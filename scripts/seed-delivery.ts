@@ -229,6 +229,97 @@ const INTERSTATE = [
             { name: "Uturu", hubPickup: 6000, doorstep: 8000 },
         ],
     },
+    // ── North ──
+    {
+        state: "Abuja (FCT)", hub: "3–5 days after pick up", door: "3–5 working days", sort: 40,
+        cities: [{ name: "Abuja", hubPickup: 5000, doorstep: 9000 }],
+    },
+    {
+        state: "Plateau", hub: "3–5 days after pick up", door: "3–5 working days", sort: 41,
+        cities: [
+            { name: "Jos", hubPickup: 7000, doorstep: 9000 },
+            { name: "Plateau", hubPickup: 7000, doorstep: 9000 },
+        ],
+    },
+    {
+        state: "Kaduna", hub: "3–5 days after pick up", door: "3–5 working days", sort: 42,
+        cities: [
+            { name: "Kaduna", hubPickup: 7000, doorstep: 9000 },
+            { name: "Zaria", hubPickup: 7000, doorstep: 9000 },
+        ],
+    },
+    {
+        state: "Kano", hub: "3–5 days after pick up", door: "3–5 working days", sort: 43,
+        cities: [{ name: "Kano", hubPickup: 7000, doorstep: 9000 }],
+    },
+    {
+        state: "Katsina", hub: "3–5 days after pick up", door: "3–5 working days", sort: 44,
+        cities: [{ name: "Katsina", hubPickup: 7000, doorstep: 9000 }],
+    },
+    {
+        state: "Kogi", hub: "3–5 days after pick up", door: "3–5 working days", sort: 45,
+        cities: [
+            { name: "Lokoja", hubPickup: 5000, doorstep: 9000 },
+            { name: "Kabba", hubPickup: 7000, doorstep: 9000 },
+            { name: "Ayingba", hubPickup: 7000, doorstep: 9000 },
+            { name: "Otukpo", hubPickup: 7000, doorstep: 9000 },
+        ],
+    },
+    {
+        state: "Borno", hub: "3–5 days after pick up", door: "3–5 working days", sort: 46,
+        cities: [{ name: "Maiduguri", hubPickup: 7000, doorstep: 9000 }],
+    },
+    {
+        state: "Bauchi", hub: "3–5 days after pick up", door: "3–5 working days", sort: 47,
+        cities: [{ name: "Bauchi", hubPickup: 7000, doorstep: 9000 }],
+    },
+    {
+        state: "Niger", hub: "3–5 days after pick up", door: "3–5 working days", sort: 48,
+        cities: [{ name: "Minna", hubPickup: 7000, doorstep: 9000 }],
+    },
+    {
+        state: "Zamfara", hub: "3–5 days after pick up", door: "3–5 working days", sort: 49,
+        cities: [{ name: "Zamfara", hubPickup: 7000, doorstep: 9000 }],
+    },
+    {
+        state: "Sokoto", hub: "3–5 days after pick up", door: "3–5 working days", sort: 50,
+        cities: [{ name: "Sokoto", hubPickup: 7000, doorstep: 9000 }],
+    },
+    {
+        state: "Kebbi", hub: "3–5 days after pick up", door: "3–5 working days", sort: 51,
+        cities: [{ name: "Kebbi", hubPickup: 7000, doorstep: 9000 }],
+    },
+    {
+        state: "Jigawa", hub: "3–5 days after pick up", door: "3–5 working days", sort: 52,
+        cities: [
+            { name: "Jigawa", hubPickup: 7000, doorstep: 9000 },
+            { name: "Dutse", hubPickup: 7000, doorstep: 9000 },
+        ],
+    },
+    {
+        state: "Taraba", hub: "3–5 days after pick up", door: "3–5 working days", sort: 53,
+        cities: [{ name: "Taraba", hubPickup: 7000, doorstep: 9000 }],
+    },
+    {
+        state: "Gombe", hub: "3–5 days after pick up", door: "3–5 working days", sort: 54,
+        cities: [{ name: "Gombe", hubPickup: 7000, doorstep: 9000 }],
+    },
+    {
+        state: "Yobe", hub: "3–5 days after pick up", door: "3–5 working days", sort: 55,
+        cities: [{ name: "Yobe", hubPickup: 7000, doorstep: 9000 }],
+    },
+    {
+        state: "Nasarawa", hub: "3–5 days after pick up", door: "3–5 working days", sort: 56,
+        cities: [{ name: "Nasarawa", hubPickup: 7000, doorstep: 9000 }],
+    },
+    {
+        state: "Benue", hub: "3–5 days after pick up", door: "3–5 working days", sort: 57,
+        cities: [{ name: "Benue", hubPickup: 7000, doorstep: 9000 }],
+    },
+    {
+        state: "Adamawa", hub: "3–5 days after pick up", door: "3–5 working days", sort: 58,
+        cities: [{ name: "Adamawa", hubPickup: 7000, doorstep: 9000 }],
+    },
 ];
 
 async function seed() {

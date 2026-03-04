@@ -8,7 +8,7 @@ import { cn } from "@/lib/cn";
 import NotificationBell from "@/components/modules/NotificationBell";
 import {
     LayoutGrid, Package, ClipboardList, Tag, Users, BarChart3,
-    FileText, Box, Ticket, Settings, Truck
+    FileText, Box, Ticket, Settings, Truck, Archive
 } from "lucide-react";
 
 export default function AdminSidebar() {
@@ -155,6 +155,7 @@ const ICON_MAP: Record<string, React.ElementType> = {
     box: Box,
     ticket: Ticket,
     truck: Truck,
+    archive: Archive,
     cog: Settings,
 };
 

@@ -1046,3 +1046,253 @@ export async function deleteDeliveryLocation(id: string): Promise<void> {
     const { error } = await supabase.from("delivery_locations").delete().eq("id", id);
     if (error) throw error;
 }
+
+// ═══════════════════════════════════════
+// Stockpile Queries
+// ═══════════════════════════════════════
+
+import type { Stockpile, StockpileItem } from "@/types";
+
+function toStockpile(row: any, items: any[] = []): Stockpile {
+    return {
+        id: row.id,
+        customerEmail: row.customer_email,
+        customerName: row.customer_name,
+        phone: row.phone || undefined,
+        status: row.status,
+        shippingAddress: row.shipping_address || undefined,
+        deliveryZone: row.delivery_zone || undefined,
+        deliveryType: row.delivery_type || undefined,
+        deliveryFee: Number(row.delivery_fee || 0),
+        totalItemsValue: Number(row.total_items_value || 0),
+        createdAt: row.created_at,
+        expiresAt: row.expires_at,
+        shippedAt: row.shipped_at || undefined,
+        items: items.map(toStockpileItem),
+    };
+}
+
+function toStockpileItem(row: any): StockpileItem {
+    return {
+        id: row.id,
+        stockpileId: row.stockpile_id,
+        productId: row.product_id,
+        productName: row.product_name,
+        productImage: row.product_image || undefined,
+        variantName: row.variant_name || undefined,
+        quantity: row.quantity,
+        pricePaid: Number(row.price_paid),
+        orderId: row.order_id || undefined,
+        createdAt: row.created_at,
+    };
+}
+
+/** Get active stockpile for a customer by email */
+export async function getStockpileByEmail(email: string): Promise<Stockpile | null> {
+    const supabase = getSupabaseClient();
+    if (!supabase) return null;
+
+    const { data, error } = await supabase
+        .from("stockpiles")
+        .select("*")
+        .eq("customer_email", email)
+        .eq("status", "active")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+    if (error || !data) return null;
+
+    // Fetch items
+    const { data: items } = await supabase
+        .from("stockpile_items")
+        .select("*")
+        .eq("stockpile_id", data.id)
+        .order("created_at", { ascending: true });
+
+    return toStockpile(data, items || []);
+}
+
+/** Get stockpile by ID */
+export async function getStockpileById(id: string): Promise<Stockpile | null> {
+    const supabase = getSupabaseClient();
+    if (!supabase) return null;
+
+    const { data, error } = await supabase
+        .from("stockpiles")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+    if (error || !data) return null;
+
+    const { data: items } = await supabase
+        .from("stockpile_items")
+        .select("*")
+        .eq("stockpile_id", data.id)
+        .order("created_at", { ascending: true });
+
+    return toStockpile(data, items || []);
+}
+
+/** Create a new stockpile for a customer */
+export async function createStockpile(input: {
+    customerEmail: string;
+    customerName: string;
+    phone?: string;
+}): Promise<Stockpile> {
+    const supabase = getSupabaseClient();
+    if (!supabase) throw new Error("Database not available");
+
+    const { data, error } = await supabase
+        .from("stockpiles")
+        .insert({
+            customer_email: input.customerEmail,
+            customer_name: input.customerName,
+            phone: input.phone || null,
+        })
+        .select("*")
+        .single();
+
+    if (error) throw error;
+    return toStockpile(data, []);
+}
+
+/** Add an item to a stockpile */
+export async function addStockpileItem(input: {
+    stockpileId: string;
+    productId: string;
+    productName: string;
+    productImage?: string;
+    variantName?: string;
+    quantity: number;
+    pricePaid: number;
+    orderId?: string;
+}): Promise<void> {
+    const supabase = getSupabaseClient();
+    if (!supabase) throw new Error("Database not available");
+
+    const { error } = await supabase.from("stockpile_items").insert({
+        stockpile_id: input.stockpileId,
+        product_id: input.productId,
+        product_name: input.productName,
+        product_image: input.productImage || null,
+        variant_name: input.variantName || null,
+        quantity: input.quantity,
+        price_paid: input.pricePaid,
+        order_id: input.orderId || null,
+    });
+
+    if (error) throw error;
+
+    // Update total value on stockpile
+    await recalcStockpileTotal(input.stockpileId);
+}
+
+/** Remove item from stockpile */
+export async function removeStockpileItem(itemId: string, stockpileId: string): Promise<void> {
+    const supabase = getSupabaseClient();
+    if (!supabase) throw new Error("Database not available");
+
+    const { error } = await supabase.from("stockpile_items").delete().eq("id", itemId);
+    if (error) throw error;
+
+    await recalcStockpileTotal(stockpileId);
+}
+
+/** Recalculate total items value for a stockpile */
+async function recalcStockpileTotal(stockpileId: string): Promise<void> {
+    const supabase = getSupabaseClient();
+    if (!supabase) return;
+
+    const { data: items } = await supabase
+        .from("stockpile_items")
+        .select("price_paid, quantity")
+        .eq("stockpile_id", stockpileId);
+
+    const total = (items || []).reduce((sum, i) => sum + Number(i.price_paid) * i.quantity, 0);
+
+    await supabase.from("stockpiles").update({ total_items_value: total }).eq("id", stockpileId);
+}
+
+/** Update stockpile status */
+export async function updateStockpileStatus(
+    id: string,
+    status: Stockpile["status"]
+): Promise<void> {
+    const supabase = getSupabaseClient();
+    if (!supabase) throw new Error("Database not available");
+
+    const updateData: any = { status };
+    if (status === "shipped") updateData.shipped_at = new Date().toISOString();
+
+    const { error } = await supabase.from("stockpiles").update(updateData).eq("id", id);
+    if (error) throw error;
+}
+
+/** Update stockpile shipping details (when customer is ready to ship) */
+export async function updateStockpileShipping(
+    id: string,
+    shipping: {
+        shippingAddress: any;
+        deliveryZone?: string;
+        deliveryType?: string;
+        deliveryFee: number;
+    }
+): Promise<void> {
+    const supabase = getSupabaseClient();
+    if (!supabase) throw new Error("Database not available");
+
+    const { error } = await supabase
+        .from("stockpiles")
+        .update({
+            shipping_address: shipping.shippingAddress,
+            delivery_zone: shipping.deliveryZone || null,
+            delivery_type: shipping.deliveryType || null,
+            delivery_fee: shipping.deliveryFee,
+        })
+        .eq("id", id);
+
+    if (error) throw error;
+}
+
+/** Get all stockpiles (admin) */
+export async function getAllStockpiles(): Promise<Stockpile[]> {
+    const supabase = getSupabaseClient();
+    if (!supabase) return [];
+
+    const { data, error } = await supabase
+        .from("stockpiles")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+    if (error) return [];
+
+    // Fetch items for all stockpiles
+    const ids = (data || []).map((s) => s.id);
+    const { data: allItems } = await supabase
+        .from("stockpile_items")
+        .select("*")
+        .in("stockpile_id", ids)
+        .order("created_at", { ascending: true });
+
+    return (data || []).map((s) =>
+        toStockpile(s, (allItems || []).filter((i) => i.stockpile_id === s.id))
+    );
+}
+
+/** Expire stockpiles older than 2 weeks */
+export async function expireOldStockpiles(): Promise<number> {
+    const supabase = getSupabaseClient();
+    if (!supabase) return 0;
+
+    const { data, error } = await supabase
+        .from("stockpiles")
+        .update({ status: "expired" })
+        .eq("status", "active")
+        .lt("expires_at", new Date().toISOString())
+        .select("id");
+
+    if (error) return 0;
+    return data?.length || 0;
+}

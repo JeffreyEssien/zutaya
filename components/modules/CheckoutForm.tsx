@@ -24,7 +24,7 @@ import {
 import type { ShippingAddress, Order } from "@/types";
 import {
     MessageCircle, Clock, Lock, MapPin, Truck, Building2,
-    ChevronDown, Info, Package, Tag,
+    ChevronDown, Info, Package, Tag, Archive,
 } from "lucide-react";
 import { useState, useEffect, useCallback, useMemo } from "react";
 
@@ -44,6 +44,7 @@ export default function CheckoutForm({ onComplete, onShippingChange }: CheckoutF
     const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
     const { items, subtotal, clearCart, couponCode, discount, removeCoupon } = useCartStore();
     const { addOrder } = useOrderStore();
+    const [stockpileMode, setStockpileMode] = useState(false);
 
     // ── DB pricing state ──
     const [dbPricing, setDbPricing] = useState<DbPricingResult | null>(null);
@@ -58,7 +59,9 @@ export default function CheckoutForm({ onComplete, onShippingChange }: CheckoutF
     }, []);
 
     // Resolve the actual data source (DB or hardcoded)
-    const lagosZones: LagosZoneInfo[] = dbPricing?.lagosZones ?? HARDCODED_LAGOS_ZONES;
+    const lagosZonesRaw: LagosZoneInfo[] = dbPricing?.lagosZones ?? HARDCODED_LAGOS_ZONES;
+    // Deduplicate by key (handles DB having duplicates from re-seeding)
+    const lagosZones = lagosZonesRaw.filter((z, i, arr) => arr.findIndex((x) => x.key === z.key) === i);
     const interstateStates: InterstateState[] = dbPricing?.interstateStates ?? HARDCODED_INTERSTATE;
 
     // Build lookup maps from resolved data
@@ -159,12 +162,15 @@ export default function CheckoutForm({ onComplete, onShippingChange }: CheckoutF
         if (!form.lastName.trim()) e.lastName = "Required";
         if (!form.email.trim()) e.email = "Required";
         if (!form.phone.trim()) e.phone = "Required";
-        if (!form.address.trim()) e.address = "Required";
-        if (!selectedState) e.state = "Please select your state";
-        if (lagosSelected && !selectedLagosArea) e.lagosArea = "Please select your area";
-        if (!lagosSelected && interstateData && !selectedInterstateCity) e.interstateCity = "Please select your city";
-        if (!lagosSelected && !interstateData && selectedState) e.state = "We don't deliver to this state yet — contact us via WhatsApp";
-        if (!form.city.trim() && !lagosSelected) e.city = "Required";
+        // Skip delivery validation in stockpile mode
+        if (!stockpileMode) {
+            if (!form.address.trim()) e.address = "Required";
+            if (!selectedState) e.state = "Please select your state";
+            if (lagosSelected && !selectedLagosArea) e.lagosArea = "Please select your area";
+            if (!lagosSelected && interstateData && !selectedInterstateCity) e.interstateCity = "Please select your city";
+            if (!lagosSelected && !interstateData && selectedState) e.state = "We don't deliver to this state yet — contact us via WhatsApp";
+            if (!form.city.trim() && !lagosSelected) e.city = "Required";
+        }
         setErrors(e);
         return Object.keys(e).length === 0;
     };
@@ -175,6 +181,61 @@ export default function CheckoutForm({ onComplete, onShippingChange }: CheckoutF
         if (!validate()) return;
         setLoading(true);
 
+        // ── Stockpile Mode ──
+        if (stockpileMode) {
+            try {
+                // Check for existing stockpile
+                let stockpileRes = await fetch(`/api/stockpile?email=${encodeURIComponent(form.email)}`);
+                let stockpile = await stockpileRes.json();
+
+                // Create new stockpile if none exists
+                if (!stockpile?.id) {
+                    const createRes = await fetch('/api/stockpile', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'create',
+                            customerEmail: form.email,
+                            customerName: `${form.firstName} ${form.lastName}`,
+                            phone: form.phone,
+                        }),
+                    });
+                    stockpile = await createRes.json();
+                }
+
+                // Add each cart item to stockpile
+                for (const item of items) {
+                    await fetch('/api/stockpile', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'add_item',
+                            stockpileId: stockpile.id,
+                            productId: item.product.id,
+                            productName: item.product.name,
+                            productImage: item.product.images?.[0] || item.variant?.image,
+                            variantName: item.variant?.name,
+                            quantity: item.quantity,
+                            pricePaid: (item.variant?.price || item.product.price),
+                        }),
+                    });
+                }
+
+                clearCart();
+                removeCoupon();
+                setLoading(false);
+                // Redirect to stockpile page
+                window.location.href = `/stockpile?email=${encodeURIComponent(form.email)}&added=true`;
+                return;
+            } catch (err) {
+                console.error('Stockpile error:', err);
+                alert('Failed to add to stockpile. Please try again.');
+                setLoading(false);
+                return;
+            }
+        }
+
+        // ── Normal Order Flow ──
         const sub = subtotal();
         const ship = deliveryFee;
         const discountAmount = sub * (discount / 100);
@@ -500,6 +561,28 @@ export default function CheckoutForm({ onComplete, onShippingChange }: CheckoutF
                 </div>
             </div>
 
+            {/* ── Stockpile Option ── */}
+            <div className="bg-gradient-to-r from-brand-purple/[0.04] to-brand-lilac/[0.04] rounded-xl border border-brand-purple/10 p-5">
+                <label className="flex items-start gap-4 cursor-pointer">
+                    <input
+                        type="checkbox"
+                        checked={stockpileMode}
+                        onChange={(e) => setStockpileMode(e.target.checked)}
+                        className="mt-1 accent-brand-purple w-4 h-4"
+                    />
+                    <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                            <Archive size={16} className="text-brand-purple" />
+                            <span className="font-medium text-brand-dark text-sm">Add to Stockpile Instead</span>
+                        </div>
+                        <span className="block text-xs text-brand-dark/45 mt-1 leading-relaxed">
+                            Pay for these items now and keep shopping. When you're ready, ship everything together
+                            with a single delivery fee. Items held for up to 14 days.
+                        </span>
+                    </div>
+                </label>
+            </div>
+
             {/* Security notice */}
             <div className="flex items-center gap-2 text-[10px] text-brand-dark/30">
                 <Lock size={10} />
@@ -511,9 +594,11 @@ export default function CheckoutForm({ onComplete, onShippingChange }: CheckoutF
                 size="lg"
                 className="w-full"
                 loading={loading}
-                disabled={selectedState && !lagosSelected && !interstateData ? true : false}
+                disabled={!stockpileMode && selectedState && !lagosSelected && !interstateData ? true : false}
             >
-                {paymentMethod === 'whatsapp' ? "Place Order & Chat on WhatsApp" : "Place Order"}
+                {stockpileMode
+                    ? "Add to Stockpile & Pay Later for Shipping"
+                    : paymentMethod === 'whatsapp' ? "Place Order & Chat on WhatsApp" : "Place Order"}
             </Button>
         </form>
     );

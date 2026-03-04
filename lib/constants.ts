@@ -10,6 +10,7 @@ export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://xelle.verce
 export const NAV_LINKS = [
     { label: "Home", href: "/" },
     { label: "Shop", href: "/shop" },
+    { label: "Stockpile", href: "/stockpile" },
     { label: "Track Order", href: "/track" },
     { label: "About", href: "/#about" },
 ] as const;
@@ -18,6 +19,7 @@ export const ADMIN_NAV_LINKS = [
     { label: "Dashboard", href: "/admin", icon: "grid" },
     { label: "Products", href: "/admin/products", icon: "package" },
     { label: "Orders", href: "/admin/orders", icon: "clipboard" },
+    { label: "Stockpiles", href: "/admin/stockpiles", icon: "archive" },
     { label: "Customers", href: "/admin/customers", icon: "users" },
     { label: "Analytics", href: "/admin/analytics", icon: "chart" },
     { label: "CMS Pages", href: "/admin/pages", icon: "file" },

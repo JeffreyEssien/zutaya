@@ -425,8 +425,6 @@ export const INTERSTATE_TERMS = [
 
 export const LAGOS_TERMS = [
     "Delivery is typically within 1–3 working days depending on your zone.",
-    "Pricing applies to items weighing between 0–2 kg.",
-    "Each additional kilogram attracts a ₦1,000 surcharge.",
 ] as const;
 
 /** Extra weight surcharge: ₦1,000 per additional kg above 2 kg */
