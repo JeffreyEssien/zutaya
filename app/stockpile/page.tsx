@@ -5,14 +5,20 @@ import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { formatCurrency } from "@/lib/formatCurrency";
 import Button from "@/components/ui/Button";
-import { Package, Clock, Truck, Search, Archive, ShoppingBag, AlertTriangle, CheckCircle2, ArrowRight, Copy, Check } from "lucide-react";
+import Header from "@/components/modules/Header";
+import Footer from "@/components/modules/Footer";
+import { Package, Clock, Truck, Search, Archive, ShoppingBag, AlertTriangle, CheckCircle2, ArrowRight, ArrowLeft, Copy, Check } from "lucide-react";
 import type { Stockpile } from "@/types";
 
 export default function StockpilePage() {
     return (
-        <Suspense fallback={<div className="min-h-screen bg-gradient-to-b from-brand-lilac/5 to-white flex items-center justify-center"><p className="text-brand-dark/30 text-sm">Loading...</p></div>}>
-            <StockpileContent />
-        </Suspense>
+        <>
+            <Header />
+            <Suspense fallback={<div className="min-h-screen bg-gradient-to-b from-brand-lilac/5 to-white flex items-center justify-center"><p className="text-brand-dark/30 text-sm">Loading...</p></div>}>
+                <StockpileContent />
+            </Suspense>
+            <Footer />
+        </>
     );
 }
 
@@ -101,6 +107,13 @@ function StockpileContent() {
             </div>
 
             <div className="max-w-2xl mx-auto px-6 -mt-6">
+                {/* Back Button */}
+                <div className="mb-4">
+                    <a href="/shop" className="inline-flex items-center gap-1.5 text-sm text-brand-dark/50 hover:text-brand-purple transition-colors group">
+                        <ArrowLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
+                        Back to Shop
+                    </a>
+                </div>
                 {/* Success Banner */}
                 {successBanner && (
                     <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 mb-4 flex items-center gap-3">

@@ -5,7 +5,10 @@ import { useRouter } from "next/navigation";
 import type { Order } from "@/types";
 import { formatCurrency } from "@/lib/formatCurrency";
 import Badge from "@/components/ui/Badge";
+import Button from "@/components/ui/Button";
 import OrderDetailPanel from "@/components/modules/OrderDetailPanel";
+import AdminCreateOrder from "@/components/modules/AdminCreateOrder";
+import { Plus } from "lucide-react";
 
 const statusVariant: Record<Order["status"], "warning" | "info" | "success"> = {
     pending: "warning",
@@ -24,6 +27,7 @@ export default function AdminOrdersContent({ initialOrders }: AdminOrdersContent
     const [orderList, setOrderList] = useState<Order[]>(initialOrders);
     const [selected, setSelected] = useState<Order | null>(null);
     const [search, setSearch] = useState("");
+    const [showCreate, setShowCreate] = useState(false);
 
     // Sync state with props when router.refresh() fetches new data
     useEffect(() => {
@@ -107,13 +111,21 @@ export default function AdminOrdersContent({ initialOrders }: AdminOrdersContent
         <div>
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
                 <h1 className="font-serif text-2xl sm:text-3xl text-brand-dark">Orders</h1>
-                <input
-                    type="text"
-                    placeholder="Search by ID, name, or email..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="px-4 py-2 border border-brand-lilac/30 rounded-sm focus:outline-none focus:border-brand-purple w-full sm:w-80"
-                />
+                <div className="flex items-center gap-3 w-full sm:w-auto">
+                    <input
+                        type="text"
+                        placeholder="Search by ID, name, or email..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="px-4 py-2 border border-brand-lilac/30 rounded-sm focus:outline-none focus:border-brand-purple w-full sm:w-80"
+                    />
+                    <Button onClick={() => setShowCreate(true)} className="shrink-0">
+                        <span className="flex items-center gap-2">
+                            <Plus size={16} />
+                            <span className="hidden sm:inline">Create Order</span>
+                        </span>
+                    </Button>
+                </div>
             </div>
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
                 <div className={selected ? "xl:col-span-2" : "xl:col-span-3"}>
@@ -138,6 +150,16 @@ export default function AdminOrdersContent({ initialOrders }: AdminOrdersContent
                     </div>
                 )}
             </div>
+
+            {showCreate && (
+                <AdminCreateOrder
+                    onClose={() => setShowCreate(false)}
+                    onSuccess={() => {
+                        setShowCreate(false);
+                        handleRefresh();
+                    }}
+                />
+            )}
         </div>
     );
 }
