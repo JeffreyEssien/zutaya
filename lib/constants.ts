@@ -30,7 +30,7 @@ export const ADMIN_NAV_LINKS = [
     { label: "Categories", href: "/admin/categories", icon: "tag" },
 ] as const;
 
-export const WHATSAPP_NUMBER = "2349161265463";
+export const WHATSAPP_NUMBER = "2347011378490";
 
 // Bank Transfer Details
 export const BANK_NAME = "Pocketapp";

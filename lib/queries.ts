@@ -278,24 +278,45 @@ export async function createOrder(order: Order): Promise<void> {
 
     // Deduct stock atomically via RPC (prevents race conditions)
     for (const item of order.items) {
-        if (!item.product.inventoryId) continue;
+        if (item.variant) {
+            // Deduct from variant stock inside the products JSONB array
+            const { error: rpcError } = await supabase.rpc("deduct_variant_stock", {
+                p_product_id: item.product.id,
+                p_variant_name: item.variant.name,
+                p_quantity: item.quantity,
+            });
 
-        const { error: rpcError } = await supabase.rpc("deduct_stock", {
-            p_inventory_id: item.product.inventoryId,
-            p_quantity: item.quantity,
-        });
+            if (rpcError) {
+                throw new Error(rpcError.message || `Variant stock deduction failed for ${item.product.name} - ${item.variant.name}`);
+            }
 
-        if (rpcError) {
-            throw new Error(rpcError.message || `Stock deduction failed for ${item.product.name}`);
+            // Log inventory change for the variant
+            const { error: logError } = await supabase.from("inventory_logs").insert({
+                product_id: item.product.id,
+                change_amount: -item.quantity,
+                reason: `order_variant_${item.variant.name}`
+            });
+            if (logError) console.warn("Inventory log failed (variant):", logError.message);
+
+        } else if (item.product.inventoryId) {
+            // Deduct from main inventory item stock (for non-variant products)
+            const { error: rpcError } = await supabase.rpc("deduct_stock", {
+                p_inventory_id: item.product.inventoryId,
+                p_quantity: item.quantity,
+            });
+
+            if (rpcError) {
+                throw new Error(rpcError.message || `Stock deduction failed for ${item.product.name}`);
+            }
+
+            // Log the inventory change (best-effort, ignore failures)
+            const { error: logError } = await supabase.from("inventory_logs").insert({
+                product_id: item.product.id,
+                change_amount: -item.quantity,
+                reason: 'order_main'
+            });
+            if (logError) console.warn("Inventory log failed:", logError.message);
         }
-
-        // Log the inventory change (best-effort, ignore failures)
-        const { error: logError } = await supabase.from("inventory_logs").insert({
-            product_id: item.product.id,
-            change_amount: -item.quantity,
-            reason: 'order'
-        });
-        if (logError) console.warn("Inventory log failed:", logError.message);
     }
 
     // Insert Order with proper coupon columns (no JSON hack)
