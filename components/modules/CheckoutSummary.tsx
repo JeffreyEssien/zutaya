@@ -34,7 +34,7 @@ export default function CheckoutSummary({ shippingFee }: CheckoutSummaryProps) {
             <ul className="space-y-4 mb-6">
                 {items.map((item, i) => (
                     <motion.li
-                        key={item.product.id}
+                        key={`${item.product.id}-${item.variant?.name ?? ""}`}
                         initial={{ opacity: 0, x: 10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.1 + i * 0.05 }}

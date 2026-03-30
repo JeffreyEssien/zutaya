@@ -48,6 +48,10 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
 
     const [variants, setVariants] = useState<Product["variants"]>(initialData?.variants || []);
 
+    const variantStockTotal: number | null = variants.length > 0
+        ? variants.reduce((sum: number, v: Product["variants"][number]) => sum + (v.stock || 0), 0)
+        : null;
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     };
@@ -101,13 +105,15 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
 
         setLoading(true);
         try {
-            if (initialData) {
+            const stockToSave = variantStockTotal !== null ? variantStockTotal : parseInt(form.stock);
+
+        if (initialData) {
                 // Edit (Standard Update)
                 await updateProduct(initialData.id, {
                     name: form.title,
                     description: form.description,
                     price: parseFloat(form.price),
-                    stock: parseInt(form.stock),
+                    stock: stockToSave,
                     category: form.category,
                     images: imageUrls,
                     variants: variants,
@@ -125,7 +131,7 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                         name: form.title,
                         costPrice: Number(invForm.costPrice),
                         sellingPrice: Number(form.price),
-                        stock: Number(form.stock),
+                        stock: stockToSave,
                         reorderLevel: Number(invForm.reorderLevel),
                         supplier: invForm.supplier
                     });
@@ -144,7 +150,7 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                     name: form.title,
                     description: form.description,
                     price: parseFloat(form.price),
-                    stock: parseInt(form.stock),
+                    stock: stockToSave,
                     category: form.category,
                     images: imageUrls,
                     variants: variants,
@@ -229,14 +235,14 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                         />
 
                         <InputField
-                            label={`Stock Quantity ${mode === "existing" ? "(Managed in Inventory)" : ""}`}
+                            label={`Stock Quantity${mode === "existing" ? " (Managed in Inventory)" : variantStockTotal !== null ? " (Sum of variants)" : ""}`}
                             name="stock"
                             type="number"
-                            value={form.stock}
+                            value={variantStockTotal !== null ? variantStockTotal.toString() : form.stock}
                             onChange={handleChange}
                             required
-                            readOnly={mode === "existing"}
-                            className={mode === "existing" ? "bg-gray-100 text-gray-500 cursor-not-allowed" : ""}
+                            readOnly={mode === "existing" || variantStockTotal !== null}
+                            className={mode === "existing" || variantStockTotal !== null ? "bg-gray-100 text-gray-500 cursor-not-allowed" : ""}
                         />
                     </div>
                     {/* Margin Calc Visual */}

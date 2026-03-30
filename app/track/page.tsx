@@ -14,7 +14,7 @@ interface TrackedOrder {
     customerName: string;
     email: string;
     items: {
-        product: { name: string; price: number; images: string[] };
+        product: { id: string; name: string; price: number; images: string[] };
         variant?: { name: string; price?: number };
         quantity: number;
     }[];
@@ -264,10 +264,10 @@ function TrackContent() {
                                     </h2>
 
                                     <div className="divide-y divide-brand-dark/5">
-                                        {order.items.map((item, i) => {
+                                        {order.items.map((item) => {
                                             const price = item.variant?.price || item.product.price;
                                             return (
-                                                <div key={i} className="flex items-center gap-4 py-4 first:pt-0 last:pb-0">
+                                                <div key={`${item.product.id}-${item.variant?.name ?? ""}`} className="flex items-center gap-4 py-4 first:pt-0 last:pb-0">
                                                     {/* Product image */}
                                                     {item.product.images?.[0] ? (
                                                         <div className="w-14 h-14 rounded-xl bg-neutral-50 overflow-hidden shrink-0">
