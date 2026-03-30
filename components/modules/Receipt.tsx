@@ -70,7 +70,7 @@ function CustomerSection({ name, email, address }: {
     );
 }
 
-function ItemsTable({ items }: { items: { product: { name: string; price: number }; quantity: number }[] }) {
+function ItemsTable({ items }: { items: { product: { name: string; price: number }; variant?: { name?: string; price?: number }; quantity: number }[] }) {
     return (
         <div>
             <Label>Items</Label>
@@ -84,14 +84,22 @@ function ItemsTable({ items }: { items: { product: { name: string; price: number
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-brand-lilac/8">
-                    {items.map((item) => (
-                        <tr key={item.product.name}>
-                            <td className="py-3 text-brand-dark font-medium">{item.product.name}</td>
-                            <td className="py-3 text-center text-brand-dark/50">{item.quantity}</td>
-                            <td className="py-3 text-right text-brand-dark/50">{formatCurrency(item.product.price)}</td>
-                            <td className="py-3 text-right text-brand-dark font-semibold">{formatCurrency(item.product.price * item.quantity)}</td>
-                        </tr>
-                    ))}
+                    {items.map((item) => {
+                        const unitPrice = item.variant?.price || item.product.price;
+                        return (
+                            <tr key={`${item.product.name}-${item.variant?.name ?? ""}`}>
+                                <td className="py-3 text-brand-dark font-medium">
+                                    {item.product.name}
+                                    {item.variant?.name && (
+                                        <span className="block text-[10px] text-brand-dark/40 font-normal mt-0.5">{item.variant.name}</span>
+                                    )}
+                                </td>
+                                <td className="py-3 text-center text-brand-dark/50">{item.quantity}</td>
+                                <td className="py-3 text-right text-brand-dark/50">{formatCurrency(unitPrice)}</td>
+                                <td className="py-3 text-right text-brand-dark font-semibold">{formatCurrency(unitPrice * item.quantity)}</td>
+                            </tr>
+                        );
+                    })}
                 </tbody>
             </table>
         </div>

@@ -60,8 +60,8 @@ export default async function PrintOrderPage({ params }: { params: Promise<{ id:
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-black/10">
-                    {order.items.map((item, i) => (
-                        <tr key={i}>
+                    {order.items.map((item) => (
+                        <tr key={`${item.product.id}-${item.variant?.name ?? ""}`}>
                             <td className="py-4 text-brand-dark align-top">{item.quantity}</td>
                             <td className="py-4 text-brand-dark align-top">
                                 <p className="font-medium">{item.product.name}</p>

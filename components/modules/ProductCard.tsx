@@ -38,8 +38,11 @@ export default function ProductCard({ product }: ProductCardProps) {
         setQuickViewOpen(true);
     };
 
-    const isSoldOut = product.stock === 0;
-    const isLowStock = product.stock <= LOW_STOCK_THRESHOLD && product.stock > 0;
+    const totalStock = product.variants.length > 0
+        ? product.variants.reduce((sum, v) => sum + (v.stock ?? 0), 0)
+        : product.stock;
+    const isSoldOut = totalStock === 0;
+    const isLowStock = totalStock <= LOW_STOCK_THRESHOLD && totalStock > 0;
 
     return (
         <>
@@ -71,14 +74,14 @@ export default function ProductCard({ product }: ProductCardProps) {
 
                         {/* Badges */}
                         <div className="absolute top-3 left-3 flex flex-col gap-1.5">
-                            {product.isNew && product.stock > LOW_STOCK_THRESHOLD && (
+                            {product.isNew && totalStock > LOW_STOCK_THRESHOLD && (
                                 <span className="bg-brand-dark text-white text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full">
                                     New
                                 </span>
                             )}
                             {isLowStock && (
                                 <span className="bg-amber-500/90 backdrop-blur-sm text-white text-[9px] sm:text-[10px] font-semibold px-2.5 py-1 rounded-full">
-                                    Only {product.stock} left
+                                    Only {totalStock} left
                                 </span>
                             )}
                             {isSoldOut && (

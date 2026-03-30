@@ -6,7 +6,7 @@ import type { NextRequest } from "next/server";
  * Protects all /admin routes with a password stored in ADMIN_PASSWORD env var.
  * Uses a session cookie to avoid re-prompting on every page load.
  */
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
     // Only protect /admin routes
