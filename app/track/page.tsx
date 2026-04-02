@@ -21,7 +21,7 @@ interface TrackedOrder {
     subtotal: number;
     shipping: number;
     total: number;
-    status: "pending" | "shipped" | "delivered";
+    status: "pending" | "processing" | "packed" | "out_for_delivery" | "delivered";
     createdAt: string;
     shippingAddress: {
         firstName: string;
@@ -226,10 +226,11 @@ function TrackContent() {
                                 <div className={`
                                     inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold self-start
                                     ${order.status === "pending" ? "bg-amber-50 text-amber-700" : ""}
-                                    ${order.status === "shipped" ? "bg-blue-50 text-blue-700" : ""}
+                                    ${order.status === "processing" || order.status === "packed" ? "bg-blue-50 text-blue-700" : ""}
+                                    ${order.status === "out_for_delivery" ? "bg-indigo-50 text-indigo-700" : ""}
                                     ${order.status === "delivered" ? "bg-emerald-50 text-emerald-700" : ""}
                                 `}>
-                                    <span className={`w-1.5 h-1.5 rounded-full ${order.status === "pending" ? "bg-amber-500" : ""} ${order.status === "shipped" ? "bg-blue-500" : ""} ${order.status === "delivered" ? "bg-emerald-500" : ""}`} />
+                                    <span className={`w-1.5 h-1.5 rounded-full ${order.status === "pending" ? "bg-amber-500" : ""} ${order.status === "processing" || order.status === "packed" ? "bg-blue-500" : ""} ${order.status === "out_for_delivery" ? "bg-indigo-500" : ""} ${order.status === "delivered" ? "bg-emerald-500" : ""}`} />
                                     {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                                 </div>
                             </div>

@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { CartItem, Product } from "@/types";
+import type { CartItem, Product, PrepOption } from "@/types";
 import { validateCoupon } from "@/lib/queries";
 
 interface CartStore {
@@ -15,7 +15,7 @@ interface CartStore {
     open: () => void;
     close: () => void;
     toggle: () => void;
-    addItem: (product: Product, variant?: CartItem["variant"]) => void;
+    addItem: (product: Product, variant?: CartItem["variant"], selectedPrepOptions?: PrepOption[]) => void;
     removeItem: (productId: string, variantName?: string) => void;
     updateQuantity: (productId: string, variantName: string | undefined, quantity: number) => void;
     clearCart: () => void;
@@ -38,7 +38,7 @@ export const useCartStore = create<CartStore>()(
             close: () => set({ isOpen: false }),
             toggle: () => set((s) => ({ isOpen: !s.isOpen })),
 
-            addItem: (product, variant) => {
+            addItem: (product, variant, selectedPrepOptions) => {
                 set((state) => {
                     const existingItem = state.items.find(
                         (item) => item.product.id === product.id && item.variant?.name === variant?.name
@@ -73,7 +73,7 @@ export const useCartStore = create<CartStore>()(
                         return {};
                     }
 
-                    return { items: [...state.items, { product, variant, quantity: 1 }] };
+                    return { items: [...state.items, { product, variant, quantity: 1, selectedPrepOptions: selectedPrepOptions || undefined }] };
                 });
             },
 

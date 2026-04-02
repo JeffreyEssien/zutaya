@@ -9,9 +9,11 @@ interface FilterSidebarProps {
     categories: Category[];
     selectedCategory: string;
     selectedBrand: string;
+    selectedStorageType: string;
     priceRange: [number, number];
     onCategoryChange: (v: string) => void;
     onBrandChange: (v: string) => void;
+    onStorageTypeChange: (v: string) => void;
     onPriceChange: (v: [number, number]) => void;
 }
 
@@ -19,9 +21,11 @@ export default function FilterSidebar({
     categories,
     selectedCategory,
     selectedBrand,
+    selectedStorageType,
     priceRange,
     onCategoryChange,
     onBrandChange,
+    onStorageTypeChange,
     onPriceChange,
 }: FilterSidebarProps) {
     return (
@@ -53,10 +57,21 @@ export default function FilterSidebar({
                 </div>
             </CollapsibleSection>
 
-            <CollapsibleSection title="Brand" defaultOpen={false}>
+            <CollapsibleSection title="Cut Type" defaultOpen={false}>
                 <div className="flex flex-wrap gap-2">
-                    <FilterChip label="All Brands" active={selectedBrand === ""} onClick={() => onBrandChange("")} />
-                    <FilterChip label="XELLÉ" active={selectedBrand === "XELLÉ"} onClick={() => onBrandChange("XELLÉ")} />
+                    <FilterChip label="All Cuts" active={selectedBrand === ""} onClick={() => onBrandChange("")} />
+                    {["Whole", "Fillet", "Diced", "Mince", "Steak"].map((cut) => (
+                        <FilterChip key={cut} label={cut} active={selectedBrand === cut} onClick={() => onBrandChange(cut)} />
+                    ))}
+                </div>
+            </CollapsibleSection>
+
+            <CollapsibleSection title="Storage Type" defaultOpen={false}>
+                <div className="flex flex-wrap gap-2">
+                    <FilterChip label="All" active={selectedStorageType === ""} onClick={() => onStorageTypeChange("")} />
+                    {["fresh", "chilled", "frozen"].map((type) => (
+                        <FilterChip key={type} label={type.charAt(0).toUpperCase() + type.slice(1)} active={selectedStorageType === type} onClick={() => onStorageTypeChange(type)} />
+                    ))}
                 </div>
             </CollapsibleSection>
         </aside>

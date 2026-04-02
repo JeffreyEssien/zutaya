@@ -8,6 +8,7 @@ import type { Product } from "@/types";
 import { useCartStore } from "@/lib/cartStore";
 import { LOW_STOCK_THRESHOLD } from "@/lib/constants";
 import { ShoppingBag, Heart, Eye } from "lucide-react";
+import { StorageBadge } from "@/components/ui/StorageBadge";
 import { useState } from "react";
 import { toast } from "sonner";
 import QuickViewModal from "@/components/modules/QuickViewModal";
@@ -133,16 +134,26 @@ export default function ProductCard({ product }: ProductCardProps) {
                     </div>
 
                     {/* Info */}
-                    <div className="mt-3.5 space-y-1">
-                        <h3 className="font-sans text-sm text-brand-dark leading-snug line-clamp-1 group-hover:text-brand-purple transition-colors duration-300">
+                    <div className="mt-4 space-y-1.5">
+                        <div className="flex items-center gap-2">
+                            <p className="text-[10px] text-brand-dark/35 uppercase tracking-[0.15em] font-medium">
+                                {product.category}
+                            </p>
+                            {product.storageType && <StorageBadge type={product.storageType} />}
+                        </div>
+                        <h3 className="font-serif text-[15px] text-brand-dark leading-snug line-clamp-1 group-hover:text-brand-purple transition-colors duration-300">
                             {product.name}
                         </h3>
-                        <p className="text-[10px] text-brand-dark/35 uppercase tracking-[0.15em]">
-                            {product.category}
-                        </p>
-                        <p className="font-sans text-sm font-medium text-brand-dark tracking-wide">
-                            {formatCurrency(product.price)}
-                        </p>
+                        <div className="flex items-baseline gap-1.5 pt-0.5">
+                            <p className="font-serif text-base font-semibold text-brand-dark">
+                                {formatCurrency(product.price)}
+                            </p>
+                            {product.priceUnit && (
+                                <span className="text-[10px] text-brand-dark/35 font-light">
+                                    / {product.priceUnit === "per_kg" ? "kg" : product.priceUnit === "per_pack" ? "pack" : product.priceUnit === "per_piece" ? "piece" : "whole"}
+                                </span>
+                            )}
+                        </div>
                     </div>
                 </Link>
             </div>

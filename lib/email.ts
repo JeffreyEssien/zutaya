@@ -52,9 +52,9 @@ function buildReceiptHtml(order: Order): string {
   <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
     
     <!-- Header -->
-    <div style="background: linear-gradient(135deg, #1a1a2e 0%, #7c3aed 100%); border-radius: 16px 16px 0 0; padding: 32px; text-align: center;">
+    <div style="background:#1A1A1A;border-bottom:4px solid #C0392B; border-radius: 16px 16px 0 0; padding: 32px; text-align: center;">
       <h1 style="color: white; font-size: 28px; letter-spacing: 4px; margin: 0 0 4px 0;">${SITE_NAME}</h1>
-      <p style="color: rgba(255,255,255,0.5); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin: 0;">Order Receipt</p>
+      <p style="font-family:Arial,sans-serif;font-size:12px;color:#C8955A;margin-top:4px;">Order Receipt</p>
     </div>
 
     <!-- Order Info -->
@@ -119,7 +119,7 @@ function buildReceiptHtml(order: Order): string {
         <p style="font-size: 13px; color: #666; margin: 0 0 2px 0;">${a.address}</p>
         <p style="font-size: 13px; color: #666; margin: 0 0 2px 0;">${a.city}, ${a.state} ${a.zip}</p>
         <p style="font-size: 13px; color: #666; margin: 0;">Nigeria</p>
-        ${order.deliveryZone ? `<p style="font-size: 12px; color: #7c3aed; margin: 8px 0 0 0; font-weight: 500;">📍 Zone: ${order.deliveryZone} &bull; ${order.deliveryType === 'hub_pickup' ? 'Hub Pickup' : 'Doorstep Delivery'}</p>` : ''}
+        ${order.deliveryZone ? `<p style="font-size: 12px; color: #C0392B; margin: 8px 0 0 0; font-weight: 500;">📍 Zone: ${order.deliveryZone} &bull; ${order.deliveryType === 'hub_pickup' ? 'Hub Pickup' : 'Doorstep Delivery'}</p>` : ''}
         ${order.deliveryDiscount ? `<p style="font-size: 11px; color: #10b981; margin: 4px 0 0 0;">🎉 ${order.deliveryDiscount.percent}% delivery discount applied${order.deliveryDiscount.label ? ` (${order.deliveryDiscount.label})` : ''}</p>` : ''}
       </div>
 
@@ -133,7 +133,7 @@ function buildReceiptHtml(order: Order): string {
 
     <!-- Footer -->
     <div style="background: #f8f7fa; border-radius: 0 0 16px 16px; padding: 24px; text-align: center; border: 1px solid #f3f0f7; border-top: none;">
-      <a href="${SITE_URL}/track?id=${order.id}" style="display: inline-block; background: linear-gradient(135deg, #1a1a2e 0%, #7c3aed 100%); color: white; text-decoration: none; font-size: 13px; font-weight: 600; padding: 10px 24px; border-radius: 25px; margin-bottom: 12px;">📦 Track Your Order →</a>
+      <a href="${SITE_URL}/track?id=${order.id}" style="display: inline-block; background:#1A1A1A;border-bottom:4px solid #C0392B; color: white; text-decoration: none; font-size: 13px; font-weight: 600; padding: 10px 24px; border-radius: 25px; margin-bottom: 12px;">📦 Track Your Order →</a>
       <br>
       <a href="https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi! I have a question about my order.")}" style="display: inline-block; background: #25D366; color: white; text-decoration: none; font-size: 12px; font-weight: 600; padding: 8px 20px; border-radius: 20px; margin-bottom: 12px;">💬 Chat with us on WhatsApp</a>
       <p style="font-size: 12px; color: #aaa; margin: 0 0 4px 0;">
@@ -160,7 +160,7 @@ function buildAdminNotificationHtml(order: Order): string {
 <html>
 <body style="margin: 0; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #f8f7fa;">
   <div style="max-width: 500px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb;">
-    <div style="background: #1a1a2e; padding: 20px; color: white;">
+    <div style="background: #1A1A1A; padding: 20px; color: white; border-bottom: 4px solid #C0392B;">
       <h2 style="margin: 0; font-size: 16px;">🛍️ New Order: ${order.id}</h2>
       <p style="margin: 4px 0 0; font-size: 12px; opacity: 0.6;">${new Date(order.createdAt).toLocaleString()}</p>
     </div>
@@ -296,7 +296,7 @@ export async function sendOrderDeliveredEmail(order: Order): Promise<void> {
     total: order.total,
     emoji: "🎉",
     title: "Your Order Has Been Delivered!",
-    accentColor: "#7c3aed",
+    accentColor: "#C0392B",
     accentBg: "#f5f3ff",
     message: "Your order has been successfully delivered! We hope you love your new items.",
     statusLabel: "Delivered",
@@ -340,9 +340,9 @@ function buildStatusEmailHtml(params: {
   <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
 
     <!-- Header -->
-    <div style="background: linear-gradient(135deg, #1a1a2e 0%, #7c3aed 100%); border-radius: 16px 16px 0 0; padding: 32px; text-align: center;">
+    <div style="background:#1A1A1A;border-bottom:4px solid #C0392B; border-radius: 16px 16px 0 0; padding: 32px; text-align: center;">
       <h1 style="color: white; font-size: 28px; letter-spacing: 4px; margin: 0 0 4px 0;">${SITE_NAME}</h1>
-      <p style="color: rgba(255,255,255,0.5); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin: 0;">Order Update</p>
+      <p style="font-family:Arial,sans-serif;font-size:12px;color:#C8955A;margin-top:4px;">Order Update</p>
     </div>
 
     <!-- Content -->
@@ -385,7 +385,7 @@ function buildStatusEmailHtml(params: {
 
     <!-- Footer -->
     <div style="background: #f8f7fa; border-radius: 0 0 16px 16px; padding: 24px; text-align: center; border: 1px solid #f3f0f7; border-top: none;">
-      <a href="${SITE_URL}/track?id=${params.orderId}" style="display: inline-block; background: linear-gradient(135deg, #1a1a2e 0%, #7c3aed 100%); color: white; text-decoration: none; font-size: 13px; font-weight: 600; padding: 10px 24px; border-radius: 25px; margin-bottom: 12px;">📦 Track Your Order →</a>
+      <a href="${SITE_URL}/track?id=${params.orderId}" style="display: inline-block; background:#1A1A1A;border-bottom:4px solid #C0392B; color: white; text-decoration: none; font-size: 13px; font-weight: 600; padding: 10px 24px; border-radius: 25px; margin-bottom: 12px;">📦 Track Your Order →</a>
       <br>
       <a href="https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi! I have a question about my order.")}" style="display: inline-block; background: #25D366; color: white; text-decoration: none; font-size: 12px; font-weight: 600; padding: 8px 20px; border-radius: 20px; margin-bottom: 12px;">💬 Chat with us on WhatsApp</a>
       <p style="font-size: 12px; color: #ccc; margin: 0;">
@@ -418,9 +418,9 @@ export async function sendReviewRequestEmail(order: Order): Promise<void> {
 <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f8f7fa;">
   <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
 
-    <div style="background: linear-gradient(135deg, #1a1a2e 0%, #7c3aed 100%); border-radius: 16px 16px 0 0; padding: 32px; text-align: center;">
+    <div style="background:#1A1A1A;border-bottom:4px solid #C0392B; border-radius: 16px 16px 0 0; padding: 32px; text-align: center;">
       <h1 style="color: white; font-size: 28px; letter-spacing: 4px; margin: 0 0 4px 0;">${SITE_NAME}</h1>
-      <p style="color: rgba(255,255,255,0.5); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin: 0;">We'd Love Your Feedback</p>
+      <p style="font-family:Arial,sans-serif;font-size:12px;color:#C8955A;margin-top:4px;">We'd Love Your Feedback</p>
     </div>
 
     <div style="background: white; padding: 32px; border-left: 1px solid #f3f0f7; border-right: 1px solid #f3f0f7;">
@@ -442,7 +442,7 @@ export async function sendReviewRequestEmail(order: Order): Promise<void> {
       <div style="text-align: center;">
         <a href="https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hi! I just received my order *${order.id}* and I wanted to share some feedback: `)}" style="display: inline-block; background: #25D366; color: white; text-decoration: none; font-size: 14px; font-weight: 600; padding: 12px 28px; border-radius: 25px; margin-bottom: 12px;">💬 Share Feedback on WhatsApp</a>
         <br>
-        <a href="https://wa.me/${WHATSAPP_NUMBER}?text=${reorderMessage}" style="display: inline-block; background: #7c3aed; color: white; text-decoration: none; font-size: 14px; font-weight: 600; padding: 12px 28px; border-radius: 25px;">🔄 Reorder on WhatsApp</a>
+        <a href="https://wa.me/${WHATSAPP_NUMBER}?text=${reorderMessage}" style="display: inline-block; background: #C0392B; color: white; text-decoration: none; font-size: 14px; font-weight: 600; padding: 12px 28px; border-radius: 25px;">🔄 Reorder on WhatsApp</a>
       </div>
     </div>
 
@@ -487,9 +487,9 @@ export async function sendAbandonedCartEmail(
 <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f8f7fa;">
   <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
 
-    <div style="background: linear-gradient(135deg, #1a1a2e 0%, #7c3aed 100%); border-radius: 16px 16px 0 0; padding: 32px; text-align: center;">
+    <div style="background:#1A1A1A;border-bottom:4px solid #C0392B; border-radius: 16px 16px 0 0; padding: 32px; text-align: center;">
       <h1 style="color: white; font-size: 28px; letter-spacing: 4px; margin: 0 0 4px 0;">${SITE_NAME}</h1>
-      <p style="color: rgba(255,255,255,0.5); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin: 0;">You Left Something Behind</p>
+      <p style="font-family:Arial,sans-serif;font-size:12px;color:#C8955A;margin-top:4px;">You Left Something Behind</p>
     </div>
 
     <div style="background: white; padding: 32px; border-left: 1px solid #f3f0f7; border-right: 1px solid #f3f0f7;">
@@ -549,9 +549,9 @@ function stockpileHeader(subtitle: string): string {
 </head>
 <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f8f7fa;">
   <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="background: linear-gradient(135deg, #1a1a2e 0%, #7c3aed 100%); border-radius: 16px 16px 0 0; padding: 32px; text-align: center;">
+    <div style="background:#1A1A1A;border-bottom:4px solid #C0392B; border-radius: 16px 16px 0 0; padding: 32px; text-align: center;">
       <h1 style="color: white; font-size: 28px; letter-spacing: 4px; margin: 0 0 4px 0;">${SITE_NAME}</h1>
-      <p style="color: rgba(255,255,255,0.5); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin: 0;">📦 ${subtitle}</p>
+      <p style="font-family:Arial,sans-serif;font-size:12px;color:#C8955A;margin-top:4px;">📦 ${subtitle}</p>
     </div>
     <div style="background: white; border-radius: 0 0 16px 16px; padding: 32px; border: 1px solid #f3f0f7; border-top: none;">`;
 }
@@ -561,14 +561,14 @@ function stockpileFooter(stockpileId: string): string {
   return `
       <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid #f3f0f7; text-align: center;">
         <p style="font-size: 11px; color: #999; margin: 0 0 8px 0;">Your Stockpile ID</p>
-        <p style="font-family: monospace; font-size: 13px; color: #7c3aed; background: #f3f0f7; padding: 8px 16px; border-radius: 8px; display: inline-block; margin: 0;">${stockpileId}</p>
+        <p style="font-family: monospace; font-size: 13px; color: #C0392B; background: #f3f0f7; padding: 8px 16px; border-radius: 8px; display: inline-block; margin: 0;">${stockpileId}</p>
         <p style="margin: 16px 0 0 0;">
-          <a href="${url}" style="display: inline-block; padding: 12px 28px; background: #7c3aed; color: white; text-decoration: none; border-radius: 10px; font-size: 14px; font-weight: 600;">View Your Stockpile</a>
+          <a href="${url}" style="display: inline-block; padding: 12px 28px; background: #C0392B; color: white; text-decoration: none; border-radius: 10px; font-size: 14px; font-weight: 600;">View Your Stockpile</a>
         </p>
       </div>
     </div>
     <p style="text-align: center; font-size: 11px; color: #999; margin-top: 16px;">
-      ${SITE_NAME} · Reach out to us on <a href="https://wa.me/${WHATSAPP_NUMBER}" style="color: #7c3aed;">WhatsApp</a>
+      ${SITE_NAME} · Reach out to us on <a href="https://wa.me/${WHATSAPP_NUMBER}" style="color: #C0392B;">WhatsApp</a>
     </p>
   </div>
 </body>
@@ -615,7 +615,7 @@ export async function sendStockpileCreatedEmail(stockpile: Stockpile): Promise<v
         </tr>
         <tr>
           <td style="font-size: 12px; color: #999; padding-top: 8px;">Expires</td>
-          <td style="text-align: right; font-size: 14px; font-weight: 600; color: #7c3aed; padding-top: 8px;">${expiryDate}</td>
+          <td style="text-align: right; font-size: 14px; font-weight: 600; color: #C0392B; padding-top: 8px;">${expiryDate}</td>
         </tr>
       </table>
     </div>
@@ -667,7 +667,7 @@ export async function sendStockpileItemAddedEmail(stockpile: Stockpile, newItems
         </tr>
         <tr>
           <td style="font-size: 12px; color: #999; padding-top: 8px;">Total Paid</td>
-          <td style="text-align: right; font-size: 14px; font-weight: 600; color: #7c3aed; padding-top: 8px;">₦${stockpile.totalItemsValue.toLocaleString()}</td>
+          <td style="text-align: right; font-size: 14px; font-weight: 600; color: #C0392B; padding-top: 8px;">₦${stockpile.totalItemsValue.toLocaleString()}</td>
         </tr>
       </table>
     </div>
@@ -719,7 +719,7 @@ export async function sendStockpileShippedEmail(stockpile: Stockpile): Promise<v
 
     <p style="font-size: 13px; color: #666; line-height: 1.6; margin-top: 16px;">
       If you have any questions about your delivery, feel free to reach out to us on 
-      <a href="https://wa.me/${WHATSAPP_NUMBER}" style="color: #7c3aed; text-decoration: none;">WhatsApp</a>.
+      <a href="https://wa.me/${WHATSAPP_NUMBER}" style="color: #C0392B; text-decoration: none;">WhatsApp</a>.
     </p>
     ${stockpileFooter(stockpile.id)}`;
 
@@ -752,16 +752,16 @@ export async function sendStockpileExpiredEmail(stockpile: Stockpile): Promise<v
     <div style="background: #fefce8; border: 1px solid #fde68a; border-radius: 10px; padding: 14px; margin: 16px 0;">
       <p style="font-size: 12px; color: #92400e; margin: 0; line-height: 1.5;">
         💡 <strong>Want to shop again?</strong> You can start a new stockpile anytime by choosing "Add to Stockpile" at checkout. 
-        Please reach out to us on <a href="https://wa.me/${WHATSAPP_NUMBER}" style="color: #7c3aed;">WhatsApp</a> regarding any payments already made.
+        Please reach out to us on <a href="https://wa.me/${WHATSAPP_NUMBER}" style="color: #C0392B;">WhatsApp</a> regarding any payments already made.
       </p>
     </div>
 
     <p style="text-align: center; margin-top: 20px;">
-      <a href="${SITE_URL}/shop" style="display: inline-block; padding: 12px 28px; background: #7c3aed; color: white; text-decoration: none; border-radius: 10px; font-size: 14px; font-weight: 600;">Shop Again</a>
+      <a href="${SITE_URL}/shop" style="display: inline-block; padding: 12px 28px; background: #C0392B; color: white; text-decoration: none; border-radius: 10px; font-size: 14px; font-weight: 600;">Shop Again</a>
     </p>
   </div>
   <p style="text-align: center; font-size: 11px; color: #999; margin-top: 16px;">
-    ${SITE_NAME} · Reach out to us on <a href="https://wa.me/${WHATSAPP_NUMBER}" style="color: #7c3aed;">WhatsApp</a>
+    ${SITE_NAME} · Reach out to us on <a href="https://wa.me/${WHATSAPP_NUMBER}" style="color: #C0392B;">WhatsApp</a>
   </p>
 </div>
 </body>
@@ -777,5 +777,266 @@ export async function sendStockpileExpiredEmail(stockpile: Stockpile): Promise<v
     console.log(`✅ Stockpile expired email sent to ${stockpile.customerEmail}`);
   } catch (error) {
     console.error("❌ Stockpile expired email failed:", error);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Newsletter Emails
+// ═══════════════════════════════════════════════════════════════════
+
+export async function sendNewsletterWelcomeEmail(
+  email: string,
+  firstName?: string,
+  unsubscribeToken?: string
+): Promise<void> {
+  if (!process.env.SMTP_PASSWORD) return;
+
+  const name = firstName || "there";
+  const unsubUrl = `${SITE_URL}/api/newsletter/unsubscribe?token=${unsubscribeToken}`;
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #FDF6EC;">
+  <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+
+    <!-- Header -->
+    <div style="background: #1A1A1A; border-bottom: 4px solid #C0392B; border-radius: 16px 16px 0 0; padding: 40px 32px; text-align: center;">
+      <h1 style="color: #FDF6EC; font-size: 32px; letter-spacing: 6px; margin: 0 0 6px 0; font-family: Georgia, serif;">${SITE_NAME}</h1>
+      <p style="font-size: 12px; color: #C8955A; margin: 0; letter-spacing: 2px; text-transform: uppercase;">Welcome to the Family</p>
+    </div>
+
+    <!-- Body -->
+    <div style="background: white; padding: 40px 32px; border-left: 1px solid #f3ede3; border-right: 1px solid #f3ede3;">
+      <div style="text-align: center; margin-bottom: 28px;">
+        <div style="display: inline-block; width: 72px; height: 72px; line-height: 72px; font-size: 36px; background: linear-gradient(135deg, #C0392B20, #C8955A20); border-radius: 50%; text-align: center;">
+          🥩
+        </div>
+      </div>
+
+      <h2 style="font-size: 24px; color: #1A1A1A; text-align: center; margin: 0 0 16px 0; font-family: Georgia, serif;">
+        Welcome, ${name}!
+      </h2>
+
+      <p style="font-size: 15px; color: #7A5C3A; margin: 0 0 20px 0; line-height: 1.7; text-align: center;">
+        You're now part of the ${SITE_NAME} community. Get ready for exclusive deals,
+        freshest cuts, seasonal recipes, and first access to new arrivals — delivered straight to your inbox.
+      </p>
+
+      <div style="background: #FDF6EC; border-radius: 12px; padding: 24px; margin: 24px 0; border: 1px solid #C8955A30;">
+        <h3 style="font-size: 14px; color: #1A1A1A; margin: 0 0 12px 0; text-align: center; text-transform: uppercase; letter-spacing: 1px;">What to expect</h3>
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="padding: 8px 0; font-size: 14px; color: #7A5C3A;">
+              <span style="color: #C0392B; font-weight: bold; margin-right: 8px;">01</span> Weekly deals & flash sales
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; font-size: 14px; color: #7A5C3A;">
+              <span style="color: #C0392B; font-weight: bold; margin-right: 8px;">02</span> New product launches
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; font-size: 14px; color: #7A5C3A;">
+              <span style="color: #C0392B; font-weight: bold; margin-right: 8px;">03</span> Recipes & cooking tips
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; font-size: 14px; color: #7A5C3A;">
+              <span style="color: #C0392B; font-weight: bold; margin-right: 8px;">04</span> Subscriber-only discounts
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <div style="text-align: center; margin-top: 28px;">
+        <a href="${SITE_URL}/shop" style="display: inline-block; background: #C0392B; color: white; text-decoration: none; font-size: 14px; font-weight: 600; padding: 14px 36px; border-radius: 8px; letter-spacing: 0.5px;">Shop Now</a>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="background: #1A1A1A; border-radius: 0 0 16px 16px; padding: 24px; text-align: center;">
+      <p style="font-size: 12px; color: #C8955A; margin: 0 0 8px 0;">With love, The ${SITE_NAME} Team</p>
+      <a href="${unsubUrl}" style="font-size: 11px; color: #666; text-decoration: underline;">Unsubscribe</a>
+    </div>
+
+  </div>
+</body>
+</html>`;
+
+  try {
+    await transporter.sendMail({
+      from: `"${SITE_NAME}" <${process.env.SMTP_EMAIL || SITE_EMAIL}>`,
+      to: email,
+      subject: `Welcome to ${SITE_NAME}! 🥩`,
+      html,
+    });
+    console.log(`✅ Newsletter welcome email sent to ${email}`);
+  } catch (error) {
+    console.error("❌ Newsletter welcome email failed:", error);
+  }
+}
+
+export async function sendNewsletterCampaignEmail(
+  email: string,
+  subject: string,
+  content: string,
+  unsubscribeToken: string
+): Promise<void> {
+  if (!process.env.SMTP_PASSWORD) return;
+
+  const unsubUrl = `${SITE_URL}/api/newsletter/unsubscribe?token=${unsubscribeToken}`;
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #FDF6EC;">
+  <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+
+    <div style="background: #1A1A1A; border-bottom: 4px solid #C0392B; border-radius: 16px 16px 0 0; padding: 32px; text-align: center;">
+      <h1 style="color: #FDF6EC; font-size: 28px; letter-spacing: 4px; margin: 0; font-family: Georgia, serif;">${SITE_NAME}</h1>
+    </div>
+
+    <div style="background: white; padding: 36px 32px; border-left: 1px solid #f3ede3; border-right: 1px solid #f3ede3;">
+      <div style="font-size: 15px; color: #1A1A1A; line-height: 1.7;">
+        ${content}
+      </div>
+
+      <div style="text-align: center; margin-top: 32px;">
+        <a href="${SITE_URL}/shop" style="display: inline-block; background: #C0392B; color: white; text-decoration: none; font-size: 14px; font-weight: 600; padding: 14px 36px; border-radius: 8px;">Shop Now</a>
+      </div>
+    </div>
+
+    <div style="background: #1A1A1A; border-radius: 0 0 16px 16px; padding: 24px; text-align: center;">
+      <p style="font-size: 12px; color: #C8955A; margin: 0 0 8px 0;">The ${SITE_NAME} Team</p>
+      <a href="${unsubUrl}" style="font-size: 11px; color: #666; text-decoration: underline;">Unsubscribe</a>
+    </div>
+
+  </div>
+</body>
+</html>`;
+
+  await transporter.sendMail({
+    from: `"${SITE_NAME}" <${process.env.SMTP_EMAIL || SITE_EMAIL}>`,
+    to: email,
+    subject: `${subject} — ${SITE_NAME}`,
+    html,
+  });
+}
+
+export async function sendSubscriptionConfirmedEmail(
+  email: string,
+  customerName: string,
+  frequency: string,
+  items: { productName: string; quantity: number; price: number }[],
+  nextOrderDate: string
+): Promise<void> {
+  if (!process.env.SMTP_PASSWORD) return;
+
+  const firstName = customerName.split(" ")[0];
+  const freqLabel = frequency === "weekly" ? "Weekly" : frequency === "biweekly" ? "Bi-weekly" : "Monthly";
+  const total = items.reduce((s, i) => s + i.price * i.quantity, 0);
+  const formattedDate = new Date(nextOrderDate).toLocaleDateString("en-NG", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  const itemRows = items.map(i => `
+    <tr>
+      <td style="padding: 8px 0; border-bottom: 1px solid #f3ede3; font-size: 14px; color: #1A1A1A;">${i.productName}</td>
+      <td style="padding: 8px 0; border-bottom: 1px solid #f3ede3; text-align: center; font-size: 14px; color: #7A5C3A;">${i.quantity}</td>
+      <td style="padding: 8px 0; border-bottom: 1px solid #f3ede3; text-align: right; font-size: 14px; font-weight: 600; color: #1A1A1A;">\u20A6${(i.price * i.quantity).toLocaleString()}</td>
+    </tr>`).join("");
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #FDF6EC;">
+  <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+
+    <div style="background: #1A1A1A; border-bottom: 4px solid #C0392B; border-radius: 16px 16px 0 0; padding: 40px 32px; text-align: center;">
+      <h1 style="color: #FDF6EC; font-size: 32px; letter-spacing: 6px; margin: 0 0 6px 0; font-family: Georgia, serif;">${SITE_NAME}</h1>
+      <p style="font-size: 12px; color: #C8955A; margin: 0; letter-spacing: 2px; text-transform: uppercase;">Subscription Confirmed</p>
+    </div>
+
+    <div style="background: white; padding: 40px 32px; border-left: 1px solid #f3ede3; border-right: 1px solid #f3ede3;">
+      <div style="text-align: center; margin-bottom: 24px;">
+        <div style="display: inline-block; width: 72px; height: 72px; line-height: 72px; font-size: 36px; background: #27AE6020; border-radius: 50%; text-align: center;">
+          ✅
+        </div>
+      </div>
+
+      <h2 style="font-size: 22px; color: #1A1A1A; text-align: center; margin: 0 0 8px 0; font-family: Georgia, serif;">
+        You're All Set, ${firstName}!
+      </h2>
+      <p style="font-size: 15px; color: #7A5C3A; margin: 0 0 24px 0; line-height: 1.7; text-align: center;">
+        Your ${freqLabel.toLowerCase()} meat box subscription is now active. Sit back and enjoy premium cuts delivered on schedule.
+      </p>
+
+      <div style="background: #FDF6EC; border-radius: 12px; padding: 20px; margin: 0 0 24px 0; border: 1px solid #C8955A30;">
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="font-size: 12px; color: #7A5C3A; text-transform: uppercase; letter-spacing: 1px;">Frequency</td>
+            <td style="text-align: right; font-size: 15px; font-weight: 600; color: #1A1A1A;">${freqLabel}</td>
+          </tr>
+          <tr>
+            <td style="font-size: 12px; color: #7A5C3A; text-transform: uppercase; letter-spacing: 1px; padding-top: 12px;">Next Delivery</td>
+            <td style="text-align: right; font-size: 15px; font-weight: 600; color: #C0392B; padding-top: 12px;">${formattedDate}</td>
+          </tr>
+          <tr>
+            <td style="font-size: 12px; color: #7A5C3A; text-transform: uppercase; letter-spacing: 1px; padding-top: 12px;">Per Delivery</td>
+            <td style="text-align: right; font-size: 18px; font-weight: 700; color: #1A1A1A; padding-top: 12px;">\u20A6${total.toLocaleString()}</td>
+          </tr>
+        </table>
+      </div>
+
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 24px;">
+        <thead>
+          <tr style="border-bottom: 2px solid #f3ede3;">
+            <th style="text-align: left; padding: 8px 0; font-size: 10px; color: #C8955A; text-transform: uppercase; letter-spacing: 1.5px;">Product</th>
+            <th style="text-align: center; padding: 8px 0; font-size: 10px; color: #C8955A; text-transform: uppercase; letter-spacing: 1.5px;">Qty</th>
+            <th style="text-align: right; padding: 8px 0; font-size: 10px; color: #C8955A; text-transform: uppercase; letter-spacing: 1.5px;">Total</th>
+          </tr>
+        </thead>
+        <tbody>${itemRows}</tbody>
+      </table>
+
+      <div style="text-align: center;">
+        <a href="https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi! I just set up a meat subscription and I have a question.")}" style="display: inline-block; background: #25D366; color: white; text-decoration: none; font-size: 14px; font-weight: 600; padding: 12px 28px; border-radius: 8px;">Questions? Chat with Us</a>
+      </div>
+    </div>
+
+    <div style="background: #1A1A1A; border-radius: 0 0 16px 16px; padding: 24px; text-align: center;">
+      <p style="font-size: 12px; color: #C8955A; margin: 0;">With love, The ${SITE_NAME} Team</p>
+    </div>
+
+  </div>
+</body>
+</html>`;
+
+  try {
+    await transporter.sendMail({
+      from: `"${SITE_NAME}" <${process.env.SMTP_EMAIL || SITE_EMAIL}>`,
+      to: email,
+      subject: `✅ Subscription Confirmed — ${freqLabel} Meat Box | ${SITE_NAME}`,
+      html,
+    });
+    console.log(`✅ Subscription confirmed email sent to ${email}`);
+  } catch (error) {
+    console.error("❌ Subscription confirmed email failed:", error);
   }
 }

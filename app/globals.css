@@ -1,11 +1,23 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-lilac: #C8A2C8;
-  --color-brand-purple: #B665D2;
-  --color-brand-dark: #4B0082;
-  --color-brand-white: #FFFFFF;
-  --color-brand-cream: #FDFBF9;
+  --color-brand-red: #C0392B;
+  --color-brand-green: #27AE60;
+  --color-brand-black: #1A1A1A;
+  --color-warm-cream: #FDF6EC;
+  --color-warm-tan: #C8955A;
+  --color-deep-espresso: #2C1A0E;
+  --color-muted-brown: #7A5C3A;
+  --color-fresh-green: #D4EDDA;
+  --color-chilled-blue: #D0E8FF;
+  --color-frozen-ice: #E8F4FD;
+
+  /* Legacy aliases used by existing components */
+  --color-brand-lilac: #C8955A;
+  --color-brand-purple: #C0392B;
+  --color-brand-dark: #1A1A1A;
+  --color-brand-white: #FDF6EC;
+  --color-brand-cream: #FDF6EC;
 
   --font-serif: var(--font-playfair), "Georgia", serif;
   --font-sans: var(--font-inter), "Helvetica Neue", sans-serif;
@@ -31,8 +43,8 @@ html {
 
 /* ── Selection ── */
 ::selection {
-  background: rgba(182, 101, 210, 0.15);
-  color: var(--color-brand-dark);
+  background: rgba(192, 57, 43, 0.15);
+  color: var(--color-brand-black);
 }
 
 /* ── Keyframes ── */
@@ -74,11 +86,11 @@ html {
 
 @keyframes glow {
   from {
-    box-shadow: 0 0 10px rgba(182, 101, 210, 0.2);
+    box-shadow: 0 0 10px rgba(192, 57, 43, 0.2);
   }
 
   to {
-    box-shadow: 0 0 20px rgba(182, 101, 210, 0.6);
+    box-shadow: 0 0 20px rgba(192, 57, 43, 0.6);
   }
 }
 
@@ -219,11 +231,22 @@ html {
   }
 }
 
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
 /* ── Base ── */
 @layer base {
   body {
-    background-color: var(--color-brand-white);
-    color: var(--color-brand-dark);
+    background-color: var(--color-warm-cream);
+    color: var(--color-brand-black);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -238,12 +261,12 @@ html {
   }
 
   ::-webkit-scrollbar-thumb {
-    background: rgba(200, 162, 200, 0.3);
+    background: rgba(200, 149, 90, 0.3);
     border-radius: 10px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(200, 162, 200, 0.5);
+    background: rgba(200, 149, 90, 0.5);
   }
 }
 
@@ -258,8 +281,8 @@ html {
     border: 1px solid rgba(255, 255, 255, 0.4);
     border-radius: 1.5rem;
     box-shadow:
-      0 8px 32px rgba(75, 0, 130, 0.04),
-      0 1px 2px rgba(75, 0, 130, 0.02),
+      0 8px 32px rgba(26, 26, 26, 0.04),
+      0 1px 2px rgba(26, 26, 26, 0.02),
       inset 0 0 0 1px rgba(255, 255, 255, 0.15);
   }
 
@@ -270,16 +293,16 @@ html {
         rgba(255, 255, 255, 0.78));
     backdrop-filter: blur(24px) saturate(1.8);
     -webkit-backdrop-filter: blur(24px) saturate(1.8);
-    border-bottom: 1px solid rgba(200, 162, 200, 0.15);
+    border-bottom: 1px solid rgba(200, 149, 90, 0.15);
     box-shadow: 0 1px 20px rgba(0, 0, 0, 0.03);
   }
 
   /* Gradient text */
   .text-gradient-luxury {
     background: linear-gradient(135deg,
-        var(--color-brand-dark) 0%,
-        var(--color-brand-purple) 50%,
-        var(--color-brand-lilac) 100%);
+        var(--color-brand-black) 0%,
+        var(--color-brand-red) 50%,
+        var(--color-warm-tan) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -319,16 +342,16 @@ html {
   .hover-lift:hover {
     transform: translateY(-4px);
     box-shadow:
-      0 12px 40px rgba(75, 0, 130, 0.08),
-      0 4px 12px rgba(75, 0, 130, 0.04);
+      0 12px 40px rgba(26, 26, 26, 0.08),
+      0 4px 12px rgba(26, 26, 26, 0.04);
   }
 
   /* Shimmer loading skeleton */
   .shimmer-bg {
     background: linear-gradient(90deg,
-        rgba(200, 162, 200, 0.08) 25%,
-        rgba(200, 162, 200, 0.15) 50%,
-        rgba(200, 162, 200, 0.08) 75%);
+        rgba(200, 149, 90, 0.08) 25%,
+        rgba(200, 149, 90, 0.15) 50%,
+        rgba(200, 149, 90, 0.08) 75%);
     background-size: 200% 100%;
     animation: shimmer 2s linear infinite;
     border-radius: 0.5rem;
@@ -357,7 +380,7 @@ html {
     height: 1px;
     background: linear-gradient(90deg,
         transparent,
-        var(--color-brand-lilac),
+        var(--color-warm-tan),
         transparent);
     margin: 2rem auto;
     transform-origin: center;

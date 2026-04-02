@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { Product, InventoryItem, Category } from "@/types";
+import type { Product, InventoryItem, Category, PrepOption } from "@/types";
 import Button from "@/components/ui/Button";
 import { uploadProductImage } from "@/lib/uploadImage";
 import { createProduct, updateProduct, createInventoryItem, getInventoryItems, getCategories } from "@/lib/queries";
@@ -36,7 +36,15 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
         price: initialData?.price.toString() || "",
         stock: initialData?.stock.toString() || "",
         category: initialData?.category || "",
+        priceUnit: initialData?.priceUnit || "per_kg",
+        cutType: initialData?.cutType || "",
+        storageType: initialData?.storageType || "fresh",
+        minWeightKg: initialData?.minWeightKg?.toString() || "",
     });
+
+    const [prepOptions, setPrepOptions] = useState<PrepOption[]>(
+        initialData?.prepOptions || []
+    );
 
     // New Inventory Fields
     const [invForm, setInvForm] = useState({
@@ -117,6 +125,11 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                     category: form.category,
                     images: imageUrls,
                     variants: variants,
+                    priceUnit: form.priceUnit,
+                    cutType: form.cutType || null,
+                    storageType: form.storageType || "fresh",
+                    prepOptions: prepOptions,
+                    minWeightKg: form.minWeightKg ? parseFloat(form.minWeightKg) : null,
                 });
                 await revalidateShop();
                 toast.success("Product updated!");
@@ -154,7 +167,12 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                     category: form.category,
                     images: imageUrls,
                     variants: variants,
-                    inventoryId: inventoryId
+                    inventoryId: inventoryId,
+                    priceUnit: form.priceUnit,
+                    cutType: form.cutType || null,
+                    storageType: form.storageType || "fresh",
+                    prepOptions: prepOptions,
+                    minWeightKg: form.minWeightKg ? parseFloat(form.minWeightKg) : null,
                 });
                 await revalidateShop();
 
@@ -260,6 +278,114 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                             <InputField label="Supplier (Optional)" name="supplier" value={invForm.supplier} onChange={handleInvChange} />
                         </div>
                     )}
+                </div>
+
+                {/* Meat Commerce Fields */}
+                <div className="border border-brand-lilac/20 rounded p-4 bg-gray-50">
+                    <h3 className="text-sm font-semibold text-brand-dark mb-3">Meat Details</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label htmlFor="priceUnit" className="block text-xs text-brand-dark/60 mb-1">Price Unit</label>
+                            <select
+                                id="priceUnit"
+                                name="priceUnit"
+                                value={form.priceUnit}
+                                onChange={handleChange}
+                                className="w-full border border-brand-lilac/20 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/30"
+                            >
+                                <option value="per_kg">Per KG</option>
+                                <option value="per_pack">Per Pack</option>
+                                <option value="per_piece">Per Piece</option>
+                                <option value="whole">Whole</option>
+                            </select>
+                        </div>
+                        <InputField label="Cut Type" name="cutType" value={form.cutType} onChange={handleChange} />
+                        <div>
+                            <label htmlFor="storageType" className="block text-xs text-brand-dark/60 mb-1">Storage Type</label>
+                            <select
+                                id="storageType"
+                                name="storageType"
+                                value={form.storageType}
+                                onChange={handleChange}
+                                className="w-full border border-brand-lilac/20 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/30"
+                            >
+                                <option value="fresh">Fresh</option>
+                                <option value="chilled">Chilled</option>
+                                <option value="frozen">Frozen</option>
+                            </select>
+                        </div>
+                    </div>
+                    {form.priceUnit === "per_kg" && (
+                        <div className="mt-4">
+                            <InputField label="Min Weight (kg)" name="minWeightKg" type="number" value={form.minWeightKg} onChange={handleChange} />
+                        </div>
+                    )}
+
+                    {/* Prep Options */}
+                    <div className="mt-4 pt-4 border-t border-gray-200/50">
+                        <div className="flex justify-between items-center mb-3">
+                            <label className="text-xs text-brand-dark/60 font-medium">Prep Options</label>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setPrepOptions([...prepOptions, { id: crypto.randomUUID(), label: "", extraFee: 0 }])}
+                            >
+                                + Add Option
+                            </Button>
+                        </div>
+                        {prepOptions.length === 0 && (
+                            <button
+                                type="button"
+                                onClick={() => setPrepOptions([
+                                    { id: crypto.randomUUID(), label: "Debone", extraFee: 500 },
+                                    { id: crypto.randomUUID(), label: "Dice", extraFee: 300 },
+                                    { id: crypto.randomUUID(), label: "Mince", extraFee: 400 },
+                                    { id: crypto.randomUUID(), label: "Season", extraFee: 600 },
+                                ])}
+                                className="text-xs text-brand-purple hover:underline cursor-pointer"
+                            >
+                                Seed default options (Debone, Dice, Mince, Season)
+                            </button>
+                        )}
+                        {prepOptions.map((opt, idx) => (
+                            <div key={opt.id} className="flex gap-2 items-end bg-white p-3 rounded-md mb-2">
+                                <div className="flex-1">
+                                    <label className="text-xs text-brand-dark/60">Label</label>
+                                    <input
+                                        type="text"
+                                        value={opt.label}
+                                        onChange={(e) => {
+                                            const next = [...prepOptions];
+                                            next[idx] = { ...next[idx], label: e.target.value };
+                                            setPrepOptions(next);
+                                        }}
+                                        className="w-full border border-brand-lilac/20 rounded-md px-2 py-1 text-sm"
+                                        placeholder="e.g. Debone"
+                                    />
+                                </div>
+                                <div className="w-28">
+                                    <label className="text-xs text-brand-dark/60">Extra Fee (₦)</label>
+                                    <input
+                                        type="number"
+                                        value={opt.extraFee}
+                                        onChange={(e) => {
+                                            const next = [...prepOptions];
+                                            next[idx] = { ...next[idx], extraFee: parseInt(e.target.value) || 0 };
+                                            setPrepOptions(next);
+                                        }}
+                                        className="w-full border border-brand-lilac/20 rounded-md px-2 py-1 text-sm"
+                                    />
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setPrepOptions(prepOptions.filter((_, i) => i !== idx))}
+                                    className="text-red-500 hover:text-red-700 text-xs pb-2"
+                                >
+                                    Remove
+                                </button>
+                            </div>
+                        ))}
+                    </div>
                 </div>
 
                 <div>

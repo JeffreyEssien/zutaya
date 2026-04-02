@@ -22,8 +22,12 @@ export async function POST(request: Request) {
     console.log(`   Payment: ${order.paymentMethod || "not specified"}`);
 
     return NextResponse.json({ success: true, orderId: order.id });
-  } catch (err) {
-    console.error("Order error:", err);
-    return NextResponse.json({ success: false, error: "Failed to process order" }, { status: 500 });
+  } catch (err: any) {
+    const message = err?.message || String(err);
+    console.error("Order error:", message, err);
+    return NextResponse.json(
+      { success: false, error: message || "Failed to process order" },
+      { status: 500 }
+    );
   }
 }

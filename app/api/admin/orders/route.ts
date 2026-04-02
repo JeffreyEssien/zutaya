@@ -8,7 +8,8 @@ export async function POST(request: Request) {
         // Verify admin session
         const cookieStore = await cookies();
         const session = cookieStore.get("admin_session")?.value;
-        const secret = process.env.ADMIN_SESSION_SECRET || "xelle-admin-default-secret";
+        const secret = process.env.ADMIN_SESSION_SECRET;
+        if (!secret) return NextResponse.json({ error: "Server misconfigured" }, { status: 500 });
 
         if (session !== secret) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

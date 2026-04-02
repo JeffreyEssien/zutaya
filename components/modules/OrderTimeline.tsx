@@ -1,22 +1,26 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Package, Truck, CheckCircle2, Clock, CreditCard, ShieldCheck } from "lucide-react";
+import { Package, CreditCard as ProcessingIcon, BoxIcon, Truck, CheckCircle2, Clock, CreditCard, ShieldCheck } from "lucide-react";
 
 interface OrderTimelineProps {
-    status: "pending" | "shipped" | "delivered";
+    status: "pending" | "processing" | "packed" | "out_for_delivery" | "delivered";
     paymentMethod?: "whatsapp" | "bank_transfer";
     paymentStatus?: "awaiting_payment" | "payment_submitted" | "payment_confirmed";
     createdAt: string;
 }
 
 const STEPS = [
-    { key: "pending", label: "Order Placed", icon: Package },
-    { key: "shipped", label: "Shipped", icon: Truck },
+    { key: "pending", label: "Pending", icon: Package },
+    { key: "processing", label: "Processing", icon: ProcessingIcon },
+    { key: "packed", label: "Packed", icon: BoxIcon },
+    { key: "out_for_delivery", label: "Out for Delivery", icon: Truck },
     { key: "delivered", label: "Delivered", icon: CheckCircle2 },
 ] as const;
 
-const STATUS_ORDER = { pending: 0, shipped: 1, delivered: 2 };
+const STATUS_ORDER: Record<string, number> = {
+    pending: 0, processing: 1, packed: 2, out_for_delivery: 3, delivered: 4,
+};
 
 const PAYMENT_CONFIG: Record<string, { label: string; color: string; bg: string; icon: typeof Clock }> = {
     awaiting_payment: { label: "Awaiting Payment", color: "text-amber-600", bg: "bg-amber-50 border-amber-200", icon: Clock },
@@ -25,13 +29,15 @@ const PAYMENT_CONFIG: Record<string, { label: string; color: string; bg: string;
 };
 
 export default function OrderTimeline({ status, paymentMethod, paymentStatus, createdAt }: OrderTimelineProps) {
-    const currentIndex = STATUS_ORDER[status];
+    const currentIndex = STATUS_ORDER[status] ?? 0;
     const orderDate = new Date(createdAt).toLocaleDateString("en-US", {
         year: "numeric", month: "long", day: "numeric",
     });
     const orderTime = new Date(createdAt).toLocaleTimeString("en-US", {
         hour: "2-digit", minute: "2-digit",
     });
+
+    const progressPercent = currentIndex === 0 ? 0 : (currentIndex / (STEPS.length - 1)) * 100;
 
     return (
         <div className="space-y-6">
@@ -41,17 +47,12 @@ export default function OrderTimeline({ status, paymentMethod, paymentStatus, cr
                 <div className="hidden sm:block">
                     <div className="flex items-start justify-between relative">
                         {/* Connector line (behind icons) */}
-                        <div className="absolute top-5 left-[calc(16.67%)] right-[calc(16.67%)] h-[2px] bg-brand-dark/8 z-0" />
+                        <div className="absolute top-5 left-[10%] right-[10%] h-[2px] bg-brand-dark/8 z-0" />
                         <motion.div
-                            className="absolute top-5 left-[calc(16.67%)] h-[2px] bg-gradient-to-r from-brand-purple to-brand-lilac z-0"
+                            className="absolute top-5 left-[10%] h-[2px] bg-brand-green z-0"
                             initial={{ width: 0 }}
-                            animate={{
-                                width: currentIndex === 0 ? "0%" :
-                                    currentIndex === 1 ? "50%" : "100%",
-                            }}
-                            style={{
-                                maxWidth: `calc(100% - ${100 / 3}%)`,
-                            }}
+                            animate={{ width: `${progressPercent}%` }}
+                            style={{ maxWidth: "80%" }}
                             transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
                         />
 
@@ -70,29 +71,35 @@ export default function OrderTimeline({ status, paymentMethod, paymentStatus, cr
                                     transition={{ delay: 0.15 * i, duration: 0.5 }}
                                 >
                                     {/* Icon circle */}
-                                    <div className={`
-                                        w-10 h-10 rounded-full flex items-center justify-center transition-all duration-500
-                                        ${isCompleted ? "bg-brand-purple text-white shadow-md shadow-brand-purple/20" : ""}
-                                        ${isActive ? "bg-brand-purple/10 text-brand-purple ring-2 ring-brand-purple/30 ring-offset-2 ring-offset-white" : ""}
-                                        ${isUpcoming ? "bg-brand-dark/5 text-brand-dark/25" : ""}
-                                    `}>
-                                        <Icon size={18} strokeWidth={isCompleted || isActive ? 2.5 : 1.5} />
+                                    <div className="relative">
+                                        <div className={`
+                                            w-10 h-10 rounded-full flex items-center justify-center transition-all duration-500
+                                            ${isCompleted ? "bg-brand-green text-white shadow-md shadow-brand-green/20" : ""}
+                                            ${isActive ? "bg-brand-red/10 text-brand-red ring-2 ring-brand-red/30 ring-offset-2 ring-offset-white" : ""}
+                                            ${isUpcoming ? "bg-brand-dark/5 text-brand-dark/25" : ""}
+                                        `}>
+                                            <Icon size={18} strokeWidth={isCompleted || isActive ? 2.5 : 1.5} />
+                                        </div>
+                                        {/* Animated pulse ring for active step */}
+                                        {isActive && (
+                                            <span className="absolute inset-0 rounded-full animate-ping bg-brand-red/20" style={{ animationDuration: "2s" }} />
+                                        )}
                                     </div>
 
                                     {/* Label */}
                                     <span className={`
                                         mt-3 text-xs font-medium tracking-wide text-center
-                                        ${isCompleted ? "text-brand-purple" : ""}
+                                        ${isCompleted ? "text-brand-green" : ""}
                                         ${isActive ? "text-brand-dark" : ""}
                                         ${isUpcoming ? "text-brand-dark/30" : ""}
                                     `}>
                                         {step.label}
                                     </span>
 
-                                    {/* Active pulse */}
+                                    {/* Active indicator */}
                                     {isActive && (
                                         <motion.span
-                                            className="mt-1.5 text-[10px] text-brand-purple/60 font-medium"
+                                            className="mt-1.5 text-[10px] text-brand-red/60 font-medium"
                                             initial={{ opacity: 0 }}
                                             animate={{ opacity: 1 }}
                                             transition={{ delay: 0.6 }}
@@ -119,15 +126,10 @@ export default function OrderTimeline({ status, paymentMethod, paymentStatus, cr
                         {/* Vertical connector */}
                         <div className="absolute left-[15px] top-5 bottom-5 w-[2px] bg-brand-dark/8" />
                         <motion.div
-                            className="absolute left-[15px] top-5 w-[2px] bg-gradient-to-b from-brand-purple to-brand-lilac"
+                            className="absolute left-[15px] top-5 w-[2px] bg-brand-green"
                             initial={{ height: 0 }}
-                            animate={{
-                                height: currentIndex === 0 ? "0%" :
-                                    currentIndex === 1 ? "50%" : "100%",
-                            }}
-                            style={{
-                                maxHeight: `calc(100% - 40px)`,
-                            }}
+                            animate={{ height: `${progressPercent}%` }}
+                            style={{ maxHeight: "calc(100% - 40px)" }}
                             transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
                         />
 
@@ -147,13 +149,18 @@ export default function OrderTimeline({ status, paymentMethod, paymentStatus, cr
                                         transition={{ delay: 0.15 * i, duration: 0.5 }}
                                     >
                                         {/* Icon */}
-                                        <div className={`
-                                            absolute -left-8 w-8 h-8 rounded-full flex items-center justify-center shrink-0 z-10
-                                            ${isCompleted ? "bg-brand-purple text-white shadow-md shadow-brand-purple/20" : ""}
-                                            ${isActive ? "bg-brand-purple/10 text-brand-purple ring-2 ring-brand-purple/30" : ""}
-                                            ${isUpcoming ? "bg-white border border-brand-dark/10 text-brand-dark/25" : ""}
-                                        `}>
-                                            <Icon size={14} strokeWidth={isCompleted || isActive ? 2.5 : 1.5} />
+                                        <div className="relative">
+                                            <div className={`
+                                                absolute -left-8 w-8 h-8 rounded-full flex items-center justify-center shrink-0 z-10
+                                                ${isCompleted ? "bg-brand-green text-white shadow-md shadow-brand-green/20" : ""}
+                                                ${isActive ? "bg-brand-red/10 text-brand-red ring-2 ring-brand-red/30" : ""}
+                                                ${isUpcoming ? "bg-white border border-brand-dark/10 text-brand-dark/25" : ""}
+                                            `}>
+                                                <Icon size={14} strokeWidth={isCompleted || isActive ? 2.5 : 1.5} />
+                                            </div>
+                                            {isActive && (
+                                                <span className="absolute -left-8 top-0 w-8 h-8 rounded-full animate-ping bg-brand-red/20" style={{ animationDuration: "2s" }} />
+                                            )}
                                         </div>
 
                                         {/* Text */}
@@ -166,7 +173,7 @@ export default function OrderTimeline({ status, paymentMethod, paymentStatus, cr
                                             )}
                                             {isActive && (
                                                 <motion.span
-                                                    className="inline-block mt-1 text-[10px] text-brand-purple font-medium bg-brand-purple/5 px-2 py-0.5 rounded-full"
+                                                    className="inline-block mt-1 text-[10px] text-brand-red font-medium bg-brand-red/5 px-2 py-0.5 rounded-full"
                                                     initial={{ opacity: 0, scale: 0.8 }}
                                                     animate={{ opacity: 1, scale: 1 }}
                                                     transition={{ delay: 0.6 }}

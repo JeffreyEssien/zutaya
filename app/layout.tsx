@@ -21,8 +21,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
 
   return {
-    title: settings?.siteName ? `${settings.siteName} | High-End Lifestyle E-Commerce` : "XELLÉ | High-End Lifestyle E-Commerce",
-    description: "Simple, Elegant, Classy e-commerce experience.",
+    title: settings?.siteName ? `${settings.siteName} | Premium Meat Delivery` : "Zúta Ya | Premium Meat Delivery · Lagos",
+    description: "Premium meat delivery in Lagos. Fresh, chilled, and frozen cuts delivered to your door.",
     icons: settings?.faviconUrl ? {
       icon: settings.faviconUrl
     } : undefined

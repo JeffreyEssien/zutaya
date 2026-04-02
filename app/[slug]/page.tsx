@@ -9,7 +9,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     const page = await getPageBySlug(slug);
     if (!page) return {};
     return {
-        title: `${page.title} | XELLÉ`,
+        title: `${page.title} | Zúta Ya`,
     };
 }
 

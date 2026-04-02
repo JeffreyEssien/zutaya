@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // ✅ Move allowedDevOrigins to the root level
+  allowedDevOrigins: ['172.20.3.44'],
+
   images: {
     remotePatterns: [
       {

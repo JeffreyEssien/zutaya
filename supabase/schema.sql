@@ -86,10 +86,16 @@ CREATE TABLE IF NOT EXISTS site_settings (
   business_phone TEXT,
   business_whatsapp TEXT,
   business_address TEXT,
+  -- About page
+  about_promise_text TEXT,
+  about_quote TEXT,
+  about_stats TEXT,
   -- Footer
   footer_tagline TEXT,
   -- Shipping
   free_shipping_threshold NUMERIC(10,2) DEFAULT 50000,
+  -- All editable texts
+  custom_texts JSONB DEFAULT '{}',
   updated_at TIMESTAMPTZ DEFAULT now()
 );
 
@@ -384,10 +390,13 @@ BEGIN
     to_jsonb(v_current_stock - p_quantity)
   );
 
-  -- Update the product
+  -- Update the product (variants + recalculate total stock as sum of all variant stocks)
   UPDATE products
   SET variants = v_updated_variants,
-      updated_at = now()
+      stock = (
+        SELECT COALESCE(SUM((elem->>'stock')::int), 0)
+        FROM jsonb_array_elements(v_updated_variants) AS elem
+      )
   WHERE id = p_product_id;
 
   RETURN v_updated_variants;

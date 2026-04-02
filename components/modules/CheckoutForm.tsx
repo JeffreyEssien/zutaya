@@ -27,6 +27,7 @@ import {
     ChevronDown, Info, Package, Tag, Archive,
 } from "lucide-react";
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { toast } from "sonner";
 
 interface CheckoutFormProps {
     onComplete: (orderInfo?: { orderId: string; total: number; paymentMethod: "whatsapp" | "bank_transfer" }) => void;
@@ -229,7 +230,7 @@ export default function CheckoutForm({ onComplete, onShippingChange }: CheckoutF
                 return;
             } catch (err) {
                 console.error('Stockpile error:', err);
-                alert('Failed to add to stockpile. Please try again.');
+                toast.error('Failed to add to stockpile. Please try again.');
                 setLoading(false);
                 return;
             }
@@ -286,7 +287,16 @@ export default function CheckoutForm({ onComplete, onShippingChange }: CheckoutF
 
             if (!res.ok || !data.success) {
                 console.error("Order failed:", data);
-                alert(data.error || "Failed to place order. Please try again.");
+                const errMsg = data.error || "Failed to place order. Please try again.";
+                // Show user-friendly stock error messages
+                if (errMsg.toLowerCase().includes("insufficient stock")) {
+                    toast.error("Out of Stock", {
+                        description: errMsg,
+                        duration: 6000,
+                    });
+                } else {
+                    toast.error(errMsg, { duration: 5000 });
+                }
                 setLoading(false);
                 return;
             }
@@ -320,7 +330,7 @@ export default function CheckoutForm({ onComplete, onShippingChange }: CheckoutF
             }
         } catch (err) {
             console.error("Order submission error:", err);
-            alert("Something went wrong. Please check your connection and try again.");
+            toast.error("Something went wrong. Please check your connection and try again.");
             setLoading(false);
         }
     };

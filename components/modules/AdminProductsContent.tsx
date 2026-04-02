@@ -8,6 +8,7 @@ import { LOW_STOCK_THRESHOLD } from "@/lib/constants";
 import { cn } from "@/lib/cn";
 import Button from "@/components/ui/Button";
 import AddProductForm from "@/components/modules/AddProductForm";
+import { StorageBadge } from "@/components/ui/StorageBadge";
 import { deleteProduct } from "@/lib/queries";
 import { revalidateShop } from "@/app/actions";
 
@@ -87,6 +88,8 @@ export default function AdminProductsContent({ products }: AdminProductsContentP
                                     <th className="text-left px-4 py-3 font-medium text-brand-dark/60">Price</th>
                                     <th className="text-left px-4 py-3 font-medium text-brand-dark/60">Stock</th>
                                     <th className="text-left px-4 py-3 font-medium text-brand-dark/60">Category</th>
+                                    <th className="text-left px-4 py-3 font-medium text-brand-dark/60">Storage</th>
+                                    <th className="text-left px-4 py-3 font-medium text-brand-dark/60">Cut</th>
                                     <th className="text-right px-4 py-3 font-medium text-brand-dark/60">Actions</th>
                                 </tr>
                             </thead>
@@ -99,6 +102,10 @@ export default function AdminProductsContent({ products }: AdminProductsContentP
                                             <StockBadge stock={p.stock} />
                                         </td>
                                         <td className="px-4 py-3 text-brand-dark/70 capitalize">{p.category}</td>
+                                        <td className="px-4 py-3">
+                                            {p.storageType && <StorageBadge type={p.storageType} />}
+                                        </td>
+                                        <td className="px-4 py-3 text-brand-dark/70 text-xs capitalize">{p.cutType || "—"}</td>
                                         <td className="px-4 py-3 text-right space-x-3">
                                             <button
                                                 type="button"
@@ -119,7 +126,7 @@ export default function AdminProductsContent({ products }: AdminProductsContentP
                                 ))}
                                 {filteredProducts.length === 0 && (
                                     <tr>
-                                        <td colSpan={5} className="px-4 py-8 text-center text-brand-dark/50">
+                                        <td colSpan={7} className="px-4 py-8 text-center text-brand-dark/50">
                                             No products found matching "{searchQuery}"
                                         </td>
                                     </tr>
@@ -163,6 +170,8 @@ export default function AdminProductsContent({ products }: AdminProductsContentP
                             <span className="text-brand-dark/70">{formatCurrency(p.price)}</span>
                             <span className="capitalize text-brand-dark/50">{p.category}</span>
                             <StockBadge stock={p.stock} />
+                            {p.storageType && <StorageBadge type={p.storageType} />}
+                            {p.cutType && <span className="text-brand-dark/50 capitalize">{p.cutType}</span>}
                         </div>
                     </div>
                 ))}

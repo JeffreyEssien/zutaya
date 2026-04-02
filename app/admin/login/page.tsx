@@ -48,7 +48,7 @@ function LoginForm() {
         <div className="min-h-screen flex items-center justify-center bg-neutral-50 px-4">
             <div className="w-full max-w-sm">
                 <div className="text-center mb-8">
-                    <h1 className="font-serif text-3xl text-brand-dark tracking-wider">XELLÉ</h1>
+                    <h1 className="font-serif text-3xl text-brand-dark tracking-wider">Zúta Ya</h1>
                     <p className="text-brand-dark/50 text-sm mt-1">Admin Access</p>
                 </div>
 

@@ -1,5 +1,5 @@
 import { getSupabaseClient } from "@/lib/supabase";
-import type { Product, Category, Order, SiteSettings, Coupon, Profile, InventoryLog, Page, InventoryItem } from "@/types";
+import type { Product, Category, Order, SiteSettings, Coupon, Profile, InventoryLog, Page, InventoryItem, BundleRule, Subscription, NewsletterSubscriber, NewsletterCampaign } from "@/types";
 
 interface DbProduct {
     id: string;
@@ -16,6 +16,14 @@ interface DbProduct {
     is_new: boolean;
     inventory_item_id?: string;
     created_at: string;
+    // Meat commerce fields
+    category_id?: string;
+    price_unit?: string;
+    cut_type?: string | null;
+    storage_type?: string;
+    prep_options?: any[];
+    min_weight_kg?: number | null;
+    related_recipe_ids?: string[];
 }
 
 interface DbOrder {
@@ -56,6 +64,13 @@ function toProduct(row: DbProduct): Product {
         isFeatured: row.is_featured,
         isNew: row.is_new,
         inventoryId: row.inventory_item_id,
+        categoryId: row.category_id,
+        priceUnit: row.price_unit as Product["priceUnit"],
+        cutType: row.cut_type,
+        storageType: (row.storage_type as Product["storageType"]) || "fresh",
+        prepOptions: row.prep_options || [],
+        minWeightKg: row.min_weight_kg,
+        relatedRecipeIds: row.related_recipe_ids || [],
     };
 }
 
@@ -348,6 +363,25 @@ export async function createOrder(order: Order): Promise<void> {
     const { error } = await supabase.from("orders").insert(insertData);
 
     if (error) throw error;
+
+    // Increment coupon usage count if applicable (best-effort, don't fail the order)
+    if (order.couponCode) {
+        try {
+            const { data: couponData } = await supabase
+                .from("coupons")
+                .select("usage_count")
+                .eq("code", order.couponCode.toUpperCase())
+                .single();
+            if (couponData) {
+                await supabase
+                    .from("coupons")
+                    .update({ usage_count: (couponData.usage_count || 0) + 1 })
+                    .eq("code", order.couponCode.toUpperCase());
+            }
+        } catch (e) {
+            console.warn("Coupon usage_count update failed:", e);
+        }
+    }
 }
 
 export async function updatePaymentInfo(
@@ -377,7 +411,12 @@ export interface CreateProductInput {
     brand?: string;
     images: string[];
     variants: Product["variants"];
-    inventoryId?: string; // Link to inventory source
+    inventoryId?: string;
+    priceUnit?: string;
+    cutType?: string | null;
+    storageType?: string;
+    prepOptions?: any[];
+    minWeightKg?: number | null;
 }
 
 export async function createProduct(input: CreateProductInput): Promise<void> {
@@ -389,20 +428,27 @@ export async function createProduct(input: CreateProductInput): Promise<void> {
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)/g, "");
 
-    const { error } = await supabase.from("products").insert({
+    const insertData: any = {
         slug,
         name: input.name,
         description: input.description,
         price: input.price,
         category: input.category,
-        brand: input.brand || "XELLÉ",
+        brand: input.brand || "Zúta Ya",
         stock: input.stock,
         images: input.images,
         variants: input.variants,
         is_featured: false,
         is_new: true,
-        inventory_item_id: input.inventoryId, // Save the link
-    });
+        inventory_item_id: input.inventoryId,
+    };
+    if (input.priceUnit) insertData.price_unit = input.priceUnit;
+    if (input.cutType !== undefined) insertData.cut_type = input.cutType;
+    if (input.storageType) insertData.storage_type = input.storageType;
+    if (input.prepOptions) insertData.prep_options = input.prepOptions;
+    if (input.minWeightKg !== undefined) insertData.min_weight_kg = input.minWeightKg;
+
+    const { error } = await supabase.from("products").insert(insertData);
     if (error) throw error;
 }
 export async function updateProduct(id: string, input: CreateProductInput): Promise<void> {
@@ -426,6 +472,11 @@ export async function updateProduct(id: string, input: CreateProductInput): Prom
     };
     if (input.brand !== undefined) updateData.brand = input.brand;
     if (input.inventoryId !== undefined) updateData.inventory_item_id = input.inventoryId;
+    if (input.priceUnit !== undefined) updateData.price_unit = input.priceUnit;
+    if (input.cutType !== undefined) updateData.cut_type = input.cutType;
+    if (input.storageType !== undefined) updateData.storage_type = input.storageType;
+    if (input.prepOptions !== undefined) updateData.prep_options = input.prepOptions;
+    if (input.minWeightKg !== undefined) updateData.min_weight_kg = input.minWeightKg;
 
     const { error } = await supabase
         .from("products")
@@ -483,8 +534,8 @@ export async function getSiteSettings(): Promise<SiteSettings | null> {
         faviconUrl: data.favicon_url,
         ourStoryHeading: data.our_story_heading,
         ourStoryText: data.our_story_text,
-        whyXelleHeading: data.why_xelle_heading,
-        whyXelleFeatures: data.why_xelle_features,
+        whyZutaYaHeading: data.why_xelle_heading,
+        whyZutaYaFeatures: data.why_xelle_features,
         // Announcement bar
         announcementBarEnabled: data.announcement_bar_enabled,
         announcementBarText: data.announcement_bar_text,
@@ -498,10 +549,15 @@ export async function getSiteSettings(): Promise<SiteSettings | null> {
         businessPhone: data.business_phone,
         businessWhatsapp: data.business_whatsapp,
         businessAddress: data.business_address,
+        // About page
+        aboutPromiseText: data.about_promise_text,
+        aboutQuote: data.about_quote,
+        aboutStats: data.about_stats,
         // Footer
         footerTagline: data.footer_tagline,
         // Shipping
         freeShippingThreshold: data.free_shipping_threshold != null ? Number(data.free_shipping_threshold) : undefined,
+        customTexts: data.custom_texts || {},
     };
 }
 
@@ -520,8 +576,8 @@ export async function updateSiteSettings(settings: Partial<SiteSettings>): Promi
     if (settings.faviconUrl !== undefined) dbSettings.favicon_url = settings.faviconUrl;
     if (settings.ourStoryHeading !== undefined) dbSettings.our_story_heading = settings.ourStoryHeading;
     if (settings.ourStoryText !== undefined) dbSettings.our_story_text = settings.ourStoryText;
-    if (settings.whyXelleHeading !== undefined) dbSettings.why_xelle_heading = settings.whyXelleHeading;
-    if (settings.whyXelleFeatures !== undefined) dbSettings.why_xelle_features = settings.whyXelleFeatures;
+    if (settings.whyZutaYaHeading !== undefined) dbSettings.why_xelle_heading = settings.whyZutaYaHeading;
+    if (settings.whyZutaYaFeatures !== undefined) dbSettings.why_xelle_features = settings.whyZutaYaFeatures;
     // Announcement bar
     if (settings.announcementBarEnabled !== undefined) dbSettings.announcement_bar_enabled = settings.announcementBarEnabled;
     if (settings.announcementBarText !== undefined) dbSettings.announcement_bar_text = settings.announcementBarText;
@@ -535,10 +591,15 @@ export async function updateSiteSettings(settings: Partial<SiteSettings>): Promi
     if (settings.businessPhone !== undefined) dbSettings.business_phone = settings.businessPhone;
     if (settings.businessWhatsapp !== undefined) dbSettings.business_whatsapp = settings.businessWhatsapp;
     if (settings.businessAddress !== undefined) dbSettings.business_address = settings.businessAddress;
+    // About page
+    if (settings.aboutPromiseText !== undefined) dbSettings.about_promise_text = settings.aboutPromiseText;
+    if (settings.aboutQuote !== undefined) dbSettings.about_quote = settings.aboutQuote;
+    if (settings.aboutStats !== undefined) dbSettings.about_stats = settings.aboutStats;
     // Footer
     if (settings.footerTagline !== undefined) dbSettings.footer_tagline = settings.footerTagline;
     // Shipping
     if (settings.freeShippingThreshold !== undefined) dbSettings.free_shipping_threshold = settings.freeShippingThreshold;
+    if (settings.customTexts !== undefined) dbSettings.custom_texts = settings.customTexts;
 
     // init if not exists, otherwise update
     const { error } = await supabase
@@ -1316,4 +1377,389 @@ export async function expireOldStockpiles(): Promise<number> {
 
     if (error) return 0;
     return data?.length || 0;
+}
+
+// ═══════════════════════════════════════
+// Bundle Rules Queries
+// ═══════════════════════════════════════
+
+function toBundleRule(row: any): BundleRule {
+    return {
+        id: row.id,
+        name: row.name,
+        description: row.description || undefined,
+        minItems: row.min_items,
+        maxItems: row.max_items,
+        discountPercent: Number(row.discount_percent),
+        allowedCategoryIds: row.allowed_category_ids || undefined,
+        isActive: row.is_active,
+        createdAt: row.created_at,
+    };
+}
+
+export async function getBundleRules(activeOnly = false): Promise<BundleRule[]> {
+    const supabase = getSupabaseClient();
+    if (!supabase) return [];
+
+    let query = supabase.from("bundle_rules").select("*").order("created_at", { ascending: false });
+    if (activeOnly) query = query.eq("is_active", true);
+
+    const { data, error } = await query;
+    if (error) return [];
+    return (data || []).map(toBundleRule);
+}
+
+export async function getBundleRuleById(id: string): Promise<BundleRule | null> {
+    const supabase = getSupabaseClient();
+    if (!supabase) return null;
+
+    const { data, error } = await supabase.from("bundle_rules").select("*").eq("id", id).single();
+    if (error || !data) return null;
+    return toBundleRule(data);
+}
+
+export async function createBundleRule(input: {
+    name: string;
+    description?: string;
+    minItems: number;
+    maxItems: number;
+    discountPercent: number;
+    allowedCategoryIds?: string[];
+    isActive?: boolean;
+}): Promise<string> {
+    const supabase = getSupabaseClient();
+    if (!supabase) throw new Error("Database not available");
+
+    const { data, error } = await supabase.from("bundle_rules").insert({
+        name: input.name,
+        description: input.description || null,
+        min_items: input.minItems,
+        max_items: input.maxItems,
+        discount_percent: input.discountPercent,
+        allowed_category_ids: input.allowedCategoryIds || null,
+        is_active: input.isActive ?? true,
+    }).select("id").single();
+
+    if (error) throw error;
+    return data.id;
+}
+
+export async function updateBundleRule(id: string, input: {
+    name?: string;
+    description?: string;
+    minItems?: number;
+    maxItems?: number;
+    discountPercent?: number;
+    allowedCategoryIds?: string[] | null;
+    isActive?: boolean;
+}): Promise<void> {
+    const supabase = getSupabaseClient();
+    if (!supabase) throw new Error("Database not available");
+
+    const db: any = {};
+    if (input.name !== undefined) db.name = input.name;
+    if (input.description !== undefined) db.description = input.description;
+    if (input.minItems !== undefined) db.min_items = input.minItems;
+    if (input.maxItems !== undefined) db.max_items = input.maxItems;
+    if (input.discountPercent !== undefined) db.discount_percent = input.discountPercent;
+    if (input.allowedCategoryIds !== undefined) db.allowed_category_ids = input.allowedCategoryIds;
+    if (input.isActive !== undefined) db.is_active = input.isActive;
+
+    const { error } = await supabase.from("bundle_rules").update(db).eq("id", id);
+    if (error) throw error;
+}
+
+export async function deleteBundleRule(id: string): Promise<void> {
+    const supabase = getSupabaseClient();
+    if (!supabase) throw new Error("Database not available");
+
+    const { error } = await supabase.from("bundle_rules").delete().eq("id", id);
+    if (error) throw error;
+}
+
+// ═══════════════════════════════════════
+// Subscription Queries
+// ═══════════════════════════════════════
+
+function toSubscription(row: any): Subscription {
+    return {
+        id: row.id,
+        customerEmail: row.customer_email,
+        customerName: row.customer_name,
+        phone: row.phone || undefined,
+        items: row.items || [],
+        frequency: row.frequency,
+        deliveryAddress: row.delivery_address || undefined,
+        deliveryZone: row.delivery_zone || undefined,
+        paymentMethod: row.payment_method || undefined,
+        status: row.status,
+        nextOrderDate: row.next_order_date,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+    };
+}
+
+export async function getSubscriptions(): Promise<Subscription[]> {
+    const supabase = getSupabaseClient();
+    if (!supabase) return [];
+
+    const { data, error } = await supabase
+        .from("subscriptions")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+    if (error) return [];
+    return (data || []).map(toSubscription);
+}
+
+export async function getSubscriptionById(id: string): Promise<Subscription | null> {
+    const supabase = getSupabaseClient();
+    if (!supabase) return null;
+
+    const { data, error } = await supabase.from("subscriptions").select("*").eq("id", id).single();
+    if (error || !data) return null;
+    return toSubscription(data);
+}
+
+export async function createSubscription(input: {
+    customerEmail: string;
+    customerName: string;
+    phone?: string;
+    items: Subscription["items"];
+    frequency: Subscription["frequency"];
+    deliveryAddress?: any;
+    deliveryZone?: string;
+    paymentMethod?: string;
+    nextOrderDate: string;
+}): Promise<string> {
+    const supabase = getSupabaseClient();
+    if (!supabase) throw new Error("Database not available");
+
+    const { data, error } = await supabase.from("subscriptions").insert({
+        customer_email: input.customerEmail,
+        customer_name: input.customerName,
+        phone: input.phone || null,
+        items: input.items,
+        frequency: input.frequency,
+        delivery_address: input.deliveryAddress || null,
+        delivery_zone: input.deliveryZone || null,
+        payment_method: input.paymentMethod || null,
+        next_order_date: input.nextOrderDate,
+    }).select("id").single();
+
+    if (error) throw error;
+    return data.id;
+}
+
+export async function updateSubscription(id: string, input: {
+    status?: Subscription["status"];
+    frequency?: Subscription["frequency"];
+    items?: Subscription["items"];
+    nextOrderDate?: string;
+}): Promise<void> {
+    const supabase = getSupabaseClient();
+    if (!supabase) throw new Error("Database not available");
+
+    const db: any = { updated_at: new Date().toISOString() };
+    if (input.status !== undefined) db.status = input.status;
+    if (input.frequency !== undefined) db.frequency = input.frequency;
+    if (input.items !== undefined) db.items = input.items;
+    if (input.nextOrderDate !== undefined) db.next_order_date = input.nextOrderDate;
+
+    const { error } = await supabase.from("subscriptions").update(db).eq("id", id);
+    if (error) throw error;
+}
+
+export async function getActiveSubscriptionsDueToday(): Promise<Subscription[]> {
+    const supabase = getSupabaseClient();
+    if (!supabase) return [];
+
+    const today = new Date().toISOString().slice(0, 10);
+    const { data, error } = await supabase
+        .from("subscriptions")
+        .select("*")
+        .eq("status", "active")
+        .eq("next_order_date", today);
+
+    if (error) return [];
+    return (data || []).map(toSubscription);
+}
+
+// ═══════════════════════════════════════
+// Newsletter Queries
+// ═══════════════════════════════════════
+
+function toNewsletterSubscriber(row: any): NewsletterSubscriber {
+    return {
+        id: row.id,
+        email: row.email,
+        firstName: row.first_name || undefined,
+        source: row.source,
+        token: row.token,
+        subscribedAt: row.subscribed_at,
+        unsubscribedAt: row.unsubscribed_at || null,
+    };
+}
+
+function toNewsletterCampaign(row: any): NewsletterCampaign {
+    return {
+        id: row.id,
+        subject: row.subject,
+        content: row.content,
+        status: row.status,
+        sentAt: row.sent_at || null,
+        recipientCount: row.recipient_count || 0,
+        createdAt: row.created_at,
+    };
+}
+
+export async function getNewsletterSubscribers(): Promise<NewsletterSubscriber[]> {
+    const supabase = getSupabaseClient();
+    if (!supabase) return [];
+
+    const { data, error } = await supabase
+        .from("newsletter_subscribers")
+        .select("*")
+        .order("subscribed_at", { ascending: false });
+
+    if (error) return [];
+    return (data || []).map(toNewsletterSubscriber);
+}
+
+export async function getActiveNewsletterSubscribers(): Promise<NewsletterSubscriber[]> {
+    const supabase = getSupabaseClient();
+    if (!supabase) return [];
+
+    const { data, error } = await supabase
+        .from("newsletter_subscribers")
+        .select("*")
+        .is("unsubscribed_at", null)
+        .order("subscribed_at", { ascending: false });
+
+    if (error) return [];
+    return (data || []).map(toNewsletterSubscriber);
+}
+
+export async function createNewsletterSubscriber(input: {
+    email: string;
+    firstName?: string;
+    source?: string;
+}): Promise<{ subscriber: NewsletterSubscriber | null; alreadyExists: boolean }> {
+    const supabase = getSupabaseClient();
+    if (!supabase) throw new Error("Database not available");
+
+    // Check for existing subscriber
+    const { data: existing } = await supabase
+        .from("newsletter_subscribers")
+        .select("*")
+        .eq("email", input.email.toLowerCase())
+        .maybeSingle();
+
+    if (existing) {
+        if (existing.unsubscribed_at) {
+            await supabase
+                .from("newsletter_subscribers")
+                .update({ unsubscribed_at: null, subscribed_at: new Date().toISOString() })
+                .eq("id", existing.id);
+            return { subscriber: toNewsletterSubscriber({ ...existing, unsubscribed_at: null }), alreadyExists: false };
+        }
+        return { subscriber: toNewsletterSubscriber(existing), alreadyExists: true };
+    }
+
+    const token = crypto.randomUUID();
+    const { data, error } = await supabase
+        .from("newsletter_subscribers")
+        .insert({
+            email: input.email.toLowerCase(),
+            first_name: input.firstName || null,
+            source: input.source || "footer",
+            token,
+        })
+        .select("*")
+        .single();
+
+    if (error) throw error;
+    return { subscriber: toNewsletterSubscriber(data), alreadyExists: false };
+}
+
+export async function unsubscribeNewsletter(token: string): Promise<boolean> {
+    const supabase = getSupabaseClient();
+    if (!supabase) return false;
+
+    const { data, error } = await supabase
+        .from("newsletter_subscribers")
+        .update({ unsubscribed_at: new Date().toISOString() })
+        .eq("token", token)
+        .is("unsubscribed_at", null)
+        .select("id");
+
+    if (error || !data?.length) return false;
+    return true;
+}
+
+export async function deleteNewsletterSubscriber(id: string): Promise<void> {
+    const supabase = getSupabaseClient();
+    if (!supabase) throw new Error("Database not available");
+
+    const { error } = await supabase.from("newsletter_subscribers").delete().eq("id", id);
+    if (error) throw error;
+}
+
+export async function getNewsletterCampaigns(): Promise<NewsletterCampaign[]> {
+    const supabase = getSupabaseClient();
+    if (!supabase) return [];
+
+    const { data, error } = await supabase
+        .from("newsletter_campaigns")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+    if (error) return [];
+    return (data || []).map(toNewsletterCampaign);
+}
+
+export async function createNewsletterCampaign(input: {
+    subject: string;
+    content: string;
+}): Promise<string> {
+    const supabase = getSupabaseClient();
+    if (!supabase) throw new Error("Database not available");
+
+    const { data, error } = await supabase.from("newsletter_campaigns").insert({
+        subject: input.subject,
+        content: input.content,
+        status: "draft",
+    }).select("id").single();
+
+    if (error) throw error;
+    return data.id;
+}
+
+export async function updateNewsletterCampaign(id: string, input: {
+    subject?: string;
+    content?: string;
+    status?: NewsletterCampaign["status"];
+    recipientCount?: number;
+    sentAt?: string;
+}): Promise<void> {
+    const supabase = getSupabaseClient();
+    if (!supabase) throw new Error("Database not available");
+
+    const db: any = {};
+    if (input.subject !== undefined) db.subject = input.subject;
+    if (input.content !== undefined) db.content = input.content;
+    if (input.status !== undefined) db.status = input.status;
+    if (input.recipientCount !== undefined) db.recipient_count = input.recipientCount;
+    if (input.sentAt !== undefined) db.sent_at = input.sentAt;
+
+    const { error } = await supabase.from("newsletter_campaigns").update(db).eq("id", id);
+    if (error) throw error;
+}
+
+export async function deleteNewsletterCampaign(id: string): Promise<void> {
+    const supabase = getSupabaseClient();
+    if (!supabase) throw new Error("Database not available");
+
+    const { error } = await supabase.from("newsletter_campaigns").delete().eq("id", id);
+    if (error) throw error;
 }

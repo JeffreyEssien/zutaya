@@ -52,10 +52,13 @@ BEGIN
     to_jsonb(v_current_stock - p_quantity)
   );
 
-  -- Update the product
+  -- Update the product (variants + recalculate total stock as sum of all variant stocks)
   UPDATE products
   SET variants = v_updated_variants,
-      updated_at = now()
+      stock = (
+        SELECT COALESCE(SUM((elem->>'stock')::int), 0)
+        FROM jsonb_array_elements(v_updated_variants) AS elem
+      )
   WHERE id = p_product_id;
 
   RETURN v_updated_variants;

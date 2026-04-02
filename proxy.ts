@@ -21,7 +21,8 @@ export function proxy(request: NextRequest) {
 
     // Check for admin session cookie
     const adminToken = request.cookies.get("admin_session")?.value;
-    const expectedToken = process.env.ADMIN_SESSION_SECRET || "xelle-admin-default-secret";
+    const expectedToken = process.env.ADMIN_SESSION_SECRET;
+    if (!expectedToken) throw new Error("ADMIN_SESSION_SECRET is not set");
 
     if (adminToken === expectedToken) {
         return NextResponse.next();

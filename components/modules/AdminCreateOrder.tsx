@@ -113,7 +113,7 @@ export default function AdminCreateOrder({ onClose, onSuccess }: AdminCreateOrde
                     description: "",
                     price: item.unitPrice,
                     category: "",
-                    brand: "XELLÉ",
+                    brand: "Zúta Ya",
                     stock: 999,
                     images: [],
                     variants: [],

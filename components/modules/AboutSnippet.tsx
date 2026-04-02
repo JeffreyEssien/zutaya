@@ -1,99 +1,291 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
 import { getSiteSettings } from "@/lib/queries";
 import type { SiteSettings } from "@/types";
+import { BUSINESS_PHONE, BUSINESS_HOURS, INSTAGRAM_HANDLE, WHATSAPP_NUMBER } from "@/lib/constants";
+import Link from "next/link";
+import {
+    Beef,
+    Thermometer,
+    Truck,
+    Award,
+    ShieldCheck,
+    Clock,
+    Phone,
+    Instagram,
+    ArrowRight,
+    MapPin,
+    MessageCircle,
+} from "lucide-react";
+
+const features = [
+    {
+        icon: Beef,
+        title: "Premium Sourcing",
+        desc: "Direct from trusted farms and certified suppliers across Nigeria.",
+        accent: "bg-red-50 text-red-600",
+    },
+    {
+        icon: Thermometer,
+        title: "Cold-Chain Integrity",
+        desc: "Temperature-controlled packaging from warehouse to your door.",
+        accent: "bg-blue-50 text-blue-600",
+    },
+    {
+        icon: Truck,
+        title: "Swift Delivery",
+        desc: "Same-day in Lagos, nationwide interstate shipping available.",
+        accent: "bg-green-50 text-green-600",
+    },
+    {
+        icon: ShieldCheck,
+        title: "Quality Guaranteed",
+        desc: "Every cut inspected. Not satisfied? We make it right.",
+        accent: "bg-purple-50 text-purple-600",
+    },
+];
+
+const defaultStats = [
+    { value: "500+", label: "Happy Customers" },
+    { value: "24hrs", label: "Max Delivery Time" },
+    { value: "100%", label: "Cold-Chain Packed" },
+    { value: "6", label: "Days a Week" },
+];
 
 export default function AboutSnippet() {
     const [settings, setSettings] = useState<SiteSettings | null>(null);
+    const sectionRef = useRef<HTMLElement>(null);
+
+    const { scrollYProgress } = useScroll({
+        target: sectionRef,
+        offset: ["start end", "end start"],
+    });
+    const parallaxY = useTransform(scrollYProgress, [0, 1], [40, -40]);
 
     useEffect(() => {
-        getSiteSettings().then(setSettings).catch(() => { });
+        getSiteSettings().then(setSettings).catch(() => {});
     }, []);
 
+    const stats: { value: string; label: string }[] = (() => {
+        if (settings?.aboutStats) {
+            try { return JSON.parse(settings.aboutStats); } catch { /* ignore */ }
+        }
+        return defaultStats;
+    })();
+
+    const promiseText = settings?.aboutPromiseText || "Every order is packed with care, kept cold, and delivered fresh. If it doesn\u2019t meet your standards, we\u2019ll make it right \u2014 no questions asked.";
+    const signatureQuote = settings?.aboutQuote || "More than meat delivery. It\u2019s freshness. It\u2019s trust. It\u2019s Z\u00fata Ya.";
+
     return (
-        <section id="about" className="py-24 md:py-32 px-6 relative overflow-hidden">
-            {/* Ambient glow */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-brand-lilac/[0.06] rounded-full blur-[120px] pointer-events-none" />
+        <section id="about" ref={sectionRef} className="relative overflow-hidden">
+            {/* ── Story Section ── */}
+            <div className="py-24 md:py-32 px-6 bg-warm-cream relative">
+                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-warm-tan/20 to-transparent" />
 
-            <div className="max-w-4xl mx-auto text-center relative z-10">
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-80px" }}
-                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                >
-                    {/* Header */}
-                    <div className="flex flex-col items-center mb-14">
-                        <p className="text-[11px] uppercase tracking-[0.3em] text-brand-purple mb-3 font-medium">Our Story</p>
-                        <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-brand-dark tracking-tight leading-tight max-w-2xl">
-                            {settings?.ourStoryHeading ? settings.ourStoryHeading : (
-                                <>The Comfort of <span className="text-gradient-luxury italic">Smart Living</span></>
-                            )}
-                        </h2>
-                        <motion.div
-                            initial={{ scaleX: 0 }}
-                            whileInView={{ scaleX: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: 0.3, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                            className="w-12 h-[1px] bg-brand-lilac/50 mt-8 origin-center"
-                        />
-                    </div>
+                <div className="max-w-6xl mx-auto">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+                        {/* Left — text */}
+                        <div>
+                            <motion.div
+                                initial={{ opacity: 0, y: 30 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true, margin: "-80px" }}
+                                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                            >
+                                <p className="text-[11px] uppercase tracking-[0.3em] text-brand-red mb-4 font-medium">Our Story</p>
+                                <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-brand-dark tracking-tight leading-[1.1] mb-8">
+                                    {settings?.ourStoryHeading || (
+                                        <>From the Market to <span className="text-gradient-luxury italic">Your Kitchen</span></>
+                                    )}
+                                </h2>
+                            </motion.div>
 
-                    {/* Paragraphs with stagger */}
-                    <div className="space-y-6 max-w-2xl mx-auto md:text-center text-left">
-                        {(settings?.ourStoryText ? settings.ourStoryText.split("\n\n") : [
-                            "XELLÉ was created from a simple idea: everyday living should feel elevated without being expensive or complicated.",
-                            "As a chronic online shopper, I was tired of buying from multiple stores and paying delivery fees over and over again. I wanted one space where you could find quality beauty products, chic accessories, home essentials, gadgets, and more — all carefully selected and reasonably priced.",
-                            "At XELLÉ, we focus on high-end finds at affordable prices and everyday essentials that make life easier. Convenience you can rely on. Quality you can trust. Pieces that help you feel put together without the stress.",
-                            "This is more than just a store.\nIt’s convenience.\nIt’s comfort.\nIt’s curated for everyday living."
-                        ]).map((paragraph, idx) => (
-                            <motion.p
-                                key={idx}
-                                initial={{ opacity: 0, y: 15 }}
+                            <div className="space-y-5 mb-10">
+                                {(settings?.ourStoryText ? settings.ourStoryText.split("\n\n") : [
+                                    "Zúta Ya was born from a simple belief: every home in Lagos deserves access to premium, fresh meat — delivered with care and cold-chain integrity.",
+                                    "We source the finest cuts directly from trusted suppliers. Every piece is inspected, properly stored, and delivered cold-chain packed to your door. From whole chickens to premium steaks, we bring the butcher shop experience to your kitchen.",
+                                ]).map((paragraph, idx) => (
+                                    <motion.p
+                                        key={idx}
+                                        initial={{ opacity: 0, y: 15 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        viewport={{ once: true }}
+                                        transition={{ delay: 0.1 * (idx + 1), duration: 0.6 }}
+                                        className="text-base md:text-lg text-brand-dark/50 leading-relaxed font-light"
+                                    >
+                                        {paragraph}
+                                    </motion.p>
+                                ))}
+                            </div>
+
+                            <motion.div
+                                initial={{ opacity: 0, y: 10 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
-                                transition={{ delay: 0.1 * (idx + 1), duration: 0.6 }}
-                                className={`text-base md:text-lg text-brand-dark/55 leading-relaxed ${idx === 3 && !settings?.ourStoryText ? 'font-medium mt-4' : 'font-light'} whitespace-pre-line`}
+                                transition={{ delay: 0.3, duration: 0.5 }}
                             >
-                                {paragraph}
-                            </motion.p>
+                                <Link
+                                    href="/shop"
+                                    className="inline-flex items-center gap-2 text-brand-red font-semibold text-sm hover:gap-3 transition-all group"
+                                >
+                                    Explore our products <ArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
+                                </Link>
+                            </motion.div>
+                        </div>
+
+                        {/* Right — stats + promise card */}
+                        <motion.div
+                            style={{ y: parallaxY }}
+                            className="space-y-6"
+                        >
+                            {/* Stats grid */}
+                            <div className="grid grid-cols-2 gap-4">
+                                {stats.map((stat, idx) => (
+                                    <motion.div
+                                        key={stat.label}
+                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        whileInView={{ opacity: 1, scale: 1 }}
+                                        viewport={{ once: true }}
+                                        transition={{ delay: idx * 0.08, duration: 0.5 }}
+                                        className="bg-white rounded-2xl p-6 border border-warm-tan/10 text-center hover:shadow-md hover:border-brand-red/10 transition-all duration-300"
+                                    >
+                                        <p className="font-serif text-3xl md:text-4xl font-bold text-brand-dark mb-1">{stat.value}</p>
+                                        <p className="text-xs uppercase tracking-widest text-muted-brown">{stat.label}</p>
+                                    </motion.div>
+                                ))}
+                            </div>
+
+                            {/* Promise card */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: 0.3, duration: 0.6 }}
+                                className="bg-deep-espresso rounded-2xl p-8 text-warm-cream relative overflow-hidden"
+                            >
+                                <div className="absolute top-0 right-0 w-40 h-40 bg-brand-red/10 rounded-full blur-[80px] pointer-events-none" />
+                                <Award size={28} strokeWidth={1.5} className="text-brand-red mb-4" />
+                                <h3 className="font-serif text-xl font-bold mb-2">Our Promise</h3>
+                                <p className="text-warm-cream/60 text-sm leading-relaxed">
+                                    {promiseText}
+                                </p>
+                            </motion.div>
+                        </motion.div>
+                    </div>
+                </div>
+            </div>
+
+            {/* ── Features Strip ── */}
+            <div className="bg-white py-20 md:py-24 px-6 border-t border-warm-tan/10">
+                <div className="max-w-6xl mx-auto">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6 }}
+                        className="text-center mb-14"
+                    >
+                        <p className="text-[11px] uppercase tracking-[0.3em] text-brand-red mb-3 font-medium">Why Choose Us</p>
+                        <h2 className="font-serif text-2xl md:text-3xl text-brand-dark">Built on Trust, Delivered with Care</h2>
+                    </motion.div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {features.map((feature, idx) => (
+                            <motion.div
+                                key={feature.title}
+                                initial={{ opacity: 0, y: 25 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: idx * 0.1, duration: 0.5 }}
+                                className="group relative rounded-2xl p-6 border border-warm-tan/10 hover:border-brand-red/15 hover:shadow-lg hover:shadow-brand-red/[0.04] transition-all duration-500"
+                            >
+                                <div className={`w-12 h-12 rounded-xl ${feature.accent.split(" ")[0]} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300`}>
+                                    <feature.icon size={22} strokeWidth={1.5} className={feature.accent.split(" ")[1]} />
+                                </div>
+                                <h3 className="font-serif text-lg text-brand-dark mb-2">{feature.title}</h3>
+                                <p className="text-sm text-brand-dark/45 leading-relaxed font-light">{feature.desc}</p>
+                            </motion.div>
                         ))}
                     </div>
+                </div>
+            </div>
 
-                    {/* WHY XELLE */}
-                    <div className="mt-20 border-t border-brand-lilac/15 pt-16 pb-4 text-left max-w-lg mx-auto">
-                        <motion.h3
-                            initial={{ opacity: 0, y: 10 }}
+            {/* ── Contact / CTA Strip ── */}
+            <div className="bg-warm-cream py-16 md:py-20 px-6 border-t border-warm-tan/10">
+                <div className="max-w-6xl mx-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {/* Contact info */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
-                            className="text-[13px] uppercase tracking-[0.25em] text-brand-dark mb-10 font-bold text-center"
+                            className="space-y-4"
                         >
-                            {settings?.whyXelleHeading || "Why XELLÉ?"}
-                        </motion.h3>
-                        <ul className="space-y-6">
-                            {(settings?.whyXelleFeatures ? settings.whyXelleFeatures.split("\n").filter(Boolean) : [
-                                "High-end brands at affordable prices",
-                                "Beauty, accessories, gadgets & home essentials in one place",
-                                "One cart. One delivery fee",
-                                "Curated for comfort and convenience"
-                            ]).map((feature, idx) => (
-                                <motion.li
-                                    key={idx}
-                                    initial={{ opacity: 0, x: -10 }}
-                                    whileInView={{ opacity: 1, x: 0 }}
-                                    viewport={{ once: true }}
-                                    transition={{ delay: 0.1 * idx, duration: 0.5 }}
-                                    className="flex items-start gap-4 text-brand-dark/70 text-base font-light"
+                            <h3 className="font-serif text-xl text-brand-dark font-bold">Get in Touch</h3>
+                            <div className="space-y-3">
+                                <a href={`tel:${BUSINESS_PHONE}`} className="flex items-center gap-3 text-sm text-brand-dark/60 hover:text-brand-red transition-colors">
+                                    <Phone size={16} /> {BUSINESS_PHONE}
+                                </a>
+                                <a
+                                    href={`https://wa.me/${WHATSAPP_NUMBER}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-3 text-sm text-brand-dark/60 hover:text-green-600 transition-colors"
                                 >
-                                    <span className="text-brand-purple flex-shrink-0 mt-0.5 font-bold">✔</span>
-                                    <span>{feature}</span>
-                                </motion.li>
-                            ))}
-                        </ul>
+                                    <MessageCircle size={16} /> Chat on WhatsApp
+                                </a>
+                                <a
+                                    href={`https://instagram.com/${INSTAGRAM_HANDLE.replace("@", "")}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-3 text-sm text-brand-dark/60 hover:text-pink-600 transition-colors"
+                                >
+                                    <Instagram size={16} /> {INSTAGRAM_HANDLE}
+                                </a>
+                            </div>
+                        </motion.div>
+
+                        {/* Hours */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.1 }}
+                            className="space-y-4"
+                        >
+                            <h3 className="font-serif text-xl text-brand-dark font-bold">Business Hours</h3>
+                            <div className="space-y-3">
+                                <div className="flex items-center gap-3 text-sm text-brand-dark/60">
+                                    <Clock size={16} /> {BUSINESS_HOURS}
+                                </div>
+                                <div className="flex items-center gap-3 text-sm text-brand-dark/60">
+                                    <MapPin size={16} /> Lagos, Nigeria
+                                </div>
+                            </div>
+                        </motion.div>
+
+                        {/* Quick CTA */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.2 }}
+                            className="flex flex-col justify-center"
+                        >
+                            <p className="font-serif text-xl md:text-2xl text-brand-dark/70 italic leading-relaxed mb-6">
+                                &ldquo;{signatureQuote}&rdquo;
+                            </p>
+                            <Link
+                                href="/shop"
+                                className="inline-flex items-center justify-center gap-2 bg-brand-red text-white px-6 py-3 rounded-xl font-semibold text-sm hover:bg-brand-red/90 transition-colors w-fit shadow-sm"
+                            >
+                                Start Shopping <ArrowRight size={16} />
+                            </Link>
+                        </motion.div>
                     </div>
-                </motion.div>
+                </div>
             </div>
         </section>
     );

@@ -4,18 +4,45 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getSiteSettings } from "@/lib/queries";
 import type { SiteSettings } from "@/types";
-import { SITE_NAME, SITE_EMAIL } from "@/lib/constants";
-import { Instagram, Twitter, Music2, Facebook, Mail, ArrowUpRight } from "lucide-react";
+import { SITE_NAME, SITE_EMAIL, WHATSAPP_NUMBER } from "@/lib/constants";
+import { Instagram, Twitter, Music2, Facebook, Mail, ArrowUpRight, MessageCircle, Check, Loader2 } from "lucide-react";
 
 export default function Footer() {
     const [settings, setSettings] = useState<SiteSettings | null>(null);
+    const [nlEmail, setNlEmail] = useState("");
+    const [nlStatus, setNlStatus] = useState<"idle" | "loading" | "success" | "error" | "exists">("idle");
 
     useEffect(() => {
         getSiteSettings().then(setSettings).catch(() => { });
     }, []);
 
+    const handleNewsletterSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!nlEmail || nlStatus === "loading") return;
+        setNlStatus("loading");
+        try {
+            const res = await fetch("/api/newsletter/subscribe", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: nlEmail, source: "footer" }),
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                setNlStatus("error");
+            } else if (data.alreadyExists) {
+                setNlStatus("exists");
+            } else {
+                setNlStatus("success");
+                setNlEmail("");
+            }
+        } catch {
+            setNlStatus("error");
+        }
+        setTimeout(() => setNlStatus("idle"), 4000);
+    };
+
     const displayName = settings?.siteName || SITE_NAME;
-    const tagline = settings?.footerTagline || "Curating smart finds for modern, everyday living.";
+    const tagline = settings?.footerTagline || "Premium meat delivery in Lagos. Fresh, chilled, and frozen cuts delivered to your door.";
 
     const socialLinks = [
         { icon: Instagram, url: settings?.socialInstagram, label: "Instagram" },
@@ -84,6 +111,17 @@ export default function Footer() {
                                     <span className="absolute top-0 left-0 inline-block translate-y-full transition-transform duration-[400ms] group-hover:translate-y-0 text-brand-purple">{SITE_EMAIL}</span>
                                 </span>
                             </a>
+                            <a
+                                href={`https://wa.me/${WHATSAPP_NUMBER}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-3 text-sm text-brand-dark/70 hover:text-[#25D366] transition-all duration-300 font-light group"
+                            >
+                                <span className="p-2.5 rounded-full border border-brand-dark/10 group-hover:border-[#25D366]/30 group-hover:bg-[#25D366]/5 transition-all duration-300">
+                                    <MessageCircle size={14} strokeWidth={1.5} className="group-hover:text-[#25D366] text-brand-dark/50 transition-colors" />
+                                </span>
+                                <span>WhatsApp Us</span>
+                            </a>
                             {settings?.businessPhone && (
                                 <p className="text-sm text-brand-dark/60 font-light pl-[46px]">{settings.businessPhone}</p>
                             )}
@@ -98,16 +136,35 @@ export default function Footer() {
                         <h4 className="text-[10px] font-semibold text-brand-dark/40 uppercase tracking-[0.25em] mb-8">
                             Newsletter
                         </h4>
-                        <div className="relative group/input mb-12">
+                        <form onSubmit={handleNewsletterSubmit} className="relative group/input mb-12">
                             <input
                                 type="email"
-                                placeholder="Subscribe for updates"
-                                className="w-full bg-transparent border-b border-brand-dark/15 pb-4 text-sm text-brand-dark placeholder:text-brand-dark/30 focus:outline-none focus:border-brand-purple transition-colors font-light"
+                                value={nlEmail}
+                                onChange={(e) => setNlEmail(e.target.value)}
+                                placeholder={
+                                    nlStatus === "success" ? "You're subscribed!"
+                                        : nlStatus === "exists" ? "Already subscribed"
+                                            : nlStatus === "error" ? "Try again"
+                                                : "Subscribe for updates"
+                                }
+                                disabled={nlStatus === "loading"}
+                                className="w-full bg-transparent border-b border-brand-dark/15 pb-4 text-sm text-brand-dark placeholder:text-brand-dark/30 focus:outline-none focus:border-brand-purple transition-colors font-light disabled:opacity-50"
                             />
-                            <button aria-label="Subscribe" className="absolute right-0 top-1 text-brand-dark/40 group-hover/input:text-brand-purple transition-colors">
-                                <ArrowUpRight size={18} strokeWidth={1.5} className="group-hover/input:translate-x-1 group-hover/input:-translate-y-1 transition-transform duration-300" />
+                            <button
+                                type="submit"
+                                disabled={nlStatus === "loading" || !nlEmail}
+                                aria-label="Subscribe"
+                                className="absolute right-0 top-1 text-brand-dark/40 group-hover/input:text-brand-purple transition-colors disabled:opacity-30"
+                            >
+                                {nlStatus === "loading" ? (
+                                    <Loader2 size={18} strokeWidth={1.5} className="animate-spin" />
+                                ) : nlStatus === "success" ? (
+                                    <Check size={18} strokeWidth={2} className="text-brand-green" />
+                                ) : (
+                                    <ArrowUpRight size={18} strokeWidth={1.5} className="group-hover/input:translate-x-1 group-hover/input:-translate-y-1 transition-transform duration-300" />
+                                )}
                             </button>
-                        </div>
+                        </form>
 
                         {socialLinks.length > 0 && (
                             <div>

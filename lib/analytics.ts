@@ -252,7 +252,7 @@ export function calculateAnalytics(
 
 
     // --- 6. Operations ---
-    const fulfilled = orders.filter(o => o.status === 'shipped' || o.status === 'delivered').length;
+    const fulfilled = orders.filter(o => o.status === 'out_for_delivery' || o.status === 'delivered').length;
     const fulfillmentRate = orders.length > 0 ? (fulfilled / orders.length) * 100 : 0;
     const backlog = orders.filter(o => o.status === 'pending').length;
     const recentActivityCount = inventoryLogs.filter(l => new Date(l.createdAt).getTime() > (now.getTime() - oneDay)).length;
@@ -308,7 +308,7 @@ export function calculateAnalytics(
 
     // --- 10. Conversion Funnel (NEW) ---
     const pendingCount = orders.filter(o => o.status === 'pending').length;
-    const shippedCount = orders.filter(o => o.status === 'shipped').length;
+    const shippedCount = orders.filter(o => o.status === 'out_for_delivery' || o.status === 'packed').length;
     const deliveredCount = orders.filter(o => o.status === 'delivered').length;
     const totalOrders = orders.length;
     const pendingToShippedRate = totalOrders > 0 ? ((shippedCount + deliveredCount) / totalOrders) * 100 : 0;

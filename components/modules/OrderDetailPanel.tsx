@@ -9,7 +9,9 @@ import Button from "@/components/ui/Button";
 
 const statusVariant: Record<Order["status"], "warning" | "info" | "success"> = {
     pending: "warning",
-    shipped: "info",
+    processing: "info",
+    packed: "info",
+    out_for_delivery: "info",
     delivered: "success",
 };
 
@@ -75,15 +77,17 @@ export default function OrderDetailPanel({ order, onClose, onUpdate }: OrderDeta
 
     const messageCustomer = () => {
         openWhatsApp(
-            `Hi ${order.customerName.split(" ")[0]}! 👋\n\nRegarding your XELLÉ order *${order.id}*, `
+            `Hi ${order.customerName.split(" ")[0]}! 👋\n\nRegarding your Zúta Ya order *${order.id}*, `
         );
     };
 
     const sendWhatsAppStatusUpdate = (status: string) => {
         const messages: Record<string, string> = {
-            shipped: `Hi ${order.customerName.split(" ")[0]}! 📦\n\nGreat news! Your order *${order.id}* has been shipped and is on its way to you.\n\n*Order Total:* ₦${order.total.toLocaleString()}\n*Shipping To:* ${order.shippingAddress.address}, ${order.shippingAddress.city}\n\nWe'll let you know once it's delivered. Thank you for shopping with XELLÉ! 💜`,
-            delivered: `Hi ${order.customerName.split(" ")[0]}! 🎉\n\nYour order *${order.id}* has been delivered!\n\nWe hope you love your new items. If you have any questions, feel free to reach out.\n\nThank you for shopping with XELLÉ! 💜`,
-            payment_confirmed: `Hi ${order.customerName.split(" ")[0]}! ✅\n\nYour payment for order *${order.id}* (₦${order.total.toLocaleString()}) has been *confirmed*!\n\nWe're now preparing your order for shipment. We'll notify you once it ships.\n\nThank you for shopping with XELLÉ! 💜`,
+            processing: `Hi ${order.customerName.split(" ")[0]}! ✅\n\nYour payment for order *${order.id}* (₦${order.total.toLocaleString()}) has been *confirmed*!\n\nWe're now preparing your order. We'll notify you once it's packed.\n\nThank you for choosing Zúta Ya!`,
+            packed: `Hi ${order.customerName.split(" ")[0]}! 📦\n\nGreat news! Your order *${order.id}* has been packed and is ready for delivery.\n\n*Order Total:* ₦${order.total.toLocaleString()}\n*Delivering To:* ${order.shippingAddress.address}, ${order.shippingAddress.city}\n\nWe'll let you know once it's out for delivery. Thank you for choosing Zúta Ya!`,
+            out_for_delivery: `Hi ${order.customerName.split(" ")[0]}! 🚚\n\nYour order *${order.id}* is out for delivery!\n\n*Delivering To:* ${order.shippingAddress.address}, ${order.shippingAddress.city}\n\nPlease ensure someone is available to receive the package. Thank you for choosing Zúta Ya!`,
+            delivered: `Hi ${order.customerName.split(" ")[0]}! 🎉\n\nYour order *${order.id}* has been delivered!\n\nWe hope you enjoy your fresh cuts. If you have any questions, feel free to reach out.\n\nThank you for choosing Zúta Ya!`,
+            payment_confirmed: `Hi ${order.customerName.split(" ")[0]}! ✅\n\nYour payment for order *${order.id}* (₦${order.total.toLocaleString()}) has been *confirmed*!\n\nWe're now preparing your order. We'll notify you once it's packed.\n\nThank you for choosing Zúta Ya!`,
         };
         openWhatsApp(messages[status] || `Hi! Regarding your order ${order.id}...`);
     };
@@ -120,13 +124,31 @@ export default function OrderDetailPanel({ order, onClose, onUpdate }: OrderDeta
                             {order.status === "pending" && (
                                 <Button
                                     size="sm"
-                                    onClick={() => handleStatusUpdate("shipped")}
+                                    onClick={() => handleStatusUpdate("processing")}
                                     disabled={isUpdatingStatus}
                                 >
-                                    Mark Shipped
+                                    Mark Processing
                                 </Button>
                             )}
-                            {order.status === "shipped" && (
+                            {order.status === "processing" && (
+                                <Button
+                                    size="sm"
+                                    onClick={() => handleStatusUpdate("packed")}
+                                    disabled={isUpdatingStatus}
+                                >
+                                    Mark Packed
+                                </Button>
+                            )}
+                            {order.status === "packed" && (
+                                <Button
+                                    size="sm"
+                                    onClick={() => handleStatusUpdate("out_for_delivery")}
+                                    disabled={isUpdatingStatus}
+                                >
+                                    Mark Out for Delivery
+                                </Button>
+                            )}
+                            {order.status === "out_for_delivery" && (
                                 <Button
                                     size="sm"
                                     onClick={() => handleStatusUpdate("delivered")}
@@ -156,7 +178,7 @@ export default function OrderDetailPanel({ order, onClose, onUpdate }: OrderDeta
                         </div>
 
                         {/* WhatsApp Status Notifications */}
-                        {(order.status === "shipped" || order.status === "delivered" || order.paymentStatus === "payment_confirmed") && (
+                        {(order.status !== "pending" || order.paymentStatus === "payment_confirmed") && (
                             <div className="space-y-2">
                                 <p className="text-[10px] font-semibold text-brand-dark/40 uppercase tracking-wider">WhatsApp Notifications</p>
                                 <div className="flex flex-wrap gap-2">
@@ -168,12 +190,20 @@ export default function OrderDetailPanel({ order, onClose, onUpdate }: OrderDeta
                                             ✅ Send Payment Confirmed
                                         </button>
                                     )}
-                                    {order.status === "shipped" && (
+                                    {order.status === "packed" && (
                                         <button
-                                            onClick={() => sendWhatsAppStatusUpdate("shipped")}
+                                            onClick={() => sendWhatsAppStatusUpdate("packed")}
                                             className="text-xs px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 transition-colors cursor-pointer"
                                         >
-                                            📦 Send Shipped Update
+                                            📦 Send Packed Update
+                                        </button>
+                                    )}
+                                    {order.status === "out_for_delivery" && (
+                                        <button
+                                            onClick={() => sendWhatsAppStatusUpdate("out_for_delivery")}
+                                            className="text-xs px-3 py-1.5 rounded-full bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 transition-colors cursor-pointer"
+                                        >
+                                            🚚 Send Out for Delivery Update
                                         </button>
                                     )}
                                     {order.status === "delivered" && (

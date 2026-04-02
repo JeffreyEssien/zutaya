@@ -16,6 +16,17 @@ export interface InventoryItem {
     supplier?: string;
     createdAt: string;
     updatedAt: string;
+    // Meat commerce fields
+    stockUnit?: string;
+    batchNumber?: string;
+    expiryDate?: string;
+    storageType?: "fresh" | "chilled" | "frozen";
+}
+
+export interface PrepOption {
+    id: string;
+    label: string;
+    extraFee: number;
 }
 
 export interface Product {
@@ -26,12 +37,20 @@ export interface Product {
     price: number;
     category: string;
     brand: string;
-    inventoryId?: string; // Optional during migration
-    stock: number; // Mapped from InventoryItem in queries
+    inventoryId?: string;
+    stock: number;
     images: string[];
     variants: ProductVariant[];
     isFeatured: boolean;
     isNew: boolean;
+    // Meat commerce fields
+    categoryId?: string;
+    priceUnit?: "per_kg" | "per_pack" | "per_piece" | "whole";
+    cutType?: string | null;
+    storageType?: "fresh" | "chilled" | "frozen";
+    prepOptions?: PrepOption[];
+    minWeightKg?: number | null;
+    relatedRecipeIds?: string[];
 }
 
 export interface Category {
@@ -46,6 +65,19 @@ export interface CartItem {
     product: Product;
     variant?: ProductVariant;
     quantity: number;
+    selectedPrepOptions?: PrepOption[];
+}
+
+export interface Recipe {
+    id: string;
+    title: string;
+    slug: string;
+    content: any;
+    coverImage?: string;
+    ingredientProductIds: string[];
+    isPublished: boolean;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface ShippingAddress {
@@ -69,7 +101,7 @@ export interface Order {
     total: number;
     subtotal: number;
     shipping: number;
-    status: "pending" | "shipped" | "delivered";
+    status: "pending" | "processing" | "packed" | "out_for_delivery" | "delivered";
     createdAt: string;
     shippingAddress: ShippingAddress;
     notes?: string;
@@ -82,6 +114,14 @@ export interface Order {
     deliveryZone?: string;
     deliveryType?: "doorstep" | "hub_pickup";
     deliveryDiscount?: { percent: number; label: string | null };
+    deliveryFee?: number;
+    // Meat commerce fields
+    packagingFee?: number;
+    prepFee?: number;
+    prepInstructions?: string;
+    requestedDeliveryDate?: string;
+    requestedDeliverySlot?: "morning" | "afternoon" | "evening";
+    subscriptionId?: string;
 }
 
 export interface SiteSettings {
@@ -97,8 +137,8 @@ export interface SiteSettings {
     faviconUrl?: string;
     ourStoryHeading?: string;
     ourStoryText?: string;
-    whyXelleHeading?: string;
-    whyXelleFeatures?: string;
+    whyZutaYaHeading?: string;
+    whyZutaYaFeatures?: string;
     // Announcement bar
     announcementBarEnabled?: boolean;
     announcementBarText?: string;
@@ -112,10 +152,16 @@ export interface SiteSettings {
     businessPhone?: string;
     businessWhatsapp?: string;
     businessAddress?: string;
+    // About page
+    aboutPromiseText?: string;
+    aboutQuote?: string;
+    aboutStats?: string;
     // Footer
     footerTagline?: string;
     // Shipping
     freeShippingThreshold?: number;
+    // All editable texts as JSON
+    customTexts?: Record<string, string>;
 }
 
 export interface Coupon {
@@ -165,6 +211,61 @@ export interface InventoryLog {
     productName?: string;
     changeAmount: number;
     reason: string;
+    createdAt: string;
+}
+
+export interface BundleRule {
+    id: string;
+    name: string;
+    description?: string;
+    minItems: number;
+    maxItems: number;
+    discountPercent: number;
+    allowedCategoryIds?: string[];
+    isActive: boolean;
+    createdAt: string;
+}
+
+export interface Subscription {
+    id: string;
+    customerEmail: string;
+    customerName: string;
+    phone?: string;
+    items: SubscriptionItem[];
+    frequency: "weekly" | "biweekly" | "monthly";
+    deliveryAddress?: ShippingAddress;
+    deliveryZone?: string;
+    paymentMethod?: string;
+    status: "active" | "paused" | "cancelled";
+    nextOrderDate: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface SubscriptionItem {
+    productId: string;
+    productName: string;
+    quantity: number;
+    price: number;
+}
+
+export interface NewsletterSubscriber {
+    id: string;
+    email: string;
+    firstName?: string;
+    source: string;
+    token: string;
+    subscribedAt: string;
+    unsubscribedAt?: string | null;
+}
+
+export interface NewsletterCampaign {
+    id: string;
+    subject: string;
+    content: string;
+    status: "draft" | "sending" | "sent";
+    sentAt?: string | null;
+    recipientCount: number;
     createdAt: string;
 }
 

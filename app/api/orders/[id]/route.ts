@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { updateOrderStatus, updatePaymentInfo, getOrderById } from "@/lib/queries";
-import { sendOrderShippedEmail, sendOrderDeliveredEmail, sendPaymentApprovedEmail, sendReviewRequestEmail } from "@/lib/email";
+import { sendOrderDeliveredEmail, sendPaymentApprovedEmail, sendReviewRequestEmail } from "@/lib/email";
 import type { Order } from "@/types";
 
 export async function PUT(
@@ -29,13 +29,11 @@ export async function PUT(
         // Send status email to customer
         const order = await getOrderById(id);
         if (order) {
-            if (status === "shipped") {
-                await sendOrderShippedEmail(order);
-            } else if (status === "delivered") {
+            if (status === "delivered") {
                 await sendOrderDeliveredEmail(order);
-                // Send review request email a bit later conceptually, but trigger it now
                 await sendReviewRequestEmail(order);
             }
+            // TODO: Add sendOrderPackedEmail and sendOutForDeliveryEmail when implemented
         }
 
         return NextResponse.json({ success: true });

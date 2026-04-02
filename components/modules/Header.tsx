@@ -344,7 +344,7 @@ export default function Header() {
                                 className="mt-8 pt-6 border-t border-brand-lilac/15"
                             >
                                 <p className="text-xs text-brand-dark/30 uppercase tracking-[0.25em]">
-                                    {displayName} — Luxury Redefined
+                                    {displayName} — Premium Meat Delivery
                                 </p>
                             </motion.div>
                         </motion.div>

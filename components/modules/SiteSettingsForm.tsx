@@ -8,13 +8,14 @@ import Button from "@/components/ui/Button";
 import { toast } from "sonner";
 import {
     Megaphone, Globe, Phone, MessageCircle, MapPin, Type,
-    Instagram, Twitter, Music2, Facebook
+    Instagram, Twitter, Music2, Facebook, BookOpen, Plus, Trash2
 } from "lucide-react";
 
 export default function SiteSettingsForm() {
     const [settings, setSettings] = useState<Partial<SiteSettings>>({});
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [aboutStats, setAboutStats] = useState<{ value: string; label: string }[]>([]);
 
     useEffect(() => {
         loadSettings();
@@ -23,7 +24,20 @@ export default function SiteSettingsForm() {
     const loadSettings = async () => {
         try {
             const data = await getSiteSettings();
-            if (data) setSettings(data);
+            if (data) {
+                setSettings(data);
+                if (data.aboutStats) {
+                    try { setAboutStats(JSON.parse(data.aboutStats)); } catch { /* ignore */ }
+                }
+                if (!data.aboutStats) {
+                    setAboutStats([
+                        { value: "500+", label: "Happy Customers" },
+                        { value: "24hrs", label: "Max Delivery Time" },
+                        { value: "100%", label: "Cold-Chain Packed" },
+                        { value: "6", label: "Days a Week" },
+                    ]);
+                }
+            }
         } catch (error) {
             console.error("Failed to load settings", error);
             toast.error("Failed to load settings");
@@ -45,7 +59,8 @@ export default function SiteSettingsForm() {
         e.preventDefault();
         setSaving(true);
         try {
-            await updateSiteSettings(settings);
+            const payload = { ...settings, aboutStats: JSON.stringify(aboutStats) };
+            await updateSiteSettings(payload);
             toast.success("Settings saved successfully.");
         } catch {
             toast.error("Failed to save settings.");
@@ -139,10 +154,10 @@ export default function SiteSettingsForm() {
                 </div>
             </SettingsSection>
 
-            {/* --- Our Story & Why XELLE --- */}
+            {/* --- Our Story & Why Zúta Ya --- */}
             <SettingsSection title="Our Story & Features" icon={Type}>
                 <Field label="Our Story Heading">
-                    <input type="text" name="ourStoryHeading" value={settings.ourStoryHeading || ""} onChange={handleChange} className="form-input" placeholder="The Comfort of Smart Living" />
+                    <input type="text" name="ourStoryHeading" value={settings.ourStoryHeading || ""} onChange={handleChange} className="form-input" placeholder="Premium Meat, Delivered Fresh" />
                 </Field>
                 <Field label="Our Story Text (Separate paragraphs with double newlines)">
                     <textarea
@@ -150,22 +165,94 @@ export default function SiteSettingsForm() {
                         value={settings.ourStoryText || ""}
                         onChange={handleChange}
                         className="form-input min-h-[160px] resize-y"
-                        placeholder="XELLÉ was created from a simple idea...\n\nAs a chronic online shopper..."
+                        placeholder="Zúta Ya was born from a simple belief...\n\nWe source the finest cuts..."
                     />
                 </Field>
                 <div className="pt-4 border-t border-brand-lilac/15 mt-4">
-                    <Field label="Why XELLÉ Heading">
-                        <input type="text" name="whyXelleHeading" value={settings.whyXelleHeading || ""} onChange={handleChange} className="form-input" placeholder="Why XELLÉ?" />
+                    <Field label="Why Zúta Ya Heading">
+                        <input type="text" name="whyZutaYaHeading" value={settings.whyZutaYaHeading || ""} onChange={handleChange} className="form-input" placeholder="Why Zúta Ya?" />
                     </Field>
-                    <Field label="Why XELLÉ Features (One feature per line)">
+                    <Field label="Why Zúta Ya Features (One feature per line)">
                         <textarea
-                            name="whyXelleFeatures"
-                            value={settings.whyXelleFeatures || ""}
+                            name="whyZutaYaFeatures"
+                            value={settings.whyZutaYaFeatures || ""}
                             onChange={handleChange}
                             className="form-input min-h-[120px] resize-y"
-                            placeholder="High-end brands at affordable prices\nBeauty, accessories, gadgets & home essentials in one place"
+                            placeholder="Fresh daily from trusted suppliers\nCold-chain packed for guaranteed freshness"
                         />
                     </Field>
+                </div>
+            </SettingsSection>
+
+            {/* --- About Page --- */}
+            <SettingsSection title="About Page" icon={BookOpen}>
+                <Field label="Promise Card Text">
+                    <textarea
+                        name="aboutPromiseText"
+                        value={settings.aboutPromiseText || ""}
+                        onChange={handleChange}
+                        className="form-input min-h-[100px] resize-y"
+                        placeholder="Every order is packed with care, kept cold, and delivered fresh..."
+                    />
+                </Field>
+                <Field label="Signature Quote">
+                    <input
+                        type="text"
+                        name="aboutQuote"
+                        value={settings.aboutQuote || ""}
+                        onChange={handleChange}
+                        className="form-input"
+                        placeholder="More than meat delivery. It's freshness. It's trust. It's Zúta Ya."
+                    />
+                </Field>
+                <div className="pt-4 border-t border-brand-lilac/15 mt-4">
+                    <div className="flex items-center justify-between mb-3">
+                        <label className="text-sm font-medium text-brand-dark/70">Stats (shown on About section)</label>
+                        {aboutStats.length < 6 && (
+                            <button
+                                type="button"
+                                onClick={() => setAboutStats((prev) => [...prev, { value: "", label: "" }])}
+                                className="inline-flex items-center gap-1 text-xs text-brand-purple hover:text-brand-purple/80 font-medium"
+                            >
+                                <Plus size={14} /> Add Stat
+                            </button>
+                        )}
+                    </div>
+                    <div className="space-y-3">
+                        {aboutStats.map((stat, idx) => (
+                            <div key={idx} className="flex items-center gap-2">
+                                <input
+                                    type="text"
+                                    value={stat.value}
+                                    onChange={(e) => {
+                                        const next = [...aboutStats];
+                                        next[idx] = { ...next[idx], value: e.target.value };
+                                        setAboutStats(next);
+                                    }}
+                                    className="form-input w-28 flex-shrink-0"
+                                    placeholder="500+"
+                                />
+                                <input
+                                    type="text"
+                                    value={stat.label}
+                                    onChange={(e) => {
+                                        const next = [...aboutStats];
+                                        next[idx] = { ...next[idx], label: e.target.value };
+                                        setAboutStats(next);
+                                    }}
+                                    className="form-input flex-1"
+                                    placeholder="Happy Customers"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setAboutStats((prev) => prev.filter((_, i) => i !== idx))}
+                                    className="text-red-400 hover:text-red-600 p-1"
+                                >
+                                    <Trash2 size={14} />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </SettingsSection>
 

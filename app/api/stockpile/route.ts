@@ -10,6 +10,7 @@ import {
     getAllStockpiles,
     expireOldStockpiles,
 } from "@/lib/queries";
+import { getSupabaseClient } from "@/lib/supabase";
 import {
     sendStockpileCreatedEmail,
     sendStockpileItemAddedEmail,
@@ -81,6 +82,32 @@ export async function POST(request: Request) {
                 return NextResponse.json(stockpile);
             }
             case "add_item": {
+                const supabase = getSupabaseClient();
+                if (!supabase) throw new Error("Database not available");
+
+                // Deduct stock when adding to stockpile (same as order placement)
+                if (body.variantName) {
+                    const { error: rpcError } = await supabase.rpc("deduct_variant_stock", {
+                        p_product_id: body.productId,
+                        p_variant_name: body.variantName,
+                        p_quantity: body.quantity,
+                    });
+                    if (rpcError) {
+                        throw new Error(rpcError.message || `Insufficient stock for ${body.productName} - ${body.variantName}`);
+                    }
+                } else {
+                    // Try to deduct from main inventory if product has inventoryId
+                    if (body.inventoryId) {
+                        const { error: rpcError } = await supabase.rpc("deduct_stock", {
+                            p_inventory_id: body.inventoryId,
+                            p_quantity: body.quantity,
+                        });
+                        if (rpcError) {
+                            throw new Error(rpcError.message || `Insufficient stock for ${body.productName}`);
+                        }
+                    }
+                }
+
                 await addStockpileItem({
                     stockpileId: body.stockpileId,
                     productId: body.productId,
@@ -106,6 +133,47 @@ export async function POST(request: Request) {
                 return NextResponse.json({ success: true });
             }
             case "remove_item": {
+                // Restore stock when removing from stockpile
+                const supabaseForRemove = getSupabaseClient();
+                if (supabaseForRemove && body.productId && body.quantity) {
+                    try {
+                        if (body.variantName) {
+                            // Restore variant stock: fetch current, then add back
+                            const { data: prod } = await supabaseForRemove
+                                .from("products")
+                                .select("variants")
+                                .eq("id", body.productId)
+                                .single();
+                            if (prod?.variants) {
+                                const variants = prod.variants as any[];
+                                const idx = variants.findIndex((v: any) => v.name === body.variantName);
+                                if (idx >= 0) {
+                                    variants[idx].stock = (variants[idx].stock || 0) + body.quantity;
+                                    const totalStock = variants.reduce((sum: number, v: any) => sum + (v.stock || 0), 0);
+                                    await supabaseForRemove
+                                        .from("products")
+                                        .update({ variants, stock: totalStock })
+                                        .eq("id", body.productId);
+                                }
+                            }
+                        } else if (body.inventoryId) {
+                            // Restore main inventory stock
+                            const { data: inv } = await supabaseForRemove
+                                .from("inventory_items")
+                                .select("stock")
+                                .eq("id", body.inventoryId)
+                                .single();
+                            if (inv) {
+                                await supabaseForRemove
+                                    .from("inventory_items")
+                                    .update({ stock: inv.stock + body.quantity })
+                                    .eq("id", body.inventoryId);
+                            }
+                        }
+                    } catch (e) {
+                        console.warn("Stock restore on stockpile remove failed:", e);
+                    }
+                }
                 await removeStockpileItem(body.itemId, body.stockpileId);
                 return NextResponse.json({ success: true });
             }

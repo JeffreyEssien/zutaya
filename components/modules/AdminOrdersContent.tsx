@@ -12,11 +12,13 @@ import { Plus } from "lucide-react";
 
 const statusVariant: Record<Order["status"], "warning" | "info" | "success"> = {
     pending: "warning",
-    shipped: "info",
+    processing: "info",
+    packed: "info",
+    out_for_delivery: "info",
     delivered: "success",
 };
 
-const statusOptions: Order["status"][] = ["pending", "shipped", "delivered"];
+const statusOptions: Order["status"][] = ["pending", "processing", "packed", "out_for_delivery", "delivered"];
 
 interface AdminOrdersContentProps {
     initialOrders: Order[];
