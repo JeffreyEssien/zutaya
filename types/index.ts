@@ -269,32 +269,3 @@ export interface NewsletterCampaign {
     createdAt: string;
 }
 
-export interface Stockpile {
-    id: string;
-    customerEmail: string;
-    customerName: string;
-    phone?: string;
-    status: "active" | "shipped" | "expired" | "cancelled";
-    shippingAddress?: ShippingAddress;
-    deliveryZone?: string;
-    deliveryType?: string;
-    deliveryFee: number;
-    totalItemsValue: number;
-    createdAt: string;
-    expiresAt: string;
-    shippedAt?: string;
-    items: StockpileItem[];
-}
-
-export interface StockpileItem {
-    id: string;
-    stockpileId: string;
-    productId: string;
-    productName: string;
-    productImage?: string;
-    variantName?: string;
-    quantity: number;
-    pricePaid: number;
-    orderId?: string;
-    createdAt: string;
-}

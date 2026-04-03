@@ -20,7 +20,7 @@ import {
 // ═══════════════════════════════════════════════════════════════════
 //  TYPES
 // ═══════════════════════════════════════════════════════════════════
-type Tab = "lagos" | "interstate" | "discounts";
+type Tab = "lagos" | "discounts";
 
 interface Props { initialZones: DeliveryZoneWithLocations[]; }
 
@@ -41,11 +41,10 @@ export default function DeliveryManagement({ initialZones }: Props) {
 
     // ── Derived ──
     const lagosZones = useMemo(() => zones.filter(z => z.zone_type === "lagos"), [zones]);
-    const interstateZones = useMemo(() => zones.filter(z => z.zone_type === "interstate"), [zones]);
     const totalLocations = zones.reduce((s, z) => s + z.locations.length, 0);
     const activeDiscounts = zones.filter(z => z.discount_percent > 0);
 
-    const currentZones = tab === "lagos" ? lagosZones : tab === "interstate" ? interstateZones : zones;
+    const currentZones = tab === "lagos" ? lagosZones : zones;
     const filteredZones = currentZones.filter(z => {
         if (!search) return true;
         const q = search.toLowerCase();
@@ -118,7 +117,6 @@ export default function DeliveryManagement({ initialZones }: Props) {
                     </h1>
                     <div className="flex flex-wrap gap-5 mt-3">
                         <MetricCard label="Lagos Zones" value={lagosZones.length} icon={<MapPin size={14} />} />
-                        <MetricCard label="Interstate" value={interstateZones.length} icon={<Package size={14} />} />
                         <MetricCard label="Total Locations" value={totalLocations} icon={<Building2 size={14} />} />
                         <MetricCard label="Active Discounts" value={activeDiscounts.length} icon={<Tag size={14} />} highlight={activeDiscounts.length > 0} />
                     </div>
@@ -133,7 +131,6 @@ export default function DeliveryManagement({ initialZones }: Props) {
                 <div className="flex gap-1 bg-brand-lilac/10 p-1 rounded-lg">
                     {([
                         { key: "lagos" as Tab, label: "Lagos Zones", icon: <MapPin size={13} /> },
-                        { key: "interstate" as Tab, label: "Interstate", icon: <Package size={13} /> },
                         { key: "discounts" as Tab, label: "Discounts", icon: <Tag size={13} /> },
                     ]).map(t => (
                         <button
@@ -180,24 +177,15 @@ export default function DeliveryManagement({ initialZones }: Props) {
                 <div className="space-y-3">
                     {filteredZones.map(zone => {
                         const isExpanded = expandedZone === zone.id;
-                        const isLagos = zone.zone_type === "lagos";
                         const activeLocs = zone.locations.filter(l => l.is_active).length;
-                        const feeDisplay = isLagos
-                            ? (zone.base_fee ? formatCurrency(zone.base_fee) : "—")
-                            : (() => {
-                                const fees = zone.locations
-                                    .filter(l => l.is_active)
-                                    .flatMap(l => [l.hub_pickup_fee, l.doorstep_fee].filter(Boolean) as number[]);
-                                if (fees.length === 0) return "No pricing set";
-                                return `${formatCurrency(Math.min(...fees))} – ${formatCurrency(Math.max(...fees))}`;
-                            })();
+                        const feeDisplay = zone.base_fee ? formatCurrency(zone.base_fee) : "—";
 
                         return (
                             <div key={zone.id} className={`bg-white rounded-xl border overflow-hidden transition-all shadow-sm ${zone.is_active ? "border-brand-lilac/15" : "border-red-200/50 opacity-60"}`}>
                                 {/* Zone Header */}
                                 <div className="flex items-center gap-3 p-4 cursor-pointer hover:bg-brand-lilac/[0.03] transition-colors" onClick={() => toggle(zone.id)}>
-                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${isLagos ? "bg-brand-purple/8 text-brand-purple" : "bg-amber-50 text-amber-600"}`}>
-                                        {isLagos ? <MapPin size={18} /> : <Package size={18} />}
+                                    <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-brand-purple/8 text-brand-purple">
+                                        <MapPin size={18} />
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2 flex-wrap">
@@ -278,8 +266,8 @@ export default function DeliveryManagement({ initialZones }: Props) {
                                             {showAddLoc === zone.id && (
                                                 <AddLocationForm
                                                     zoneId={zone.id}
-                                                    isLagos={isLagos}
-                                                    allowsHub={zone.allows_hub_pickup}
+                                                    isLagos={true}
+                                                    allowsHub={false}
                                                     onCreated={(loc) => {
                                                         setZones(prev => prev.map(z => z.id === zone.id
                                                             ? { ...z, locations: [...z.locations, loc] }
@@ -304,8 +292,7 @@ export default function DeliveryManagement({ initialZones }: Props) {
                                                             <thead>
                                                                 <tr className="border-b border-brand-lilac/10 bg-brand-lilac/[0.03]">
                                                                     <th className="text-left py-2.5 px-3 text-[10px] font-semibold text-brand-dark/40 uppercase tracking-wider">Location</th>
-                                                                    {zone.allows_hub_pickup && <th className="text-right py-2.5 px-3 text-[10px] font-semibold text-brand-dark/40 uppercase tracking-wider">Hub Pickup</th>}
-                                                                    <th className="text-right py-2.5 px-3 text-[10px] font-semibold text-brand-dark/40 uppercase tracking-wider">{isLagos ? "Fee" : "Doorstep"}</th>
+                                                                    <th className="text-right py-2.5 px-3 text-[10px] font-semibold text-brand-dark/40 uppercase tracking-wider">Fee</th>
                                                                     <th className="text-center py-2.5 px-3 text-[10px] font-semibold text-brand-dark/40 uppercase tracking-wider">Status</th>
                                                                     <th className="text-right py-2.5 px-3 text-[10px] font-semibold text-brand-dark/40 uppercase tracking-wider">Actions</th>
                                                                 </tr>
@@ -316,8 +303,8 @@ export default function DeliveryManagement({ initialZones }: Props) {
                                                                         {editingLoc === loc.id ? (
                                                                             <EditLocRow
                                                                                 loc={loc}
-                                                                                isLagos={isLagos}
-                                                                                allowsHub={zone.allows_hub_pickup}
+                                                                                isLagos={true}
+                                                                                allowsHub={false}
                                                                                 zoneFee={zone.base_fee}
                                                                                 onSave={(upd) => {
                                                                                     setZones(prev => prev.map(z => ({
@@ -331,16 +318,8 @@ export default function DeliveryManagement({ initialZones }: Props) {
                                                                         ) : (
                                                                             <>
                                                                                 <td className="py-2.5 px-3 font-medium text-brand-dark">{loc.name}</td>
-                                                                                {zone.allows_hub_pickup && (
-                                                                                    <td className="py-2.5 px-3 text-right font-mono text-brand-dark/50 text-xs">
-                                                                                        {loc.hub_pickup_fee != null ? formatCurrency(loc.hub_pickup_fee) : "—"}
-                                                                                    </td>
-                                                                                )}
                                                                                 <td className="py-2.5 px-3 text-right font-mono text-brand-dark/60">
-                                                                                    {isLagos
-                                                                                        ? (zone.base_fee ? formatCurrency(zone.base_fee) : "—")
-                                                                                        : (loc.doorstep_fee != null ? formatCurrency(loc.doorstep_fee) : "—")
-                                                                                    }
+                                                                                    {zone.base_fee ? formatCurrency(zone.base_fee) : "—"}
                                                                                 </td>
                                                                                 <td className="py-2.5 px-3 text-center">
                                                                                     <button onClick={() => handleToggleLoc(loc)} className="transition-colors">
@@ -375,8 +354,8 @@ export default function DeliveryManagement({ initialZones }: Props) {
                                                                 {editingLoc === loc.id ? (
                                                                     <EditLocMobile
                                                                         loc={loc}
-                                                                        isLagos={isLagos}
-                                                                        allowsHub={zone.allows_hub_pickup}
+                                                                        isLagos={true}
+                                                                        allowsHub={false}
                                                                         zoneFee={zone.base_fee}
                                                                         onSave={(upd) => {
                                                                             setZones(prev => prev.map(z => ({
@@ -400,10 +379,7 @@ export default function DeliveryManagement({ initialZones }: Props) {
                                                                             </div>
                                                                         </div>
                                                                         <div className="flex gap-2 text-xs">
-                                                                            {zone.allows_hub_pickup && (
-                                                                                <PriceChip label="Hub" value={loc.hub_pickup_fee} />
-                                                                            )}
-                                                                            <PriceChip label={isLagos ? "Fee" : "Door"} value={isLagos ? zone.base_fee : loc.doorstep_fee} />
+                                                                            <PriceChip label="Fee" value={zone.base_fee} />
                                                                         </div>
                                                                     </>
                                                                 )}
@@ -436,7 +412,7 @@ export default function DeliveryManagement({ initialZones }: Props) {
             {/* ── Create Zone Modal ── */}
             {showCreateZone && (
                 <CreateZoneModal
-                    defaultType={tab === "interstate" ? "interstate" : "lagos"}
+                    defaultType="lagos"
                     onCreated={(zone) => {
                         setZones(prev => [...prev, zone]);
                         setShowCreateZone(false);
@@ -520,7 +496,7 @@ function DiscountsPanel({ zones, onUpdate }: {
                                 <div>
                                     <div className="flex items-center gap-2">
                                         <span className="font-medium text-brand-dark">{zone.name}</span>
-                                        <Badge variant={zone.zone_type === "lagos" ? "info" : "warning"}>{zone.zone_type === "lagos" ? "Lagos" : "Interstate"}</Badge>
+                                        <Badge variant="info">Lagos</Badge>
                                     </div>
                                     <div className="text-xs text-brand-dark/40 mt-0.5">
                                         <span className="font-mono font-bold text-emerald-600">{zone.discount_percent}% off</span>
@@ -568,7 +544,7 @@ function DiscountRow({ zone, onApply }: { zone: DeliveryZoneWithLocations; onApp
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <span className="font-medium text-brand-dark text-sm">{zone.name}</span>
-                    <Badge variant={zone.zone_type === "lagos" ? "info" : "warning"}>{zone.zone_type === "lagos" ? "Lagos" : "Interstate"}</Badge>
+                    <Badge variant="info">Lagos</Badge>
                 </div>
                 <button onClick={() => setOpen(!open)} className="text-[11px] text-brand-purple hover:text-brand-dark font-medium transition-colors">
                     {open ? "Cancel" : "+ Add Discount"}
@@ -642,19 +618,7 @@ function EditZonePanel({ zone, onSave, onClose }: {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 <InputField label="Zone Name" value={name} onChange={setName} />
-                {zone.zone_type === "lagos" && <InputField label="Base Fee (₦)" type="number" value={baseFee} onChange={setBaseFee} />}
-                {zone.zone_type === "interstate" && (
-                    <>
-                        <InputField label="Hub Pickup Estimate" value={hubEst} onChange={setHubEst} placeholder="e.g. 1–3 days" />
-                        <InputField label="Doorstep Estimate" value={doorEst} onChange={setDoorEst} placeholder="e.g. 3–5 days" />
-                        <div className="flex items-center gap-2 sm:col-span-2 lg:col-span-1">
-                            <label className="flex items-center gap-2 cursor-pointer text-sm text-brand-dark/60">
-                                <input type="checkbox" checked={allowsHub} onChange={e => setAllowsHub(e.target.checked)} className="accent-brand-purple w-4 h-4" />
-                                Allow Hub Pickup
-                            </label>
-                        </div>
-                    </>
-                )}
+                <InputField label="Base Fee (₦)" type="number" value={baseFee} onChange={setBaseFee} />
             </div>
             <div className="flex justify-end gap-2 mt-4">
                 <Button variant="ghost" size="sm" onClick={onClose}>Cancel</Button>
@@ -885,17 +849,13 @@ function BulkAddLocations({ zoneId, onDone, onCancel }: {
 //  CREATE ZONE MODAL
 // ═══════════════════════════════════════════════════════════════════
 function CreateZoneModal({ defaultType, onCreated, onClose }: {
-    defaultType: "lagos" | "interstate";
+    defaultType: "lagos";
     onCreated: (z: DeliveryZoneWithLocations) => void;
     onClose: () => void;
 }) {
     const router = useRouter();
     const [name, setName] = useState("");
-    const [type, setType] = useState<"lagos" | "interstate">(defaultType);
     const [baseFee, setBaseFee] = useState("");
-    const [allowsHub, setAllowsHub] = useState(true);
-    const [hubEst, setHubEst] = useState("1–3 days after pick up");
-    const [doorEst, setDoorEst] = useState("3–5 working days");
     const [loading, setLoading] = useState(false);
 
     const submit = async (e: React.FormEvent) => {
@@ -904,17 +864,15 @@ function CreateZoneModal({ defaultType, onCreated, onClose }: {
         setLoading(true);
         try {
             const id = await createDeliveryZone({
-                name: name.trim(), zoneType: type,
+                name: name.trim(), zoneType: "lagos",
                 baseFee: baseFee ? Number(baseFee) : undefined,
-                allowsHubPickup: type === "interstate" ? allowsHub : false,
-                hubEstimate: hubEst || undefined,
-                doorstepEstimate: doorEst || undefined,
+                allowsHubPickup: false,
             });
             onCreated({
-                id, name: name.trim(), zone_type: type,
+                id, name: name.trim(), zone_type: "lagos",
                 base_fee: baseFee ? Number(baseFee) : null,
-                allows_hub_pickup: type === "interstate" ? allowsHub : false,
-                hub_estimate: hubEst, doorstep_estimate: doorEst,
+                allows_hub_pickup: false,
+                hub_estimate: null, doorstep_estimate: null,
                 discount_percent: 0, discount_label: null,
                 is_active: true, sort_order: 0, created_at: new Date().toISOString(),
                 locations: [],
@@ -933,44 +891,8 @@ function CreateZoneModal({ defaultType, onCreated, onClose }: {
                     <button onClick={onClose} className="text-brand-dark/25 hover:text-brand-dark/50 p-1"><X size={18} /></button>
                 </div>
                 <form onSubmit={submit} className="space-y-4">
-                    <InputField label="Zone Name" required value={name} onChange={setName} placeholder={type === "lagos" ? "e.g. Mainland Core" : "e.g. Kano"} />
-
-                    <div>
-                        <label className="block text-xs font-medium text-brand-dark/40 mb-2 uppercase tracking-wider">Zone Type</label>
-                        <div className="flex gap-3">
-                            {(["lagos", "interstate"] as const).map(t => (
-                                <button
-                                    key={t}
-                                    type="button"
-                                    onClick={() => setType(t)}
-                                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 border rounded-xl text-sm font-medium transition-all ${type === t
-                                        ? "border-brand-purple bg-brand-purple/5 text-brand-purple shadow-sm"
-                                        : "border-brand-dark/8 text-brand-dark/35 hover:border-brand-purple/30"
-                                        }`}
-                                >
-                                    {t === "lagos" ? <MapPin size={15} /> : <Package size={15} />}
-                                    {t === "lagos" ? "Lagos" : "Interstate"}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {type === "lagos" && (
-                        <InputField label="Flat Delivery Fee (₦)" type="number" value={baseFee} onChange={setBaseFee} placeholder="e.g. 3500" />
-                    )}
-
-                    {type === "interstate" && (
-                        <>
-                            <label className="flex items-center gap-3 cursor-pointer">
-                                <input type="checkbox" checked={allowsHub} onChange={e => setAllowsHub(e.target.checked)} className="accent-brand-purple w-4 h-4" />
-                                <span className="text-sm text-brand-dark/60">Allow Hub Pickup option for customers</span>
-                            </label>
-                            <div className="grid grid-cols-2 gap-3">
-                                <InputField label="Hub Pickup Estimate" value={hubEst} onChange={setHubEst} />
-                                <InputField label="Doorstep Estimate" value={doorEst} onChange={setDoorEst} />
-                            </div>
-                        </>
-                    )}
+                    <InputField label="Zone Name" required value={name} onChange={setName} placeholder="e.g. Mainland Core" />
+                    <InputField label="Flat Delivery Fee (₦)" type="number" value={baseFee} onChange={setBaseFee} placeholder="e.g. 3500" />
 
                     <div className="flex justify-end gap-3 pt-4 border-t border-brand-lilac/10">
                         <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>

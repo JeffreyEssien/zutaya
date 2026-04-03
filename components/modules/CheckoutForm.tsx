@@ -5,26 +5,17 @@ import { useCartStore } from "@/lib/cartStore";
 import { useOrderStore } from "@/lib/orderStore";
 import { WHATSAPP_NUMBER } from "@/lib/constants";
 import {
-    NIGERIAN_STATES,
     LAGOS_ZONES as HARDCODED_LAGOS_ZONES,
-    INTERSTATE_DATA as HARDCODED_INTERSTATE,
-    INTERSTATE_TERMS,
     LAGOS_TERMS,
-    isLagos,
-    lookupLagosZone as hardcodedLookupLagosZone,
-    getInterstateState as hardcodedGetInterstateState,
-    getInterstateFee as hardcodedGetInterstateFee,
     fetchDeliveryPricingFromDB,
     applyDiscount,
-    type DeliveryType,
     type LagosZoneInfo,
-    type InterstateState,
     type DbPricingResult,
 } from "@/lib/deliveryPricing";
 import type { ShippingAddress, Order } from "@/types";
 import {
-    MessageCircle, Clock, Lock, MapPin, Truck, Building2,
-    ChevronDown, Info, Package, Tag, Archive,
+    MessageCircle, Clock, Lock, Truck, Building2,
+    ChevronDown, Package, Tag,
 } from "lucide-react";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { toast } from "sonner";
@@ -36,22 +27,21 @@ interface CheckoutFormProps {
 
 const emptyAddress: ShippingAddress = {
     firstName: "", lastName: "", email: "", phone: "",
-    address: "", city: "", state: "", zip: "", country: "Nigeria",
+    address: "", city: "", state: "Lagos", zip: "", country: "Nigeria",
 };
 
 export default function CheckoutForm({ onComplete, onShippingChange }: CheckoutFormProps) {
     const [form, setForm] = useState<ShippingAddress>(emptyAddress);
     const [loading, setLoading] = useState(false);
+    const [queueStatus, setQueueStatus] = useState<"idle" | "queued" | "processing">("idle");
     const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
     const { items, subtotal, clearCart, couponCode, discount, removeCoupon } = useCartStore();
     const { addOrder } = useOrderStore();
-    const [stockpileMode, setStockpileMode] = useState(false);
 
     // ── DB pricing state ──
     const [dbPricing, setDbPricing] = useState<DbPricingResult | null>(null);
     const [pricingLoaded, setPricingLoaded] = useState(false);
 
-    // Load pricing from DB on mount
     useEffect(() => {
         fetchDeliveryPricingFromDB().then((result) => {
             if (result) setDbPricing(result);
@@ -59,13 +49,9 @@ export default function CheckoutForm({ onComplete, onShippingChange }: CheckoutF
         });
     }, []);
 
-    // Resolve the actual data source (DB or hardcoded)
     const lagosZonesRaw: LagosZoneInfo[] = dbPricing?.lagosZones ?? HARDCODED_LAGOS_ZONES;
-    // Deduplicate by key (handles DB having duplicates from re-seeding)
     const lagosZones = lagosZonesRaw.filter((z, i, arr) => arr.findIndex((x) => x.key === z.key) === i);
-    const interstateStates: InterstateState[] = dbPricing?.interstateStates ?? HARDCODED_INTERSTATE;
 
-    // Build lookup maps from resolved data
     const lagosAreaIndex = useMemo(() => {
         const map = new Map<string, LagosZoneInfo>();
         for (const zone of lagosZones) {
@@ -76,81 +62,35 @@ export default function CheckoutForm({ onComplete, onShippingChange }: CheckoutF
         return map;
     }, [lagosZones]);
 
-    const interstateIndex = useMemo(() => {
-        const map = new Map<string, InterstateState>();
-        for (const s of interstateStates) {
-            map.set(s.state.toLowerCase(), s);
-        }
-        return map;
-    }, [interstateStates]);
-
     // ── Delivery state ──
-    const [selectedState, setSelectedState] = useState("");
     const [selectedLagosArea, setSelectedLagosArea] = useState("");
-    const [selectedInterstateCity, setSelectedInterstateCity] = useState("");
-    const [deliveryType, setDeliveryType] = useState<DeliveryType>("doorstep");
     const [deliveryFee, setDeliveryFee] = useState(0);
-
     const [paymentMethod, setPaymentMethod] = useState<"whatsapp" | "manual">("whatsapp");
 
-    // ── Derived state ──
-    const lagosSelected = isLagos(selectedState);
-    const interstateData = useMemo(
-        () => (selectedState && !lagosSelected ? interstateIndex.get(selectedState.toLowerCase()) ?? null : null),
-        [selectedState, lagosSelected, interstateIndex]
-    );
     const currentLagosZone: LagosZoneInfo | null = useMemo(
-        () => (lagosSelected && selectedLagosArea ? lagosAreaIndex.get(selectedLagosArea.toLowerCase()) ?? null : null),
-        [lagosSelected, selectedLagosArea, lagosAreaIndex]
+        () => (selectedLagosArea ? lagosAreaIndex.get(selectedLagosArea.toLowerCase()) ?? null : null),
+        [selectedLagosArea, lagosAreaIndex]
     );
 
-    // Active discount for current zone
     const activeDiscount = useMemo(() => {
-        if (!dbPricing?.discounts) return null;
-        if (lagosSelected && currentLagosZone) {
-            return dbPricing.discounts.get(currentLagosZone.label) ?? null;
-        }
-        if (interstateData) {
-            return dbPricing.discounts.get(interstateData.state) ?? null;
-        }
-        return null;
-    }, [dbPricing, lagosSelected, currentLagosZone, interstateData]);
+        if (!dbPricing?.discounts || !currentLagosZone) return null;
+        return dbPricing.discounts.get(currentLagosZone.label) ?? null;
+    }, [dbPricing, currentLagosZone]);
 
     // ── Fee computation ──
     const computeFee = useCallback((): number => {
-        let rawFee = 0;
-        if (lagosSelected && currentLagosZone) {
-            rawFee = currentLagosZone.fee;
-        } else if (interstateData && selectedInterstateCity) {
-            const city = interstateData.cities.find(
-                (c) => c.name.toLowerCase() === selectedInterstateCity.toLowerCase()
-            );
-            if (city) {
-                rawFee = deliveryType === "hub_pickup" ? city.hubPickup : city.doorstep;
-            }
-        }
-        // Apply discount if any
+        let rawFee = currentLagosZone?.fee ?? 0;
         if (activeDiscount && activeDiscount.percent > 0) {
             rawFee = applyDiscount(rawFee, activeDiscount.percent);
         }
         return rawFee;
-    }, [lagosSelected, currentLagosZone, interstateData, selectedInterstateCity, deliveryType, activeDiscount]);
+    }, [currentLagosZone, activeDiscount]);
 
     useEffect(() => {
         const fee = computeFee();
         setDeliveryFee(fee);
         onShippingChange(fee);
     }, [computeFee, onShippingChange]);
-
-    // ── Handlers ──
-    const handleStateChange = (state: string) => {
-        setSelectedState(state);
-        setSelectedLagosArea("");
-        setSelectedInterstateCity("");
-        setDeliveryType("doorstep");
-        setForm((prev) => ({ ...prev, state }));
-        setErrors((prev) => ({ ...prev, state: undefined, lagosArea: undefined, interstateCity: undefined }));
-    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -163,15 +103,8 @@ export default function CheckoutForm({ onComplete, onShippingChange }: CheckoutF
         if (!form.lastName.trim()) e.lastName = "Required";
         if (!form.email.trim()) e.email = "Required";
         if (!form.phone.trim()) e.phone = "Required";
-        // Skip delivery validation in stockpile mode
-        if (!stockpileMode) {
-            if (!form.address.trim()) e.address = "Required";
-            if (!selectedState) e.state = "Please select your state";
-            if (lagosSelected && !selectedLagosArea) e.lagosArea = "Please select your area";
-            if (!lagosSelected && interstateData && !selectedInterstateCity) e.interstateCity = "Please select your city";
-            if (!lagosSelected && !interstateData && selectedState) e.state = "We don't deliver to this state yet — contact us via WhatsApp";
-            if (!form.city.trim() && !lagosSelected) e.city = "Required";
-        }
+        if (!form.address.trim()) e.address = "Required";
+        if (!selectedLagosArea) e.lagosArea = "Please select your area";
         setErrors(e);
         return Object.keys(e).length === 0;
     };
@@ -182,71 +115,11 @@ export default function CheckoutForm({ onComplete, onShippingChange }: CheckoutF
         if (!validate()) return;
         setLoading(true);
 
-        // ── Stockpile Mode ──
-        if (stockpileMode) {
-            try {
-                // Check for existing stockpile
-                let stockpileRes = await fetch(`/api/stockpile?email=${encodeURIComponent(form.email)}`);
-                let stockpile = await stockpileRes.json();
-
-                // Create new stockpile if none exists
-                if (!stockpile?.id) {
-                    const createRes = await fetch('/api/stockpile', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            action: 'create',
-                            customerEmail: form.email,
-                            customerName: `${form.firstName} ${form.lastName}`,
-                            phone: form.phone,
-                        }),
-                    });
-                    stockpile = await createRes.json();
-                }
-
-                // Add each cart item to stockpile
-                for (const item of items) {
-                    await fetch('/api/stockpile', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            action: 'add_item',
-                            stockpileId: stockpile.id,
-                            productId: item.product.id,
-                            productName: item.product.name,
-                            productImage: item.product.images?.[0] || item.variant?.image,
-                            variantName: item.variant?.name,
-                            quantity: item.quantity,
-                            pricePaid: (item.variant?.price || item.product.price),
-                        }),
-                    });
-                }
-
-                clearCart();
-                removeCoupon();
-                setLoading(false);
-                // Redirect to stockpile page
-                window.location.href = `/stockpile?email=${encodeURIComponent(form.email)}&added=true`;
-                return;
-            } catch (err) {
-                console.error('Stockpile error:', err);
-                toast.error('Failed to add to stockpile. Please try again.');
-                setLoading(false);
-                return;
-            }
-        }
-
-        // ── Normal Order Flow ──
         const sub = subtotal();
         const ship = deliveryFee;
         const discountAmount = sub * (discount / 100);
 
-        const locationDesc = lagosSelected
-            ? `${selectedLagosArea}, Lagos (${currentLagosZone?.label})`
-            : `${selectedInterstateCity}, ${selectedState}`;
-        const deliveryTypeLabel = lagosSelected
-            ? "Doorstep"
-            : deliveryType === "hub_pickup" ? "Hub Pickup" : "Doorstep";
+        const locationDesc = `${selectedLagosArea}, Lagos (${currentLagosZone?.label})`;
 
         const order: Order = {
             id: `ORD-${Date.now().toString(36).toUpperCase()}`,
@@ -261,43 +134,41 @@ export default function CheckoutForm({ onComplete, onShippingChange }: CheckoutF
             createdAt: new Date().toISOString(),
             shippingAddress: {
                 ...form,
-                city: lagosSelected ? selectedLagosArea : form.city,
-                state: selectedState,
+                city: selectedLagosArea,
+                state: "Lagos",
                 country: "Nigeria",
             },
             couponCode: couponCode || undefined,
             discountTotal: discountAmount > 0 ? discountAmount : undefined,
             paymentMethod: paymentMethod === "whatsapp" ? "whatsapp" : "bank_transfer",
             paymentStatus: paymentMethod === "manual" ? "awaiting_payment" : undefined,
-            deliveryZone: lagosSelected
-                ? currentLagosZone?.label
-                : interstateData?.state,
-            deliveryType: lagosSelected ? "doorstep" : deliveryType,
+            deliveryZone: currentLagosZone?.label,
+            deliveryType: "doorstep",
             deliveryDiscount: activeDiscount && activeDiscount.percent > 0 ? activeDiscount : undefined,
         };
 
         try {
+            setQueueStatus("queued");
+
             const res = await fetch("/api/orders", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(order),
             });
 
+            setQueueStatus("processing");
             const data = await res.json();
 
             if (!res.ok || !data.success) {
                 console.error("Order failed:", data);
                 const errMsg = data.error || "Failed to place order. Please try again.";
-                // Show user-friendly stock error messages
                 if (errMsg.toLowerCase().includes("insufficient stock")) {
-                    toast.error("Out of Stock", {
-                        description: errMsg,
-                        duration: 6000,
-                    });
+                    toast.error("Out of Stock", { description: errMsg, duration: 6000 });
                 } else {
                     toast.error(errMsg, { duration: 5000 });
                 }
                 setLoading(false);
+                setQueueStatus("idle");
                 return;
             }
 
@@ -313,7 +184,6 @@ export default function CheckoutForm({ onComplete, onShippingChange }: CheckoutF
                     `*Email:* ${order.email}\n` +
                     `*Phone:* ${order.phone}\n\n` +
                     `*Delivery To:* ${locationDesc}\n` +
-                    `*Delivery Type:* ${deliveryTypeLabel}\n` +
                     `*Address:* ${form.address}\n\n` +
                     `*Items:*\n` +
                     order.items.map(i => `  • ${i.quantity}x ${i.product.name} (${i.variant?.name || 'Default'})`).join('\n') +
@@ -332,12 +202,40 @@ export default function CheckoutForm({ onComplete, onShippingChange }: CheckoutF
             console.error("Order submission error:", err);
             toast.error("Something went wrong. Please check your connection and try again.");
             setLoading(false);
+            setQueueStatus("idle");
         }
     };
 
     // ═══════════════════════════════════════════════════════════════
     //  RENDER
     // ═══════════════════════════════════════════════════════════════
+
+    if (queueStatus !== "idle" && loading) {
+        return (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+                <div className="relative mb-6">
+                    <div className="w-16 h-16 rounded-full border-4 border-warm-tan/20 border-t-brand-red animate-spin" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <Package size={20} className="text-brand-red" />
+                    </div>
+                </div>
+                <h2 className="font-serif text-xl text-brand-dark mb-2">
+                    {queueStatus === "queued" ? "You're in the Queue" : "Processing Your Order"}
+                </h2>
+                <p className="text-sm text-brand-dark/50 max-w-xs leading-relaxed">
+                    {queueStatus === "queued"
+                        ? "We're preparing to process your order. Please hold tight — this only takes a moment."
+                        : "Confirming stock and finalising your order. Almost there..."}
+                </p>
+                <div className="flex items-center gap-3 mt-6">
+                    <span className={`w-2.5 h-2.5 rounded-full ${queueStatus === "queued" ? "bg-amber-400 animate-pulse" : "bg-green-500"}`} />
+                    <span className="text-xs text-brand-dark/40 uppercase tracking-wider font-medium">
+                        {queueStatus === "queued" ? "Queued" : "Processing"}
+                    </span>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <form onSubmit={handleSubmit} className="space-y-8">
@@ -356,189 +254,48 @@ export default function CheckoutForm({ onComplete, onShippingChange }: CheckoutF
 
             {/* ── Step 2: Delivery ── */}
             <div>
-                <SectionTitle step={2}>Delivery Details</SectionTitle>
+                <SectionTitle step={2}>Delivery Details (Lagos Only)</SectionTitle>
                 <div className="mt-5 space-y-4">
                     <FloatingField label="Street Address" name="address" value={form.address} error={errors.address} onChange={handleChange} />
 
-                    {/* State Selector */}
+                    {/* Lagos Area Selector */}
                     <SelectField
-                        icon={<MapPin size={16} />}
-                        value={selectedState}
-                        placeholder="Select your state"
-                        error={errors.state}
-                        onChange={handleStateChange}
+                        icon={<Building2 size={16} />}
+                        value={selectedLagosArea}
+                        placeholder="Select your area in Lagos"
+                        error={errors.lagosArea}
+                        onChange={(val) => {
+                            setSelectedLagosArea(val);
+                            setErrors((prev) => ({ ...prev, lagosArea: undefined }));
+                        }}
                     >
-                        {NIGERIAN_STATES.map((s) => (
-                            <option key={s} value={s}>{s}</option>
+                        {lagosZones.map((zone) => (
+                            <optgroup key={zone.key} label={`${zone.label} — ₦${zone.fee.toLocaleString()}`}>
+                                {zone.areas.map((area) => (
+                                    <option key={area} value={area}>{area}</option>
+                                ))}
+                            </optgroup>
                         ))}
                     </SelectField>
 
-                    {/* ── Lagos Flow ── */}
-                    {lagosSelected && (
-                        <>
-                            <SelectField
-                                icon={<Building2 size={16} />}
-                                value={selectedLagosArea}
-                                placeholder="Select your area"
-                                error={errors.lagosArea}
-                                onChange={(val) => {
-                                    setSelectedLagosArea(val);
-                                    setErrors((prev) => ({ ...prev, lagosArea: undefined }));
-                                }}
-                            >
-                                {lagosZones.map((zone) => (
-                                    <optgroup key={zone.key} label={`${zone.label} — ₦${zone.fee.toLocaleString()}`}>
-                                        {zone.areas.map((area) => (
-                                            <option key={area} value={area}>{area}</option>
-                                        ))}
-                                    </optgroup>
+                    {/* Lagos zone result */}
+                    {currentLagosZone && (
+                        <DeliveryResultCard
+                            icon={<Truck size={16} />}
+                            title={currentLagosZone.label}
+                            fee={deliveryFee}
+                            originalFee={activeDiscount ? currentLagosZone.fee : undefined}
+                            discount={activeDiscount}
+                        >
+                            <ul className="space-y-1.5">
+                                {LAGOS_TERMS.map((term, i) => (
+                                    <li key={i} className="flex items-start gap-2 text-[11px] text-brand-dark/45 leading-relaxed">
+                                        <span className="mt-1 w-1 h-1 rounded-full bg-brand-dark/20 shrink-0" />
+                                        {term}
+                                    </li>
                                 ))}
-                            </SelectField>
-
-                            {/* Lagos zone result */}
-                            {currentLagosZone && (
-                                <DeliveryResultCard
-                                    icon={<Truck size={16} />}
-                                    title={`${currentLagosZone.label}`}
-                                    fee={deliveryFee}
-                                    originalFee={activeDiscount ? currentLagosZone.fee : undefined}
-                                    discount={activeDiscount}
-                                    badgeColor="emerald"
-                                >
-                                    <ul className="space-y-1.5">
-                                        {LAGOS_TERMS.map((term, i) => (
-                                            <li key={i} className="flex items-start gap-2 text-[11px] text-brand-dark/45 leading-relaxed">
-                                                <span className="mt-1 w-1 h-1 rounded-full bg-brand-dark/20 shrink-0" />
-                                                {term}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </DeliveryResultCard>
-                            )}
-                        </>
-                    )}
-
-                    {/* ── Interstate Flow ── */}
-                    {!lagosSelected && interstateData && (
-                        <>
-                            <SelectField
-                                icon={<Building2 size={16} />}
-                                value={selectedInterstateCity}
-                                placeholder="Select your city"
-                                error={errors.interstateCity}
-                                onChange={(val) => {
-                                    setSelectedInterstateCity(val);
-                                    setErrors((prev) => ({ ...prev, interstateCity: undefined }));
-                                }}
-                            >
-                                {interstateData.cities.map((c) => (
-                                    <option key={c.name} value={c.name}>{c.name}</option>
-                                ))}
-                            </SelectField>
-
-                            {/* Delivery type toggle */}
-                            {selectedInterstateCity && (
-                                <div className="space-y-2.5">
-                                    <p className="text-xs text-brand-dark/50 font-medium uppercase tracking-wider">Choose Delivery Type</p>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        {(() => {
-                                            const city = interstateData.cities.find(c => c.name === selectedInterstateCity);
-                                            return (
-                                                <>
-                                                    <DeliveryTypeCard
-                                                        label="Doorstep Delivery"
-                                                        description="Delivered to your door"
-                                                        estimate={interstateData.doorstepEstimate}
-                                                        icon={<Truck size={18} />}
-                                                        selected={deliveryType === "doorstep"}
-                                                        price={city?.doorstep ?? null}
-                                                        onClick={() => setDeliveryType("doorstep")}
-                                                    />
-                                                    <DeliveryTypeCard
-                                                        label="Hub Pickup"
-                                                        description="Collect from nearest hub"
-                                                        estimate={interstateData.hubEstimate}
-                                                        icon={<Building2 size={18} />}
-                                                        selected={deliveryType === "hub_pickup"}
-                                                        price={city?.hubPickup ?? null}
-                                                        onClick={() => setDeliveryType("hub_pickup")}
-                                                    />
-                                                </>
-                                            );
-                                        })()}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Interstate fee result + T&C */}
-                            {selectedInterstateCity && deliveryFee > 0 && (
-                                <DeliveryResultCard
-                                    icon={<Package size={16} />}
-                                    title={`${selectedInterstateCity}, ${selectedState}`}
-                                    fee={deliveryFee}
-                                    originalFee={activeDiscount ? (() => {
-                                        const city = interstateData.cities.find(c => c.name === selectedInterstateCity);
-                                        return city ? (deliveryType === "hub_pickup" ? city.hubPickup : city.doorstep) : undefined;
-                                    })() : undefined}
-                                    discount={activeDiscount}
-                                    badgeColor="brand"
-                                >
-                                    <div className="space-y-3">
-                                        <div className="flex items-center gap-2 text-[11px] font-semibold text-brand-dark/60 uppercase tracking-wider">
-                                            <Info size={12} />
-                                            Important Delivery Information
-                                        </div>
-                                        <ul className="space-y-2">
-                                            {INTERSTATE_TERMS.map((term, i) => (
-                                                <li key={i} className="flex items-start gap-2 text-[11px] text-brand-dark/50 leading-relaxed">
-                                                    <span className="mt-1.5 w-1 h-1 rounded-full bg-brand-purple/40 shrink-0" />
-                                                    {term}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                        <div className="flex items-start gap-2 px-3 py-2.5 bg-brand-purple/[0.04] rounded-lg border border-brand-purple/10">
-                                            <Package size={12} className="text-brand-purple mt-0.5 shrink-0" />
-                                            <p className="text-[10px] text-brand-dark/50 leading-relaxed">
-                                                Your delivery fee covers items up to 2 kg. Ordering heavier items? No problem — a small
-                                                ₦1,000 per additional kg applies so we can get everything to you safely. Some remote
-                                                locations may have a modest ₦500 surcharge.
-                                            </p>
-                                        </div>
-                                    </div>
-                                </DeliveryResultCard>
-                            )}
-                        </>
-                    )}
-
-                    {/* ── Unsupported state ── */}
-                    {selectedState && !lagosSelected && !interstateData && (
-                        <div className="rounded-xl bg-amber-50/50 border border-amber-200/50 p-5 space-y-3">
-                            <div className="flex items-center gap-2 text-amber-700">
-                                <Info size={16} />
-                                <span className="text-sm font-semibold">Delivery Not Yet Available</span>
-                            </div>
-                            <p className="text-xs text-amber-600 leading-relaxed">
-                                We don't currently have a delivery route to <strong>{selectedState}</strong>.
-                                Please contact us directly via WhatsApp so we can arrange delivery for you.
-                            </p>
-                            <a
-                                href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hi, I'd like to order for delivery to ${selectedState}. Can you help?`)}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 px-4 py-2 bg-amber-100 hover:bg-amber-200 text-amber-800 text-xs font-medium rounded-lg transition-colors"
-                            >
-                                <MessageCircle size={14} />
-                                Contact Us on WhatsApp
-                            </a>
-                        </div>
-                    )}
-
-                    {/* Extra fields for interstate */}
-                    {!lagosSelected && selectedState && (
-                        <div className="grid grid-cols-2 gap-4">
-                            <FloatingField label="City / Town" name="city" value={form.city} error={errors.city} onChange={handleChange} />
-                            <FloatingField label="ZIP / Postal Code" name="zip" value={form.zip} error={errors.zip} onChange={handleChange} />
-                        </div>
+                            </ul>
+                        </DeliveryResultCard>
                     )}
                 </div>
             </div>
@@ -571,44 +328,14 @@ export default function CheckoutForm({ onComplete, onShippingChange }: CheckoutF
                 </div>
             </div>
 
-            {/* ── Stockpile Option ── */}
-            <div className="bg-gradient-to-r from-brand-purple/[0.04] to-brand-lilac/[0.04] rounded-xl border border-brand-purple/10 p-5">
-                <label className="flex items-start gap-4 cursor-pointer">
-                    <input
-                        type="checkbox"
-                        checked={stockpileMode}
-                        onChange={(e) => setStockpileMode(e.target.checked)}
-                        className="mt-1 accent-brand-purple w-4 h-4"
-                    />
-                    <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                            <Archive size={16} className="text-brand-purple" />
-                            <span className="font-medium text-brand-dark text-sm">Add to Stockpile Instead</span>
-                        </div>
-                        <span className="block text-xs text-brand-dark/45 mt-1 leading-relaxed">
-                            Pay for these items now and keep shopping. When you're ready, ship everything together
-                            with a single delivery fee. Items held for up to 14 days.
-                        </span>
-                    </div>
-                </label>
-            </div>
-
             {/* Security notice */}
             <div className="flex items-center gap-2 text-[10px] text-brand-dark/30">
                 <Lock size={10} />
                 <span>Your information is protected and secure</span>
             </div>
 
-            <Button
-                type="submit"
-                size="lg"
-                className="w-full"
-                loading={loading}
-                disabled={!stockpileMode && selectedState && !lagosSelected && !interstateData ? true : false}
-            >
-                {stockpileMode
-                    ? "Add to Stockpile & Pay Later for Shipping"
-                    : paymentMethod === 'whatsapp' ? "Place Order & Chat on WhatsApp" : "Place Order"}
+            <Button type="submit" size="lg" className="w-full" loading={loading}>
+                {paymentMethod === 'whatsapp' ? "Place Order & Chat on WhatsApp" : "Place Order"}
             </Button>
         </form>
     );
@@ -684,53 +411,16 @@ function SelectField({ icon, value, placeholder, error, children, onChange }: {
     );
 }
 
-function DeliveryTypeCard({ label, description, estimate, icon, selected, price, onClick }: {
-    label: string;
-    description: string;
-    estimate: string;
-    icon: React.ReactNode;
-    selected: boolean;
-    price: number | null;
-    onClick: () => void;
-}) {
-    return (
-        <button
-            type="button"
-            onClick={onClick}
-            className={`flex flex-col items-center gap-1 p-4 border rounded-xl cursor-pointer transition-all duration-300 text-center ${selected
-                ? "border-brand-purple bg-brand-purple/[0.04] shadow-sm shadow-brand-purple/5 ring-1 ring-brand-purple/15"
-                : "border-brand-dark/8 hover:border-brand-purple/30"
-                }`}
-        >
-            <div className={`${selected ? "text-brand-purple" : "text-brand-dark/30"} transition-colors`}>{icon}</div>
-            <span className={`text-xs font-medium ${selected ? "text-brand-dark" : "text-brand-dark/60"}`}>{label}</span>
-            <span className="text-[10px] text-brand-dark/35">{description}</span>
-            {price !== null && (
-                <span className={`text-sm font-bold mt-1 ${selected ? "text-brand-purple" : "text-brand-dark/40"}`}>
-                    ₦{price.toLocaleString()}
-                </span>
-            )}
-            <span className="text-[9px] text-brand-dark/25 mt-0.5">{estimate}</span>
-        </button>
-    );
-}
-
-function DeliveryResultCard({ icon, title, fee, originalFee, discount, badgeColor, children }: {
+function DeliveryResultCard({ icon, title, fee, originalFee, discount, children }: {
     icon: React.ReactNode;
     title: string;
     fee: number;
     originalFee?: number;
     discount?: { percent: number; label: string | null } | null;
-    badgeColor: "emerald" | "brand";
     children: React.ReactNode;
 }) {
-    const badgeClasses = badgeColor === "emerald"
-        ? "bg-emerald-50 text-emerald-700 border-emerald-100"
-        : "bg-brand-purple/5 text-brand-purple border-brand-purple/10";
-
     return (
         <div className="rounded-xl bg-gradient-to-br from-neutral-50/80 to-white border border-brand-dark/5 p-5 space-y-4 shadow-sm">
-            {/* Header */}
             <div className="flex items-center justify-between flex-wrap gap-2">
                 <div className="flex items-center gap-2 text-brand-dark/70">
                     <span className="text-brand-purple">{icon}</span>
@@ -740,13 +430,12 @@ function DeliveryResultCard({ icon, title, fee, originalFee, discount, badgeColo
                     {originalFee && originalFee !== fee && (
                         <span className="text-xs text-brand-dark/30 line-through">₦{originalFee.toLocaleString()}</span>
                     )}
-                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${badgeClasses}`}>
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border bg-emerald-50 text-emerald-700 border-emerald-100">
                         <Truck size={11} />
                         ₦{fee.toLocaleString()}
                     </span>
                 </div>
             </div>
-            {/* Discount badge */}
             {discount && discount.percent > 0 && (
                 <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 rounded-lg border border-emerald-100">
                     <Tag size={12} className="text-emerald-600" />
@@ -755,7 +444,6 @@ function DeliveryResultCard({ icon, title, fee, originalFee, discount, badgeColo
                     </span>
                 </div>
             )}
-            {/* Body */}
             {children}
         </div>
     );

@@ -9,6 +9,7 @@ import Button from "@/components/ui/Button";
 import OrderDetailPanel from "@/components/modules/OrderDetailPanel";
 import AdminCreateOrder from "@/components/modules/AdminCreateOrder";
 import { Plus } from "lucide-react";
+import { ORDER_STATUSES } from "@/lib/constants";
 
 const statusVariant: Record<Order["status"], "warning" | "info" | "success"> = {
     pending: "warning",
@@ -18,7 +19,16 @@ const statusVariant: Record<Order["status"], "warning" | "info" | "success"> = {
     delivered: "success",
 };
 
-const statusOptions: Order["status"][] = ["pending", "processing", "packed", "out_for_delivery", "delivered"];
+/** Returns the allowed statuses an order can transition to (current + one forward + one back) */
+function getAllowedStatuses(current: Order["status"]): Order["status"][] {
+    const idx = ORDER_STATUSES.indexOf(current);
+    if (idx === -1) return [...ORDER_STATUSES];
+    const allowed: Order["status"][] = [current];
+    if (idx > 0) allowed.push(ORDER_STATUSES[idx - 1]);
+    if (idx < ORDER_STATUSES.length - 1) allowed.push(ORDER_STATUSES[idx + 1]);
+    // Sort in pipeline order
+    return ORDER_STATUSES.filter((s) => allowed.includes(s));
+}
 
 interface AdminOrdersContentProps {
     initialOrders: Order[];
@@ -98,9 +108,9 @@ export default function AdminOrdersContent({ initialOrders }: AdminOrdersContent
             });
 
             if (!response.ok) {
-                // throw new Error("Failed to update");
-                // revert on failure
-                console.error("Failed to update status");
+                const errData = await response.json().catch(() => null);
+                const msg = errData?.error || "Failed to update status";
+                alert(msg);
                 router.refresh();
             }
         } catch (error) {
@@ -195,7 +205,7 @@ function OrderCard({ order, onStatusChange, onSelect, isSelected }: {
                         onChange={(e) => onStatusChange(order.id, e.target.value as Order["status"])}
                         className="text-xs border border-brand-lilac/20 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brand-purple/30 bg-white"
                     >
-                        {statusOptions.map((s) => (
+                        {getAllowedStatuses(order.status).map((s) => (
                             <option key={s} value={s}>{s}</option>
                         ))}
                     </select>
@@ -249,7 +259,7 @@ function OrderTable({ orders, onStatusChange, onSelect, selectedId }: {
                                         onChange={(e) => onStatusChange(o.id, e.target.value as Order["status"])}
                                         className="text-xs border border-brand-lilac/20 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brand-purple/30"
                                     >
-                                        {statusOptions.map((s) => (
+                                        {getAllowedStatuses(o.status).map((s) => (
                                             <option key={s} value={s}>{s}</option>
                                         ))}
                                     </select>

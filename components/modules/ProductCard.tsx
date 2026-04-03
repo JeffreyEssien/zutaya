@@ -39,8 +39,9 @@ export default function ProductCard({ product }: ProductCardProps) {
         setQuickViewOpen(true);
     };
 
-    const totalStock = product.variants.length > 0
-        ? product.variants.reduce((sum, v) => sum + (v.stock ?? 0), 0)
+    const variants = Array.isArray(product.variants) ? product.variants : [];
+    const totalStock = variants.length > 0
+        ? variants.reduce((sum, v) => sum + (v.stock ?? 0), 0)
         : product.stock;
     const isSoldOut = totalStock === 0;
     const isLowStock = totalStock <= LOW_STOCK_THRESHOLD && totalStock > 0;

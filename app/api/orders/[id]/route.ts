@@ -3,6 +3,24 @@ import { revalidatePath } from "next/cache";
 import { updateOrderStatus, updatePaymentInfo, getOrderById } from "@/lib/queries";
 import { sendOrderDeliveredEmail, sendPaymentApprovedEmail, sendReviewRequestEmail } from "@/lib/email";
 import type { Order } from "@/types";
+import { ORDER_STATUSES } from "@/lib/constants";
+
+/**
+ * Validate that a status transition follows the sequential pipeline.
+ * Allowed transitions: each status can only move to the next one in the pipeline.
+ * Exception: any status can go back to "pending" (admin override / revert).
+ */
+function isValidStatusTransition(current: Order["status"], next: Order["status"]): boolean {
+    if (current === next) return true;
+    const currentIdx = ORDER_STATUSES.indexOf(current);
+    const nextIdx = ORDER_STATUSES.indexOf(next);
+    if (currentIdx === -1 || nextIdx === -1) return false;
+    // Allow moving forward by exactly one step
+    if (nextIdx === currentIdx + 1) return true;
+    // Allow reverting to previous step (admin correction)
+    if (nextIdx === currentIdx - 1) return true;
+    return false;
+}
 
 export async function PUT(
     request: Request,
@@ -20,20 +38,44 @@ export async function PUT(
             );
         }
 
+        if (!ORDER_STATUSES.includes(status)) {
+            return NextResponse.json(
+                { error: `Invalid status: ${status}` },
+                { status: 400 }
+            );
+        }
+
+        // Fetch current order to validate transition
+        const order = await getOrderById(id);
+        if (!order) {
+            return NextResponse.json(
+                { error: "Order not found" },
+                { status: 404 }
+            );
+        }
+
+        if (!isValidStatusTransition(order.status, status)) {
+            const currentIdx = ORDER_STATUSES.indexOf(order.status);
+            const allowedNext = ORDER_STATUSES[currentIdx + 1];
+            const allowedPrev = currentIdx > 0 ? ORDER_STATUSES[currentIdx - 1] : null;
+            const allowed = [allowedPrev, allowedNext].filter(Boolean).join(" or ");
+            return NextResponse.json(
+                {
+                    error: `Cannot skip stages. Current: "${order.status}". Next allowed: ${allowed}.`,
+                },
+                { status: 400 }
+            );
+        }
+
         await updateOrderStatus(id, status as Order["status"]);
 
-        // Revalidate admin pages to reflect changes immediately
         revalidatePath("/admin");
         revalidatePath("/admin/orders");
 
         // Send status email to customer
-        const order = await getOrderById(id);
-        if (order) {
-            if (status === "delivered") {
-                await sendOrderDeliveredEmail(order);
-                await sendReviewRequestEmail(order);
-            }
-            // TODO: Add sendOrderPackedEmail and sendOutForDeliveryEmail when implemented
+        if (status === "delivered") {
+            await sendOrderDeliveredEmail(order);
+            await sendReviewRequestEmail(order);
         }
 
         return NextResponse.json({ success: true });
@@ -63,7 +105,6 @@ export async function PATCH(
         revalidatePath("/admin");
         revalidatePath("/admin/orders");
 
-        // Send payment approved email if admin confirmed payment
         if (paymentStatus === "payment_confirmed") {
             const order = await getOrderById(id);
             if (order) {

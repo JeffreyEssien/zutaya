@@ -36,7 +36,7 @@ const features = [
     {
         icon: Truck,
         title: "Swift Delivery",
-        desc: "Same-day in Lagos, nationwide interstate shipping available.",
+        desc: "Same-day and next-day delivery across all Lagos zones.",
         accent: "bg-green-50 text-green-600",
     },
     {
