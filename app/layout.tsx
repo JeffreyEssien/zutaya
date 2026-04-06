@@ -20,12 +20,28 @@ const playfair = Playfair_Display({
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
 
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.zutayang.com").replace(/\/+$/, "");
+  const title = settings?.siteName ? `${settings.siteName} | Premium Meat Delivery` : "Zúta Ya | Premium Meat Delivery · Lagos";
+  const description = "Premium meat delivery in Lagos. Fresh, chilled, and frozen cuts delivered to your door.";
+
   return {
-    title: settings?.siteName ? `${settings.siteName} | Premium Meat Delivery` : "Zúta Ya | Premium Meat Delivery · Lagos",
-    description: "Premium meat delivery in Lagos. Fresh, chilled, and frozen cuts delivered to your door.",
-    icons: settings?.faviconUrl ? {
-      icon: settings.faviconUrl
-    } : undefined
+    title,
+    description,
+    icons: settings?.faviconUrl ? { icon: settings.faviconUrl } : { icon: "/og-image.jpg" },
+    openGraph: {
+      title,
+      description,
+      url: siteUrl,
+      siteName: "Zúta Ya",
+      images: [{ url: `${siteUrl}/og-image.jpg`, width: 1200, height: 1200, alt: "Zúta Ya Logo" }],
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [`${siteUrl}/og-image.jpg`],
+    },
   };
 }
 
