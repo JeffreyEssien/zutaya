@@ -5,6 +5,7 @@ import { deleteCoupon, toggleCouponStatus } from "@/lib/queries";
 import { useRouter } from "next/navigation";
 import Badge from "@/components/ui/Badge";
 import { useState } from "react";
+import { logAction } from "@/lib/auditClient";
 
 export default function CouponList({ initialCoupons }: { initialCoupons: Coupon[] }) {
     const router = useRouter();
@@ -14,6 +15,7 @@ export default function CouponList({ initialCoupons }: { initialCoupons: Coupon[
         if (!confirm("Delete this coupon?")) return;
         try {
             await deleteCoupon(id);
+            logAction("delete", "coupon", id, "Deleted coupon");
             router.refresh();
         } catch (e) {
             alert("Failed to delete");
@@ -24,6 +26,7 @@ export default function CouponList({ initialCoupons }: { initialCoupons: Coupon[
         setLoadingIds(prev => [...prev, id]);
         try {
             await toggleCouponStatus(id, !currentStatus);
+            logAction("update", "coupon", id, `Coupon ${!currentStatus ? "activated" : "deactivated"}`);
             router.refresh();
         } catch (e) {
             alert("Failed to update status");

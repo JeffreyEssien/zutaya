@@ -793,3 +793,192 @@ export async function sendSubscriptionConfirmedEmail(
     console.error("❌ Subscription confirmed email failed:", error);
   }
 }
+
+/**
+ * Notify customer their subscription order was renewed.
+ */
+export async function sendSubscriptionRenewalEmail(
+  email: string,
+  customerName: string,
+  orderId: string,
+  items: { productName: string; quantity: number; price: number }[],
+  nextOrderDate: string
+): Promise<void> {
+  if (!process.env.SMTP_PASSWORD) return;
+
+  const firstName = customerName.split(" ")[0];
+  const total = items.reduce((s, i) => s + i.price * i.quantity, 0);
+  const formattedDate = new Date(nextOrderDate).toLocaleDateString("en-NG", {
+    weekday: "long", year: "numeric", month: "long", day: "numeric",
+  });
+
+  const itemRows = items.map(i => `
+    <tr>
+      <td style="padding: 8px 0; border-bottom: 1px solid #f3ede3; font-size: 14px; color: #1A1A1A;">${i.productName}</td>
+      <td style="padding: 8px 0; border-bottom: 1px solid #f3ede3; text-align: center; font-size: 14px; color: #7A5C3A;">×${i.quantity}</td>
+      <td style="padding: 8px 0; border-bottom: 1px solid #f3ede3; text-align: right; font-size: 14px; font-weight: 600; color: #1A1A1A;">₦${(i.price * i.quantity).toLocaleString()}</td>
+    </tr>`).join("");
+
+  const html = `
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#FDF6EC;">
+<div style="max-width:600px;margin:0 auto;padding:20px;">
+  <div style="background:#1A1A1A;border-bottom:4px solid #C0392B;border-radius:16px 16px 0 0;padding:40px 32px;text-align:center;">
+    <h1 style="color:#FDF6EC;font-size:32px;letter-spacing:6px;margin:0 0 6px;font-family:Georgia,serif;">${SITE_NAME}</h1>
+    <p style="font-size:12px;color:#C8955A;margin:0;letter-spacing:2px;text-transform:uppercase;">Subscription Renewal</p>
+  </div>
+  <div style="background:white;padding:40px 32px;border-left:1px solid #f3ede3;border-right:1px solid #f3ede3;">
+    <div style="text-align:center;margin-bottom:24px;">
+      <div style="display:inline-block;width:72px;height:72px;line-height:72px;font-size:36px;background:#C0392B20;border-radius:50%;">🔄</div>
+    </div>
+    <h2 style="font-size:22px;color:#1A1A1A;text-align:center;margin:0 0 8px;font-family:Georgia,serif;">Your Box is on the Way, ${firstName}!</h2>
+    <p style="font-size:15px;color:#7A5C3A;margin:0 0 24px;line-height:1.7;text-align:center;">
+      We've automatically renewed your subscription and placed order <strong style="color:#C0392B;">${orderId}</strong>.
+    </p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+      <thead><tr>
+        <th style="text-align:left;padding:8px 0;border-bottom:2px solid #C8955A30;font-size:11px;color:#7A5C3A;text-transform:uppercase;letter-spacing:1px;">Item</th>
+        <th style="text-align:center;padding:8px 0;border-bottom:2px solid #C8955A30;font-size:11px;color:#7A5C3A;text-transform:uppercase;letter-spacing:1px;">Qty</th>
+        <th style="text-align:right;padding:8px 0;border-bottom:2px solid #C8955A30;font-size:11px;color:#7A5C3A;text-transform:uppercase;letter-spacing:1px;">Price</th>
+      </tr></thead>
+      <tbody>${itemRows}</tbody>
+      <tfoot><tr>
+        <td colspan="2" style="padding:12px 0;font-size:14px;font-weight:700;color:#1A1A1A;">Total</td>
+        <td style="padding:12px 0;text-align:right;font-size:18px;font-weight:700;color:#C0392B;">₦${total.toLocaleString()}</td>
+      </tr></tfoot>
+    </table>
+    <div style="background:#FDF6EC;border-radius:12px;padding:16px;text-align:center;border:1px solid #C8955A30;">
+      <p style="font-size:12px;color:#7A5C3A;margin:0 0 4px;text-transform:uppercase;letter-spacing:1px;">Next Renewal</p>
+      <p style="font-size:16px;font-weight:700;color:#1A1A1A;margin:0;">${formattedDate}</p>
+    </div>
+    <div style="text-align:center;margin-top:24px;">
+      <a href="${SITE_URL}/track?id=${orderId}" style="display:inline-block;padding:14px 32px;background:#C0392B;color:white;text-decoration:none;border-radius:8px;font-weight:600;font-size:14px;">Track This Order</a>
+    </div>
+  </div>
+  <div style="background:#1A1A1A;padding:20px 32px;border-radius:0 0 16px 16px;text-align:center;">
+    <p style="font-size:11px;color:#C8955A80;margin:0;">Need to pause or cancel? <a href="https://wa.me/${WHATSAPP_NUMBER}" style="color:#C8955A;">Contact us on WhatsApp</a></p>
+  </div>
+</div></body></html>`;
+
+  try {
+    await transporter.sendMail({
+      from: `"${SITE_NAME}" <${process.env.SMTP_EMAIL || SITE_EMAIL}>`,
+      to: email,
+      subject: `🔄 Subscription Renewed — Order ${orderId} | ${SITE_NAME}`,
+      html,
+    });
+  } catch (error) {
+    console.error("❌ Subscription renewal email failed:", error);
+  }
+}
+
+/**
+ * Notify customer their order is out for delivery.
+ */
+export async function sendDeliveryReminderEmail(order: Order): Promise<void> {
+  if (!process.env.SMTP_PASSWORD) return;
+
+  const firstName = order.customerName.split(" ")[0];
+  const html = `
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#FDF6EC;">
+<div style="max-width:600px;margin:0 auto;padding:20px;">
+  <div style="background:#1A1A1A;border-bottom:4px solid #C0392B;border-radius:16px 16px 0 0;padding:40px 32px;text-align:center;">
+    <h1 style="color:#FDF6EC;font-size:32px;letter-spacing:6px;margin:0 0 6px;font-family:Georgia,serif;">${SITE_NAME}</h1>
+    <p style="font-size:12px;color:#C8955A;margin:0;letter-spacing:2px;text-transform:uppercase;">Delivery Update</p>
+  </div>
+  <div style="background:white;padding:40px 32px;border-left:1px solid #f3ede3;border-right:1px solid #f3ede3;">
+    <div style="text-align:center;margin-bottom:24px;">
+      <div style="display:inline-block;width:72px;height:72px;line-height:72px;font-size:36px;background:#27AE6020;border-radius:50%;">🚚</div>
+    </div>
+    <h2 style="font-size:22px;color:#1A1A1A;text-align:center;margin:0 0 8px;font-family:Georgia,serif;">Heads Up, ${firstName}!</h2>
+    <p style="font-size:15px;color:#7A5C3A;margin:0 0 24px;line-height:1.7;text-align:center;">
+      Your order <strong style="color:#C0392B;">${order.id}</strong> is currently out for delivery. Please ensure someone is available to receive your package.
+    </p>
+    ${order.deliveryZone ? `<div style="background:#FDF6EC;border-radius:12px;padding:16px;text-align:center;border:1px solid #C8955A30;margin-bottom:24px;">
+      <p style="font-size:12px;color:#7A5C3A;margin:0 0 4px;text-transform:uppercase;letter-spacing:1px;">Delivery Zone</p>
+      <p style="font-size:16px;font-weight:700;color:#1A1A1A;margin:0;">${order.deliveryZone}</p>
+    </div>` : ""}
+    <div style="text-align:center;">
+      <a href="${SITE_URL}/track?id=${order.id}" style="display:inline-block;padding:14px 32px;background:#C0392B;color:white;text-decoration:none;border-radius:8px;font-weight:600;font-size:14px;">Track Your Order</a>
+    </div>
+  </div>
+  <div style="background:#1A1A1A;padding:20px 32px;border-radius:0 0 16px 16px;text-align:center;">
+    <p style="font-size:11px;color:#C8955A80;margin:0;">Questions? <a href="https://wa.me/${WHATSAPP_NUMBER}" style="color:#C8955A;">WhatsApp us</a></p>
+  </div>
+</div></body></html>`;
+
+  try {
+    await transporter.sendMail({
+      from: `"${SITE_NAME}" <${process.env.SMTP_EMAIL || SITE_EMAIL}>`,
+      to: order.email,
+      subject: `🚚 Your Order is On the Way — ${order.id} | ${SITE_NAME}`,
+      html,
+    });
+  } catch (error) {
+    console.error("❌ Delivery reminder email failed:", error);
+  }
+}
+
+/**
+ * Alert admin about low stock items.
+ */
+export async function sendLowStockAlertEmail(
+  items: { name: string; sku: string; stock: number; reorderLevel: number }[]
+): Promise<void> {
+  if (!process.env.SMTP_PASSWORD || items.length === 0) return;
+
+  const rows = items.map(i => `
+    <tr>
+      <td style="padding:10px 12px;border-bottom:1px solid #f3ede3;font-size:14px;color:#1A1A1A;font-weight:500;">${i.name}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #f3ede3;font-size:12px;color:#7A5C3A;font-family:monospace;">${i.sku}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #f3ede3;text-align:center;font-size:16px;font-weight:700;color:${i.stock === 0 ? '#C0392B' : '#E67E22'};">${i.stock}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #f3ede3;text-align:center;font-size:14px;color:#7A5C3A;">${i.reorderLevel}</td>
+    </tr>`).join("");
+
+  const outOfStock = items.filter(i => i.stock === 0).length;
+  const html = `
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#FDF6EC;">
+<div style="max-width:600px;margin:0 auto;padding:20px;">
+  <div style="background:#1A1A1A;border-bottom:4px solid #E67E22;border-radius:16px 16px 0 0;padding:40px 32px;text-align:center;">
+    <h1 style="color:#FDF6EC;font-size:32px;letter-spacing:6px;margin:0 0 6px;font-family:Georgia,serif;">${SITE_NAME}</h1>
+    <p style="font-size:12px;color:#E67E22;margin:0;letter-spacing:2px;text-transform:uppercase;">Inventory Alert</p>
+  </div>
+  <div style="background:white;padding:40px 32px;border-left:1px solid #f3ede3;border-right:1px solid #f3ede3;">
+    <div style="text-align:center;margin-bottom:24px;">
+      <div style="display:inline-block;width:72px;height:72px;line-height:72px;font-size:36px;background:#E67E2220;border-radius:50%;">⚠️</div>
+    </div>
+    <h2 style="font-size:22px;color:#1A1A1A;text-align:center;margin:0 0 8px;font-family:Georgia,serif;">Low Stock Alert</h2>
+    <p style="font-size:15px;color:#7A5C3A;margin:0 0 24px;line-height:1.7;text-align:center;">
+      <strong>${items.length}</strong> item${items.length > 1 ? "s" : ""} ${items.length > 1 ? "are" : "is"} running low${outOfStock > 0 ? ` — <span style="color:#C0392B;font-weight:700;">${outOfStock} out of stock</span>` : ""}.
+    </p>
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <thead><tr>
+        <th style="text-align:left;padding:8px 12px;border-bottom:2px solid #C8955A30;font-size:11px;color:#7A5C3A;text-transform:uppercase;letter-spacing:1px;">Item</th>
+        <th style="text-align:left;padding:8px 12px;border-bottom:2px solid #C8955A30;font-size:11px;color:#7A5C3A;text-transform:uppercase;letter-spacing:1px;">SKU</th>
+        <th style="text-align:center;padding:8px 12px;border-bottom:2px solid #C8955A30;font-size:11px;color:#7A5C3A;text-transform:uppercase;letter-spacing:1px;">Stock</th>
+        <th style="text-align:center;padding:8px 12px;border-bottom:2px solid #C8955A30;font-size:11px;color:#7A5C3A;text-transform:uppercase;letter-spacing:1px;">Reorder At</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div style="text-align:center;margin-top:24px;">
+      <a href="${SITE_URL}/admin/inventory" style="display:inline-block;padding:14px 32px;background:#E67E22;color:white;text-decoration:none;border-radius:8px;font-weight:600;font-size:14px;">Manage Inventory</a>
+    </div>
+  </div>
+  <div style="background:#1A1A1A;padding:20px 32px;border-radius:0 0 16px 16px;text-align:center;">
+    <p style="font-size:11px;color:#C8955A80;margin:0;">Automated inventory alert from ${SITE_NAME}</p>
+  </div>
+</div></body></html>`;
+
+  try {
+    await transporter.sendMail({
+      from: `"${SITE_NAME}" <${process.env.SMTP_EMAIL || SITE_EMAIL}>`,
+      to: process.env.SMTP_EMAIL || SITE_EMAIL,
+      subject: `⚠️ Low Stock Alert — ${items.length} items need attention | ${SITE_NAME}`,
+      html,
+    });
+  } catch (error) {
+    console.error("❌ Low stock alert email failed:", error);
+  }
+}

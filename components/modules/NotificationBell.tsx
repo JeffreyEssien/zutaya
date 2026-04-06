@@ -2,12 +2,13 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { createPortal } from "react-dom";
+import { motion } from "framer-motion";
 import { Bell, X, ShoppingBag, CreditCard, Package, AlertTriangle, Check } from "lucide-react";
 import { useNotificationStore, type AdminNotification } from "@/lib/notificationStore";
 import { formatCurrency } from "@/lib/formatCurrency";
 
-const POLL_INTERVAL = 30000; // 30 seconds
+const POLL_INTERVAL = 30000;
 
 const typeConfig: Record<AdminNotification["type"], { icon: typeof Bell; color: string; bg: string }> = {
     new_order: { icon: ShoppingBag, color: "text-purple-600", bg: "bg-purple-50" },
@@ -20,40 +21,44 @@ const typeConfig: Record<AdminNotification["type"], { icon: typeof Bell; color: 
 export default function NotificationBell() {
     const pathname = usePathname();
     const [isOpen, setIsOpen] = useState(false);
+    const bellRef = useRef<HTMLButtonElement>(null);
     const panelRef = useRef<HTMLDivElement>(null);
+    const [mounted, setMounted] = useState(false);
     const { notifications, unreadCount, addNotification, markAllRead, markRead } = useNotificationStore();
     const seenOrderIds = useRef<Set<string>>(new Set());
     const lastPoll = useRef<string>(new Date().toISOString());
     const initialLoad = useRef(true);
 
-    // Only render on admin pages
+    useEffect(() => { setMounted(true); }, []);
+
     if (!pathname?.startsWith("/admin")) return null;
 
-    // Close panel when clicking outside
+    // Close when clicking outside
     useEffect(() => {
+        if (!isOpen) return;
         const handleClick = (e: MouseEvent) => {
-            if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
+            const target = e.target as Node;
+            if (
+                panelRef.current && !panelRef.current.contains(target) &&
+                bellRef.current && !bellRef.current.contains(target)
+            ) {
                 setIsOpen(false);
             }
         };
         document.addEventListener("mousedown", handleClick);
         return () => document.removeEventListener("mousedown", handleClick);
-    }, []);
+    }, [isOpen]);
 
     // Poll for new orders
     const pollNotifications = useCallback(async () => {
         try {
             const res = await fetch(`/api/admin/notifications?since=${encodeURIComponent(lastPoll.current)}`);
             if (!res.ok) return;
-
             const data = await res.json();
 
-            // Process new orders
             for (const order of data.recentOrders || []) {
                 if (seenOrderIds.current.has(order.id)) continue;
                 seenOrderIds.current.add(order.id);
-
-                // Skip initial load orders — we only want new ones
                 if (initialLoad.current) continue;
 
                 addNotification({
@@ -63,16 +68,12 @@ export default function NotificationBell() {
                     orderId: order.id,
                     timestamp: order.createdAt,
                 });
-
-                // Play notification sound
                 playNotificationSound();
             }
 
-            // Check for pending payments that need attention
             for (const payment of data.pendingPayments || []) {
                 if (seenOrderIds.current.has(`payment-${payment.id}`)) continue;
                 seenOrderIds.current.add(`payment-${payment.id}`);
-
                 if (initialLoad.current) continue;
 
                 addNotification({
@@ -82,7 +83,6 @@ export default function NotificationBell() {
                     orderId: payment.id,
                     timestamp: new Date().toISOString(),
                 });
-
                 playNotificationSound();
             }
 
@@ -94,26 +94,20 @@ export default function NotificationBell() {
     }, [addNotification]);
 
     useEffect(() => {
-        // Initial poll
         pollNotifications();
-
-        // Set up interval
         const interval = setInterval(pollNotifications, POLL_INTERVAL);
         return () => clearInterval(interval);
     }, [pollNotifications]);
 
     return (
-        <div ref={panelRef} className="relative">
-            {/* Bell Button */}
+        <>
             <button
-                onClick={() => {
-                    setIsOpen(!isOpen);
-                    if (!isOpen && unreadCount > 0) markAllRead();
-                }}
-                className="relative p-2 rounded-xl hover:bg-brand-lilac/10 transition-colors cursor-pointer"
+                ref={bellRef}
+                onClick={() => setIsOpen(!isOpen)}
+                className="relative p-2 rounded-xl hover:bg-white/10 transition-colors cursor-pointer"
                 aria-label="Notifications"
             >
-                <Bell size={20} className="text-brand-dark/60" />
+                <Bell size={20} className="text-white/70" />
                 {unreadCount > 0 && (
                     <motion.span
                         initial={{ scale: 0 }}
@@ -125,18 +119,21 @@ export default function NotificationBell() {
                 )}
             </button>
 
-            {/* Dropdown Panel */}
-            <AnimatePresence>
-                {isOpen && (
-                    <motion.div
-                        initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                        transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                        className="absolute right-0 top-full mt-2 w-[380px] max-h-[500px] bg-white rounded-2xl shadow-2xl border border-brand-lilac/15 overflow-hidden z-50"
+            {/* Portal-rendered panel so it's never clipped by sidebar */}
+            {mounted && isOpen && createPortal(
+                <div className="fixed inset-0 z-[9999]">
+                    {/* Backdrop */}
+                    <div
+                        className="absolute inset-0 bg-black/20"
+                        onClick={() => setIsOpen(false)}
+                    />
+                    {/* Panel */}
+                    <div
+                        ref={panelRef}
+                        className="absolute top-2 right-2 sm:top-4 sm:right-4 w-[calc(100vw-16px)] sm:w-[400px] max-h-[80vh] bg-white rounded-2xl shadow-2xl border border-brand-lilac/15 overflow-hidden flex flex-col"
                     >
                         {/* Header */}
-                        <div className="px-5 py-4 border-b border-brand-lilac/10 flex items-center justify-between bg-brand-lilac/[0.02]">
+                        <div className="px-5 py-4 border-b border-brand-lilac/10 flex items-center justify-between bg-brand-lilac/[0.02] shrink-0">
                             <div>
                                 <h3 className="text-sm font-semibold text-brand-dark">Notifications</h3>
                                 <p className="text-[10px] text-brand-dark/40 mt-0.5">
@@ -147,19 +144,19 @@ export default function NotificationBell() {
                             </div>
                             <button
                                 onClick={() => setIsOpen(false)}
-                                className="p-1 hover:bg-brand-lilac/10 rounded-lg transition-colors cursor-pointer"
+                                className="p-1.5 hover:bg-brand-lilac/10 rounded-lg transition-colors cursor-pointer"
                             >
-                                <X size={14} className="text-brand-dark/30" />
+                                <X size={16} className="text-brand-dark/40" />
                             </button>
                         </div>
 
                         {/* Notification List */}
-                        <div className="overflow-y-auto max-h-[400px]">
+                        <div className="overflow-y-auto flex-1">
                             {notifications.length === 0 ? (
-                                <div className="py-12 text-center">
-                                    <Bell size={32} className="mx-auto text-brand-dark/10 mb-3" />
+                                <div className="py-16 text-center">
+                                    <Bell size={36} className="mx-auto text-brand-dark/10 mb-3" />
                                     <p className="text-sm text-brand-dark/30">All quiet for now</p>
-                                    <p className="text-[10px] text-brand-dark/20 mt-1">New orders will appear here</p>
+                                    <p className="text-[10px] text-brand-dark/20 mt-1">New orders will appear here in real-time</p>
                                 </div>
                             ) : (
                                 notifications.map((notif) => (
@@ -171,10 +168,23 @@ export default function NotificationBell() {
                                 ))
                             )}
                         </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </div>
+
+                        {/* Footer */}
+                        {notifications.length > 0 && (
+                            <div className="px-5 py-3 border-t border-brand-lilac/10 bg-brand-lilac/[0.02] shrink-0">
+                                <button
+                                    onClick={() => markAllRead()}
+                                    className="text-xs text-brand-purple hover:text-brand-purple/70 font-medium transition-colors cursor-pointer"
+                                >
+                                    Mark all as read
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>,
+                document.body
+            )}
+        </>
     );
 }
 
@@ -185,27 +195,26 @@ function NotificationItem({ notification, onRead }: { notification: AdminNotific
 
     return (
         <div
-            className={`px-5 py-3.5 border-b border-brand-lilac/5 hover:bg-brand-lilac/[0.03] transition-colors cursor-pointer ${!notification.read ? "bg-brand-lilac/[0.05]" : ""
-                }`}
+            className={`px-5 py-4 border-b border-brand-lilac/5 hover:bg-brand-lilac/[0.03] transition-colors cursor-pointer ${!notification.read ? "bg-brand-purple/[0.03]" : ""}`}
             onClick={onRead}
         >
             <div className="flex gap-3">
-                <div className={`w-9 h-9 rounded-xl ${config.bg} flex items-center justify-center flex-shrink-0 mt-0.5`}>
-                    <Icon size={16} className={config.color} />
+                <div className={`w-10 h-10 rounded-xl ${config.bg} flex items-center justify-center flex-shrink-0`}>
+                    <Icon size={18} className={config.color} />
                 </div>
                 <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
-                        <p className={`text-sm ${!notification.read ? "font-semibold text-brand-dark" : "text-brand-dark/70"}`}>
+                        <p className={`text-sm leading-tight ${!notification.read ? "font-semibold text-brand-dark" : "text-brand-dark/70"}`}>
                             {notification.title}
                         </p>
                         {!notification.read && (
                             <span className="w-2 h-2 rounded-full bg-brand-purple flex-shrink-0 mt-1.5" />
                         )}
                     </div>
-                    <p className="text-xs text-brand-dark/50 mt-0.5 leading-relaxed truncate">
+                    <p className="text-xs text-brand-dark/50 mt-1 leading-relaxed">
                         {notification.message}
                     </p>
-                    <p className="text-[10px] text-brand-dark/25 mt-1">{timeAgo}</p>
+                    <p className="text-[10px] text-brand-dark/25 mt-1.5">{timeAgo}</p>
                 </div>
             </div>
         </div>
@@ -242,6 +251,6 @@ function playNotificationSound() {
         oscillator.start(ctx.currentTime);
         oscillator.stop(ctx.currentTime + 0.3);
     } catch {
-        // Audio not available, skip
+        // Audio not available
     }
 }

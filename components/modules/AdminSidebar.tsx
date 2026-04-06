@@ -8,8 +8,9 @@ import { cn } from "@/lib/cn";
 import NotificationBell from "@/components/modules/NotificationBell";
 import {
     LayoutGrid, Package, ClipboardList, Tag, Users, BarChart3,
-    FileText, Box, Ticket, Settings, Truck, Mail, RefreshCw, Gift
+    FileText, Box, Ticket, Settings, Truck, Mail, RefreshCw, Gift, Clock, LogOut, Shield
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function AdminSidebar() {
     const pathname = usePathname();
@@ -86,14 +87,10 @@ export default function AdminSidebar() {
                 <nav className="flex-1 px-4 py-4">
                     <NavLinks pathname={pathname} />
                 </nav>
-                <div className="px-6 py-4 border-t border-white/10">
-                    <Link href="/" className="text-xs text-white/40 hover:text-white/70 transition-colors">
-                        ← Back to Store
-                    </Link>
-                </div>
+                <SidebarFooter />
             </aside>
 
-            {/* ── Desktop Sidebar (unchanged) ── */}
+            {/* ── Desktop Sidebar ── */}
             <aside className="hidden lg:flex flex-col w-60 shrink-0 bg-brand-dark min-h-screen">
                 <div className="px-6 py-6 border-b border-white/10">
                     <div className="flex items-center justify-between">
@@ -107,11 +104,7 @@ export default function AdminSidebar() {
                 <nav className="flex-1 px-4 py-6">
                     <NavLinks pathname={pathname} />
                 </nav>
-                <div className="px-6 py-4 border-t border-white/10">
-                    <Link href="/" className="text-xs text-white/40 hover:text-white/70 transition-colors">
-                        ← Back to Store
-                    </Link>
-                </div>
+                <SidebarFooter />
             </aside>
         </>
     );
@@ -144,6 +137,38 @@ function NavLinks({ pathname }: { pathname: string }) {
     );
 }
 
+function SidebarFooter() {
+    const router = useRouter();
+    const [loggingOut, setLoggingOut] = useState(false);
+
+    const handleLogout = async () => {
+        setLoggingOut(true);
+        try {
+            await fetch("/api/admin/logout", { method: "POST" });
+            router.push("/admin/login");
+            router.refresh();
+        } catch {
+            setLoggingOut(false);
+        }
+    };
+
+    return (
+        <div className="px-4 py-4 border-t border-white/10 space-y-2">
+            <button
+                onClick={handleLogout}
+                disabled={loggingOut}
+                className="flex items-center gap-2 w-full px-3 py-2 rounded-md text-xs text-red-400/80 hover:text-red-300 hover:bg-red-500/10 transition-colors cursor-pointer disabled:opacity-50"
+            >
+                <LogOut size={14} />
+                {loggingOut ? "Signing out..." : "Sign Out"}
+            </button>
+            <Link href="/" className="flex items-center gap-2 px-3 py-1 text-xs text-white/30 hover:text-white/60 transition-colors">
+                ← Back to Store
+            </Link>
+        </div>
+    );
+}
+
 const ICON_MAP: Record<string, React.ElementType> = {
     grid: LayoutGrid,
     package: Package,
@@ -158,6 +183,8 @@ const ICON_MAP: Record<string, React.ElementType> = {
     mail: Mail,
     refresh: RefreshCw,
     gift: Gift,
+    clock: Clock,
+    shield: Shield,
     cog: Settings,
 };
 

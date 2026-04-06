@@ -4,6 +4,7 @@ import { useState } from "react";
 import { formatCurrency } from "@/lib/formatCurrency";
 import Button from "@/components/ui/Button";
 import { Plus, Trash2, ShoppingBag, X, Package, User, MapPin, CreditCard, Truck, FileText } from "lucide-react";
+import { logAction } from "@/lib/auditClient";
 
 interface OrderItem {
     productName: string;
@@ -161,6 +162,7 @@ export default function AdminCreateOrder({ onClose, onSuccess }: AdminCreateOrde
                 throw new Error(data.error || "Failed to create order");
             }
 
+            logAction("create", "order", data.id, `Admin-created order for ${customerName}`);
             onSuccess();
         } catch (err: any) {
             setError(err.message || "Something went wrong");

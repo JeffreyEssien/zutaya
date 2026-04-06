@@ -10,6 +10,7 @@ import {
     Megaphone, Globe, Phone, MessageCircle, MapPin, Type,
     Instagram, Twitter, Music2, Facebook, BookOpen, Plus, Trash2
 } from "lucide-react";
+import { logAction } from "@/lib/auditClient";
 
 export default function SiteSettingsForm() {
     const [settings, setSettings] = useState<Partial<SiteSettings>>({});
@@ -61,6 +62,7 @@ export default function SiteSettingsForm() {
         try {
             const payload = { ...settings, aboutStats: JSON.stringify(aboutStats) };
             await updateSiteSettings(payload);
+            logAction("update", "settings", undefined, "Updated site settings");
             toast.success("Settings saved successfully.");
         } catch {
             toast.error("Failed to save settings.");

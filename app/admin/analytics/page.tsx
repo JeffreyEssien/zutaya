@@ -1,6 +1,3 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import {
     getOrders,
     getProducts,
@@ -9,50 +6,35 @@ import {
     getInventoryLogs,
     getInventoryItems
 } from "@/lib/queries";
-import { calculateAnalytics, AnalyticsData } from "@/lib/analytics";
-import AnalyticsDashboardComponent from "@/components/modules/AnalyticsDashboard";
-import { Order, Product, Profile, Coupon, InventoryLog, InventoryItem } from "@/types";
+import { calculateAnalytics } from "@/lib/analytics";
+import AnalyticsDashboard from "@/components/modules/AnalyticsDashboard";
 
-export default function AnalyticsPage() {
-    const [data, setData] = useState<AnalyticsData | null>(null);
-    const [loading, setLoading] = useState(true);
+export const dynamic = "force-dynamic";
 
-    useEffect(() => {
-        async function loadData() {
-            try {
-                const [orders, products, customers, coupons, logs, items] = await Promise.all([
-                    getOrders(),
-                    getProducts(),
-                    getCustomers(),
-                    getCoupons(),
-                    getInventoryLogs(),
-                    getInventoryItems()
-                ]);
+export default async function AnalyticsPage() {
+    try {
+        const [orders, products, customers, coupons, inventoryLogs, inventoryItems] = await Promise.all([
+            getOrders().catch(() => []),
+            getProducts().catch(() => []),
+            getCustomers().catch(() => []),
+            getCoupons().catch(() => []),
+            getInventoryLogs().catch(() => []),
+            getInventoryItems().catch(() => []),
+        ]);
 
-                const analytics = calculateAnalytics(orders, products, customers, coupons, logs, items);
-                setData(analytics);
-            } catch (error) {
-                console.error("Failed to load analytics data", error);
-            } finally {
-                setLoading(false);
-            }
-        }
+        const data = calculateAnalytics(orders, products, customers, coupons, inventoryLogs, inventoryItems);
 
-        loadData();
-    }, []);
-
-    if (loading) {
+        return <AnalyticsDashboard data={data} />;
+    } catch (err) {
+        console.error("Analytics page error:", err);
         return (
-            <div className="flex items-center justify-center min-h-[60vh]">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-purple mx-auto mb-4"></div>
-                    <p className="text-brand-dark/60">Crunching the numbers...</p>
-                </div>
+            <div className="p-10 text-center">
+                <h1 className="font-serif text-2xl text-brand-dark mb-2">Analytics Error</h1>
+                <p className="text-brand-dark/50 text-sm">Failed to load analytics data. Ensure all database tables are set up.</p>
+                <pre className="mt-4 text-xs text-red-500 bg-red-50 p-4 rounded-lg max-w-lg mx-auto text-left overflow-auto">
+                    {String(err)}
+                </pre>
             </div>
         );
     }
-
-    if (!data) return <div>Error loading data.</div>;
-
-    return <AnalyticsDashboardComponent data={data} />;
 }

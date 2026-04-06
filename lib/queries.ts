@@ -1350,6 +1350,88 @@ export async function getActiveSubscriptionsDueToday(): Promise<Subscription[]> 
     return (data || []).map(toSubscription);
 }
 
+export async function advanceSubscriptionNextDate(id: string, frequency: Subscription["frequency"]): Promise<void> {
+    const supabase = getSupabaseClient();
+    if (!supabase) return;
+
+    const now = new Date();
+    if (frequency === "weekly") now.setDate(now.getDate() + 7);
+    else if (frequency === "biweekly") now.setDate(now.getDate() + 14);
+    else now.setMonth(now.getMonth() + 1);
+
+    await supabase.from("subscriptions").update({
+        next_order_date: now.toISOString().slice(0, 10),
+        updated_at: new Date().toISOString(),
+    }).eq("id", id);
+}
+
+export async function getOrdersOutForDelivery(): Promise<Order[]> {
+    const supabase = getSupabaseClient();
+    if (!supabase) return [];
+
+    const { data, error } = await supabase
+        .from("orders")
+        .select("*")
+        .eq("status", "out_for_delivery")
+        .order("created_at", { ascending: false });
+
+    if (error) return [];
+    return (data || []).map(toOrder);
+}
+
+export async function getLowStockInventory(threshold?: number): Promise<InventoryItem[]> {
+    const supabase = getSupabaseClient();
+    if (!supabase) return [];
+
+    const limit = threshold ?? 5;
+    const { data, error } = await supabase
+        .from("inventory_items")
+        .select("*")
+        .lte("stock", limit)
+        .order("stock", { ascending: true });
+
+    if (error) return [];
+    return (data || []).map((item: any) => ({
+        id: item.id,
+        sku: item.sku,
+        name: item.name,
+        costPrice: Number(item.cost_price),
+        sellingPrice: Number(item.selling_price),
+        stock: item.stock,
+        reorderLevel: item.reorder_level,
+        supplier: item.supplier || undefined,
+        createdAt: item.created_at,
+        updatedAt: item.updated_at,
+    }));
+}
+
+export async function getCronLogs(limit = 50): Promise<any[]> {
+    const supabase = getSupabaseClient();
+    if (!supabase) return [];
+
+    const { data, error } = await supabase
+        .from("cron_logs")
+        .select("*")
+        .order("ran_at", { ascending: false })
+        .limit(limit);
+
+    if (error) return [];
+    return data || [];
+}
+
+export async function insertCronLog(log: { job_name: string; status: string; details?: string; items_processed?: number }): Promise<void> {
+    const supabase = getSupabaseClient();
+    if (!supabase) return;
+
+    await supabase.from("cron_logs").insert({
+        job_name: log.job_name,
+        status: log.status,
+        details: log.details || null,
+        items_processed: log.items_processed || 0,
+        ran_at: new Date().toISOString(),
+    });
+}
+
 // ═══════════════════════════════════════
 // Newsletter Queries
 // ═══════════════════════════════════════

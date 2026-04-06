@@ -7,6 +7,7 @@ import { uploadProductImage } from "@/lib/uploadImage";
 import Button from "@/components/ui/Button";
 import { toast } from "sonner";
 import Image from "next/image";
+import { logAction } from "@/lib/auditClient";
 
 interface CategoryFormProps {
     initialData?: Category | null;
@@ -57,9 +58,11 @@ export default function CategoryForm({ initialData, onSuccess, onCancel }: Categ
         try {
             if (initialData) {
                 await updateCategory(initialData.id, form);
+                logAction("update", "category", initialData.id, `Updated category: ${form.name}`);
                 toast.success("Category updated");
             } else {
                 await createCategory(form);
+                logAction("create", "category", undefined, `Created category: ${form.name}`);
                 toast.success("Category created");
             }
             onSuccess();

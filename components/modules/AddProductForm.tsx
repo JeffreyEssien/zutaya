@@ -8,6 +8,7 @@ import { createProduct, updateProduct, createInventoryItem, getInventoryItems, g
 import { revalidateShop } from "@/app/actions";
 import RichTextEditor from "@/components/modules/RichTextEditor";
 import { toast } from "sonner";
+import { logAction } from "@/lib/auditClient";
 
 export default function AddProductForm({ initialData }: { initialData?: Product | null }) {
     const [loading, setLoading] = useState(false);
@@ -131,6 +132,7 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                     prepOptions: prepOptions,
                     minWeightKg: form.minWeightKg ? parseFloat(form.minWeightKg) : null,
                 });
+                logAction("update", "product", initialData.id, `Updated product: ${form.title}`);
                 await revalidateShop();
                 toast.success("Product updated!");
             } else {
@@ -174,6 +176,7 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                     prepOptions: prepOptions,
                     minWeightKg: form.minWeightKg ? parseFloat(form.minWeightKg) : null,
                 });
+                logAction("create", "product", undefined, `Created product: ${form.title}`);
                 await revalidateShop();
 
                 toast.success("Product created!");

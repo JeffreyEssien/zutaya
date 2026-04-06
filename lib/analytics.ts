@@ -86,6 +86,36 @@ export function calculateAnalytics(
     const oneDay = 24 * 60 * 60 * 1000;
     const todayStart = now.getTime() - (now.getTime() % oneDay);
 
+    // Ensure items is always an array (may arrive as JSON string from DB)
+    // Normalize item shape: some have {product: {id, price}}, others have flat {productId, name, price}
+    orders = orders.map(o => {
+        const rawItems = typeof o.items === "string" ? JSON.parse(o.items) : Array.isArray(o.items) ? o.items : [];
+        return {
+            ...o,
+            items: rawItems.map((item: any) => {
+                if (item.product?.id) return item; // already CartItem shape
+                return {
+                    product: {
+                        id: item.productId || item.product_id || "unknown",
+                        name: item.name || item.productName || "Unknown",
+                        slug: "",
+                        price: item.price || 0,
+                        image: item.image || "",
+                        images: [],
+                        description: "",
+                        category: item.category || "",
+                        brand: "",
+                        stock: 0,
+                        variants: [],
+                        isFeatured: false,
+                        isNew: false,
+                    },
+                    variant: item.variant ? (typeof item.variant === "string" ? { name: item.variant } : item.variant) : undefined,
+                    quantity: item.quantity || 1,
+                };
+            }),
+        };
+    });
 
     // --- 1. Sales & Revenue ---
     const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);

@@ -11,6 +11,7 @@ import AddProductForm from "@/components/modules/AddProductForm";
 import { StorageBadge } from "@/components/ui/StorageBadge";
 import { deleteProduct } from "@/lib/queries";
 import { revalidateShop } from "@/app/actions";
+import { logAction } from "@/lib/auditClient";
 
 interface AdminProductsContentProps {
     products: Product[];
@@ -43,6 +44,7 @@ export default function AdminProductsContent({ products }: AdminProductsContentP
         if (confirm("Are you sure you want to delete this product? This action cannot be undone.")) {
             try {
                 await deleteProduct(id);
+                logAction("delete", "product", id, `Deleted product`);
                 await revalidateShop();
                 alert("Product deleted successfully");
                 window.location.reload();

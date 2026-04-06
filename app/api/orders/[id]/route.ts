@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { updateOrderStatus, updatePaymentInfo, getOrderById } from "@/lib/queries";
 import { sendOrderDeliveredEmail, sendPaymentApprovedEmail, sendReviewRequestEmail } from "@/lib/email";
+import { getCurrentAdmin, logAdminAction } from "@/lib/adminAuth";
 import type { Order } from "@/types";
 import { ORDER_STATUSES } from "@/lib/constants";
 
@@ -69,6 +70,20 @@ export async function PUT(
 
         await updateOrderStatus(id, status as Order["status"]);
 
+        // Audit log
+        const admin = await getCurrentAdmin();
+        if (admin) {
+            await logAdminAction({
+                adminId: admin.id,
+                adminEmail: admin.email,
+                adminName: admin.name,
+                action: "status_change",
+                entityType: "order",
+                entityId: id,
+                details: `Changed order status from "${order.status}" to "${status}"`,
+            });
+        }
+
         revalidatePath("/admin");
         revalidatePath("/admin/orders");
 
@@ -101,6 +116,20 @@ export async function PATCH(
             senderName: senderName || undefined,
             paymentStatus: paymentStatus || undefined,
         });
+
+        // Audit log
+        const admin = await getCurrentAdmin();
+        if (admin) {
+            await logAdminAction({
+                adminId: admin.id,
+                adminEmail: admin.email,
+                adminName: admin.name,
+                action: "payment_update",
+                entityType: "order",
+                entityId: id,
+                details: `Payment ${paymentStatus || "updated"}${senderName ? ` — sender: ${senderName}` : ""}`,
+            });
+        }
 
         revalidatePath("/admin");
         revalidatePath("/admin/orders");

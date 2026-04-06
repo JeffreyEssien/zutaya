@@ -97,7 +97,7 @@ There are no test scripts configured.
 - **Section 6.2:** ~~Sequential order status validation~~ — DONE. API enforces one-step-at-a-time transitions. Admin UI only shows valid next statuses.
 - **Section 6.4:** New checkout fields: prep_instructions, delivery date/slot selection.
 - **Section 9.4:** Recipes CMS (not started).
-- **Section 12:** Cron jobs (subscription renewals, delivery reminders, expiry sweep).
+- **Section 12:** ~~Cron jobs~~ — DONE. Three Vercel Cron jobs: subscription renewals (7am), delivery reminders (9am), inventory sweep (6am). Admin dashboard at `/admin/cron` with manual trigger + execution history. `cron_logs` table tracks all runs. Email templates for renewal, delivery reminder, and low stock alert.
 - **Section 14 (migration):** RLS policy tightening (migration 014).
 - **Section 15:** Pre-launch testing checklist items.
 - **Custom texts wiring:** `lib/textDefaults.ts` has TEXT_GROUPS and `getText()` but admin settings form doesn't render grouped editor yet, and components don't call `getText()` yet.
@@ -107,3 +107,31 @@ There are no test scripts configured.
 - Each feature should be done thoroughly, well featured and all features must be working, no skeletons
 - Use as little tokens as possible
 - Always save context to this file to help you know where you are at all times
+
+Still TODO
+
+  High Priority (Core Features)
+
+  1. Section 6.3 — Order ID Format: No ZY-YYYYMMDD-XXXX format implemented. Orders still use default UUIDs.
+  2. Section 6.4 — New Checkout Fields: prep_instructions, requested_delivery_date, requested_delivery_slot, packaging_fee are NOT in CheckoutForm. DeliveryScheduler
+  component exists but is not wired.
+  3. Section 6.5 — Coupon Usage Increment: increment_coupon_usage is never called after order placement.
+  4. Section 7.1 — Delivery Fee: OrderDetailPanel has no editable delivery_fee field for admin to enter Uber fee post-dispatch.
+  5. Section 7.2 — Delivery Availability API: No GET /api/delivery/availability route. DeliveryScheduler exists but can't fetch slot availability. increment_delivery_capacity
+   not called on order placement.
+  6. Section 9.4 — Recipes CMS: No /admin/recipes route, no /api/recipes, no recipe pages. Migration 006 exists but no app code. Homepage missing "Recipe Spotlight" section
+  (#7 in section order).
+  7. Section 10.2 — OrderDetailPanel Additions: Missing delivery date/slot display, prep instructions, packaging/prep fee line items, storage badges on line items, editable
+  delivery fee.
+  8. Section 10.5 — Dashboard Meat Metrics: "Total kg sold", "Expiring stock" metric cards likely missing.
+  9. Section 10.6 — Analytics Meat Charts: "Kg Sold by Category" bar chart, "Gross Margin" line chart, "Delivery Zone Breakdown" pie chart — likely incomplete.
+  10. Section 11.1 — Notifications: expiringStock data point not added to notification polling.
+
+  Medium Priority
+
+  11. Section 1.2 — Startup Guard: No server-side env var guard in lib/supabase.ts (missing ADMIN_SESSION_SECRET, SUPABASE_SERVICE_ROLE_KEY, ADMIN_PASSWORD_HASH check).
+  12. Section 13.1 — Homepage Sections: Missing Announcement Bar (#1) and Recipe Spotlight (#7).
+  13. Section 14 — RLS Policies: Migration file 014_rls_policies.sql exists but needs verification it's complete.
+  14. Section 15 — Pre-launch Testing: No automated tests or verified checklist.
+  15. Custom Texts Wiring: getText() exists in lib/textDefaults.ts but no components actually call it yet. Admin settings form doesn't render the grouped editor.
+

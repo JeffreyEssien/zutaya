@@ -2,6 +2,7 @@
 
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Lock, Mail, Eye, EyeOff, AlertCircle } from "lucide-react";
 
 export default function AdminLoginPage() {
     return (
@@ -12,7 +13,9 @@ export default function AdminLoginPage() {
 }
 
 function LoginForm() {
+    const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const router = useRouter();
@@ -27,15 +30,17 @@ function LoginForm() {
             const res = await fetch("/api/admin/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ password }),
+                body: JSON.stringify({ email, password }),
             });
+
+            const data = await res.json();
 
             if (res.ok) {
                 const redirectTo = searchParams.get("from") || "/admin";
                 router.push(redirectTo);
                 router.refresh();
             } else {
-                setError("Invalid password");
+                setError(data.error || "Invalid credentials");
             }
         } catch {
             setError("Something went wrong. Please try again.");
@@ -45,43 +50,94 @@ function LoginForm() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-neutral-50 px-4">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-neutral-50 via-white to-neutral-100 px-4">
             <div className="w-full max-w-sm">
-                <div className="text-center mb-8">
+                {/* Logo */}
+                <div className="text-center mb-10">
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-brand-dark rounded-2xl mb-4 shadow-lg">
+                        <Lock size={24} className="text-white" />
+                    </div>
                     <h1 className="font-serif text-3xl text-brand-dark tracking-wider">Zúta Ya</h1>
-                    <p className="text-brand-dark/50 text-sm mt-1">Admin Access</p>
+                    <p className="text-brand-dark/40 text-xs mt-1 uppercase tracking-widest">Admin Portal</p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-brand-lilac/10 p-6 space-y-4">
+                <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-xl shadow-brand-dark/5 border border-brand-lilac/10 p-7 space-y-5">
+                    {/* Email */}
                     <div>
-                        <label htmlFor="password" className="block text-xs text-brand-dark/60 mb-1">
-                            Admin Password
+                        <label htmlFor="email" className="block text-[10px] text-brand-dark/40 mb-1.5 uppercase tracking-wider font-medium">
+                            Email Address
                         </label>
-                        <input
-                            id="password"
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Enter admin password"
-                            className="w-full border border-brand-lilac/20 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/30"
-                            autoFocus
-                        />
+                        <div className="relative">
+                            <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-dark/25" />
+                            <input
+                                id="email"
+                                type="email"
+                                value={email}
+                                onChange={(e) => { setEmail(e.target.value); setError(""); }}
+                                placeholder="admin@zutayang.com"
+                                className="w-full border border-brand-lilac/20 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple/40 transition-all bg-white"
+                                autoFocus
+                                autoComplete="email"
+                            />
+                        </div>
                     </div>
 
+                    {/* Password */}
+                    <div>
+                        <label htmlFor="password" className="block text-[10px] text-brand-dark/40 mb-1.5 uppercase tracking-wider font-medium">
+                            Password
+                        </label>
+                        <div className="relative">
+                            <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-dark/25" />
+                            <input
+                                id="password"
+                                type={showPassword ? "text" : "password"}
+                                value={password}
+                                onChange={(e) => { setPassword(e.target.value); setError(""); }}
+                                placeholder="Enter your password"
+                                className="w-full border border-brand-lilac/20 rounded-xl pl-10 pr-11 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple/40 transition-all bg-white"
+                                autoComplete="current-password"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-brand-dark/25 hover:text-brand-dark/50 transition-colors"
+                                tabIndex={-1}
+                            >
+                                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Error */}
                     {error && (
-                        <p className="text-red-500 text-sm">{error}</p>
+                        <div className="flex items-center gap-2 px-3.5 py-2.5 bg-red-50 border border-red-100 rounded-xl">
+                            <AlertCircle size={14} className="text-red-500 shrink-0" />
+                            <p className="text-red-600 text-xs">{error}</p>
+                        </div>
                     )}
 
+                    {/* Submit */}
                     <button
                         type="submit"
-                        disabled={loading || !password}
-                        className="w-full bg-brand-purple text-white rounded-md py-2.5 text-sm font-medium hover:bg-brand-purple/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={loading || !email || !password}
+                        className="w-full bg-brand-dark text-white rounded-xl py-3 text-sm font-medium hover:bg-brand-dark/90 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
                     >
-                        {loading ? "Signing in..." : "Sign In"}
+                        {loading ? (
+                            <span className="flex items-center justify-center gap-2">
+                                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                Signing in...
+                            </span>
+                        ) : (
+                            "Sign In"
+                        )}
                     </button>
                 </form>
+
+                <p className="text-center text-[10px] text-brand-dark/20 mt-6">
+                    All admin actions are monitored and logged
+                </p>
             </div>
         </div>
     );
 }
-

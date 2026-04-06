@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Button from "@/components/ui/Button";
 import { createCoupon } from "@/lib/queries";
+import { logAction } from "@/lib/auditClient";
 
 export default function CouponForm({ onSuccess }: { onSuccess: () => void }) {
     const [code, setCode] = useState("");
@@ -50,6 +51,7 @@ export default function CouponForm({ onSuccess }: { onSuccess: () => void }) {
                 discountPercent: parseInt(discount),
                 isActive: true,
             });
+            logAction("create", "coupon", undefined, `Created coupon: ${code} (${discount}%)`);
             setCode("");
             setDiscount("");
             setWarning(null);

@@ -6,6 +6,7 @@ import { updateOrderStatus, updateOrderNotes, updatePaymentInfo } from "@/lib/qu
 import { WHATSAPP_NUMBER } from "@/lib/constants";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
+import { logAction } from "@/lib/auditClient";
 
 const statusVariant: Record<Order["status"], "warning" | "info" | "success"> = {
     pending: "warning",
@@ -33,6 +34,7 @@ export default function OrderDetailPanel({ order, onClose, onUpdate }: OrderDeta
         setIsUpdatingStatus(true);
         try {
             await updateOrderStatus(order.id, status);
+            logAction("update", "order", order.id, `Status changed to ${status}`);
             if (onUpdate) onUpdate();
         } catch (error) {
             alert("Failed to update status");
@@ -45,6 +47,7 @@ export default function OrderDetailPanel({ order, onClose, onUpdate }: OrderDeta
         setIsSavingNotes(true);
         try {
             await updateOrderNotes(order.id, notes);
+            logAction("update", "order", order.id, "Updated order notes");
             alert("Notes saved");
             if (onUpdate) onUpdate();
         } catch (error) {
@@ -59,6 +62,7 @@ export default function OrderDetailPanel({ order, onClose, onUpdate }: OrderDeta
         setIsApprovingPayment(true);
         try {
             await updatePaymentInfo(order.id, { paymentStatus: "payment_confirmed" });
+            logAction("update", "order", order.id, "Payment approved (bank transfer confirmed)");
             if (onUpdate) onUpdate();
         } catch (error) {
             alert("Failed to approve payment");

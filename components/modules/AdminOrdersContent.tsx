@@ -10,6 +10,7 @@ import OrderDetailPanel from "@/components/modules/OrderDetailPanel";
 import AdminCreateOrder from "@/components/modules/AdminCreateOrder";
 import { Plus } from "lucide-react";
 import { ORDER_STATUSES } from "@/lib/constants";
+import { logAction } from "@/lib/auditClient";
 
 const statusVariant: Record<Order["status"], "warning" | "info" | "success"> = {
     pending: "warning",
@@ -112,6 +113,8 @@ export default function AdminOrdersContent({ initialOrders }: AdminOrdersContent
                 const msg = errData?.error || "Failed to update status";
                 alert(msg);
                 router.refresh();
+            } else {
+                logAction("update", "order", id, `Status changed to ${newStatus} (inline)`);
             }
         } catch (error) {
             console.error(error);
