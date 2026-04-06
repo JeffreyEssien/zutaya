@@ -31,7 +31,7 @@ export async function proxy(request: NextRequest) {
 
     // Validate token against DB
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!url || !key) {
         // Fallback: allow if env not set (dev)

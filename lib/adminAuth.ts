@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { getSupabaseClient } from "@/lib/supabase";
+import { getSupabaseServiceClient } from "@/lib/supabase";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 
@@ -22,7 +22,7 @@ export async function authenticateAdmin(
     email: string,
     password: string
 ): Promise<{ admin: AdminUser; token: string } | null> {
-    const supabase = getSupabaseClient();
+    const supabase = getSupabaseServiceClient();
     if (!supabase) return null;
 
     const { data, error } = await supabase
@@ -72,7 +72,7 @@ export async function authenticateAdmin(
  * Validate a session token. Returns admin user or null.
  */
 export async function validateSession(token: string): Promise<AdminUser | null> {
-    const supabase = getSupabaseClient();
+    const supabase = getSupabaseServiceClient();
     if (!supabase || !token) return null;
 
     const { data, error } = await supabase
@@ -111,7 +111,7 @@ export async function getCurrentAdmin(): Promise<AdminUser | null> {
  * Destroy a session (logout).
  */
 export async function destroySession(token: string): Promise<void> {
-    const supabase = getSupabaseClient();
+    const supabase = getSupabaseServiceClient();
     if (!supabase || !token) return;
     await supabase.from("admin_sessions").delete().eq("token", token);
 }
@@ -129,7 +129,7 @@ export async function logAdminAction(params: {
     details?: string;
     ipAddress?: string;
 }): Promise<void> {
-    const supabase = getSupabaseClient();
+    const supabase = getSupabaseServiceClient();
     if (!supabase) return;
 
     await supabase.from("admin_audit_logs").insert({
@@ -148,7 +148,7 @@ export async function logAdminAction(params: {
  * Get audit logs.
  */
 export async function getAuditLogs(limit = 200): Promise<any[]> {
-    const supabase = getSupabaseClient();
+    const supabase = getSupabaseServiceClient();
     if (!supabase) return [];
 
     const { data, error } = await supabase
