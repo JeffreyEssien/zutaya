@@ -65,8 +65,12 @@ There are no test scripts configured.
 - **Editable texts:** `site_settings.custom_texts` JSONB column stores overrides. `lib/textDefaults.ts` defines groups/defaults. `getText(customTexts, key)` returns override or default.
 - **Newsletter:** Footer signup → welcome email. Admin campaign CRUD + batch send. Token-based unsubscribe.
 - **Subscriptions:** Multi-step signup at `/subscribe`. Admin at `/admin/subscriptions`. Frequencies: weekly/biweekly/monthly.
-- **Bundles:** Full bundle builder at `/bundles` with search, filters, quantity controls, sticky summary, progress bar. Admin rules at `/admin/bundles`.
-- **Email templates** (`lib/email.ts`): order receipt, payment approved, shipped, delivered, review request, abandoned cart, newsletter welcome, campaign send, subscription confirmed.
+- **Bundles:** Full bundle builder at `/bundles` with search, filters, quantity controls, sticky summary, progress bar. Per-product prep option selection flows through cart → checkout → order → receipt → admin → email. Admin rules at `/admin/bundles`.
+- **Cart:** Per-bundle discount system (`bundleId`/`bundleDiscount`/`bundleName` on CartItem). `bundleDiscountTotal()` calculates per-group. Coupon stacks on top of bundle discounts.
+- **Email templates** (`lib/email.ts`): order receipt, payment approved, shipped, delivered, review request, abandoned cart, newsletter welcome, campaign send, subscription confirmed. All item lists include variant + prep options.
+- **OrderDetailPanel:** Redesigned with gradient header, icon-based card sections, bundle grouping, prep options per item, copy-to-clipboard (structured text of full order details), WhatsApp status messaging, contextual actions.
+- **Admin Settings:** Tabbed layout (General, Storefront, Business, Checkout, Texts). Packaging fee/label/description admin-editable from Checkout tab.
+- **Admin Sidebar:** Independent scrolling from main content. Mobile drawer with `overflow-y-auto`.
 
 ### Environment Variables
 - `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` — Supabase connection
@@ -95,7 +99,7 @@ There are no test scripts configured.
 - **Section 3:** Bcrypt admin auth with rate limiting (currently plain password comparison).
 - **Section 7.3:** DeliveryScheduler with capacity slots (`components/modules/DeliveryScheduler.tsx` exists but not wired).
 - **Section 6.2:** ~~Sequential order status validation~~ — DONE. API enforces one-step-at-a-time transitions. Admin UI only shows valid next statuses.
-- **Section 6.4:** New checkout fields: prep_instructions, delivery date/slot selection.
+- **Section 6.4:** ~~New checkout fields~~ — DONE. prep_instructions, delivery date/slot (DeliveryScheduler wired), packaging_fee in CheckoutForm.
 - **Section 9.4:** Recipes CMS (not started).
 - **Section 12:** ~~Cron jobs~~ — DONE. Three Vercel Cron jobs: subscription renewals (7am), delivery reminders (9am), inventory sweep (6am). Admin dashboard at `/admin/cron` with manual trigger + execution history. `cron_logs` table tracks all runs. Email templates for renewal, delivery reminder, and low stock alert.
 - **Section 14 (migration):** RLS policy tightening (migration 014).
@@ -112,20 +116,17 @@ Still TODO
 
   High Priority (Core Features)
 
-  1. Section 6.3 — Order ID Format: No ZY-YYYYMMDD-XXXX format implemented. Orders still use default UUIDs.
-  2. Section 6.4 — New Checkout Fields: prep_instructions, requested_delivery_date, requested_delivery_slot, packaging_fee are NOT in CheckoutForm. DeliveryScheduler
-  component exists but is not wired.
+  1. ~~Section 6.3 — Order ID Format~~ — DONE. Orders use ZY-YYYYMMDD-XXXX format.
+  2. ~~Section 6.4 — New Checkout Fields~~ — DONE. prep_instructions, delivery date/slot (DeliveryScheduler wired), packaging_fee all in CheckoutForm. queries.ts persists all fields.
   3. Section 6.5 — Coupon Usage Increment: increment_coupon_usage is never called after order placement.
   4. Section 7.1 — Delivery Fee: OrderDetailPanel has no editable delivery_fee field for admin to enter Uber fee post-dispatch.
-  5. Section 7.2 — Delivery Availability API: No GET /api/delivery/availability route. DeliveryScheduler exists but can't fetch slot availability. increment_delivery_capacity
-   not called on order placement.
+  5. ~~Section 7.2 — Delivery Availability API~~ — DONE. GET /api/delivery/availability returns slot availability. increment_delivery_capacity called on order placement.
   6. Section 9.4 — Recipes CMS: No /admin/recipes route, no /api/recipes, no recipe pages. Migration 006 exists but no app code. Homepage missing "Recipe Spotlight" section
   (#7 in section order).
-  7. Section 10.2 — OrderDetailPanel Additions: Missing delivery date/slot display, prep instructions, packaging/prep fee line items, storage badges on line items, editable
-  delivery fee.
-  8. Section 10.5 — Dashboard Meat Metrics: "Total kg sold", "Expiring stock" metric cards likely missing.
-  9. Section 10.6 — Analytics Meat Charts: "Kg Sold by Category" bar chart, "Gross Margin" line chart, "Delivery Zone Breakdown" pie chart — likely incomplete.
-  10. Section 11.1 — Notifications: expiringStock data point not added to notification polling.
+  7. ~~Section 10.2 — OrderDetailPanel Additions~~ — DONE. Delivery date/slot, prep instructions, packaging/prep fee line items, per-item prep options, bundle grouping, copy-to-clipboard. Delivery fee is read-only (admin sets defaults from delivery panel).
+  8. ~~Section 10.5 — Dashboard Meat Metrics~~ — DONE. "Total Kg Sold", "Expiring Stock" KPI cards in new Meat & Delivery tab.
+  9. ~~Section 10.6 — Analytics Meat Charts~~ — DONE. "Kg Sold by Category" bar chart, "Gross Margin" line chart, "Delivery Zone Breakdown" pie chart + zone performance table.
+  10. ~~Section 11.1 — Notifications~~ — DONE. expiringStock + lowStock data points added to notification polling and NotificationBell.
 
   Medium Priority
 
@@ -133,5 +134,5 @@ Still TODO
   12. Section 13.1 — Homepage Sections: Missing Announcement Bar (#1) and Recipe Spotlight (#7).
   13. Section 14 — RLS Policies: Migration file 014_rls_policies.sql exists but needs verification it's complete.
   14. Section 15 — Pre-launch Testing: No automated tests or verified checklist.
-  15. Custom Texts Wiring: getText() exists in lib/textDefaults.ts but no components actually call it yet. Admin settings form doesn't render the grouped editor.
+  15. ~~Custom Texts Wiring~~ — DONE. Admin settings form renders grouped TEXT_GROUPS editor. Hero, PromiseBar, NewArrivals, ShopByCategory, HomeCta, AboutSnippet, Footer all use getText().
 

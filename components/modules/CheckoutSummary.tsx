@@ -9,15 +9,23 @@ import { Package, MapPin } from "lucide-react";
 
 interface CheckoutSummaryProps {
     shippingFee: number;
+    packagingFee?: number;
 }
 
-export default function CheckoutSummary({ shippingFee }: CheckoutSummaryProps) {
-    const { items, subtotal, discount } = useCartStore();
+export default function CheckoutSummary({ shippingFee, packagingFee = 0 }: CheckoutSummaryProps) {
+    const { items, subtotal, discount, couponCode, bundleDiscountTotal, total: cartTotal } = useCartStore();
 
     const sub = subtotal();
     const shipping = shippingFee;
-    const discountAmount = sub * (discount / 100);
-    const total = Math.max(0, sub - discountAmount) + shipping;
+    const bundleDisc = bundleDiscountTotal();
+    const couponDisc = discount > 0 ? (sub - bundleDisc) * (discount / 100) : 0;
+    const prepFee = items.reduce((sum, item) => {
+        if (item.selectedPrepOptions && item.selectedPrepOptions.length > 0) {
+            return sum + item.selectedPrepOptions.reduce((s, o) => s + o.extraFee, 0) * item.quantity;
+        }
+        return sum;
+    }, 0);
+    const total = Math.max(0, sub - bundleDisc - couponDisc) + shipping + packagingFee + prepFee;
 
     return (
         <motion.div
@@ -34,7 +42,7 @@ export default function CheckoutSummary({ shippingFee }: CheckoutSummaryProps) {
             <ul className="space-y-4 mb-6">
                 {items.map((item, i) => (
                     <motion.li
-                        key={`${item.product.id}-${item.variant?.name ?? ""}`}
+                        key={`${item.product.id}-${item.variant?.name ?? ""}-${item.bundleId ?? ""}`}
                         initial={{ opacity: 0, x: 10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.1 + i * 0.05 }}
@@ -49,6 +57,9 @@ export default function CheckoutSummary({ shippingFee }: CheckoutSummaryProps) {
                         <div className="flex-1 min-w-0">
                             <p className="text-sm text-brand-dark font-medium truncate">{item.product.name}</p>
                             {item.variant && <p className="text-[10px] text-brand-dark/35">{item.variant.name}</p>}
+                            {item.bundleName && (
+                                <p className="text-[10px] text-emerald-600 font-medium">{item.bundleName} ({item.bundleDiscount}% off)</p>
+                            )}
                         </div>
                         <p className="text-sm text-brand-dark font-medium shrink-0">
                             {formatCurrency((item.variant?.price || item.product.price) * item.quantity)}
@@ -63,10 +74,16 @@ export default function CheckoutSummary({ shippingFee }: CheckoutSummaryProps) {
 
             <div className="border-t border-brand-lilac/10 pt-4 space-y-2.5">
                 <Row label="Subtotal" value={formatCurrency(sub)} />
-                {discount > 0 && (
+                {bundleDisc > 0 && (
                     <div className="flex justify-between text-sm">
-                        <span className="text-emerald-600">Discount</span>
-                        <span className="text-emerald-600 font-medium">-{formatCurrency(discountAmount)}</span>
+                        <span className="text-emerald-600">Bundle Discount</span>
+                        <span className="text-emerald-600 font-medium">-{formatCurrency(bundleDisc)}</span>
+                    </div>
+                )}
+                {couponDisc > 0 && (
+                    <div className="flex justify-between text-sm">
+                        <span className="text-emerald-600">Coupon ({couponCode})</span>
+                        <span className="text-emerald-600 font-medium">-{formatCurrency(couponDisc)}</span>
                     </div>
                 )}
                 <div className="flex justify-between text-sm text-brand-dark/50">
@@ -80,6 +97,21 @@ export default function CheckoutSummary({ shippingFee }: CheckoutSummaryProps) {
                         )}
                     </span>
                 </div>
+                {packagingFee > 0 && (
+                    <div className="flex justify-between text-sm text-brand-dark/50">
+                        <span className="flex items-center gap-1.5">
+                            <Package size={12} className="text-brand-dark/30" />
+                            Premium Packaging
+                        </span>
+                        <span className="font-medium text-brand-dark/70">{formatCurrency(packagingFee)}</span>
+                    </div>
+                )}
+                {prepFee > 0 && (
+                    <div className="flex justify-between text-sm text-brand-dark/50">
+                        <span>Prep Fee</span>
+                        <span className="font-medium text-brand-dark/70">{formatCurrency(prepFee)}</span>
+                    </div>
+                )}
             </div>
 
             <div className="border-t border-brand-lilac/10 mt-4 pt-4">

@@ -2,31 +2,17 @@
 
 import { motion } from "framer-motion";
 import { Snowflake, Truck, ShieldCheck, Clock } from "lucide-react";
+import { getText } from "@/lib/textDefaults";
 
-const promises = [
-    {
-        icon: ShieldCheck,
-        title: "Quality Guaranteed",
-        desc: "Every cut inspected and certified",
-    },
-    {
-        icon: Snowflake,
-        title: "Cold-Chain Packed",
-        desc: "Sealed cold from source to door",
-    },
-    {
-        icon: Truck,
-        title: "Same-Day Delivery",
-        desc: "Order by 12pm, get it today",
-    },
-    {
-        icon: Clock,
-        title: "Fresh Daily",
-        desc: "Sourced fresh every morning",
-    },
-];
+const promiseIcons = [ShieldCheck, Snowflake, Truck, Clock];
+const promiseKeys = ["promise.1", "promise.2", "promise.3", "promise.4"];
 
-export default function PromiseBar() {
+export default function PromiseBar({ customTexts }: { customTexts?: Record<string, string> }) {
+    const promises = promiseKeys.map((key, i) => ({
+        icon: promiseIcons[i],
+        title: getText(customTexts, `${key}.title`),
+        desc: getText(customTexts, `${key}.desc`),
+    }));
     return (
         <section className="py-12 md:py-16 px-6 border-b border-warm-tan/10">
             <div className="max-w-[1400px] mx-auto">

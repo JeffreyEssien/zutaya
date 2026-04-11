@@ -8,6 +8,7 @@ import { getSiteSettings } from "@/lib/queries";
 import type { SiteSettings } from "@/types";
 import Image from "next/image";
 import { ArrowDown } from "lucide-react";
+import { getText } from "@/lib/textDefaults";
 
 const textReveal = {
     hidden: { y: "100%", opacity: 0 },
@@ -22,7 +23,7 @@ const textReveal = {
     }),
 };
 
-export default function Hero() {
+export default function Hero({ customTexts }: { customTexts?: Record<string, string> }) {
     const [settings, setSettings] = useState<SiteSettings | null>(null);
     const sectionRef = useRef<HTMLElement>(null);
 
@@ -39,10 +40,10 @@ export default function Hero() {
         getSiteSettings().then(setSettings).catch(() => { });
     }, []);
 
-    const headingText = settings?.heroHeading || "Premium Meat. Delivered Fresh.";
+    const headingText = settings?.heroHeading || getText(customTexts, "hero.heading");
     const headingWords = typeof headingText === "string" ? headingText.split(" ") : [];
-    const subheading = settings?.heroSubheading || "Fresh, chilled, and frozen cuts sourced from trusted suppliers — cold-chain packed and delivered to your door in Lagos.";
-    const ctaText = settings?.heroCtaText || "Shop Now";
+    const subheading = settings?.heroSubheading || getText(customTexts, "hero.subheading");
+    const ctaText = settings?.heroCtaText || getText(customTexts, "hero.cta");
     const ctaLink = settings?.heroCtaLink || "/shop";
 
     return (

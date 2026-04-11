@@ -18,6 +18,7 @@ function formatItemsHtml(order: Order): string {
         <td style="padding: 12px 0; border-bottom: 1px solid #f3f0f7; font-size: 14px; color: #1a1a2e;">
           ${i.product.name}
           ${i.variant ? `<span style="color: #999; font-size: 12px;"> (${i.variant.name})</span>` : ""}
+          ${i.selectedPrepOptions && i.selectedPrepOptions.length > 0 ? `<br><span style="font-size: 11px; color: #92400e;">Prep: ${i.selectedPrepOptions.map(p => p.label).join(", ")}</span>` : ""}
         </td>
         <td style="padding: 12px 0; border-bottom: 1px solid #f3f0f7; text-align: center; font-size: 14px; color: #666;">
           ${i.quantity}
@@ -102,15 +103,30 @@ function buildReceiptHtml(order: Order): string {
           <span style="font-size: 14px; color: #10b981;">Discount${order.couponCode ? ` (${order.couponCode})` : ""}</span>
           <span style="font-size: 14px; color: #10b981;">-₦${order.discountTotal.toLocaleString()}</span>
         </div>` : ""}
-        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-          <span style="font-size: 14px; color: #888;">Shipping</span>
-          <span style="font-size: 14px; color: #666;">${order.shipping === 0 ? "Free" : `₦${order.shipping.toLocaleString()}`}</span>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+          <span style="font-size: 14px; color: #888;">Delivery Fee</span>
+          <span style="font-size: 14px; color: #666;">${(order.deliveryFee ?? order.shipping) === 0 ? "Free" : `₦${(order.deliveryFee ?? order.shipping).toLocaleString()}`}</span>
         </div>
+        ${order.packagingFee ? `
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+          <span style="font-size: 14px; color: #888;">Premium Packaging</span>
+          <span style="font-size: 14px; color: #666;">₦${order.packagingFee.toLocaleString()}</span>
+        </div>` : ""}
+        ${order.prepFee ? `
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+          <span style="font-size: 14px; color: #888;">Prep Fee</span>
+          <span style="font-size: 14px; color: #666;">₦${order.prepFee.toLocaleString()}</span>
+        </div>` : ""}
         <div style="border-top: 1px solid #f3f0f7; padding-top: 12px; display: flex; justify-content: space-between;">
           <span style="font-size: 16px; font-weight: 700; color: #1a1a2e;">Total</span>
           <span style="font-size: 20px; font-weight: 700; color: #1a1a2e;">₦${order.total.toLocaleString()}</span>
         </div>
       </div>
+      ${order.prepInstructions ? `
+      <div style="margin-top: 12px; padding: 12px 16px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px;">
+        <p style="font-size: 11px; color: #92400e; margin: 0 0 4px 0; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Prep Instructions</p>
+        <p style="font-size: 13px; color: #a16207; margin: 0;">${order.prepInstructions}</p>
+      </div>` : ""}
 
       <!-- Shipping Address -->
       <div style="margin-top: 24px; padding: 20px; background: #f8f7fa; border-radius: 12px;">
@@ -176,12 +192,16 @@ function buildAdminNotificationHtml(order: Order): string {
       <hr style="border: none; border-top: 1px solid #f3f0f7; margin: 16px 0;">
       <p><strong>Items:</strong></p>
       <ul style="padding-left: 20px;">
-        ${order.items.map(i => `<li>${i.product.name} ×${i.quantity} — ₦${((i.variant?.price || i.product.price) * i.quantity).toLocaleString()}</li>`).join("")}
+        ${order.items.map(i => `<li>${i.product.name}${i.variant ? ` (${i.variant.name})` : ""} ×${i.quantity} — ₦${((i.variant?.price || i.product.price) * i.quantity).toLocaleString()}${i.selectedPrepOptions && i.selectedPrepOptions.length > 0 ? `<br><span style="font-size: 12px; color: #92400e;">Prep: ${i.selectedPrepOptions.map(p => p.label).join(", ")}</span>` : ""}</li>`).join("")}
       </ul>
       <hr style="border: none; border-top: 1px solid #f3f0f7; margin: 16px 0;">
       <p><strong>Subtotal:</strong> ₦${order.subtotal.toLocaleString()}</p>
       ${order.discountTotal ? `<p style="color: #10b981;"><strong>Coupon Discount${order.couponCode ? ` (${order.couponCode})` : ''}:</strong> -₦${order.discountTotal.toLocaleString()}</p>` : ''}
-      <p><strong>Shipping:</strong> ${order.shipping === 0 ? 'Free' : `₦${order.shipping.toLocaleString()}`}</p>
+      <p><strong>Delivery Fee:</strong> ${(order.deliveryFee ?? order.shipping) === 0 ? 'Free' : `₦${(order.deliveryFee ?? order.shipping).toLocaleString()}`}</p>
+      ${order.packagingFee ? `<p><strong>Premium Packaging:</strong> ₦${order.packagingFee.toLocaleString()}</p>` : ''}
+      ${order.prepFee ? `<p><strong>Prep Fee:</strong> ₦${order.prepFee.toLocaleString()}</p>` : ''}
+      ${order.prepInstructions ? `<p style="color: #92400e;"><strong>Prep Instructions:</strong> ${order.prepInstructions}</p>` : ''}
+      ${order.requestedDeliveryDate ? `<p><strong>Preferred Delivery:</strong> ${order.requestedDeliveryDate}${order.requestedDeliverySlot ? ` (${order.requestedDeliverySlot})` : ''}</p>` : ''}
       <p style="font-size: 18px;"><strong>Total: ₦${order.total.toLocaleString()}</strong></p>
     </div>
   </div>

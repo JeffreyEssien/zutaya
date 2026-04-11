@@ -9,7 +9,7 @@ export default function Receipt() {
     const { lastOrder } = useOrderStore();
     if (!lastOrder) return null;
 
-    const { id, customerName, email, createdAt, items, subtotal, shipping, total, shippingAddress } = lastOrder;
+    const { id, customerName, email, createdAt, items, subtotal, shipping, total, shippingAddress, discountTotal, couponCode, deliveryFee, packagingFee, prepFee, deliveryZone, requestedDeliveryDate, requestedDeliverySlot, prepInstructions } = lastOrder;
 
     return (
         <motion.div
@@ -22,7 +22,40 @@ export default function Receipt() {
             <div className="px-8 py-7 space-y-7">
                 <CustomerSection name={customerName} email={email} address={shippingAddress} />
                 <ItemsTable items={items} />
-                <TotalsSection subtotal={subtotal} shipping={shipping} total={total} />
+                <TotalsSection
+                    subtotal={subtotal}
+                    shipping={shipping}
+                    total={total}
+                    discountTotal={discountTotal}
+                    couponCode={couponCode}
+                    deliveryFee={deliveryFee}
+                    packagingFee={packagingFee}
+                    prepFee={prepFee}
+                />
+                {(deliveryZone || requestedDeliveryDate || prepInstructions) && (
+                    <div className="border-t border-brand-lilac/10 pt-4 space-y-2">
+                        {deliveryZone && (
+                            <div className="flex justify-between text-xs text-brand-dark/50">
+                                <span>Delivery Zone</span>
+                                <span className="text-brand-dark font-medium">{deliveryZone}</span>
+                            </div>
+                        )}
+                        {requestedDeliveryDate && (
+                            <div className="flex justify-between text-xs text-brand-dark/50">
+                                <span>Preferred Delivery</span>
+                                <span className="text-brand-dark font-medium">
+                                    {requestedDeliveryDate}{requestedDeliverySlot ? ` (${requestedDeliverySlot})` : ""}
+                                </span>
+                            </div>
+                        )}
+                        {prepInstructions && (
+                            <div className="text-xs">
+                                <span className="text-brand-dark/50">Prep Instructions:</span>
+                                <p className="text-brand-dark mt-0.5 bg-amber-50 border border-amber-100 rounded px-2 py-1">{prepInstructions}</p>
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
             <ReceiptFooter />
         </motion.div>
@@ -70,7 +103,7 @@ function CustomerSection({ name, email, address }: {
     );
 }
 
-function ItemsTable({ items }: { items: { product: { name: string; price: number }; variant?: { name?: string; price?: number }; quantity: number }[] }) {
+function ItemsTable({ items }: { items: { product: { id?: string; name: string; price: number }; variant?: { name?: string; price?: number }; quantity: number; selectedPrepOptions?: { id: string; label: string; extraFee: number }[]; bundleId?: string }[] }) {
     return (
         <div>
             <Label>Items</Label>
@@ -84,14 +117,19 @@ function ItemsTable({ items }: { items: { product: { name: string; price: number
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-brand-lilac/8">
-                    {items.map((item) => {
+                    {items.map((item, idx) => {
                         const unitPrice = item.variant?.price || item.product.price;
                         return (
-                            <tr key={`${item.product.name}-${item.variant?.name ?? ""}`}>
+                            <tr key={`${item.product.id}-${item.variant?.name ?? ""}-${item.bundleId ?? ""}-${idx}`}>
                                 <td className="py-3 text-brand-dark font-medium">
                                     {item.product.name}
                                     {item.variant?.name && (
                                         <span className="block text-[10px] text-brand-dark/40 font-normal mt-0.5">{item.variant.name}</span>
+                                    )}
+                                    {item.selectedPrepOptions && item.selectedPrepOptions.length > 0 && (
+                                        <span className="block text-[10px] text-amber-700 font-normal mt-0.5">
+                                            Prep: {item.selectedPrepOptions.map(p => p.label).join(", ")}
+                                        </span>
                                     )}
                                 </td>
                                 <td className="py-3 text-center text-brand-dark/50">{item.quantity}</td>
@@ -106,11 +144,21 @@ function ItemsTable({ items }: { items: { product: { name: string; price: number
     );
 }
 
-function TotalsSection({ subtotal, shipping, total }: { subtotal: number; shipping: number; total: number }) {
+function TotalsSection({ subtotal, shipping, total, discountTotal, couponCode, deliveryFee, packagingFee, prepFee }: {
+    subtotal: number; shipping: number; total: number;
+    discountTotal?: number; couponCode?: string;
+    deliveryFee?: number; packagingFee?: number; prepFee?: number;
+}) {
+    const delivery = deliveryFee ?? shipping;
     return (
         <div className="border-t border-brand-lilac/15 pt-4 space-y-2.5">
             <TotalRow label="Subtotal" value={formatCurrency(subtotal)} />
-            <TotalRow label="Shipping" value={shipping === 0 ? "Free" : formatCurrency(shipping)} />
+            {discountTotal && discountTotal > 0 ? (
+                <TotalRow label={`Discount${couponCode ? ` (${couponCode})` : ""}`} value={`-${formatCurrency(discountTotal)}`} discount />
+            ) : null}
+            <TotalRow label="Delivery Fee" value={delivery === 0 ? "Free" : formatCurrency(delivery)} />
+            {packagingFee && packagingFee > 0 ? <TotalRow label="Premium Packaging" value={formatCurrency(packagingFee)} /> : null}
+            {prepFee && prepFee > 0 ? <TotalRow label="Prep Fee" value={formatCurrency(prepFee)} /> : null}
             <div className="border-t border-brand-lilac/10 pt-3 mt-3">
                 <TotalRow label="Total Paid" value={formatCurrency(total)} bold />
             </div>
@@ -132,9 +180,9 @@ function Label({ children }: { children: React.ReactNode }) {
     return <h3 className="text-[10px] font-semibold text-brand-dark/35 uppercase tracking-[0.2em]">{children}</h3>;
 }
 
-function TotalRow({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
+function TotalRow({ label, value, bold, discount }: { label: string; value: string; bold?: boolean; discount?: boolean }) {
     return (
-        <div className={`flex justify-between text-sm ${bold ? "text-brand-dark font-bold text-base" : "text-brand-dark/55"}`}>
+        <div className={`flex justify-between text-sm ${bold ? "text-brand-dark font-bold text-base" : discount ? "text-emerald-600" : "text-brand-dark/55"}`}>
             <span>{label}</span>
             <span>{value}</span>
         </div>

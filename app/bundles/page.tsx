@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import type { BundleRule, Product } from "@/types";
+import type { BundleRule, Product, PrepOption } from "@/types";
+import { formatCurrency } from "@/lib/formatCurrency";
 import { useCartStore } from "@/lib/cartStore";
 import { StorageBadge } from "@/components/ui/StorageBadge";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Package, Check, ShoppingCart, Minus, Plus, Search, X, ChevronRight, Sparkles } from "lucide-react";
+import { getText } from "@/lib/textDefaults";
 
 export default function BundlesPage() {
     const [bundles, setBundles] = useState<BundleRule[]>([]);
@@ -18,15 +20,20 @@ export default function BundlesPage() {
     const [addedToCart, setAddedToCart] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [filterStorage, setFilterStorage] = useState<string>("all");
-    const addItem = useCartStore((s) => s.addItem);
+    // Track prep option selections per product: productId -> PrepOption[]
+    const [productPrepSelections, setProductPrepSelections] = useState<Map<string, PrepOption[]>>(new Map());
+    const [customTexts, setCustomTexts] = useState<Record<string, string>>();
+    const addBundleToCart = useCartStore((s) => s.addBundleToCart);
 
     useEffect(() => {
         Promise.all([
             fetch("/api/bundles").then((r) => r.json()),
             fetch("/api/products").then((r) => r.json()).catch(() => []),
-        ]).then(([bundleData, productData]) => {
+            fetch("/api/settings").then((r) => r.json()).catch(() => null),
+        ]).then(([bundleData, productData, settingsData]) => {
             setBundles(bundleData);
             setProducts(productData);
+            if (settingsData?.customTexts) setCustomTexts(settingsData.customTexts);
             setLoading(false);
         });
     }, []);
@@ -69,20 +76,42 @@ export default function BundlesPage() {
         });
     };
 
+    const togglePrepOption = (productId: string, option: PrepOption) => {
+        setProductPrepSelections((prev) => {
+            const next = new Map(prev);
+            const current = next.get(productId) || [];
+            const exists = current.some((o) => o.id === option.id);
+            next.set(productId, exists ? current.filter((o) => o.id !== option.id) : [...current, option]);
+            return next;
+        });
+    };
+
+    const getPrepSelections = (productId: string): PrepOption[] => productPrepSelections.get(productId) || [];
+
+    const totalPrepFee = useMemo(() => {
+        let fee = 0;
+        for (const [id, qty] of selectedProducts.entries()) {
+            const preps = productPrepSelections.get(id) || [];
+            fee += preps.reduce((sum, o) => sum + o.extraFee, 0) * qty;
+        }
+        return fee;
+    }, [selectedProducts, productPrepSelections]);
+
     const canAddToCart = selectedBundle && totalItemCount >= selectedBundle.minItems && totalItemCount <= selectedBundle.maxItems;
 
     const handleAddBundleToCart = () => {
-        if (!canAddToCart) return;
-        for (const [productId, qty] of selectedProducts.entries()) {
-            const product = products.find((p) => p.id === productId);
-            if (product) {
-                for (let i = 0; i < qty; i++) addItem(product);
-            }
-        }
+        if (!canAddToCart || !selectedBundle) return;
+        const entries = Array.from(selectedProducts.entries()).map(([productId, quantity]) => ({
+            productId,
+            quantity,
+            prepOptions: getPrepSelections(productId),
+        }));
+        addBundleToCart(products, entries, selectedBundle.discountPercent, selectedBundle.name);
         setAddedToCart(true);
         setTimeout(() => {
             setAddedToCart(false);
             setSelectedProducts(new Map());
+            setProductPrepSelections(new Map());
             setSelectedBundle(null);
         }, 2000);
     };
@@ -143,9 +172,9 @@ export default function BundlesPage() {
                     </Link>
                     <div className="flex items-start justify-between">
                         <div>
-                            <h1 className="font-serif text-4xl md:text-5xl font-bold mb-3">Build Your Box</h1>
+                            <h1 className="font-serif text-4xl md:text-5xl font-bold mb-3">{getText(customTexts, "bundles.heading")}</h1>
                             <p className="text-warm-cream/60 text-lg max-w-lg">
-                                Pick a bundle, choose your cuts, and save big. Mix and match your favourite premium meats.
+                                {getText(customTexts, "bundles.desc")}
                             </p>
                         </div>
                         <div className="hidden md:flex items-center gap-2 bg-warm-cream/10 rounded-xl px-5 py-3">
@@ -206,6 +235,7 @@ export default function BundlesPage() {
                                             onClick={() => {
                                                 setSelectedBundle(bundle);
                                                 setSelectedProducts(new Map());
+                                                setProductPrepSelections(new Map());
                                                 setSearchQuery("");
                                                 setFilterStorage("all");
                                             }}
@@ -257,6 +287,7 @@ export default function BundlesPage() {
                                         onClick={() => {
                                             setSelectedBundle(null);
                                             setSelectedProducts(new Map());
+                                            setProductPrepSelections(new Map());
                                         }}
                                         className="inline-flex items-center gap-2 text-brand-red text-sm mb-2 hover:underline"
                                     >
@@ -424,6 +455,36 @@ export default function BundlesPage() {
                                                                     </button>
                                                                 )}
                                                             </div>
+                                                            {/* Prep options */}
+                                                            {isSelected && product.prepOptions && product.prepOptions.length > 0 && (
+                                                                <div className="mt-3 pt-3 border-t border-warm-tan/10 space-y-1.5">
+                                                                    <p className="text-[10px] font-semibold text-muted-brown/60 uppercase tracking-wider">Prep Options</p>
+                                                                    {product.prepOptions.map((opt) => {
+                                                                        const isChecked = getPrepSelections(product.id).some((s) => s.id === opt.id);
+                                                                        return (
+                                                                            <label
+                                                                                key={opt.id}
+                                                                                className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg border cursor-pointer transition-all text-xs ${
+                                                                                    isChecked
+                                                                                        ? "border-brand-red/30 bg-brand-red/5"
+                                                                                        : "border-warm-tan/15 hover:border-warm-tan/30"
+                                                                                }`}
+                                                                            >
+                                                                                <div className="flex items-center gap-2">
+                                                                                    <input
+                                                                                        type="checkbox"
+                                                                                        checked={isChecked}
+                                                                                        onChange={() => togglePrepOption(product.id, opt)}
+                                                                                        className="w-3.5 h-3.5 rounded border-warm-tan/30 text-brand-red focus:ring-brand-red/20"
+                                                                                    />
+                                                                                    <span className="text-brand-black">{opt.label}</span>
+                                                                                </div>
+                                                                                <span className="text-muted-brown font-medium">+{formatCurrency(opt.extraFee)}</span>
+                                                                            </label>
+                                                                        );
+                                                                    })}
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     </motion.div>
                                                 );
@@ -450,27 +511,41 @@ export default function BundlesPage() {
                                                     {Array.from(selectedProducts.entries()).map(([id, qty]) => {
                                                         const p = products.find((pr) => pr.id === id);
                                                         if (!p) return null;
+                                                        const preps = getPrepSelections(id);
+                                                        const itemPrepFee = preps.reduce((s, o) => s + o.extraFee, 0) * qty;
                                                         return (
-                                                            <div key={id} className="flex items-center gap-3">
-                                                                <div className="w-10 h-10 rounded-lg bg-warm-tan/10 overflow-hidden flex-shrink-0 relative">
-                                                                    {p.images?.[0] ? (
-                                                                        <Image src={p.images[0]} alt={p.name} fill className="object-cover" sizes="40px" />
-                                                                    ) : (
-                                                                        <div className="w-full h-full flex items-center justify-center text-muted-brown/20">
-                                                                            <Package size={14} />
-                                                                        </div>
-                                                                    )}
+                                                            <div key={id}>
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className="w-10 h-10 rounded-lg bg-warm-tan/10 overflow-hidden flex-shrink-0 relative">
+                                                                        {p.images?.[0] ? (
+                                                                            <Image src={p.images[0]} alt={p.name} fill className="object-cover" sizes="40px" />
+                                                                        ) : (
+                                                                            <div className="w-full h-full flex items-center justify-center text-muted-brown/20">
+                                                                                <Package size={14} />
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <p className="text-sm font-medium text-brand-black truncate">{p.name}</p>
+                                                                        <p className="text-xs text-muted-brown">x{qty} &middot; &#8358;{(p.price * qty).toLocaleString()}</p>
+                                                                    </div>
+                                                                    <button
+                                                                        onClick={() => setQty(p, 0)}
+                                                                        className="text-muted-brown/30 hover:text-brand-red transition-colors"
+                                                                    >
+                                                                        <X size={14} />
+                                                                    </button>
                                                                 </div>
-                                                                <div className="flex-1 min-w-0">
-                                                                    <p className="text-sm font-medium text-brand-black truncate">{p.name}</p>
-                                                                    <p className="text-xs text-muted-brown">x{qty} &middot; &#8358;{(p.price * qty).toLocaleString()}</p>
-                                                                </div>
-                                                                <button
-                                                                    onClick={() => setQty(p, 0)}
-                                                                    className="text-muted-brown/30 hover:text-brand-red transition-colors"
-                                                                >
-                                                                    <X size={14} />
-                                                                </button>
+                                                                {preps.length > 0 && (
+                                                                    <div className="ml-13 mt-1 space-y-0.5">
+                                                                        {preps.map((o) => (
+                                                                            <p key={o.id} className="text-[10px] text-muted-brown/60 flex justify-between">
+                                                                                <span>+ {o.label}</span>
+                                                                                <span>{formatCurrency(o.extraFee)}</span>
+                                                                            </p>
+                                                                        ))}
+                                                                    </div>
+                                                                )}
                                                             </div>
                                                         );
                                                     })}
@@ -487,9 +562,15 @@ export default function BundlesPage() {
                                                             <span>-&#8358;{Math.round(discountAmount).toLocaleString()}</span>
                                                         </div>
                                                     )}
+                                                    {totalPrepFee > 0 && (
+                                                        <div className="flex justify-between text-muted-brown">
+                                                            <span>Prep Fee</span>
+                                                            <span>&#8358;{totalPrepFee.toLocaleString()}</span>
+                                                        </div>
+                                                    )}
                                                     <div className="flex justify-between font-bold text-brand-black text-base pt-2 border-t border-warm-tan/10">
                                                         <span>Total</span>
-                                                        <span>&#8358;{Math.round(finalTotal).toLocaleString()}</span>
+                                                        <span>&#8358;{Math.round(finalTotal + totalPrepFee).toLocaleString()}</span>
                                                     </div>
                                                 </div>
                                             </>

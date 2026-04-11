@@ -6,8 +6,9 @@ import { getSiteSettings } from "@/lib/queries";
 import type { SiteSettings } from "@/types";
 import { SITE_NAME, SITE_EMAIL, WHATSAPP_NUMBER } from "@/lib/constants";
 import { Instagram, Twitter, Music2, Facebook, Mail, ArrowUpRight, MessageCircle, Check, Loader2 } from "lucide-react";
+import { getText } from "@/lib/textDefaults";
 
-export default function Footer() {
+export default function Footer({ customTexts }: { customTexts?: Record<string, string> }) {
     const [settings, setSettings] = useState<SiteSettings | null>(null);
     const [nlEmail, setNlEmail] = useState("");
     const [nlStatus, setNlStatus] = useState<"idle" | "loading" | "success" | "error" | "exists">("idle");
@@ -42,7 +43,7 @@ export default function Footer() {
     };
 
     const displayName = settings?.siteName || SITE_NAME;
-    const tagline = settings?.footerTagline || "Premium meat delivery in Lagos. Fresh, chilled, and frozen cuts delivered to your door.";
+    const tagline = settings?.footerTagline || getText(customTexts, "footer.tagline");
 
     const socialLinks = [
         { icon: Instagram, url: settings?.socialInstagram, label: "Instagram" },

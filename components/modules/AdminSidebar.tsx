@@ -84,15 +84,15 @@ export default function AdminSidebar() {
                     </button>
                 </div>
                 <p className="text-xs text-white/40 px-6 pt-3">Admin Panel</p>
-                <nav className="flex-1 px-4 py-4">
+                <nav className="flex-1 overflow-y-auto px-4 py-4">
                     <NavLinks pathname={pathname} />
                 </nav>
                 <SidebarFooter />
             </aside>
 
             {/* ── Desktop Sidebar ── */}
-            <aside className="hidden lg:flex flex-col w-60 shrink-0 bg-brand-dark min-h-screen">
-                <div className="px-6 py-6 border-b border-white/10">
+            <aside className="hidden lg:flex flex-col w-60 shrink-0 bg-brand-dark h-screen sticky top-0">
+                <div className="px-6 py-6 border-b border-white/10 shrink-0">
                     <div className="flex items-center justify-between">
                         <Link href="/admin" className="font-serif text-xl text-white tracking-widest">
                             {SITE_NAME}
@@ -101,7 +101,7 @@ export default function AdminSidebar() {
                     </div>
                     <p className="text-xs text-white/40 mt-1">Admin Panel</p>
                 </div>
-                <nav className="flex-1 px-4 py-6">
+                <nav className="flex-1 overflow-y-auto px-4 py-6">
                     <NavLinks pathname={pathname} />
                 </nav>
                 <SidebarFooter />

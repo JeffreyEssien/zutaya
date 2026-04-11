@@ -5,12 +5,14 @@ import Link from "next/link";
 import type { Category } from "@/types";
 import CategoryTile from "@/components/modules/CategoryTile";
 import { ArrowRight } from "lucide-react";
+import { getText } from "@/lib/textDefaults";
 
 interface ShopByCategoryProps {
     categories: Category[];
+    customTexts?: Record<string, string>;
 }
 
-export default function ShopByCategory({ categories }: ShopByCategoryProps) {
+export default function ShopByCategory({ categories, customTexts }: ShopByCategoryProps) {
     return (
         <section className="py-24 md:py-32 px-6 relative overflow-hidden scroll-mt-20">
             {/* Background accent */}
@@ -26,9 +28,9 @@ export default function ShopByCategory({ categories }: ShopByCategoryProps) {
                     className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-16 gap-4"
                 >
                     <div>
-                        <p className="text-[11px] uppercase tracking-[0.3em] text-brand-purple mb-3 font-medium">Browse</p>
+                        <p className="text-[11px] uppercase tracking-[0.3em] text-brand-purple mb-3 font-medium">{getText(customTexts, "categories.eyebrow")}</p>
                         <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-brand-dark tracking-tight">
-                            Shop by Category
+                            {getText(customTexts, "categories.heading")}
                         </h2>
                     </div>
                     <Link
@@ -36,7 +38,7 @@ export default function ShopByCategory({ categories }: ShopByCategoryProps) {
                         className="group inline-flex items-center gap-2 text-sm text-brand-dark/50 hover:text-brand-purple transition-colors duration-300"
                     >
                         <span className="relative">
-                            All Categories
+                            {getText(customTexts, "categories.link")}
                             <span className="absolute -bottom-0.5 left-0 w-full h-[1px] bg-brand-purple origin-left scale-x-0 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-x-100" />
                         </span>
                         <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform duration-300" />

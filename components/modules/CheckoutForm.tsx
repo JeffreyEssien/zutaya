@@ -12,10 +12,12 @@ import {
     type LagosZoneInfo,
     type DbPricingResult,
 } from "@/lib/deliveryPricing";
-import type { ShippingAddress, Order } from "@/types";
+import type { ShippingAddress, Order, SiteSettings } from "@/types";
+import { getSiteSettings } from "@/lib/queries";
+import DeliveryScheduler from "@/components/modules/DeliveryScheduler";
 import {
     MessageCircle, Clock, Lock, Truck, Building2,
-    ChevronDown, Package, Tag,
+    ChevronDown, Package, Tag, UtensilsCrossed, CalendarCheck,
 } from "lucide-react";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { toast } from "sonner";
@@ -23,6 +25,7 @@ import { toast } from "sonner";
 interface CheckoutFormProps {
     onComplete: (orderInfo?: { orderId: string; total: number; paymentMethod: "whatsapp" | "bank_transfer" }) => void;
     onShippingChange: (fee: number) => void;
+    onPackagingChange: (fee: number) => void;
 }
 
 const emptyAddress: ShippingAddress = {
@@ -30,22 +33,43 @@ const emptyAddress: ShippingAddress = {
     address: "", city: "", state: "Lagos", zip: "", country: "Nigeria",
 };
 
-export default function CheckoutForm({ onComplete, onShippingChange }: CheckoutFormProps) {
+function generateOrderId(): string {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, "0");
+    const d = String(now.getDate()).padStart(2, "0");
+    const seq = Math.random().toString(16).slice(2, 6).toUpperCase().padStart(4, "0");
+    return `ZY-${y}${m}${d}-${seq}`;
+}
+
+export default function CheckoutForm({ onComplete, onShippingChange, onPackagingChange }: CheckoutFormProps) {
     const [form, setForm] = useState<ShippingAddress>(emptyAddress);
     const [loading, setLoading] = useState(false);
     const [queueStatus, setQueueStatus] = useState<"idle" | "queued" | "processing">("idle");
     const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
-    const { items, subtotal, clearCart, couponCode, discount, removeCoupon } = useCartStore();
+    const { items, subtotal, clearCart, couponCode, discount, removeCoupon, bundleDiscountTotal } = useCartStore();
     const { addOrder } = useOrderStore();
 
     // ── DB pricing state ──
     const [dbPricing, setDbPricing] = useState<DbPricingResult | null>(null);
     const [pricingLoaded, setPricingLoaded] = useState(false);
 
+    // ── Packaging settings from admin ──
+    const [packagingConfig, setPackagingConfig] = useState({ fee: 500, label: "Premium Packaging", description: "Insulated gift-ready packaging with ice packs for extended freshness" });
+
     useEffect(() => {
         fetchDeliveryPricingFromDB().then((result) => {
             if (result) setDbPricing(result);
             setPricingLoaded(true);
+        });
+        getSiteSettings().then((s) => {
+            if (s) {
+                setPackagingConfig({
+                    fee: s.packagingFee ?? 500,
+                    label: s.packagingLabel || "Premium Packaging",
+                    description: s.packagingDescription || "Insulated gift-ready packaging with ice packs for extended freshness",
+                });
+            }
         });
     }, []);
 
@@ -66,6 +90,10 @@ export default function CheckoutForm({ onComplete, onShippingChange }: CheckoutF
     const [selectedLagosArea, setSelectedLagosArea] = useState("");
     const [deliveryFee, setDeliveryFee] = useState(0);
     const [paymentMethod, setPaymentMethod] = useState<"whatsapp" | "manual">("whatsapp");
+    const [prepInstructions, setPrepInstructions] = useState("");
+    const [requestedDeliveryDate, setRequestedDeliveryDate] = useState("");
+    const [requestedDeliverySlot, setRequestedDeliverySlot] = useState<"morning" | "afternoon" | "evening" | "">("");
+    const [addPackaging, setAddPackaging] = useState(false);
 
     const currentLagosZone: LagosZoneInfo | null = useMemo(
         () => (selectedLagosArea ? lagosAreaIndex.get(selectedLagosArea.toLowerCase()) ?? null : null),
@@ -92,6 +120,10 @@ export default function CheckoutForm({ onComplete, onShippingChange }: CheckoutF
         onShippingChange(fee);
     }, [computeFee, onShippingChange]);
 
+    useEffect(() => {
+        onPackagingChange(addPackaging ? packagingConfig.fee : 0);
+    }, [addPackaging, onPackagingChange]);
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
         setErrors((prev) => ({ ...prev, [e.target.name]: undefined }));
@@ -117,19 +149,28 @@ export default function CheckoutForm({ onComplete, onShippingChange }: CheckoutF
 
         const sub = subtotal();
         const ship = deliveryFee;
-        const discountAmount = sub * (discount / 100);
+        const packFee = addPackaging ? packagingConfig.fee : 0;
+        const bundleDisc = bundleDiscountTotal();
+        const couponDisc = discount > 0 ? (sub - bundleDisc) * (discount / 100) : 0;
+        const totalDiscount = bundleDisc + couponDisc;
+        const prepFee = items.reduce((sum, item) => {
+            if (item.selectedPrepOptions && item.selectedPrepOptions.length > 0) {
+                return sum + item.selectedPrepOptions.reduce((s, o) => s + o.extraFee, 0) * item.quantity;
+            }
+            return sum;
+        }, 0);
 
         const locationDesc = `${selectedLagosArea}, Lagos (${currentLagosZone?.label})`;
 
         const order: Order = {
-            id: `ORD-${Date.now().toString(36).toUpperCase()}`,
+            id: generateOrderId(),
             customerName: `${form.firstName} ${form.lastName}`,
             email: form.email,
             phone: form.phone,
             items: [...items],
             subtotal: sub,
             shipping: ship,
-            total: Math.max(0, sub - discountAmount) + ship,
+            total: Math.max(0, sub - totalDiscount) + ship + packFee + prepFee,
             status: "pending",
             createdAt: new Date().toISOString(),
             shippingAddress: {
@@ -139,12 +180,18 @@ export default function CheckoutForm({ onComplete, onShippingChange }: CheckoutF
                 country: "Nigeria",
             },
             couponCode: couponCode || undefined,
-            discountTotal: discountAmount > 0 ? discountAmount : undefined,
+            discountTotal: totalDiscount > 0 ? totalDiscount : undefined,
             paymentMethod: paymentMethod === "whatsapp" ? "whatsapp" : "bank_transfer",
             paymentStatus: paymentMethod === "manual" ? "awaiting_payment" : undefined,
             deliveryZone: currentLagosZone?.label,
             deliveryType: "doorstep",
             deliveryDiscount: activeDiscount && activeDiscount.percent > 0 ? activeDiscount : undefined,
+            deliveryFee: ship,
+            packagingFee: packFee > 0 ? packFee : undefined,
+            prepFee: prepFee > 0 ? prepFee : undefined,
+            prepInstructions: prepInstructions.trim() || undefined,
+            requestedDeliveryDate: requestedDeliveryDate || undefined,
+            requestedDeliverySlot: requestedDeliverySlot || undefined,
         };
 
         try {
@@ -188,11 +235,15 @@ export default function CheckoutForm({ onComplete, onShippingChange }: CheckoutF
                     `*Items:*\n` +
                     order.items.map(i => `  • ${i.quantity}x ${i.product.name} (${i.variant?.name || 'Default'})`).join('\n') +
                     `\n\n*Subtotal:* ₦${sub.toLocaleString()}` +
-                    (discountAmount > 0 ? `\n*Discount:* -₦${discountAmount.toLocaleString()}` : '') +
+                    (totalDiscount > 0 ? `\n*Discount:* -₦${totalDiscount.toLocaleString()}${bundleDisc > 0 ? ' (incl. bundle)' : ''}` : '') +
+                    (packFee > 0 ? `\n*Packaging Fee:* ₦${packFee.toLocaleString()}` : '') +
+                    (prepFee > 0 ? `\n*Prep Fee:* ₦${prepFee.toLocaleString()}` : '') +
                     `\n*Delivery Fee:* ₦${ship.toLocaleString()}` +
                     (activeDiscount ? `\n*Delivery Discount:* ${activeDiscount.percent}% off${activeDiscount.label ? ` (${activeDiscount.label})` : ''}` : '') +
-                    `\n*Total:* ₦${order.total.toLocaleString()}\n\n` +
-                    `I would like to pay for this order.`
+                    `\n*Total:* ₦${order.total.toLocaleString()}` +
+                    (requestedDeliveryDate ? `\n\n*Preferred Delivery:* ${requestedDeliveryDate}${requestedDeliverySlot ? ` (${requestedDeliverySlot})` : ''}` : '') +
+                    (prepInstructions.trim() ? `\n*Prep Instructions:* ${prepInstructions.trim()}` : '') +
+                    `\n\nI would like to pay for this order.`
                 );
                 window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`;
             } else {
@@ -300,9 +351,75 @@ export default function CheckoutForm({ onComplete, onShippingChange }: CheckoutF
                 </div>
             </div>
 
-            {/* ── Step 3: Payment ── */}
+            {/* ── Step 3: Delivery Schedule ── */}
             <div>
-                <SectionTitle step={3}>Payment Method</SectionTitle>
+                <SectionTitle step={3}>Preferred Delivery Date</SectionTitle>
+                <div className="mt-5">
+                    <DeliveryScheduler
+                        onSelect={(date, slot) => {
+                            setRequestedDeliveryDate(date);
+                            setRequestedDeliverySlot(slot);
+                        }}
+                        selectedDate={requestedDeliveryDate}
+                        selectedSlot={requestedDeliverySlot || undefined}
+                    />
+                    {!requestedDeliveryDate && (
+                        <p className="text-[11px] text-brand-dark/35 mt-3 flex items-center gap-1.5">
+                            <CalendarCheck size={12} />
+                            Optional — select a preferred date and time slot for delivery
+                        </p>
+                    )}
+                </div>
+            </div>
+
+            {/* ── Step 4: Prep & Packaging ── */}
+            <div>
+                <SectionTitle step={4}>Preparation Preferences</SectionTitle>
+                <div className="mt-5 space-y-4">
+                    {/* Prep Instructions */}
+                    <div className="relative">
+                        <textarea
+                            value={prepInstructions}
+                            onChange={(e) => setPrepInstructions(e.target.value)}
+                            placeholder="Any special preparation instructions? e.g. 'Debone the chicken', 'Cut into thin strips', 'Season with suya spice'..."
+                            rows={3}
+                            maxLength={500}
+                            className="w-full border border-brand-dark/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple/40 transition-all bg-white placeholder:text-brand-dark/25 resize-none"
+                        />
+                        <div className="flex items-center justify-between mt-1.5 px-1">
+                            <div className="flex items-center gap-1.5 text-brand-dark/30">
+                                <UtensilsCrossed size={11} />
+                                <span className="text-[10px]">Optional</span>
+                            </div>
+                            <span className="text-[10px] text-brand-dark/25">{prepInstructions.length}/500</span>
+                        </div>
+                    </div>
+
+                    {/* Packaging Fee */}
+                    <label className={`flex items-start gap-4 p-4 border rounded-xl cursor-pointer transition-all duration-300 ${addPackaging ? "border-brand-purple bg-brand-purple/[0.04] shadow-sm shadow-brand-purple/5" : "border-brand-dark/8 hover:border-brand-purple/30"}`}>
+                        <input
+                            type="checkbox"
+                            checked={addPackaging}
+                            onChange={(e) => setAddPackaging(e.target.checked)}
+                            className="mt-1 accent-brand-purple"
+                        />
+                        <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <Package size={16} className="text-brand-purple" />
+                                    <span className="font-medium text-brand-dark text-sm">{packagingConfig.label}</span>
+                                </div>
+                                <span className="text-sm font-semibold text-brand-dark">₦{packagingConfig.fee.toLocaleString()}</span>
+                            </div>
+                            <span className="block text-xs text-brand-dark/45 mt-1">{packagingConfig.description}</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            {/* ── Step 5: Payment ── */}
+            <div>
+                <SectionTitle step={5}>Payment Method</SectionTitle>
                 <div className="space-y-3 mt-5">
                     <label className={`flex items-start gap-4 p-4 border rounded-xl cursor-pointer transition-all duration-300 ${paymentMethod === 'whatsapp' ? 'border-brand-purple bg-brand-purple/[0.04] shadow-sm shadow-brand-purple/5' : 'border-brand-dark/8 hover:border-brand-purple/30'}`}>
                         <input type="radio" name="payment" value="whatsapp" checked={paymentMethod === 'whatsapp'} onChange={() => setPaymentMethod('whatsapp')} className="mt-1 accent-brand-purple" />

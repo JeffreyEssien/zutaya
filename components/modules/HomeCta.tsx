@@ -3,8 +3,9 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, Package } from "lucide-react";
+import { getText } from "@/lib/textDefaults";
 
-export default function HomeCta() {
+export default function HomeCta({ customTexts }: { customTexts?: Record<string, string> }) {
     return (
         <section className="py-20 md:py-28 px-6">
             <div className="max-w-[1400px] mx-auto">
@@ -21,12 +22,12 @@ export default function HomeCta() {
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.6 }}
                             >
-                                <p className="text-[11px] uppercase tracking-[0.3em] text-brand-red mb-4 font-medium">Save More</p>
+                                <p className="text-[11px] uppercase tracking-[0.3em] text-brand-red mb-4 font-medium">{getText(customTexts, "cta.eyebrow")}</p>
                                 <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl text-warm-cream leading-tight mb-4">
-                                    Build Your Own Box &<br className="hidden md:block" /> Save Up to 20%
+                                    {getText(customTexts, "cta.heading")}
                                 </h2>
                                 <p className="text-warm-cream/50 text-base md:text-lg max-w-lg mx-auto lg:mx-0 font-light leading-relaxed">
-                                    Mix and match your favourite premium cuts into a custom bundle. The more you add, the more you save.
+                                    {getText(customTexts, "cta.desc")}
                                 </p>
                             </motion.div>
                         </div>
@@ -43,14 +44,14 @@ export default function HomeCta() {
                                 className="inline-flex items-center justify-center gap-3 bg-brand-red text-white px-8 py-4 rounded-xl font-semibold hover:bg-brand-red/90 transition-all shadow-lg shadow-brand-red/20 hover:shadow-brand-red/30 group"
                             >
                                 <Package size={18} />
-                                Build Your Box
+                                {getText(customTexts, "cta.button1")}
                                 <ArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
                             </Link>
                             <Link
                                 href="/shop"
                                 className="inline-flex items-center justify-center gap-2 border border-warm-cream/20 text-warm-cream px-8 py-4 rounded-xl font-semibold hover:bg-warm-cream/10 transition-all"
                             >
-                                Browse All Cuts
+                                {getText(customTexts, "cta.button2")}
                             </Link>
                         </motion.div>
                     </div>

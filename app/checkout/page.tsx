@@ -24,6 +24,7 @@ export default function CheckoutPage() {
     const router = useRouter();
     const [state, setState] = useState<CheckoutState>({ step: "checkout" });
     const [shippingFee, setShippingFee] = useState(0);
+    const [packagingFee, setPackagingFee] = useState(0);
 
     if (items.length === 0 && state.step === "checkout") {
         return (
@@ -147,6 +148,7 @@ export default function CheckoutPage() {
                     <div className="lg:col-span-3">
                         <CheckoutForm
                             onShippingChange={setShippingFee}
+                            onPackagingChange={setPackagingFee}
                             onComplete={(orderInfo) => {
                                 if (orderInfo?.paymentMethod === "bank_transfer") {
                                     setState({
@@ -161,7 +163,7 @@ export default function CheckoutPage() {
                         />
                     </div>
                     <div className="lg:col-span-2">
-                        <CheckoutSummary shippingFee={shippingFee} />
+                        <CheckoutSummary shippingFee={shippingFee} packagingFee={packagingFee} />
                     </div>
                 </div>
             </main>

@@ -66,6 +66,9 @@ export interface CartItem {
     variant?: ProductVariant;
     quantity: number;
     selectedPrepOptions?: PrepOption[];
+    bundleId?: string;
+    bundleDiscount?: number; // percent
+    bundleName?: string;
 }
 
 export interface Recipe {
@@ -160,6 +163,10 @@ export interface SiteSettings {
     footerTagline?: string;
     // Shipping
     freeShippingThreshold?: number;
+    // Packaging
+    packagingFee?: number;
+    packagingLabel?: string;
+    packagingDescription?: string;
     // All editable texts as JSON
     customTexts?: Record<string, string>;
 }

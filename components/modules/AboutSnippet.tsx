@@ -19,6 +19,7 @@ import {
     MapPin,
     MessageCircle,
 } from "lucide-react";
+import { getText } from "@/lib/textDefaults";
 
 const features = [
     {
@@ -54,7 +55,7 @@ const defaultStats = [
     { value: "6", label: "Days a Week" },
 ];
 
-export default function AboutSnippet() {
+export default function AboutSnippet({ customTexts }: { customTexts?: Record<string, string> }) {
     const [settings, setSettings] = useState<SiteSettings | null>(null);
     const sectionRef = useRef<HTMLElement>(null);
 
@@ -94,9 +95,9 @@ export default function AboutSnippet() {
                                 viewport={{ once: true, margin: "-80px" }}
                                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                             >
-                                <p className="text-[11px] uppercase tracking-[0.3em] text-brand-red mb-4 font-medium">Our Story</p>
+                                <p className="text-[11px] uppercase tracking-[0.3em] text-brand-red mb-4 font-medium">{getText(customTexts, "about.eyebrow")}</p>
                                 <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-brand-dark tracking-tight leading-[1.1] mb-8">
-                                    {settings?.ourStoryHeading || (
+                                    {settings?.ourStoryHeading || getText(customTexts, "about.heading") || (
                                         <>From the Market to <span className="text-gradient-luxury italic">Your Kitchen</span></>
                                     )}
                                 </h2>
@@ -187,8 +188,8 @@ export default function AboutSnippet() {
                         transition={{ duration: 0.6 }}
                         className="text-center mb-14"
                     >
-                        <p className="text-[11px] uppercase tracking-[0.3em] text-brand-red mb-3 font-medium">Why Choose Us</p>
-                        <h2 className="font-serif text-2xl md:text-3xl text-brand-dark">Built on Trust, Delivered with Care</h2>
+                        <p className="text-[11px] uppercase tracking-[0.3em] text-brand-red mb-3 font-medium">{getText(customTexts, "about.features.eyebrow")}</p>
+                        <h2 className="font-serif text-2xl md:text-3xl text-brand-dark">{settings?.whyZutaYaHeading || getText(customTexts, "about.features.heading")}</h2>
                     </motion.div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

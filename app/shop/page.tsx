@@ -1,16 +1,20 @@
 import { Suspense } from "react";
 import Header from "@/components/modules/Header";
 import Footer from "@/components/modules/Footer";
-import { getProducts, getCategories } from "@/lib/queries";
+import { getProducts, getCategories, getSiteSettings } from "@/lib/queries";
 import ShopContent from "@/components/modules/ShopContent";
+import { getText } from "@/lib/textDefaults";
 
 export const dynamic = "force-dynamic";
 
 export default async function ShopPage() {
-    const [products, categories] = await Promise.all([
+    const [products, categories, settings] = await Promise.all([
         getProducts(),
         getCategories(),
+        getSiteSettings(),
     ]);
+
+    const ct = settings?.customTexts;
 
     return (
         <>
@@ -24,8 +28,8 @@ export default async function ShopPage() {
                             <span>/</span>
                             <span className="text-warm-cream/70">Shop</span>
                         </div>
-                        <h1 className="font-serif text-3xl md:text-4xl font-bold">Shop All Cuts</h1>
-                        <p className="text-warm-cream/50 mt-2 text-sm md:text-base">Premium meat sourced fresh, cold-chain packed and delivered to your door.</p>
+                        <h1 className="font-serif text-3xl md:text-4xl font-bold">{getText(ct, "shop.heading")}</h1>
+                        <p className="text-warm-cream/50 mt-2 text-sm md:text-base">{getText(ct, "shop.desc")}</p>
                     </div>
                 </div>
 

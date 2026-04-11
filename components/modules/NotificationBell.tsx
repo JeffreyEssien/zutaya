@@ -86,6 +86,36 @@ export default function NotificationBell() {
                 playNotificationSound();
             }
 
+            for (const item of data.expiringStock || []) {
+                const key = `expiring-${item.id}`;
+                if (seenOrderIds.current.has(key)) continue;
+                seenOrderIds.current.add(key);
+                if (initialLoad.current) continue;
+
+                const daysLeft = Math.ceil((new Date(item.expiryDate).getTime() - Date.now()) / 86400000);
+                addNotification({
+                    type: "low_stock",
+                    title: "Expiring Stock",
+                    message: `${item.name} (${item.stock} units) expires in ${daysLeft <= 0 ? "today" : `${daysLeft} day${daysLeft !== 1 ? "s" : ""}`}`,
+                    timestamp: new Date().toISOString(),
+                });
+                playNotificationSound();
+            }
+
+            for (const item of data.lowStock || []) {
+                const key = `lowstock-${item.id}`;
+                if (seenOrderIds.current.has(key)) continue;
+                seenOrderIds.current.add(key);
+                if (initialLoad.current) continue;
+
+                addNotification({
+                    type: "low_stock",
+                    title: "Low Stock Alert",
+                    message: `${item.name} has only ${item.stock} units left (reorder level: ${item.reorderLevel})`,
+                    timestamp: new Date().toISOString(),
+                });
+            }
+
             initialLoad.current = false;
             lastPoll.current = new Date().toISOString();
         } catch (err) {

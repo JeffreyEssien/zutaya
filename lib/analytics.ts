@@ -72,6 +72,15 @@ export interface AnalyticsData {
         count: number;
         revenue: number;
     }[];
+    // Meat-specific metrics
+    meat: {
+        totalKgSold: number;
+        kgByCategory: { name: string; kg: number }[];
+        expiringStockCount: number;
+        expiringItems: { name: string; expiryDate: string; stock: number }[];
+        deliveryZoneBreakdown: { zone: string; orders: number; revenue: number }[];
+        grossMarginTrend: { date: string; margin: number }[];
+    };
 }
 
 export function calculateAnalytics(
@@ -356,6 +365,61 @@ export function calculateAnalytics(
     });
 
 
+    // --- 12. Meat-Specific Metrics (NEW) ---
+    // Total kg sold: sum quantity * minWeightKg for products that have it, else count as 1kg per unit
+    let totalKgSold = 0;
+    const kgByCatMap = new Map<string, number>();
+    orders.forEach(order => {
+        order.items.forEach(item => {
+            const prod = products.find(p => p.id === item.product.id);
+            const weightPerUnit = prod?.minWeightKg || 1;
+            const kg = item.quantity * weightPerUnit;
+            totalKgSold += kg;
+            const cat = item.product.category || "Uncategorized";
+            kgByCatMap.set(cat, (kgByCatMap.get(cat) || 0) + kg);
+        });
+    });
+    const kgByCategory = Array.from(kgByCatMap.entries())
+        .map(([name, kg]) => ({ name, kg: Math.round(kg * 10) / 10 }))
+        .sort((a, b) => b.kg - a.kg);
+
+    // Expiring stock: items with expiryDate within 7 days
+    const sevenDaysFromNow = now.getTime() + 7 * oneDay;
+    const expiringItems = inventoryItems
+        .filter(i => i.expiryDate && new Date(i.expiryDate).getTime() <= sevenDaysFromNow && i.stock > 0)
+        .map(i => {
+            const prod = products.find(p => p.inventoryId === i.id);
+            return { name: prod?.name || i.name || "Unknown", expiryDate: i.expiryDate!, stock: i.stock };
+        })
+        .sort((a, b) => new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime());
+
+    // Delivery zone breakdown
+    const zoneMap = new Map<string, { orders: number; revenue: number }>();
+    orders.forEach(o => {
+        const zone = o.deliveryZone || "Unknown";
+        const cur = zoneMap.get(zone) || { orders: 0, revenue: 0 };
+        cur.orders += 1;
+        cur.revenue += o.total;
+        zoneMap.set(zone, cur);
+    });
+    const deliveryZoneBreakdown = Array.from(zoneMap.entries())
+        .map(([zone, d]) => ({ zone, ...d }))
+        .sort((a, b) => b.orders - a.orders);
+
+    // Gross margin trend (last 7 days)
+    const grossMarginTrend: { date: string; margin: number }[] = [];
+    for (let i = 6; i >= 0; i--) {
+        const dayStr = new Date(now.getTime() - i * oneDay).toISOString().split("T")[0];
+        const dayOrders = orders.filter(o => new Date(o.createdAt).toISOString().split("T")[0] === dayStr);
+        const dayRevenue = dayOrders.reduce((s, o) => s + o.subtotal, 0);
+        let dayCOGS = 0;
+        dayOrders.forEach(o => o.items.forEach(item => {
+            dayCOGS += ((item as any).costPrice || 0) * item.quantity;
+        }));
+        const margin = dayRevenue > 0 ? ((dayRevenue - dayCOGS) / dayRevenue) * 100 : 0;
+        grossMarginTrend.push({ date: dayStr, margin: Math.round(margin * 10) / 10 });
+    }
+
     return {
         sales: {
             totalRevenue,
@@ -417,6 +481,14 @@ export function calculateAnalytics(
             overallConversionRate,
         },
         peakHours: hourlyData,
+        meat: {
+            totalKgSold: Math.round(totalKgSold * 10) / 10,
+            kgByCategory,
+            expiringStockCount: expiringItems.length,
+            expiringItems,
+            deliveryZoneBreakdown,
+            grossMarginTrend,
+        },
     };
 }
 

@@ -47,6 +47,13 @@ interface DbOrder {
     delivery_zone?: string;
     delivery_type?: string;
     delivery_discount?: { percent: number; label: string | null };
+    delivery_fee?: number;
+    packaging_fee?: number;
+    prep_fee?: number;
+    prep_instructions?: string;
+    requested_delivery_date?: string;
+    requested_delivery_slot?: string;
+    subscription_id?: string;
 }
 
 function toProduct(row: DbProduct): Product {
@@ -96,6 +103,13 @@ function toOrder(row: DbOrder): Order {
         deliveryZone: row.delivery_zone || undefined,
         deliveryType: (row.delivery_type as Order["deliveryType"]) || undefined,
         deliveryDiscount: row.delivery_discount || undefined,
+        deliveryFee: row.delivery_fee ? Number(row.delivery_fee) : undefined,
+        packagingFee: row.packaging_fee ? Number(row.packaging_fee) : undefined,
+        prepFee: row.prep_fee ? Number(row.prep_fee) : undefined,
+        prepInstructions: row.prep_instructions || undefined,
+        requestedDeliveryDate: row.requested_delivery_date || undefined,
+        requestedDeliverySlot: (row.requested_delivery_slot as Order["requestedDeliverySlot"]) || undefined,
+        subscriptionId: row.subscription_id || undefined,
     };
 }
 
@@ -374,6 +388,13 @@ export async function createOrder(order: Order): Promise<void> {
     if (order.deliveryZone) insertData.delivery_zone = order.deliveryZone;
     if (order.deliveryType) insertData.delivery_type = order.deliveryType;
     if (order.deliveryDiscount) insertData.delivery_discount = order.deliveryDiscount;
+    if (order.deliveryFee != null) insertData.delivery_fee = order.deliveryFee;
+    if (order.packagingFee != null) insertData.packaging_fee = order.packagingFee;
+    if (order.prepFee != null) insertData.prep_fee = order.prepFee;
+    if (order.prepInstructions) insertData.prep_instructions = order.prepInstructions;
+    if (order.requestedDeliveryDate) insertData.requested_delivery_date = order.requestedDeliveryDate;
+    if (order.requestedDeliverySlot) insertData.requested_delivery_slot = order.requestedDeliverySlot;
+    if (order.subscriptionId) insertData.subscription_id = order.subscriptionId;
 
     const { error } = await supabase.from("orders").insert(insertData);
 
@@ -572,6 +593,10 @@ export async function getSiteSettings(): Promise<SiteSettings | null> {
         footerTagline: data.footer_tagline,
         // Shipping
         freeShippingThreshold: data.free_shipping_threshold != null ? Number(data.free_shipping_threshold) : undefined,
+        // Packaging
+        packagingFee: data.packaging_fee != null ? Number(data.packaging_fee) : 500,
+        packagingLabel: data.packaging_label || "Premium Packaging",
+        packagingDescription: data.packaging_description || "Insulated gift-ready packaging with ice packs for extended freshness",
         customTexts: data.custom_texts || {},
     };
 }
@@ -614,6 +639,10 @@ export async function updateSiteSettings(settings: Partial<SiteSettings>): Promi
     if (settings.footerTagline !== undefined) dbSettings.footer_tagline = settings.footerTagline;
     // Shipping
     if (settings.freeShippingThreshold !== undefined) dbSettings.free_shipping_threshold = settings.freeShippingThreshold;
+    // Packaging
+    if (settings.packagingFee !== undefined) dbSettings.packaging_fee = settings.packagingFee;
+    if (settings.packagingLabel !== undefined) dbSettings.packaging_label = settings.packagingLabel;
+    if (settings.packagingDescription !== undefined) dbSettings.packaging_description = settings.packagingDescription;
     if (settings.customTexts !== undefined) dbSettings.custom_texts = settings.customTexts;
 
     // init if not exists, otherwise update
@@ -1402,6 +1431,30 @@ export async function getLowStockInventory(threshold?: number): Promise<Inventor
         supplier: item.supplier || undefined,
         createdAt: item.created_at,
         updatedAt: item.updated_at,
+    }));
+}
+
+export async function getExpiringInventory(daysAhead = 7): Promise<{ id: string; name: string; stock: number; expiryDate: string }[]> {
+    const supabase = getSupabaseClient();
+    if (!supabase) return [];
+
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() + daysAhead);
+
+    const { data, error } = await supabase
+        .from("inventory_items")
+        .select("id, name, stock, expiry_date")
+        .not("expiry_date", "is", null)
+        .lte("expiry_date", cutoff.toISOString().split("T")[0])
+        .gt("stock", 0)
+        .order("expiry_date", { ascending: true });
+
+    if (error) return [];
+    return (data || []).map((item: any) => ({
+        id: item.id,
+        name: item.name || "Unknown",
+        stock: item.stock,
+        expiryDate: item.expiry_date,
     }));
 }
 

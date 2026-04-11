@@ -33,6 +33,18 @@ export async function POST(request: Request) {
         // Insert order + deduct stock (serialized — only one at a time)
         await createOrder(order);
 
+        // Book delivery slot if requested (best-effort — don't fail the order)
+        if (supabase && order.requestedDeliveryDate && order.requestedDeliverySlot) {
+            try {
+                await supabase.rpc("increment_delivery_capacity", {
+                    p_date: order.requestedDeliveryDate,
+                    p_slot: order.requestedDeliverySlot,
+                });
+            } catch (err) {
+                console.warn("Delivery capacity increment failed:", err);
+            }
+        }
+
         // Send emails (non-blocking — don't fail the order if email fails)
         sendOrderEmails(order).catch((err) =>
             console.error("Email send failed:", err)

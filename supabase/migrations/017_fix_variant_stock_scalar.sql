@@ -1,4 +1,4 @@
--- Atomic variant stock deduction
+-- Fix deduct_variant_stock to handle variants stored as JSON string scalar
 CREATE OR REPLACE FUNCTION deduct_variant_stock(
   p_product_id UUID,
   p_variant_name TEXT,
@@ -26,8 +26,7 @@ BEGIN
 
   -- Handle case where variants is stored as a JSON string instead of array
   IF jsonb_typeof(v_variants) = 'string' THEN
-    v_variants := v_variants #>> '{}';
-    v_variants := v_variants::jsonb;
+    v_variants := (v_variants #>> '{}')::jsonb;
   END IF;
 
   -- Find the index of the specific variant
@@ -44,7 +43,7 @@ BEGIN
   v_current_stock := (v_variants->v_variant_idx->>'stock')::INT;
 
   IF v_current_stock IS NULL THEN
-     v_current_stock := 0; -- Default if not properly set
+     v_current_stock := 0;
   END IF;
 
   IF v_current_stock < p_quantity THEN
@@ -58,7 +57,7 @@ BEGIN
     to_jsonb(v_current_stock - p_quantity)
   );
 
-  -- Update the product (variants + recalculate total stock as sum of all variant stocks)
+  -- Update the product (variants + recalculate total stock)
   UPDATE products
   SET variants = v_updated_variants,
       stock = (
@@ -70,3 +69,8 @@ BEGIN
   RETURN v_updated_variants;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Also fix any existing products where variants is a string scalar
+UPDATE products
+SET variants = (variants #>> '{}')::jsonb
+WHERE jsonb_typeof(variants) = 'string';

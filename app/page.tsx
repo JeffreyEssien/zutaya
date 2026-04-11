@@ -6,28 +6,31 @@ import ShopByCategory from "@/components/modules/ShopByCategory";
 import HomeCta from "@/components/modules/HomeCta";
 import AboutSnippet from "@/components/modules/AboutSnippet";
 import Footer from "@/components/modules/Footer";
-import { getNewProducts, getCategories } from "@/lib/queries";
+import { getNewProducts, getCategories, getSiteSettings } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const [newProducts, categories] = await Promise.all([
+  const [newProducts, categories, settings] = await Promise.all([
     getNewProducts(),
     getCategories(),
+    getSiteSettings(),
   ]);
+
+  const ct = settings?.customTexts;
 
   return (
     <>
       <Header />
       <main>
-        <Hero />
-        <PromiseBar />
-        <NewArrivals products={newProducts} />
-        <ShopByCategory categories={categories} />
-        <HomeCta />
-        <AboutSnippet />
+        <Hero customTexts={ct} />
+        <PromiseBar customTexts={ct} />
+        <NewArrivals products={newProducts} customTexts={ct} />
+        <ShopByCategory categories={categories} customTexts={ct} />
+        <HomeCta customTexts={ct} />
+        <AboutSnippet customTexts={ct} />
       </main>
-      <Footer />
+      <Footer customTexts={ct} />
     </>
   );
 }

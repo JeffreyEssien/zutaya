@@ -5,12 +5,14 @@ import Link from "next/link";
 import type { Product } from "@/types";
 import ProductCard from "@/components/modules/ProductCard";
 import { ArrowRight } from "lucide-react";
+import { getText } from "@/lib/textDefaults";
 
 interface NewArrivalsProps {
     products: Product[];
+    customTexts?: Record<string, string>;
 }
 
-export default function NewArrivals({ products }: NewArrivalsProps) {
+export default function NewArrivals({ products, customTexts }: NewArrivalsProps) {
     return (
         <section className="py-24 md:py-32 px-6 max-w-[1400px] mx-auto scroll-mt-20">
             <motion.div
@@ -22,10 +24,10 @@ export default function NewArrivals({ products }: NewArrivalsProps) {
             >
                 <div>
                     <p className="text-[11px] uppercase tracking-[0.3em] text-brand-purple mb-3 font-medium">
-                        Just Arrived
+                        {getText(customTexts, "arrivals.eyebrow")}
                     </p>
                     <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-brand-dark tracking-tight">
-                        New Arrivals
+                        {getText(customTexts, "arrivals.heading")}
                     </h2>
                 </div>
                 <Link
@@ -33,7 +35,7 @@ export default function NewArrivals({ products }: NewArrivalsProps) {
                     className="group inline-flex items-center gap-2 text-sm text-brand-dark/50 hover:text-brand-purple transition-colors duration-300"
                 >
                     <span className="relative">
-                        View All
+                        {getText(customTexts, "arrivals.link")}
                         <span className="absolute -bottom-0.5 left-0 w-full h-[1px] bg-brand-purple origin-left scale-x-0 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-x-100" />
                     </span>
                     <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform duration-300" />

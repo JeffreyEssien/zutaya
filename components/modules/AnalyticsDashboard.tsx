@@ -9,7 +9,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
     DollarSign, TrendingUp, TrendingDown, BarChart3, ShoppingBag, Package,
     Users, UserPlus, Repeat, Gem, Ticket, Percent, Truck, Clock,
-    Activity, Factory, Tag, RefreshCw, AlertTriangle, Zap, Layers, Target
+    Activity, Factory, Tag, RefreshCw, AlertTriangle, Zap, Layers, Target,
+    Beef, Scale, MapPin, Thermometer,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/formatCurrency";
 import type { AnalyticsData } from "@/lib/analytics";
@@ -59,10 +60,11 @@ interface AnalyticsDashboardProps {
 }
 
 export default function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
-    const [activeTab, setActiveTab] = useState<"sales" | "inventory" | "customers" | "marketing" | "operations">("sales");
+    const [activeTab, setActiveTab] = useState<"sales" | "meat" | "inventory" | "customers" | "marketing" | "operations">("sales");
 
     const tabs = [
         { id: "sales", label: "Sales & Profit", icon: DollarSign },
+        { id: "meat", label: "Meat & Delivery", icon: Beef },
         { id: "inventory", label: "Inventory", icon: Package },
         { id: "customers", label: "Customers", icon: Users },
         { id: "marketing", label: "Marketing", icon: Ticket },
@@ -124,6 +126,7 @@ export default function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
                     transition={{ duration: 0.25 }}
                 >
                     {activeTab === "sales" && <SalesView data={data} />}
+                    {activeTab === "meat" && <MeatDeliveryView data={data} />}
                     {activeTab === "inventory" && <InventoryView data={data} />}
                     {activeTab === "customers" && <CustomersView data={data} />}
                     {activeTab === "marketing" && <MarketingView data={data} />}
@@ -293,6 +296,181 @@ function SalesView({ data }: { data: AnalyticsData }) {
                     </div>
                 </div>
             </motion.div>
+        </motion.div>
+    );
+}
+
+
+// ============================================================
+//  MEAT & DELIVERY VIEW
+// ============================================================
+
+const ZONE_COLORS = ["#8b5cf6", "#06b6d4", "#f59e0b", "#10b981", "#ef4444", "#6366f1", "#ec4899", "#14b8a6"];
+
+function MeatDeliveryView({ data }: { data: AnalyticsData }) {
+    const m = data.meat;
+
+    return (
+        <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-6">
+            {/* KPI Cards */}
+            <motion.div variants={stagger} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <GlassKPI title="Total Kg Sold" value={m.totalKgSold} format="number" icon={Scale} accent="green" subtitle="All time" />
+                <GlassKPI title="Expiring Stock" value={m.expiringStockCount} format="number" icon={Thermometer} accent={m.expiringStockCount > 0 ? "red" : "green"} subtitle="Within 7 days" />
+                <GlassKPI title="Delivery Zones" value={m.deliveryZoneBreakdown.length} format="number" icon={MapPin} subtitle="Active zones" />
+                <GlassKPI title="Gross Margin" value={data.profit.grossMargin} format="percent" icon={TrendingUp} accent="amber" />
+            </motion.div>
+
+            {/* Charts Row */}
+            <motion.div variants={fadeUp} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Kg Sold by Category */}
+                <div className="glass-card p-6">
+                    <h3 className="text-lg font-medium text-brand-dark mb-4">Kg Sold by Category</h3>
+                    {m.kgByCategory.length > 0 ? (
+                        <div className="h-[280px]">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={m.kgByCategory}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                                    <XAxis dataKey="name" fontSize={12} stroke="#888" />
+                                    <YAxis fontSize={12} stroke="#888" tickFormatter={v => `${v}kg`} />
+                                    <Tooltip formatter={(val) => [`${Number(val).toFixed(1)} kg`, "Weight"]} />
+                                    <defs>
+                                        <linearGradient id="kgGrad" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stopColor="#10b981" />
+                                            <stop offset="100%" stopColor="#6ee7b7" />
+                                        </linearGradient>
+                                    </defs>
+                                    <Bar dataKey="kg" fill="url(#kgGrad)" radius={[6, 6, 0, 0]} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    ) : (
+                        <p className="text-brand-dark/40 text-sm py-10 text-center">No sales data yet</p>
+                    )}
+                </div>
+
+                {/* Delivery Zone Breakdown */}
+                <div className="glass-card p-6">
+                    <h3 className="text-lg font-medium text-brand-dark mb-4">Delivery Zone Breakdown</h3>
+                    {m.deliveryZoneBreakdown.length > 0 ? (
+                        <div className="h-[280px]">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={m.deliveryZoneBreakdown.map(d => ({ name: d.zone, value: d.orders }))}
+                                        cx="50%" cy="50%"
+                                        innerRadius={60} outerRadius={90}
+                                        paddingAngle={3}
+                                        dataKey="value"
+                                    >
+                                        {m.deliveryZoneBreakdown.map((_, i) => (
+                                            <Cell key={i} fill={ZONE_COLORS[i % ZONE_COLORS.length]} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip formatter={(val, _, entry) => {
+                                        const zone = m.deliveryZoneBreakdown.find(d => d.zone === entry.payload.name);
+                                        return [`${val} orders (${formatCurrency(zone?.revenue || 0)})`, entry.payload.name];
+                                    }} />
+                                    <Legend />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
+                    ) : (
+                        <p className="text-brand-dark/40 text-sm py-10 text-center">No delivery data yet</p>
+                    )}
+                </div>
+            </motion.div>
+
+            {/* Gross Margin Trend */}
+            <motion.div variants={fadeUp} className="glass-card p-6">
+                <h3 className="text-lg font-medium text-brand-dark mb-4">Gross Margin Trend (7d)</h3>
+                <div className="h-[250px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={m.grossMarginTrend}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                            <XAxis dataKey="date" fontSize={12} stroke="#888" tickFormatter={d => new Date(d).toLocaleDateString(undefined, { weekday: "short" })} />
+                            <YAxis fontSize={12} stroke="#888" tickFormatter={v => `${v}%`} domain={[0, 100]} />
+                            <Tooltip formatter={(val) => [`${Number(val).toFixed(1)}%`, "Margin"]} />
+                            <defs>
+                                <linearGradient id="marginGrad" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3} />
+                                    <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
+                                </linearGradient>
+                            </defs>
+                            <Line type="monotone" dataKey="margin" stroke="#f59e0b" strokeWidth={3} dot={{ r: 4, fill: "#f59e0b" }} activeDot={{ r: 6 }} fill="url(#marginGrad)" />
+                        </LineChart>
+                    </ResponsiveContainer>
+                </div>
+            </motion.div>
+
+            {/* Expiring Stock Table */}
+            {m.expiringItems.length > 0 && (
+                <motion.div variants={fadeUp} className="glass-card p-6">
+                    <h3 className="text-lg font-medium text-brand-dark mb-4 flex items-center gap-2">
+                        <AlertTriangle size={18} className="text-red-500" /> Expiring Stock (Next 7 Days)
+                    </h3>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm text-left">
+                            <thead className="text-gray-400 text-xs uppercase tracking-wider">
+                                <tr>
+                                    <th className="pb-3">Product</th>
+                                    <th className="pb-3 text-right">Stock</th>
+                                    <th className="pb-3 text-right">Expires</th>
+                                    <th className="pb-3 text-right">Days Left</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100/50">
+                                {m.expiringItems.map((item, i) => {
+                                    const daysLeft = Math.ceil((new Date(item.expiryDate).getTime() - Date.now()) / 86400000);
+                                    return (
+                                        <tr key={i} className="hover:bg-red-50/30 transition-colors">
+                                            <td className="py-3 font-medium text-brand-dark">{item.name}</td>
+                                            <td className="py-3 text-right text-brand-dark/70">{item.stock}</td>
+                                            <td className="py-3 text-right text-brand-dark/70">{new Date(item.expiryDate).toLocaleDateString("en-NG", { month: "short", day: "numeric" })}</td>
+                                            <td className="py-3 text-right">
+                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${daysLeft <= 2 ? "bg-red-100 text-red-700" : daysLeft <= 5 ? "bg-amber-100 text-amber-700" : "bg-yellow-100 text-yellow-700"}`}>
+                                                    {daysLeft <= 0 ? "Expired" : `${daysLeft}d`}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                </motion.div>
+            )}
+
+            {/* Zone Revenue Table */}
+            {m.deliveryZoneBreakdown.length > 0 && (
+                <motion.div variants={fadeUp} className="glass-card p-6">
+                    <h3 className="text-lg font-medium text-brand-dark mb-4">Zone Performance</h3>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm text-left">
+                            <thead className="text-gray-400 text-xs uppercase tracking-wider">
+                                <tr>
+                                    <th className="pb-3">Zone</th>
+                                    <th className="pb-3 text-right">Orders</th>
+                                    <th className="pb-3 text-right">Revenue</th>
+                                    <th className="pb-3 text-right">Avg Order</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100/50">
+                                {m.deliveryZoneBreakdown.map((z, i) => (
+                                    <tr key={i} className="hover:bg-brand-lilac/5 transition-colors">
+                                        <td className="py-3 font-medium text-brand-dark flex items-center gap-2">
+                                            <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: ZONE_COLORS[i % ZONE_COLORS.length] }} />
+                                            {z.zone}
+                                        </td>
+                                        <td className="py-3 text-right text-brand-dark/70">{z.orders}</td>
+                                        <td className="py-3 text-right font-medium">{formatCurrency(z.revenue)}</td>
+                                        <td className="py-3 text-right text-brand-dark/70">{formatCurrency(z.orders > 0 ? z.revenue / z.orders : 0)}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </motion.div>
+            )}
         </motion.div>
     );
 }
