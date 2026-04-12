@@ -162,27 +162,100 @@ export default function AuditLogView({ initialLogs }: { initialLogs: AuditLog[] 
         }
     }, [sortField]);
 
-    const exportCSV = useCallback(() => {
-        const headers = ["Timestamp", "Admin", "Email", "Action", "Entity Type", "Entity ID", "Details", "IP Address"];
-        const rows = filtered.map((l) => [
-            new Date(l.created_at).toISOString(),
-            l.admin_name,
-            l.admin_email,
-            l.action,
-            l.entity_type || "",
-            l.entity_id || "",
-            (l.details || "").replace(/,/g, ";"),
-            l.ip_address || "",
+    const exportPDF = useCallback(async () => {
+        const { default: jsPDF } = await import("jspdf");
+        const { default: autoTable } = await import("jspdf-autotable");
+
+        const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const now = new Date();
+
+        // Header background
+        doc.setFillColor(30, 30, 30);
+        doc.rect(0, 0, pageWidth, 28, "F");
+
+        // Title
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(16);
+        doc.setFont("helvetica", "bold");
+        doc.text("AUDIT LOG REPORT", 14, 12);
+        doc.setFontSize(8);
+        doc.setFont("helvetica", "normal");
+        doc.text(`ZuTa Ya Admin — Generated ${now.toLocaleDateString("en-NG", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}`, 14, 18);
+        doc.text(`Total entries: ${filtered.length}  |  This document is read-only and non-editable`, 14, 23);
+
+        // Filters applied
+        const appliedFilters: string[] = [];
+        if (filterAction) appliedFilters.push(`Action: ${getActionConfig(filterAction).label}`);
+        if (filterAdmin) appliedFilters.push(`Admin: ${filterAdmin}`);
+        if (dateRange !== "all") appliedFilters.push(`Period: ${dateRange}`);
+        if (search) appliedFilters.push(`Search: "${search}"`);
+
+        let startY = 34;
+        if (appliedFilters.length > 0) {
+            doc.setTextColor(100, 100, 100);
+            doc.setFontSize(7);
+            doc.text(`Filters: ${appliedFilters.join("  •  ")}`, 14, startY);
+            startY += 6;
+        }
+
+        // Table data
+        const tableHeaders = ["#", "Timestamp", "Admin", "Action", "Entity", "Details", "IP Address"];
+        const tableRows = filtered.map((l, i) => [
+            (i + 1).toString(),
+            new Date(l.created_at).toLocaleString("en-NG", {
+                year: "numeric", month: "short", day: "numeric",
+                hour: "2-digit", minute: "2-digit", second: "2-digit",
+            }),
+            `${l.admin_name}\n${l.admin_email}`,
+            getActionConfig(l.action).label,
+            [l.entity_type, l.entity_id ? `#${l.entity_id.slice(0, 8)}` : ""].filter(Boolean).join(" ") || "—",
+            (l.details || "—").substring(0, 80),
+            l.ip_address || "—",
         ]);
-        const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
-        const blob = new Blob([csv], { type: "text/csv" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `audit-log-${new Date().toISOString().slice(0, 10)}.csv`;
-        a.click();
-        URL.revokeObjectURL(url);
-    }, [filtered]);
+
+        autoTable(doc, {
+            head: [tableHeaders],
+            body: tableRows,
+            startY,
+            theme: "grid",
+            styles: {
+                fontSize: 7,
+                cellPadding: 2.5,
+                lineColor: [220, 220, 220],
+                lineWidth: 0.2,
+                textColor: [40, 40, 40],
+            },
+            headStyles: {
+                fillColor: [50, 50, 50],
+                textColor: [255, 255, 255],
+                fontStyle: "bold",
+                fontSize: 7.5,
+            },
+            alternateRowStyles: { fillColor: [248, 248, 248] },
+            columnStyles: {
+                0: { cellWidth: 10, halign: "center" },
+                1: { cellWidth: 40 },
+                2: { cellWidth: 40 },
+                3: { cellWidth: 25 },
+                4: { cellWidth: 30 },
+                5: { cellWidth: "auto" },
+                6: { cellWidth: 28 },
+            },
+            didDrawPage: (data: { pageNumber: number }) => {
+                // Footer on every page
+                const pageH = doc.internal.pageSize.getHeight();
+                doc.setFillColor(245, 245, 245);
+                doc.rect(0, pageH - 10, pageWidth, 10, "F");
+                doc.setFontSize(6.5);
+                doc.setTextColor(140, 140, 140);
+                doc.text("CONFIDENTIAL — ZuTa Ya Audit Log", 14, pageH - 4);
+                doc.text(`Page ${data.pageNumber}`, pageWidth - 14, pageH - 4, { align: "right" });
+            },
+        });
+
+        doc.save(`audit-log-${now.toISOString().slice(0, 10)}.pdf`);
+    }, [filtered, filterAction, filterAdmin, dateRange, search]);
 
     return (
         <div className="space-y-6">
@@ -200,8 +273,8 @@ export default function AuditLogView({ initialLogs }: { initialLogs: AuditLog[] 
                     </p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={exportCSV}>
-                        <span className="flex items-center gap-2"><Download size={13} /> Export</span>
+                    <Button variant="outline" size="sm" onClick={exportPDF}>
+                        <span className="flex items-center gap-2"><Download size={13} /> Export PDF</span>
                     </Button>
                     <Button variant="ghost" size="sm" onClick={handleRefresh} disabled={refreshing}>
                         <span className="flex items-center gap-2">

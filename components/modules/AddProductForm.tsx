@@ -15,6 +15,8 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
     const [images, setImages] = useState<File[]>([]);
     const [imageUrls, setImageUrls] = useState<string[]>(initialData?.images || []);
     const [uploading, setUploading] = useState(false);
+    const [imageInputMode, setImageInputMode] = useState<"upload" | "url">("upload");
+    const [urlInput, setUrlInput] = useState("");
 
     // Mode: 'new' = create inv + product, 'existing' = link to inv
     const [mode, setMode] = useState<"new" | "existing">(initialData ? "new" : "new");
@@ -102,6 +104,22 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                 setUploading(false);
             }
         }
+    };
+
+    const handleAddImageUrl = () => {
+        const trimmed = urlInput.trim();
+        if (!trimmed) return;
+        try {
+            new URL(trimmed);
+            setImageUrls((prev) => [...prev, trimmed]);
+            setUrlInput("");
+        } catch {
+            toast.error("Please enter a valid URL");
+        }
+    };
+
+    const handleRemoveImage = (idx: number) => {
+        setImageUrls((prev) => prev.filter((_, i) => i !== idx));
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -453,11 +471,36 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
 
                 {/* Images */}
                 <div className="space-y-3">
-                    <label className="block text-xs text-brand-dark/60">Product Images</label>
+                    <div className="flex items-center justify-between">
+                        <label className="block text-xs text-brand-dark/60">Product Images</label>
+                        <div className="flex gap-2">
+                            <button
+                                type="button"
+                                onClick={() => setImageInputMode("upload")}
+                                className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${imageInputMode === "upload" ? "bg-brand-purple text-white border-brand-purple" : "border-brand-lilac/30 text-brand-dark/60 hover:bg-brand-lilac/10"}`}
+                            >
+                                Upload File
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setImageInputMode("url")}
+                                className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${imageInputMode === "url" ? "bg-brand-purple text-white border-brand-purple" : "border-brand-lilac/30 text-brand-dark/60 hover:bg-brand-lilac/10"}`}
+                            >
+                                Paste URL
+                            </button>
+                        </div>
+                    </div>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-2">
                         {imageUrls.map((url, idx) => (
-                            <div key={idx} className="relative aspect-square rounded-md overflow-hidden border border-brand-lilac/20">
+                            <div key={idx} className="relative aspect-square rounded-md overflow-hidden border border-brand-lilac/20 group">
                                 <img src={url} alt="Preview" className="w-full h-full object-cover" />
+                                <button
+                                    type="button"
+                                    onClick={() => handleRemoveImage(idx)}
+                                    className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                    ×
+                                </button>
                             </div>
                         ))}
                         {uploading && (
@@ -466,13 +509,29 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                             </div>
                         )}
                     </div>
-                    <div className="border-2 border-dashed border-brand-lilac/30 rounded-md p-8 text-center hover:bg-brand-lilac/5 transition-colors relative">
-                        <input type="file" multiple accept="image/*" onChange={handleFileChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-                        <div className="space-y-1 pointer-events-none">
-                            <p className="text-sm text-brand-dark/60 font-medium">Click or drag images here</p>
-                            <p className="text-xs text-brand-dark/40">JPG, PNG, WEBP</p>
+                    {imageInputMode === "upload" ? (
+                        <div className="border-2 border-dashed border-brand-lilac/30 rounded-md p-8 text-center hover:bg-brand-lilac/5 transition-colors relative">
+                            <input type="file" multiple accept="image/*" onChange={handleFileChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                            <div className="space-y-1 pointer-events-none">
+                                <p className="text-sm text-brand-dark/60 font-medium">Click or drag images here</p>
+                                <p className="text-xs text-brand-dark/40">JPG, PNG, WEBP</p>
+                            </div>
                         </div>
-                    </div>
+                    ) : (
+                        <div className="flex gap-2">
+                            <input
+                                type="url"
+                                value={urlInput}
+                                onChange={(e) => setUrlInput(e.target.value)}
+                                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddImageUrl(); } }}
+                                placeholder="https://example.com/image.jpg"
+                                className="flex-1 border border-brand-lilac/20 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/30"
+                            />
+                            <Button type="button" variant="outline" onClick={handleAddImageUrl}>
+                                Add
+                            </Button>
+                        </div>
+                    )}
                 </div>
 
                 <div className="pt-2">
