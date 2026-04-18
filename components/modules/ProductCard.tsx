@@ -52,13 +52,19 @@ export default function ProductCard({ product }: ProductCardProps) {
                 <Link href={`/product/${product.slug}`} className="block">
                     {/* Image */}
                     <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-neutral-50">
-                        <Image
-                            src={product.images[0]}
-                            alt={product.name}
-                            fill
-                            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                            className="object-cover transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.04]"
-                        />
+                        {product.images[0] ? (
+                            <Image
+                                src={product.images[0]}
+                                alt={product.name}
+                                fill
+                                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                                className="object-cover transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.04]"
+                            />
+                        ) : (
+                            <div className="absolute inset-0 flex items-center justify-center bg-neutral-100 text-neutral-400">
+                                <ShoppingBag size={48} strokeWidth={1} />
+                            </div>
+                        )}
 
                         {/* Second image on hover */}
                         {product.images[1] && (

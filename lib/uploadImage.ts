@@ -1,23 +1,37 @@
-import { getSupabaseClient } from "@/lib/supabase";
-
 /**
- * Upload a file to Supabase Storage in the "product-images" bucket.
+ * Upload a file to Cloudinary via direct browser upload (signed).
  * Returns the public URL of the uploaded file, or throws on error.
  */
-export async function uploadProductImage(file: File): Promise<string> {
-    const supabase = getSupabaseClient();
-    if (!supabase) throw new Error("Database not available");
+export async function uploadProductImage(
+  file: File,
+  folder = "zutaya",
+): Promise<string> {
+  // Get signature from our API
+  const sigRes = await fetch(`/api/upload?folder=${encodeURIComponent(folder)}`);
+  if (!sigRes.ok) throw new Error("Failed to get upload signature");
+  const { signature, timestamp, apiKey, cloudName, folder: f } = await sigRes.json();
 
-    const bucketDiff = process.env.NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET || "product-images";
-    const ext = file.name.split(".").pop() ?? "jpg";
-    const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const isVideo = file.type.startsWith("video/");
+  const resourceType = isVideo ? "video" : "image";
 
-    const { error } = await supabase.storage
-        .from(bucketDiff)
-        .upload(path, file, { cacheControl: "31536000", upsert: false });
+  // Upload directly to Cloudinary
+  const form = new FormData();
+  form.append("file", file);
+  form.append("api_key", apiKey);
+  form.append("timestamp", timestamp);
+  form.append("signature", signature);
+  form.append("folder", f);
 
-    if (error) throw error;
+  const res = await fetch(
+    `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`,
+    { method: "POST", body: form },
+  );
 
-    const { data } = supabase.storage.from(bucketDiff).getPublicUrl(path);
-    return data.publicUrl;
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: { message: "Upload failed" } }));
+    throw new Error(err.error?.message || "Upload failed");
+  }
+
+  const data = await res.json();
+  return data.secure_url;
 }

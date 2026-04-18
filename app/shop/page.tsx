@@ -4,8 +4,9 @@ import Footer from "@/components/modules/Footer";
 import { getProducts, getCategories, getSiteSettings } from "@/lib/queries";
 import ShopContent from "@/components/modules/ShopContent";
 import { getText } from "@/lib/textDefaults";
+import { SettingsProvider } from "@/lib/SettingsProvider";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export default async function ShopPage() {
     const [products, categories, settings] = await Promise.all([
@@ -17,7 +18,7 @@ export default async function ShopPage() {
     const ct = settings?.customTexts;
 
     return (
-        <>
+        <SettingsProvider settings={settings}>
             <Header />
             <main className="min-h-screen bg-warm-cream">
                 {/* Shop hero */}
@@ -40,6 +41,6 @@ export default async function ShopPage() {
                 </div>
             </main>
             <Footer />
-        </>
+        </SettingsProvider>
     );
 }

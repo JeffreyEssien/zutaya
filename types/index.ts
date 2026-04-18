@@ -1,3 +1,50 @@
+export interface MediaItem {
+    id: string;
+    url: string;
+    publicId?: string;
+    type: "image" | "video";
+    name: string;
+    folder?: string;
+    width?: number;
+    height?: number;
+    sizeBytes?: number;
+    createdAt: string;
+}
+
+export type HeroDisplayMode = "single" | "slideshow" | "video";
+
+export interface HeroDisplayConfig {
+    mode: HeroDisplayMode;
+    mediaIds: string[];
+    slideshowInterval: number; // seconds
+    useFeaturedSlides?: boolean; // when true, slideshow uses featured slides instead of raw media
+}
+
+export interface FeaturedSlide {
+    id: string;
+    type: "product" | "media" | "promo";
+    isActive: boolean;
+    order: number;
+    // For product slides
+    productId?: string;
+    // For media slides (gallery item)
+    mediaId?: string;
+    mediaUrl?: string;
+    mediaType?: "image" | "video";
+    // For promo slides (custom)
+    promoImageUrl?: string;
+    // Overlay content (all slide types)
+    headline?: string;
+    subtitle?: string;
+    ctaText?: string;
+    ctaLink?: string;
+    overlayPosition?: "bottom-left" | "bottom-right" | "center" | "top-left";
+    overlayStyle?: "dark" | "light" | "gradient";
+    // Resolved at render time (not stored)
+    _resolvedProduct?: Product;
+    _resolvedMediaUrl?: string;
+}
+
 export interface ProductVariant {
     name: string;
     price?: number;
@@ -167,6 +214,10 @@ export interface SiteSettings {
     packagingFee?: number;
     packagingLabel?: string;
     packagingDescription?: string;
+    // Hero display
+    heroDisplayConfig?: HeroDisplayConfig;
+    // Featured slides for hero
+    featuredSlides?: FeaturedSlide[];
     // All editable texts as JSON
     customTexts?: Record<string, string>;
 }

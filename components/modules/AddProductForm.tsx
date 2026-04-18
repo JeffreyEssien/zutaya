@@ -125,10 +125,7 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (imageUrls.length === 0) {
-            toast.error("Please upload at least one image.");
-            return;
-        }
+        // Images are optional — admin can add them later
 
         setLoading(true);
         try {
@@ -201,8 +198,9 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
             }
             window.location.reload();
         } catch (error: any) {
-            console.error(error);
-            toast.error(`Failed: ${error.message || "Unknown error"}`);
+            console.error("Product save error:", error);
+            const msg = error?.message || error?.details || JSON.stringify(error) || "Unknown error";
+            toast.error(`Failed: ${msg}`);
         } finally {
             setLoading(false);
         }

@@ -91,9 +91,10 @@ There are no test scripts configured.
 - **Section 11 (Notifications):** NotificationBell with polling, sound alerts, new order + pending payment detection.
 - **Section 13 (Storefront):** Homepage (Hero, PromiseBar, NewArrivals, HomeCta, AboutSnippet, Footer), shop with filters/active chips, product detail, checkout with queue waiting room.
 - **Section 14:** Stockpile removed entirely. Interstate removed — Lagos only.
-- **Migrations 001-013** created.
+- **Migrations 001-013, 018-019** created.
 - **About page** admin-editable (promise text, quote, stats).
 - **DB seeded** via `scripts/seed.ts`.
+- **Featured Slides:** Admin at `/admin/featured` — curate hero slideshow with product/media/promo slides, drag-to-reorder, overlay text/position/style editor, live preview modal, toggle active/inactive, duplicate. Hero renders featured slides with animated overlays when `useFeaturedSlides` is enabled. Data resolved server-side in page.tsx.
 
 ### Remaining (from Agent Instructions Doc)
 - **Section 3:** Bcrypt admin auth with rate limiting (currently plain password comparison).

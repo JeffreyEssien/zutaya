@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { Bell, X, ShoppingBag, CreditCard, Package, AlertTriangle, Check } from "lucide-react";
@@ -18,8 +18,23 @@ const typeConfig: Record<AdminNotification["type"], { icon: typeof Bell; color: 
     order_status: { icon: Package, color: "text-blue-600", bg: "bg-blue-50" },
 };
 
+function getNotificationHref(notif: AdminNotification): string {
+    switch (notif.type) {
+        case "new_order":
+        case "payment_submitted":
+        case "payment_confirmed":
+        case "order_status":
+            return notif.orderId ? `/admin/orders?order=${notif.orderId}` : "/admin/orders";
+        case "low_stock":
+            return "/admin/inventory";
+        default:
+            return "/admin";
+    }
+}
+
 export default function NotificationBell() {
     const pathname = usePathname();
+    const router = useRouter();
     const [isOpen, setIsOpen] = useState(false);
     const bellRef = useRef<HTMLButtonElement>(null);
     const panelRef = useRef<HTMLDivElement>(null);
@@ -193,7 +208,11 @@ export default function NotificationBell() {
                                     <NotificationItem
                                         key={notif.id}
                                         notification={notif}
-                                        onRead={() => markRead(notif.id)}
+                                        onClick={() => {
+                                            markRead(notif.id);
+                                            setIsOpen(false);
+                                            router.push(getNotificationHref(notif));
+                                        }}
                                     />
                                 ))
                             )}
@@ -218,15 +237,16 @@ export default function NotificationBell() {
     );
 }
 
-function NotificationItem({ notification, onRead }: { notification: AdminNotification; onRead: () => void }) {
+function NotificationItem({ notification, onClick }: { notification: AdminNotification; onClick: () => void }) {
     const config = typeConfig[notification.type];
     const Icon = config.icon;
     const timeAgo = getTimeAgo(notification.timestamp);
+    const href = getNotificationHref(notification);
 
     return (
         <div
             className={`px-5 py-4 border-b border-brand-lilac/5 hover:bg-brand-lilac/[0.03] transition-colors cursor-pointer ${!notification.read ? "bg-brand-purple/[0.03]" : ""}`}
-            onClick={onRead}
+            onClick={onClick}
         >
             <div className="flex gap-3">
                 <div className={`w-10 h-10 rounded-xl ${config.bg} flex items-center justify-center flex-shrink-0`}>
@@ -244,7 +264,12 @@ function NotificationItem({ notification, onRead }: { notification: AdminNotific
                     <p className="text-xs text-brand-dark/50 mt-1 leading-relaxed">
                         {notification.message}
                     </p>
-                    <p className="text-[10px] text-brand-dark/25 mt-1.5">{timeAgo}</p>
+                    <div className="flex items-center justify-between mt-1.5">
+                        <p className="text-[10px] text-brand-dark/25">{timeAgo}</p>
+                        <span className="text-[10px] text-brand-purple/40 font-medium">
+                            {notification.type === "low_stock" ? "View Inventory →" : "View Order →"}
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>

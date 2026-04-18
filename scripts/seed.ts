@@ -1,5 +1,5 @@
 /**
- * Seed script for ZúTa Ya — inserts 5 sample rows into each core table.
+ * Seed script for ZúTa Ya — populates all core tables with real product data.
  * Run: npx tsx scripts/seed.ts
  * Uses SUPABASE_SERVICE_ROLE_KEY for full write access (bypasses RLS).
  */
@@ -16,121 +16,214 @@ if (!url || !key) { console.error("Missing env vars"); process.exit(1); }
 
 const sb = createClient(url, key);
 
-// Helpers
 const uid = () => crypto.randomUUID();
 const now = new Date().toISOString();
+
+function slugify(name: string) {
+    return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
+
+function sku(prefix: string, idx: number) {
+    return `${prefix}-${String(idx).padStart(3, "0")}`;
+}
 
 async function seed() {
     console.log("Seeding ZúTa Ya database...\n");
 
+    // ── 0. Clear existing data (order matters for FK constraints) ──
+    await sb.from("products").delete().neq("slug", "---");
+    await sb.from("inventory_items").delete().neq("sku", "---");
+    await sb.from("categories").delete().neq("slug", "---");
+    await sb.from("orders").delete().neq("id", "---");
+    console.log("🗑️  Cleared existing products, inventory, categories, orders");
+
     // ── 1. Categories ──
-    const catIds = [uid(), uid(), uid(), uid(), uid()];
+    const catIds: Record<string, string> = {
+        "Cow Meat": uid(),
+        "Goat Meat": uid(),
+        "Ram Meat": uid(),
+        "Poultry": uid(),
+        "Premium Cut": uid(),
+        "Snail": uid(),
+        "Grillhouse": uid(),
+    };
+
     const categories = [
-        { id: catIds[0], name: "Beef", slug: "beef", image: "https://images.unsplash.com/photo-1588347818481-073d4cb66012?w=600", description: "Premium beef cuts — steaks, ribs, mince and more" },
-        { id: catIds[1], name: "Chicken", slug: "chicken", image: "https://images.unsplash.com/photo-1587593810167-a84920ea0781?w=600", description: "Whole chickens, breast fillets, drumsticks and wings" },
-        { id: catIds[2], name: "Goat Meat", slug: "goat-meat", image: "https://images.unsplash.com/photo-1602470520998-f4a52199a3d6?w=600", description: "Fresh goat cuts for soups, stews and asun" },
-        { id: catIds[3], name: "Fish & Seafood", slug: "fish-seafood", image: "https://images.unsplash.com/photo-1534604973900-c43ab4c2e0ab?w=600", description: "Fresh and frozen fish, prawns and seafood" },
-        { id: catIds[4], name: "Offal & Extras", slug: "offal-extras", image: "https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=600", description: "Liver, kidney, tripe, oxtail and specialty cuts" },
+        { id: catIds["Cow Meat"], name: "Cow Meat", slug: "cow-meat", image: "https://images.unsplash.com/photo-1588347818481-073d4cb66012?w=600", description: "Premium beef cuts — topside, ribs, oxtail, offals and more" },
+        { id: catIds["Goat Meat"], name: "Goat Meat", slug: "goat-meat", image: "https://images.unsplash.com/photo-1602470520998-f4a52199a3d6?w=600", description: "Whole, half, quarter and boneless goat meat" },
+        { id: catIds["Ram Meat"], name: "Ram Meat", slug: "ram-meat", image: "https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=600", description: "Whole ram, half, quarter and fresh ram cuts" },
+        { id: catIds["Poultry"], name: "Poultry", slug: "poultry", image: "https://images.unsplash.com/photo-1587593810167-a84920ea0781?w=600", description: "Chicken, turkey, guinea fowl — whole and parts" },
+        { id: catIds["Premium Cut"], name: "Premium Cut", slug: "premium-cut", image: "https://images.unsplash.com/photo-1603048297172-c92544798d5a?w=600", description: "Steaks, fillets, minced meat and suya" },
+        { id: catIds["Snail"], name: "Snail", slug: "snail", image: "https://images.unsplash.com/photo-1621996659490-3275b4d0d951?w=600", description: "Jumbo, big, medium and small snails — fresh from the farm" },
+        { id: catIds["Grillhouse"], name: "Grillhouse", slug: "grillhouse", image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600", description: "Pre-grilled meats — goat, guinea fowl, chicken laps" },
     ];
     const { error: catErr } = await sb.from("categories").upsert(categories, { onConflict: "slug" });
-    console.log(catErr ? `❌ Categories: ${catErr.message}` : "✅ Categories (5)");
+    console.log(catErr ? `❌ Categories: ${catErr.message}` : `✅ Categories (${categories.length})`);
 
-    // ── 2. Inventory Items ──
-    const invIds = [uid(), uid(), uid(), uid(), uid()];
-    const inventoryItems = [
-        { id: invIds[0], sku: "BF-RIB-001", name: "Beef Short Ribs", cost_price: 4500, selling_price: 7500, stock: 25, reorder_level: 5, supplier: "Lagos Meats Co" },
-        { id: invIds[1], sku: "CK-WHL-001", name: "Whole Chicken (1.5kg)", cost_price: 3000, selling_price: 5200, stock: 40, reorder_level: 10, supplier: "FreshFarm Poultry" },
-        { id: invIds[2], sku: "GT-LEG-001", name: "Goat Leg", cost_price: 5000, selling_price: 8500, stock: 15, reorder_level: 3, supplier: "Northern Livestock" },
-        { id: invIds[3], sku: "FS-PRN-001", name: "Tiger Prawns (500g)", cost_price: 4000, selling_price: 6800, stock: 20, reorder_level: 5, supplier: "Atlantic Seafood" },
-        { id: invIds[4], sku: "OF-OXT-001", name: "Oxtail (1kg)", cost_price: 5500, selling_price: 9000, stock: 12, reorder_level: 3, supplier: "Lagos Meats Co" },
+    // ── 2. Full product list from spreadsheet ──
+    interface RawProduct {
+        name: string;
+        category: string;
+        unit: string;
+        costPrice: number;
+        sellingPrice: number;
+        startingQty: number | null; // null = preorder
+        minQty: number | null;
+        priceUnit: string;
+        storageType: string;
+        cutType: string | null;
+        prepOptions: { id: string; label: string; extraFee: number }[];
+    }
+
+    const raw: RawProduct[] = [
+        // ─── COW MEAT ───
+        { name: "Topside Beef", category: "Cow Meat", unit: "1 KG", costPrice: 8500, sellingPrice: 11000, startingQty: 30, minQty: 5, priceUnit: "per_kg", storageType: "chilled", cutType: "Topside", prepOptions: [{ id: "trim", label: "Trim fat", extraFee: 0 }] },
+        { name: "Topside Slab", category: "Cow Meat", unit: "1 KG", costPrice: 10000, sellingPrice: 14000, startingQty: 20, minQty: 5, priceUnit: "per_kg", storageType: "chilled", cutType: "Topside Slab", prepOptions: [{ id: "slice", label: "Slice into steaks", extraFee: 500 }] },
+        { name: "Quarter Cow", category: "Cow Meat", unit: "Quarter", costPrice: 200000, sellingPrice: 250000, startingQty: 3, minQty: 1, priceUnit: "whole", storageType: "chilled", cutType: "Quarter", prepOptions: [{ id: "butcher", label: "Butcher into parts", extraFee: 0 }] },
+        { name: "Shaki (Tripe)", category: "Cow Meat", unit: "Pack of 10", costPrice: 4500, sellingPrice: 7000, startingQty: 30, minQty: 5, priceUnit: "per_pack", storageType: "fresh", cutType: "Tripe", prepOptions: [{ id: "wash", label: "Deep clean & wash", extraFee: 0 }] },
+        { name: "Kidney", category: "Cow Meat", unit: "1 Piece", costPrice: 4000, sellingPrice: 5500, startingQty: 20, minQty: 5, priceUnit: "per_piece", storageType: "fresh", cutType: "Kidney", prepOptions: [] },
+        { name: "Liver", category: "Cow Meat", unit: "1 KG", costPrice: 8500, sellingPrice: 11000, startingQty: 10, minQty: 2, priceUnit: "per_kg", storageType: "fresh", cutType: "Liver", prepOptions: [{ id: "slice", label: "Slice thin", extraFee: 0 }] },
+        { name: "Roundabout", category: "Cow Meat", unit: "1 KG", costPrice: 8500, sellingPrice: 10000, startingQty: 20, minQty: 5, priceUnit: "per_kg", storageType: "chilled", cutType: "Roundabout", prepOptions: [] },
+        { name: "Full Cow Stomach", category: "Cow Meat", unit: "All Offals", costPrice: 90000, sellingPrice: 110000, startingQty: 6, minQty: 1, priceUnit: "whole", storageType: "fresh", cutType: "Offals", prepOptions: [{ id: "wash", label: "Deep clean & wash", extraFee: 0 }] },
+        { name: "Bone Marrow", category: "Cow Meat", unit: "1 KG", costPrice: 3000, sellingPrice: 6000, startingQty: 50, minQty: 5, priceUnit: "per_kg", storageType: "chilled", cutType: "Bone Marrow", prepOptions: [] },
+        { name: "Bone Marrow With Bone", category: "Cow Meat", unit: "1 KG", costPrice: 3000, sellingPrice: 6000, startingQty: 20, minQty: 5, priceUnit: "per_kg", storageType: "chilled", cutType: "Bone Marrow", prepOptions: [] },
+        { name: "Cow Leg", category: "Cow Meat", unit: "1 Piece", costPrice: 10000, sellingPrice: 13000, startingQty: 20, minQty: 5, priceUnit: "per_piece", storageType: "fresh", cutType: "Leg", prepOptions: [{ id: "split", label: "Split in half", extraFee: 0 }] },
+        { name: "Full Oxtail", category: "Cow Meat", unit: "Full", costPrice: 35000, sellingPrice: 45000, startingQty: 5, minQty: 1, priceUnit: "whole", storageType: "frozen", cutType: "Oxtail", prepOptions: [{ id: "cut", label: "Cut into pieces", extraFee: 0 }] },
+
+        // ─── GOAT MEAT ───
+        { name: "Full Goat", category: "Goat Meat", unit: "Whole", costPrice: 90000, sellingPrice: 120000, startingQty: 10, minQty: 2, priceUnit: "whole", storageType: "fresh", cutType: "Whole", prepOptions: [{ id: "butcher", label: "Butcher into parts", extraFee: 0 }] },
+        { name: "Half Goat", category: "Goat Meat", unit: "Half", costPrice: 45000, sellingPrice: 60000, startingQty: 20, minQty: 5, priceUnit: "whole", storageType: "fresh", cutType: "Half", prepOptions: [{ id: "butcher", label: "Butcher into parts", extraFee: 0 }] },
+        { name: "Quarter Goat", category: "Goat Meat", unit: "Quarter", costPrice: 22500, sellingPrice: 30000, startingQty: 30, minQty: 5, priceUnit: "whole", storageType: "fresh", cutType: "Quarter", prepOptions: [{ id: "butcher", label: "Butcher into parts", extraFee: 0 }] },
+        { name: "Boneless Goat Meat", category: "Goat Meat", unit: "1 KG", costPrice: 10000, sellingPrice: 15000, startingQty: 30, minQty: 5, priceUnit: "per_kg", storageType: "chilled", cutType: "Boneless", prepOptions: [{ id: "dice", label: "Dice into cubes", extraFee: 0 }] },
+        { name: "Goat Meat With Bone", category: "Goat Meat", unit: "1 KG", costPrice: 9000, sellingPrice: 12000, startingQty: 30, minQty: 5, priceUnit: "per_kg", storageType: "chilled", cutType: "Bone-in", prepOptions: [{ id: "cut", label: "Cut into pieces", extraFee: 0 }] },
+
+        // ─── RAM MEAT ───
+        { name: "Full Ram", category: "Ram Meat", unit: "Whole", costPrice: 180000, sellingPrice: 230000, startingQty: 10, minQty: 2, priceUnit: "whole", storageType: "fresh", cutType: "Whole", prepOptions: [{ id: "butcher", label: "Butcher into parts", extraFee: 0 }] },
+        { name: "Half Ram", category: "Ram Meat", unit: "Half", costPrice: 90000, sellingPrice: 115000, startingQty: 20, minQty: 2, priceUnit: "whole", storageType: "fresh", cutType: "Half", prepOptions: [{ id: "butcher", label: "Butcher into parts", extraFee: 0 }] },
+        { name: "Quarter Ram", category: "Ram Meat", unit: "Quarter", costPrice: 45000, sellingPrice: 57500, startingQty: 20, minQty: 3, priceUnit: "whole", storageType: "fresh", cutType: "Quarter", prepOptions: [{ id: "butcher", label: "Butcher into parts", extraFee: 0 }] },
+        { name: "Ram Meat", category: "Ram Meat", unit: "1 KG", costPrice: 12000, sellingPrice: 17000, startingQty: 50, minQty: 5, priceUnit: "per_kg", storageType: "chilled", cutType: null, prepOptions: [{ id: "dice", label: "Dice into cubes", extraFee: 0 }] },
+
+        // ─── POULTRY ───
+        { name: "Chicken Broiler", category: "Poultry", unit: "Whole", costPrice: 17000, sellingPrice: 20000, startingQty: 10, minQty: 2, priceUnit: "whole", storageType: "fresh", cutType: "Whole Broiler", prepOptions: [{ id: "cut", label: "Cut into pieces", extraFee: 300 }] },
+        { name: "Chicken Layers", category: "Poultry", unit: "Whole", costPrice: 11000, sellingPrice: 15000, startingQty: 10, minQty: 2, priceUnit: "whole", storageType: "fresh", cutType: "Whole Layer", prepOptions: [{ id: "cut", label: "Cut into pieces", extraFee: 300 }] },
+        { name: "Chicken Laps (Carton)", category: "Poultry", unit: "1 Carton", costPrice: 50000, sellingPrice: 60000, startingQty: 20, minQty: 5, priceUnit: "per_pack", storageType: "frozen", cutType: "Laps", prepOptions: [] },
+        { name: "Chicken Laps", category: "Poultry", unit: "1 KG", costPrice: 5000, sellingPrice: 6000, startingQty: 100, minQty: 10, priceUnit: "per_kg", storageType: "frozen", cutType: "Laps", prepOptions: [] },
+        { name: "Boneless Chicken Breast", category: "Poultry", unit: "1 KG", costPrice: 6000, sellingPrice: 8000, startingQty: 50, minQty: 5, priceUnit: "per_kg", storageType: "chilled", cutType: "Breast", prepOptions: [{ id: "butterfly", label: "Butterfly fillet", extraFee: 0 }] },
+        { name: "Chicken Gizzard", category: "Poultry", unit: "1 KG", costPrice: 6000, sellingPrice: 8000, startingQty: 20, minQty: 5, priceUnit: "per_kg", storageType: "fresh", cutType: "Gizzard", prepOptions: [] },
+        { name: "Guinea Fowl", category: "Poultry", unit: "Whole", costPrice: 12000, sellingPrice: 16000, startingQty: 10, minQty: 2, priceUnit: "whole", storageType: "fresh", cutType: "Whole", prepOptions: [{ id: "cut", label: "Cut into pieces", extraFee: 300 }] },
+        { name: "Turkey", category: "Poultry", unit: "Full Carton", costPrice: 100000, sellingPrice: 120000, startingQty: 5, minQty: 1, priceUnit: "per_pack", storageType: "frozen", cutType: "Whole", prepOptions: [] },
+
+        // ─── PREMIUM CUT ───
+        { name: "Beef Fillet", category: "Premium Cut", unit: "1 KG", costPrice: 10000, sellingPrice: 15000, startingQty: 10, minQty: 2, priceUnit: "per_kg", storageType: "chilled", cutType: "Fillet", prepOptions: [{ id: "trim", label: "Trim silver skin", extraFee: 0 }] },
+        { name: "Minced Beef", category: "Premium Cut", unit: "1 KG", costPrice: 10000, sellingPrice: 12000, startingQty: 20, minQty: 5, priceUnit: "per_kg", storageType: "chilled", cutType: "Mince", prepOptions: [] },
+        { name: "Minced Chicken", category: "Premium Cut", unit: "1 KG", costPrice: 8000, sellingPrice: 10000, startingQty: 20, minQty: 2, priceUnit: "per_kg", storageType: "chilled", cutType: "Mince", prepOptions: [] },
+        { name: "Ribeye Steak", category: "Premium Cut", unit: "1 KG", costPrice: 10000, sellingPrice: 15000, startingQty: null, minQty: 2, priceUnit: "per_kg", storageType: "chilled", cutType: "Ribeye", prepOptions: [{ id: "tenderize", label: "Tenderize", extraFee: 0 }] },
+        { name: "Sirloin Steak", category: "Premium Cut", unit: "1 KG", costPrice: 10000, sellingPrice: 15000, startingQty: null, minQty: 2, priceUnit: "per_kg", storageType: "chilled", cutType: "Sirloin", prepOptions: [{ id: "tenderize", label: "Tenderize", extraFee: 0 }] },
+        { name: "Suya Stick", category: "Premium Cut", unit: "1 KG", costPrice: 8500, sellingPrice: 15000, startingQty: 20, minQty: 5, priceUnit: "per_kg", storageType: "fresh", cutType: "Suya", prepOptions: [] },
+        { name: "T-Bone Steak", category: "Premium Cut", unit: "1 KG", costPrice: 12000, sellingPrice: 17000, startingQty: null, minQty: 1, priceUnit: "per_kg", storageType: "chilled", cutType: "T-Bone", prepOptions: [{ id: "tenderize", label: "Tenderize", extraFee: 0 }] },
+        { name: "Tozo Steak", category: "Premium Cut", unit: "1 KG", costPrice: 10000, sellingPrice: 14000, startingQty: null, minQty: 2, priceUnit: "per_kg", storageType: "chilled", cutType: "Tozo", prepOptions: [{ id: "tenderize", label: "Tenderize", extraFee: 0 }] },
+
+        // ─── SNAIL ───
+        { name: "Jumbo Snails", category: "Snail", unit: "20 Pieces", costPrice: 65000, sellingPrice: 80000, startingQty: null, minQty: null, priceUnit: "per_pack", storageType: "fresh", cutType: null, prepOptions: [{ id: "clean", label: "Clean & deshell", extraFee: 0 }] },
+        { name: "Big Snails", category: "Snail", unit: "20 Pieces", costPrice: 50000, sellingPrice: 75000, startingQty: null, minQty: null, priceUnit: "per_pack", storageType: "fresh", cutType: null, prepOptions: [{ id: "clean", label: "Clean & deshell", extraFee: 0 }] },
+        { name: "Medium Snails", category: "Snail", unit: "20 Pieces", costPrice: 40000, sellingPrice: 60000, startingQty: null, minQty: null, priceUnit: "per_pack", storageType: "fresh", cutType: null, prepOptions: [{ id: "clean", label: "Clean & deshell", extraFee: 0 }] },
+        { name: "Small Snails", category: "Snail", unit: "40 Pieces", costPrice: 25000, sellingPrice: 35000, startingQty: null, minQty: null, priceUnit: "per_pack", storageType: "fresh", cutType: null, prepOptions: [{ id: "clean", label: "Clean & deshell", extraFee: 0 }] },
+
+        // ─── GRILLHOUSE ───
+        { name: "Full Goat (Grilled)", category: "Grillhouse", unit: "Whole", costPrice: 150000, sellingPrice: 200000, startingQty: null, minQty: null, priceUnit: "whole", storageType: "fresh", cutType: "Grilled Whole Goat", prepOptions: [] },
+        { name: "Guinea Fowl (Grilled)", category: "Grillhouse", unit: "Whole", costPrice: 10000, sellingPrice: 15000, startingQty: null, minQty: null, priceUnit: "whole", storageType: "fresh", cutType: "Grilled Guinea Fowl", prepOptions: [] },
+        { name: "Chicken Laps (Grilled)", category: "Grillhouse", unit: "1 Carton", costPrice: 60000, sellingPrice: 80000, startingQty: null, minQty: null, priceUnit: "per_pack", storageType: "fresh", cutType: "Grilled Laps", prepOptions: [] },
     ];
+
+    // ── 3. Inventory Items ──
+    const inventoryItems = raw.map((p, i) => ({
+        id: uid(),
+        sku: sku(slugify(p.category).substring(0, 2).toUpperCase(), i + 1),
+        name: p.name,
+        cost_price: p.costPrice,
+        selling_price: p.sellingPrice,
+        stock: p.startingQty ?? 0,
+        reorder_level: p.minQty ?? 1,
+        supplier: "Zúta Ya Supply Chain",
+    }));
+
     const { error: invErr } = await sb.from("inventory_items").upsert(inventoryItems, { onConflict: "sku" });
-    console.log(invErr ? `❌ Inventory Items: ${invErr.message}` : "✅ Inventory Items (5)");
+    console.log(invErr ? `❌ Inventory Items: ${invErr.message}` : `✅ Inventory Items (${inventoryItems.length})`);
 
-    // ── 3. Products ──
-    const products = [
-        {
-            slug: "beef-short-ribs", name: "Beef Short Ribs", description: "Juicy, marbled short ribs perfect for slow cooking, grilling or braising. Cut fresh and cold-chain packed.",
-            price: 7500, category: "Beef", category_id: catIds[0], brand: "Zúta Ya", stock: 25, images: ["https://images.unsplash.com/photo-1588347818481-073d4cb66012?w=600", "https://images.unsplash.com/photo-1603048297172-c92544798d5a?w=600"],
-            variants: [{ name: "500g", price: 3750, stock: 15 }, { name: "1kg", price: 7500, stock: 10 }],
-            is_featured: true, is_new: true, inventory_item_id: invIds[0], price_unit: "per_kg", cut_type: "Short Ribs", storage_type: "chilled", min_weight_kg: 0.5,
-            prep_options: ([{ id: "trim", label: "Trim fat", extraFee: 0 }, { id: "debone", label: "Debone", extraFee: 500 }]),
-        },
-        {
-            slug: "whole-chicken", name: "Whole Chicken (1.5kg)", description: "Farm-raised whole chicken, cleaned and ready to cook. Ideal for roasting, grilling or making stock.",
-            price: 5200, category: "Chicken", category_id: catIds[1], brand: "Zúta Ya", stock: 40, images: ["https://images.unsplash.com/photo-1587593810167-a84920ea0781?w=600"],
-            variants: [], is_featured: true, is_new: false, inventory_item_id: invIds[1], price_unit: "whole", cut_type: null, storage_type: "fresh", min_weight_kg: 1.5,
-            prep_options: ([{ id: "cut", label: "Cut into pieces", extraFee: 300 }]),
-        },
-        {
-            slug: "goat-leg", name: "Goat Leg", description: "Tender goat leg, great for peppersoup, asun or slow-roasted dishes. Sourced from trusted Northern suppliers.",
-            price: 8500, category: "Goat Meat", category_id: catIds[2], brand: "Zúta Ya", stock: 15, images: ["https://images.unsplash.com/photo-1602470520998-f4a52199a3d6?w=600"],
-            variants: [{ name: "Half Leg", price: 4500, stock: 8 }, { name: "Full Leg", price: 8500, stock: 7 }],
-            is_featured: false, is_new: true, inventory_item_id: invIds[2], price_unit: "per_piece", cut_type: "Leg", storage_type: "fresh", min_weight_kg: 1.0,
-            prep_options: [],
-        },
-        {
-            slug: "tiger-prawns-500g", name: "Tiger Prawns (500g)", description: "Large wild-caught tiger prawns, deveined and shell-on. Flash-frozen for maximum freshness.",
-            price: 6800, category: "Fish & Seafood", category_id: catIds[3], brand: "Zúta Ya", stock: 20, images: ["https://images.unsplash.com/photo-1534604973900-c43ab4c2e0ab?w=600"],
-            variants: [], is_featured: true, is_new: true, inventory_item_id: invIds[3], price_unit: "per_pack", cut_type: null, storage_type: "frozen", min_weight_kg: 0.5,
-            prep_options: ([{ id: "peel", label: "Peel & devein", extraFee: 500 }]),
-        },
-        {
-            slug: "oxtail-1kg", name: "Oxtail (1kg)", description: "Rich, gelatinous oxtail — perfect for stews, peppersoup and jollof. A Nigerian kitchen essential.",
-            price: 9000, category: "Offal & Extras", category_id: catIds[4], brand: "Zúta Ya", stock: 12, images: ["https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=600"],
-            variants: [{ name: "500g", price: 4500, stock: 6 }, { name: "1kg", price: 9000, stock: 6 }],
-            is_featured: false, is_new: false, inventory_item_id: invIds[4], price_unit: "per_kg", cut_type: "Oxtail", storage_type: "frozen", min_weight_kg: 0.5,
-            prep_options: [],
-        },
-    ];
+    // ── 4. Products ──
+    const products = raw.map((p, i) => {
+        const slug = slugify(p.name);
+        const isPreorder = p.startingQty === null;
+        return {
+            slug,
+            name: p.name,
+            description: `${p.name} — ${p.unit}. ${isPreorder ? "Available on preorder." : "In stock and ready to deliver."}`,
+            price: p.sellingPrice,
+            category: p.category,
+            category_id: catIds[p.category],
+            brand: "Zúta Ya",
+            stock: p.startingQty ?? 0,
+            images: [],
+            variants: [],
+            is_featured: [0, 3, 12, 21, 29, 33].includes(i),
+            is_new: [1, 7, 15, 20, 30, 37].includes(i),
+            inventory_item_id: inventoryItems[i].id,
+            price_unit: p.priceUnit,
+            cut_type: p.cutType,
+            storage_type: p.storageType,
+            min_weight_kg: p.priceUnit === "per_kg" ? 1.0 : null,
+            prep_options: p.prepOptions,
+        };
+    });
+
     const { error: prodErr } = await sb.from("products").upsert(products, { onConflict: "slug" });
-    console.log(prodErr ? `❌ Products: ${prodErr.message}` : "✅ Products (5)");
+    console.log(prodErr ? `❌ Products: ${prodErr.message}` : `✅ Products (${products.length})`);
 
-    // ── 4. Orders ──
+    // ── 5. Orders ──
     const orders = [
         {
-            id: "ZY-00001", customer_name: "Adaeze Okafor", email: "adaeze@example.com", phone: "08012345678",
-            items: ([{ productId: "beef-short-ribs", name: "Beef Short Ribs", variant: "1kg", quantity: 2, price: 7500, image: "" }]),
-            subtotal: 15000, shipping: 2500, total: 17500, status: "delivered",
-            shipping_address: ({ street: "12 Admiralty Way", city: "Lekki", state: "Lagos", zip: "" }),
+            id: "ZY-20260417-0001", customer_name: "Adaeze Okafor", email: "adaeze@example.com", phone: "08012345678",
+            items: [{ productId: slugify("Topside Beef"), name: "Topside Beef", variant: null, quantity: 2, price: 11000, image: "" }],
+            subtotal: 22000, shipping: 2500, total: 24500, status: "delivered",
+            shipping_address: { street: "12 Admiralty Way", city: "Lekki", state: "Lagos", zip: "" },
             payment_method: "bank_transfer", payment_status: "approved", delivery_zone: "Lekki", delivery_type: "doorstep",
         },
         {
-            id: "ZY-00002", customer_name: "Chinedu Eze", email: "chinedu@example.com", phone: "07098765432",
-            items: ([{ productId: "whole-chicken", name: "Whole Chicken (1.5kg)", variant: null, quantity: 3, price: 5200, image: "" }]),
-            subtotal: 15600, shipping: 1500, total: 17100, status: "processing",
-            shipping_address: ({ street: "45 Allen Avenue", city: "Ikeja", state: "Lagos", zip: "" }),
+            id: "ZY-20260417-0002", customer_name: "Chinedu Eze", email: "chinedu@example.com", phone: "07098765432",
+            items: [{ productId: slugify("Chicken Broiler"), name: "Chicken Broiler", variant: null, quantity: 3, price: 20000, image: "" }],
+            subtotal: 60000, shipping: 1500, total: 61500, status: "processing",
+            shipping_address: { street: "45 Allen Avenue", city: "Ikeja", state: "Lagos", zip: "" },
             payment_method: "whatsapp", payment_status: "pending", delivery_zone: "Ikeja", delivery_type: "doorstep",
         },
         {
-            id: "ZY-00003", customer_name: "Fatima Bello", email: "fatima@example.com", phone: "09011223344",
-            items: ([
-                { productId: "goat-leg", name: "Goat Leg", variant: "Full Leg", quantity: 1, price: 8500, image: "" },
-                { productId: "oxtail-1kg", name: "Oxtail (1kg)", variant: "1kg", quantity: 1, price: 9000, image: "" },
-            ]),
-            subtotal: 17500, shipping: 3000, total: 20500, status: "packed",
-            shipping_address: ({ street: "7 Adeola Odeku", city: "Victoria Island", state: "Lagos", zip: "" }),
+            id: "ZY-20260417-0003", customer_name: "Fatima Bello", email: "fatima@example.com", phone: "09011223344",
+            items: [
+                { productId: slugify("Full Goat"), name: "Full Goat", variant: null, quantity: 1, price: 120000, image: "" },
+                { productId: slugify("Full Oxtail"), name: "Full Oxtail", variant: null, quantity: 1, price: 45000, image: "" },
+            ],
+            subtotal: 165000, shipping: 3000, total: 168000, status: "packed",
+            shipping_address: { street: "7 Adeola Odeku", city: "Victoria Island", state: "Lagos", zip: "" },
             payment_method: "bank_transfer", payment_status: "approved", delivery_zone: "Victoria Island", delivery_type: "doorstep",
         },
         {
-            id: "ZY-00004", customer_name: "Oluwaseun Adeyemi", email: "seun@example.com", phone: "08155667788",
-            items: ([{ productId: "tiger-prawns-500g", name: "Tiger Prawns (500g)", variant: null, quantity: 2, price: 6800, image: "" }]),
-            subtotal: 13600, shipping: 5000, total: 18600, status: "pending",
-            shipping_address: ({ street: "22 Allen Avenue", city: "Ikeja", state: "Lagos", zip: "" }),
+            id: "ZY-20260417-0004", customer_name: "Oluwaseun Adeyemi", email: "seun@example.com", phone: "08155667788",
+            items: [{ productId: slugify("Ribeye Steak"), name: "Ribeye Steak", variant: null, quantity: 2, price: 15000, image: "" }],
+            subtotal: 30000, shipping: 5000, total: 35000, status: "pending",
+            shipping_address: { street: "22 Bode Thomas", city: "Surulere", state: "Lagos", zip: "" },
             payment_method: "whatsapp", payment_status: "pending", delivery_zone: "Mainland Core", delivery_type: "doorstep",
         },
         {
-            id: "ZY-00005", customer_name: "Ngozi Mbachu", email: "ngozi@example.com", phone: "07033445566",
-            items: ([{ productId: "beef-short-ribs", name: "Beef Short Ribs", variant: "500g", quantity: 4, price: 3750, image: "" }]),
-            subtotal: 15000, shipping: 2000, total: 17000, status: "out_for_delivery",
-            shipping_address: ({ street: "15 Bode Thomas", city: "Surulere", state: "Lagos", zip: "" }),
-            payment_method: "bank_transfer", payment_status: "approved", delivery_zone: "Surulere", delivery_type: "doorstep",
+            id: "ZY-20260417-0005", customer_name: "Ngozi Mbachu", email: "ngozi@example.com", phone: "07033445566",
+            items: [{ productId: slugify("Boneless Goat Meat"), name: "Boneless Goat Meat", variant: null, quantity: 3, price: 15000, image: "" }],
+            subtotal: 45000, shipping: 2000, total: 47000, status: "out_for_delivery",
+            shipping_address: { street: "15 Allen Avenue", city: "Ikeja", state: "Lagos", zip: "" },
+            payment_method: "bank_transfer", payment_status: "approved", delivery_zone: "Ikeja", delivery_type: "doorstep",
         },
     ];
     const { error: ordErr } = await sb.from("orders").upsert(orders, { onConflict: "id" });
-    console.log(ordErr ? `❌ Orders: ${ordErr.message}` : "✅ Orders (5)");
+    console.log(ordErr ? `❌ Orders: ${ordErr.message}` : `✅ Orders (${orders.length})`);
 
-    // ── 5. Coupons ──
+    // ── 6. Coupons ──
     const coupons = [
         { code: "WELCOME10", discount_percent: 10, is_active: true, usage_count: 12 },
         { code: "MEAT20", discount_percent: 20, is_active: true, usage_count: 5 },
@@ -139,9 +232,9 @@ async function seed() {
         { code: "EXPIRED25", discount_percent: 25, is_active: false, usage_count: 3 },
     ];
     const { error: coupErr } = await sb.from("coupons").upsert(coupons, { onConflict: "code" });
-    console.log(coupErr ? `❌ Coupons: ${coupErr.message}` : "✅ Coupons (5)");
+    console.log(coupErr ? `❌ Coupons: ${coupErr.message}` : `✅ Coupons (${coupons.length})`);
 
-    // ── 6. Delivery Zones ──
+    // ── 7. Delivery Zones ──
     const zoneIds = [uid(), uid(), uid(), uid(), uid()];
     const deliveryZones = [
         { id: zoneIds[0], name: "Lekki / Ajah", zone_type: "lagos", base_fee: 2500, is_active: true, sort_order: 1, hub_estimate: null, doorstep_estimate: "Same day" },
@@ -151,31 +244,31 @@ async function seed() {
         { id: zoneIds[4], name: "Ikorodu / Mainland Extension", zone_type: "lagos", base_fee: 3500, is_active: true, sort_order: 5, hub_estimate: null, doorstep_estimate: "1–2 days" },
     ];
     const { error: zoneErr } = await sb.from("delivery_zones").upsert(deliveryZones);
-    console.log(zoneErr ? `❌ Delivery Zones: ${zoneErr.message}` : "✅ Delivery Zones (5)");
+    console.log(zoneErr ? `❌ Delivery Zones: ${zoneErr.message}` : `✅ Delivery Zones (${deliveryZones.length})`);
 
-    // ── 7. Delivery Locations ──
+    // ── 8. Delivery Locations ──
     const deliveryLocations = [
         { zone_id: zoneIds[0], name: "Lekki Phase 1", doorstep_fee: 2500, is_active: true },
         { zone_id: zoneIds[0], name: "Ajah", doorstep_fee: 3000, is_active: true },
         { zone_id: zoneIds[1], name: "Victoria Island", doorstep_fee: 2000, is_active: true },
         { zone_id: zoneIds[2], name: "Ikeja GRA", doorstep_fee: 1500, is_active: true },
-        { zone_id: zoneIds[4], name: "Ibadan", hub_pickup_fee: 3500, doorstep_fee: 5000, is_active: true },
+        { zone_id: zoneIds[4], name: "Ikorodu", doorstep_fee: 3500, is_active: true },
     ];
     const { error: locErr } = await sb.from("delivery_locations").upsert(deliveryLocations);
-    console.log(locErr ? `❌ Delivery Locations: ${locErr.message}` : "✅ Delivery Locations (5)");
+    console.log(locErr ? `❌ Delivery Locations: ${locErr.message}` : `✅ Delivery Locations (${deliveryLocations.length})`);
 
-    // ── 8. Bundle Rules ──
+    // ── 9. Bundle Rules ──
     const bundleRules = [
         { name: "Starter Box", description: "Try a little bit of everything — perfect for first-timers.", min_items: 3, max_items: 5, discount_percent: 10, is_active: true, allowed_category_ids: [] },
         { name: "Family Feast", description: "Feed the whole family for the week with premium cuts.", min_items: 5, max_items: 10, discount_percent: 15, is_active: true, allowed_category_ids: [] },
-        { name: "BBQ Bundle", description: "Everything you need for an epic grill session.", min_items: 4, max_items: 8, discount_percent: 12, is_active: true, allowed_category_ids: [catIds[0], catIds[1]] },
+        { name: "BBQ Bundle", description: "Everything you need for an epic grill session.", min_items: 4, max_items: 8, discount_percent: 12, is_active: true, allowed_category_ids: [catIds["Cow Meat"], catIds["Poultry"], catIds["Grillhouse"]] },
         { name: "Protein Pack", description: "High-protein selections for meal prep and fitness.", min_items: 3, max_items: 6, discount_percent: 8, is_active: true, allowed_category_ids: [] },
-        { name: "Soup Essentials", description: "All the cuts you need for your soups and stews.", min_items: 3, max_items: 7, discount_percent: 10, is_active: true, allowed_category_ids: [catIds[2], catIds[4]] },
+        { name: "Soup Essentials", description: "All the cuts you need for your soups and stews.", min_items: 3, max_items: 7, discount_percent: 10, is_active: true, allowed_category_ids: [catIds["Cow Meat"], catIds["Goat Meat"]] },
     ];
     const { error: bundleErr } = await sb.from("bundle_rules").upsert(bundleRules);
-    console.log(bundleErr ? `❌ Bundle Rules: ${bundleErr.message}` : "✅ Bundle Rules (5)");
+    console.log(bundleErr ? `❌ Bundle Rules: ${bundleErr.message}` : `✅ Bundle Rules (${bundleRules.length})`);
 
-    // ── 9. Newsletter Subscribers ──
+    // ── 10. Newsletter Subscribers ──
     const subscribers = [
         { email: "adaeze@example.com", first_name: "Adaeze", token: uid(), source: "footer" },
         { email: "chinedu@example.com", first_name: "Chinedu", token: uid(), source: "footer" },
@@ -184,9 +277,9 @@ async function seed() {
         { email: "ngozi@example.com", first_name: "Ngozi", token: uid(), source: "checkout" },
     ];
     const { error: subErr } = await sb.from("newsletter_subscribers").upsert(subscribers, { onConflict: "email" });
-    console.log(subErr ? `❌ Newsletter Subscribers: ${subErr.message}` : "✅ Newsletter Subscribers (5)");
+    console.log(subErr ? `❌ Newsletter Subscribers: ${subErr.message}` : `✅ Newsletter Subscribers (${subscribers.length})`);
 
-    // ── 10. Site Settings (singleton) ──
+    // ── 11. Site Settings (singleton) ──
     const siteSettings = {
         id: true,
         site_name: "Zúta Ya",
@@ -205,12 +298,12 @@ async function seed() {
         business_address: "Lagos, Nigeria",
         about_promise_text: "Every order is packed with care, kept cold, and delivered fresh. If it doesn't meet your standards, we'll make it right — no questions asked.",
         about_quote: "More than meat delivery. It's freshness. It's trust. It's Zúta Ya.",
-        about_stats: ([
+        about_stats: [
             { value: "500+", label: "Happy Customers" },
             { value: "24hrs", label: "Max Delivery Time" },
             { value: "100%", label: "Cold-Chain Packed" },
             { value: "6", label: "Days a Week" },
-        ]),
+        ],
         footer_tagline: "Premium meat delivery across Lagos and Nigeria.",
         free_shipping_threshold: 50000,
         custom_texts: {},

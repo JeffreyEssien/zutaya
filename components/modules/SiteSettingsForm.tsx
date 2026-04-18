@@ -10,9 +10,14 @@ import {
     Globe, Phone, MessageCircle, MapPin, Type, Megaphone,
     Instagram, Twitter, Music2, Facebook, BookOpen, Plus, Trash2,
     FileText, PackageCheck, Image as ImageIcon, Share2, Store, Save,
+    Monitor, Play, Film, X,
 } from "lucide-react";
 import { logAction } from "@/lib/auditClient";
 import { TEXT_GROUPS } from "@/lib/textDefaults";
+import { revalidateShop } from "@/app/actions";
+import type { HeroDisplayConfig, MediaItem } from "@/types";
+import MediaPicker from "@/components/modules/MediaPicker";
+import Image from "next/image";
 
 type TabId = "general" | "storefront" | "business" | "checkout" | "texts";
 
@@ -31,6 +36,9 @@ export default function SiteSettingsForm() {
     const [aboutStats, setAboutStats] = useState<{ value: string; label: string }[]>([]);
     const [customTexts, setCustomTexts] = useState<Record<string, string>>({});
     const [activeTab, setActiveTab] = useState<TabId>("general");
+    const [heroDisplay, setHeroDisplay] = useState<HeroDisplayConfig>({ mode: "single", mediaIds: [], slideshowInterval: 5 });
+    const [heroMediaItems, setHeroMediaItems] = useState<MediaItem[]>([]);
+    const [pickerOpen, setPickerOpen] = useState(false);
 
     useEffect(() => {
         loadSettings();
@@ -46,6 +54,23 @@ export default function SiteSettingsForm() {
                 }
                 if (data.customTexts) {
                     setCustomTexts(typeof data.customTexts === "string" ? JSON.parse(data.customTexts) : data.customTexts);
+                }
+                if (data.heroDisplayConfig) {
+                    const hdc = typeof data.heroDisplayConfig === "string" ? JSON.parse(data.heroDisplayConfig) : data.heroDisplayConfig;
+                    setHeroDisplay(hdc);
+                    // Fetch media items for the IDs
+                    if (hdc.mediaIds?.length) {
+                        fetch("/api/media").then(r => r.json()).then((all: any[]) => {
+                            if (Array.isArray(all)) {
+                                const items = all.filter((m: any) => hdc.mediaIds.includes(m.id)).map((m: any) => ({
+                                    id: m.id, url: m.url, publicId: m.public_id, type: m.type,
+                                    name: m.name, folder: m.folder, width: m.width, height: m.height,
+                                    sizeBytes: m.size_bytes, createdAt: m.created_at,
+                                }));
+                                setHeroMediaItems(items);
+                            }
+                        }).catch(() => {});
+                    }
                 }
                 if (!data.aboutStats) {
                     setAboutStats([
@@ -77,8 +102,9 @@ export default function SiteSettingsForm() {
         e.preventDefault();
         setSaving(true);
         try {
-            const payload = { ...settings, aboutStats: JSON.stringify(aboutStats), customTexts };
+            const payload = { ...settings, aboutStats: JSON.stringify(aboutStats), customTexts, heroDisplayConfig: heroDisplay };
             await updateSiteSettings(payload);
+            await revalidateShop();
             logAction("update", "settings", undefined, "Updated site settings");
             toast.success("Settings saved successfully.");
         } catch {
@@ -194,7 +220,7 @@ export default function SiteSettingsForm() {
                             <Field label="Subheading">
                                 <input type="text" name="heroSubheading" value={settings.heroSubheading || ""} onChange={handleChange} className="settings-input" />
                             </Field>
-                            <Field label="Hero Image">
+                            <Field label="Hero Image (fallback)">
                                 <ImageUpload
                                     value={settings.heroImage}
                                     name="heroImage"
@@ -213,6 +239,109 @@ export default function SiteSettingsForm() {
                                 </Field>
                             </div>
                         </Card>
+
+                        {/* Hero Display Mode */}
+                        <Card title="Hero Display Panel" description="Configure the right-side visual panel on the hero section" icon={Monitor}>
+                            <Field label="Display Mode">
+                                <div className="grid grid-cols-3 gap-3">
+                                    {([
+                                        { value: "single", label: "Single Image", icon: ImageIcon },
+                                        { value: "slideshow", label: "Slideshow", icon: Play },
+                                        { value: "video", label: "Video", icon: Film },
+                                    ] as const).map((opt) => {
+                                        const Icon = opt.icon;
+                                        const active = heroDisplay.mode === opt.value;
+                                        return (
+                                            <button
+                                                key={opt.value}
+                                                type="button"
+                                                onClick={() => setHeroDisplay((prev) => ({ ...prev, mode: opt.value }))}
+                                                className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all cursor-pointer ${
+                                                    active
+                                                        ? "border-brand-red bg-brand-red/5 text-brand-red"
+                                                        : "border-brand-dark/8 hover:border-brand-dark/20 text-brand-dark/50"
+                                                }`}
+                                            >
+                                                <Icon size={20} />
+                                                <span className="text-xs font-medium">{opt.label}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </Field>
+
+                            {heroDisplay.mode === "slideshow" && (
+                                <Field label="Slideshow Interval (seconds)">
+                                    <input
+                                        type="number"
+                                        min={2}
+                                        max={30}
+                                        value={heroDisplay.slideshowInterval}
+                                        onChange={(e) => setHeroDisplay((prev) => ({ ...prev, slideshowInterval: parseInt(e.target.value) || 5 }))}
+                                        className="settings-input w-24"
+                                    />
+                                </Field>
+                            )}
+
+                            <Field label={heroDisplay.mode === "video" ? "Select Video" : "Select Images"}>
+                                <button
+                                    type="button"
+                                    onClick={() => setPickerOpen(true)}
+                                    className="w-full py-3 px-4 border-2 border-dashed border-brand-dark/15 rounded-xl text-sm text-brand-dark/50 hover:border-brand-red/30 hover:text-brand-red/60 transition-colors cursor-pointer flex items-center justify-center gap-2"
+                                >
+                                    <ImageIcon size={16} />
+                                    Choose from Gallery
+                                </button>
+                            </Field>
+
+                            {/* Selected media preview */}
+                            {heroMediaItems.length > 0 && (
+                                <div className="space-y-2">
+                                    <p className="text-xs font-medium text-brand-dark/50 uppercase tracking-wider">
+                                        Selected ({heroMediaItems.length})
+                                    </p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {heroMediaItems.map((item) => (
+                                            <div
+                                                key={item.id}
+                                                className="relative w-20 h-20 rounded-lg overflow-hidden border border-brand-dark/10 group"
+                                            >
+                                                {item.type === "video" ? (
+                                                    <div className="w-full h-full flex items-center justify-center bg-deep-espresso/90">
+                                                        <Film size={18} className="text-white/40" />
+                                                    </div>
+                                                ) : (
+                                                    <Image src={item.url} alt={item.name} fill className="object-cover" sizes="80px" />
+                                                )}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const newItems = heroMediaItems.filter((m) => m.id !== item.id);
+                                                        setHeroMediaItems(newItems);
+                                                        setHeroDisplay((prev) => ({ ...prev, mediaIds: newItems.map((m) => m.id) }));
+                                                    }}
+                                                    className="absolute top-0.5 right-0.5 p-0.5 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                                                >
+                                                    <X size={10} className="text-white" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </Card>
+
+                        <MediaPicker
+                            open={pickerOpen}
+                            onClose={() => setPickerOpen(false)}
+                            multiple={heroDisplay.mode === "slideshow"}
+                            filterType={heroDisplay.mode === "video" ? "video" : "image"}
+                            title={heroDisplay.mode === "video" ? "Select Video" : "Select Images"}
+                            onSelect={(items) => {
+                                setHeroMediaItems(items);
+                                setHeroDisplay((prev) => ({ ...prev, mediaIds: items.map((m) => m.id) }));
+                            }}
+                        />
 
                         <Card title="Announcement Bar" description="Top-of-page promotional banner" icon={Megaphone}>
                             <div className="flex items-center gap-3">

@@ -4,6 +4,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
 import { getSiteSettings } from "@/lib/queries";
 import type { SiteSettings } from "@/types";
+import { useSettings } from "@/lib/SettingsProvider";
 import { BUSINESS_PHONE, BUSINESS_HOURS, INSTAGRAM_HANDLE, WHATSAPP_NUMBER } from "@/lib/constants";
 import Link from "next/link";
 import {
@@ -56,6 +57,7 @@ const defaultStats = [
 ];
 
 export default function AboutSnippet({ customTexts }: { customTexts?: Record<string, string> }) {
+    const ctxSettings = useSettings();
     const [settings, setSettings] = useState<SiteSettings | null>(null);
     const sectionRef = useRef<HTMLElement>(null);
 
@@ -66,8 +68,12 @@ export default function AboutSnippet({ customTexts }: { customTexts?: Record<str
     const parallaxY = useTransform(scrollYProgress, [0, 1], [40, -40]);
 
     useEffect(() => {
-        getSiteSettings().then(setSettings).catch(() => {});
-    }, []);
+        if (ctxSettings) {
+            setSettings(ctxSettings);
+        } else {
+            getSiteSettings().then(setSettings).catch(() => {});
+        }
+    }, [ctxSettings]);
 
     const stats: { value: string; label: string }[] = (() => {
         if (settings?.aboutStats) {

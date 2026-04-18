@@ -31,6 +31,8 @@ export const ADMIN_NAV_LINKS = [
     { label: "Newsletter", href: "/admin/newsletter", icon: "mail" },
     { label: "Subscriptions", href: "/admin/subscriptions", icon: "refresh" },
     { label: "Bundles", href: "/admin/bundles", icon: "gift" },
+    { label: "Featured", href: "/admin/featured", icon: "star" },
+    { label: "Gallery", href: "/admin/gallery", icon: "image" },
     { label: "Categories", href: "/admin/categories", icon: "tag" },
     { label: "Cron Jobs", href: "/admin/cron", icon: "clock" },
     { label: "Audit Log", href: "/admin/audit", icon: "shield" },

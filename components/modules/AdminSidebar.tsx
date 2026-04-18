@@ -8,7 +8,7 @@ import { cn } from "@/lib/cn";
 import NotificationBell from "@/components/modules/NotificationBell";
 import {
     LayoutGrid, Package, ClipboardList, Tag, Users, BarChart3,
-    FileText, Box, Ticket, Settings, Truck, Mail, RefreshCw, Gift, Clock, LogOut, Shield
+    FileText, Box, Ticket, Settings, Truck, Mail, RefreshCw, Gift, Clock, LogOut, Shield, ImageIcon, Star
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -185,6 +185,8 @@ const ICON_MAP: Record<string, React.ElementType> = {
     gift: Gift,
     clock: Clock,
     shield: Shield,
+    image: ImageIcon,
+    star: Star,
     cog: Settings,
 };
 

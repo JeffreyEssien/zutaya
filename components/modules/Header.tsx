@@ -9,6 +9,7 @@ import CartDrawer from "@/components/modules/CartDrawer";
 import { useState, useEffect, useRef } from "react";
 import { getSiteSettings } from "@/lib/queries";
 import type { SiteSettings } from "@/types";
+import { useSettings } from "@/lib/SettingsProvider";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, X, ShoppingBag, Menu } from "lucide-react";
 import ScrollProgress from "@/components/ui/ScrollProgress";
@@ -19,6 +20,7 @@ export default function Header() {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [searchOpen, setSearchOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
+    const ctxSettings = useSettings();
     const [settings, setSettings] = useState<SiteSettings | null>(null);
     const [mounted, setMounted] = useState(false);
     const [scrolled, setScrolled] = useState(false);
@@ -33,8 +35,13 @@ export default function Header() {
 
     useEffect(() => {
         setMounted(true);
-        getSiteSettings().then(setSettings).catch(() => { });
-    }, []);
+        if (ctxSettings) {
+            setSettings(ctxSettings);
+        } else {
+            // Fallback for pages without SettingsProvider
+            getSiteSettings().then(setSettings).catch(() => {});
+        }
+    }, [ctxSettings]);
 
     useEffect(() => {
         const onScroll = () => setScrolled(window.scrollY > 20);

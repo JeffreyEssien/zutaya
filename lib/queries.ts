@@ -1,4 +1,4 @@
-import { getSupabaseClient } from "@/lib/supabase";
+import { getSupabaseClient, getSupabaseServiceClient } from "@/lib/supabase";
 import type { Product, Category, Order, SiteSettings, Coupon, Profile, InventoryLog, Page, InventoryItem, BundleRule, Subscription, NewsletterSubscriber, NewsletterCampaign } from "@/types";
 
 interface DbProduct {
@@ -176,6 +176,18 @@ export async function getFeaturedProducts(): Promise<Product[]> {
         .limit(4);
     if (error) throw error;
     return (data as DbProduct[]).map(toProduct);
+}
+
+export async function getProductsByIds(ids: string[]): Promise<Product[]> {
+    if (!ids.length) return [];
+    const supabase = getSupabaseServiceClient() || getSupabaseClient();
+    if (!supabase) return [];
+    const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .in("id", ids);
+    if (error || !data) return [];
+    return ids.map((id) => data.find((p: any) => p.id === id)).filter(Boolean).map((row: any) => toProduct(row));
 }
 
 export async function getNewProducts(): Promise<Product[]> {
@@ -464,12 +476,24 @@ export async function createProduct(input: CreateProductInput): Promise<void> {
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)/g, "");
 
+    // Resolve category_id from category name
+    let categoryId: string | undefined;
+    if (input.category) {
+        const { data: cat } = await supabase
+            .from("categories")
+            .select("id")
+            .eq("name", input.category)
+            .single();
+        if (cat) categoryId = cat.id;
+    }
+
     const insertData: any = {
         slug,
         name: input.name,
         description: input.description,
         price: input.price,
         category: input.category,
+        category_id: categoryId || null,
         brand: input.brand || "Zúta Ya",
         stock: input.stock,
         images: input.images,
@@ -496,12 +520,24 @@ export async function updateProduct(id: string, input: CreateProductInput): Prom
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)/g, "");
 
+    // Resolve category_id from category name
+    let categoryId: string | undefined;
+    if (input.category) {
+        const { data: cat } = await supabase
+            .from("categories")
+            .select("id")
+            .eq("name", input.category)
+            .single();
+        if (cat) categoryId = cat.id;
+    }
+
     const updateData: any = {
         slug,
         name: input.name,
         description: input.description,
         price: input.price,
         category: input.category,
+        category_id: categoryId || null,
         stock: input.stock,
         images: input.images,
         variants: input.variants,
@@ -597,6 +633,12 @@ export async function getSiteSettings(): Promise<SiteSettings | null> {
         packagingFee: data.packaging_fee != null ? Number(data.packaging_fee) : 500,
         packagingLabel: data.packaging_label || "Premium Packaging",
         packagingDescription: data.packaging_description || "Insulated gift-ready packaging with ice packs for extended freshness",
+        heroDisplayConfig: data.hero_display_config
+            ? (typeof data.hero_display_config === "string" ? JSON.parse(data.hero_display_config) : data.hero_display_config)
+            : { mode: "single", mediaIds: [], slideshowInterval: 5 },
+        featuredSlides: data.featured_slides
+            ? (typeof data.featured_slides === "string" ? JSON.parse(data.featured_slides) : data.featured_slides)
+            : [],
         customTexts: data.custom_texts || {},
     };
 }
@@ -643,6 +685,8 @@ export async function updateSiteSettings(settings: Partial<SiteSettings>): Promi
     if (settings.packagingFee !== undefined) dbSettings.packaging_fee = settings.packagingFee;
     if (settings.packagingLabel !== undefined) dbSettings.packaging_label = settings.packagingLabel;
     if (settings.packagingDescription !== undefined) dbSettings.packaging_description = settings.packagingDescription;
+    if (settings.heroDisplayConfig !== undefined) dbSettings.hero_display_config = settings.heroDisplayConfig;
+    if (settings.featuredSlides !== undefined) dbSettings.featured_slides = settings.featuredSlides;
     if (settings.customTexts !== undefined) dbSettings.custom_texts = settings.customTexts;
 
     // init if not exists, otherwise update
@@ -1662,4 +1706,22 @@ export async function deleteNewsletterCampaign(id: string): Promise<void> {
 
     const { error } = await supabase.from("newsletter_campaigns").delete().eq("id", id);
     if (error) throw error;
+}
+
+/* ── Media ── */
+
+export async function getMediaByIds(ids: string[]): Promise<{ id: string; url: string; type: string }[]> {
+    if (!ids.length) return [];
+    // Use service client — media table may not have anon RLS policy
+    const supabase = getSupabaseServiceClient() || getSupabaseClient();
+    if (!supabase) return [];
+
+    const { data, error } = await supabase
+        .from("media")
+        .select("id, url, type")
+        .in("id", ids);
+
+    if (error || !data) return [];
+    // Preserve order of ids
+    return ids.map((id) => data.find((m) => m.id === id)).filter(Boolean) as { id: string; url: string; type: string }[];
 }
