@@ -25,7 +25,7 @@ export default async function DynamicPage({ params }: { params: Promise<{ slug: 
         <>
             <Header />
             <main className="max-w-4xl mx-auto px-6 py-12">
-                <h1 className="text-4xl font-serif text-brand-dark mb-8 text-center">{page.title}</h1>
+                <h1 className="text-4xl font-serif text-warm-cream mb-8 text-center">{page.title}</h1>
                 <div
                     className="prose prose-lg mx-auto"
                     dangerouslySetInnerHTML={{ __html: typeof page.content === "string" ? page.content : "" }}

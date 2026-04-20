@@ -131,7 +131,7 @@ export default function SiteSettingsForm() {
     if (loading) {
         return (
             <div className="flex items-center justify-center py-20">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-purple" />
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-green" />
             </div>
         );
     }
@@ -150,8 +150,8 @@ export default function SiteSettingsForm() {
                             onClick={() => setActiveTab(tab.id)}
                             className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all cursor-pointer ${
                                 isActive
-                                    ? "bg-brand-purple text-white shadow-sm"
-                                    : "text-brand-dark/50 hover:text-brand-dark hover:bg-brand-dark/5"
+                                    ? "bg-brand-green text-white shadow-sm"
+                                    : "text-warm-cream/40 hover:text-warm-cream hover:bg-warm-cream/5"
                             }`}
                         >
                             <Icon size={15} />
@@ -258,8 +258,8 @@ export default function SiteSettingsForm() {
                                                 onClick={() => setHeroDisplay((prev) => ({ ...prev, mode: opt.value }))}
                                                 className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all cursor-pointer ${
                                                     active
-                                                        ? "border-brand-red bg-brand-red/5 text-brand-red"
-                                                        : "border-brand-dark/8 hover:border-brand-dark/20 text-brand-dark/50"
+                                                        ? "border-brand-green bg-brand-green/5 text-brand-green"
+                                                        : "border-warm-cream/[0.08] hover:border-warm-cream/15 text-warm-cream/40"
                                                 }`}
                                             >
                                                 <Icon size={20} />
@@ -287,7 +287,7 @@ export default function SiteSettingsForm() {
                                 <button
                                     type="button"
                                     onClick={() => setPickerOpen(true)}
-                                    className="w-full py-3 px-4 border-2 border-dashed border-brand-dark/15 rounded-xl text-sm text-brand-dark/50 hover:border-brand-red/30 hover:text-brand-red/60 transition-colors cursor-pointer flex items-center justify-center gap-2"
+                                    className="w-full py-3 px-4 border-2 border-dashed border-warm-cream/10 rounded-xl text-sm text-warm-cream/40 hover:border-brand-green/30 hover:text-brand-green transition-colors cursor-pointer flex items-center justify-center gap-2"
                                 >
                                     <ImageIcon size={16} />
                                     Choose from Gallery
@@ -297,17 +297,17 @@ export default function SiteSettingsForm() {
                             {/* Selected media preview */}
                             {heroMediaItems.length > 0 && (
                                 <div className="space-y-2">
-                                    <p className="text-xs font-medium text-brand-dark/50 uppercase tracking-wider">
+                                    <p className="text-xs font-medium text-warm-cream/50 uppercase tracking-wider">
                                         Selected ({heroMediaItems.length})
                                     </p>
                                     <div className="flex flex-wrap gap-2">
                                         {heroMediaItems.map((item) => (
                                             <div
                                                 key={item.id}
-                                                className="relative w-20 h-20 rounded-lg overflow-hidden border border-brand-dark/10 group"
+                                                className="relative w-20 h-20 rounded-lg overflow-hidden border border-warm-cream/10 group"
                                             >
                                                 {item.type === "video" ? (
-                                                    <div className="w-full h-full flex items-center justify-center bg-deep-espresso/90">
+                                                    <div className="w-full h-full flex items-center justify-center bg-[#1e1e1e]">
                                                         <Film size={18} className="text-white/40" />
                                                     </div>
                                                 ) : (
@@ -350,10 +350,10 @@ export default function SiteSettingsForm() {
                                     name="announcementBarEnabled"
                                     checked={settings.announcementBarEnabled || false}
                                     onChange={handleChange}
-                                    className="h-4 w-4 rounded border-brand-lilac/30 text-brand-purple focus:ring-brand-purple/30"
+                                    className="h-4 w-4 rounded border-warm-cream/30 text-brand-green focus:ring-brand-green/30"
                                     id="announcement-toggle"
                                 />
-                                <label htmlFor="announcement-toggle" className="text-sm text-brand-dark/70 cursor-pointer">
+                                <label htmlFor="announcement-toggle" className="text-sm text-warm-cream/70 cursor-pointer">
                                     Show announcement bar
                                 </label>
                             </div>
@@ -362,7 +362,7 @@ export default function SiteSettingsForm() {
                             </Field>
                             <Field label="Background Color">
                                 <div className="flex items-center gap-3">
-                                    <input type="color" name="announcementBarColor" value={settings.announcementBarColor || "#B665D2"} onChange={handleChange} className="h-9 w-12 rounded-lg border border-brand-lilac/20 cursor-pointer p-0.5" />
+                                    <input type="color" name="announcementBarColor" value={settings.announcementBarColor || "#B665D2"} onChange={handleChange} className="h-9 w-12 rounded-lg border border-warm-cream/20 cursor-pointer p-0.5" />
                                     <input type="text" name="announcementBarColor" value={settings.announcementBarColor || "#B665D2"} onChange={handleChange} className="settings-input flex-1 font-mono text-xs" placeholder="#B665D2" />
                                 </div>
                             </Field>
@@ -410,12 +410,12 @@ export default function SiteSettingsForm() {
                             </Field>
                             <div>
                                 <div className="flex items-center justify-between mb-3">
-                                    <label className="text-sm font-medium text-brand-dark/60">Stats</label>
+                                    <label className="text-sm font-medium text-warm-cream/60">Stats</label>
                                     {aboutStats.length < 6 && (
                                         <button
                                             type="button"
                                             onClick={() => setAboutStats((prev) => [...prev, { value: "", label: "" }])}
-                                            className="inline-flex items-center gap-1 text-xs text-brand-purple hover:text-brand-purple/80 font-medium cursor-pointer"
+                                            className="inline-flex items-center gap-1 text-xs text-brand-green hover:text-brand-green/80 font-medium cursor-pointer"
                                         >
                                             <Plus size={13} /> Add
                                         </button>
@@ -449,7 +449,7 @@ export default function SiteSettingsForm() {
                                             <button
                                                 type="button"
                                                 onClick={() => setAboutStats((prev) => prev.filter((_, i) => i !== idx))}
-                                                className="p-1.5 text-red-300 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors cursor-pointer"
+                                                className="p-1.5 text-red-300 hover:text-red-500 hover:bg-red-500/10 rounded-md transition-colors cursor-pointer"
                                             >
                                                 <Trash2 size={13} />
                                             </button>
@@ -520,7 +520,7 @@ export default function SiteSettingsForm() {
                 {/* ═══ TEXTS TAB ═══ */}
                 {activeTab === "texts" && (
                     <div className="space-y-8">
-                        <p className="text-sm text-brand-dark/40">Override any text on the storefront. Leave blank to use the default.</p>
+                        <p className="text-sm text-warm-cream/40">Override any text on the storefront. Leave blank to use the default.</p>
                         {TEXT_GROUPS.map((group) => (
                             <Card key={group.label} title={group.label}>
                                 {group.keys.map((k) => (
@@ -550,36 +550,46 @@ export default function SiteSettingsForm() {
                 )}
             </div>
 
-            {/* Sticky save bar */}
-            <div className="sticky bottom-0 -mx-4 sm:-mx-6 lg:-mx-10 mt-10 px-4 sm:px-6 lg:px-10 py-4 bg-white/80 backdrop-blur-xl border-t border-brand-lilac/10 flex items-center justify-between">
-                <p className="text-xs text-brand-dark/30 hidden sm:block">Changes are saved across all tabs at once</p>
-                <Button type="submit" disabled={saving}>
+            {/* Spacer for fixed save bar */}
+            <div className="h-16" />
+
+            <style jsx>{`
+                .settings-input {
+                    width: 100%;
+                    border: 1px solid rgba(253, 246, 236, 0.08);
+                    border-radius: 0.625rem;
+                    padding: 0.5rem 0.75rem;
+                    font-size: 0.875rem;
+                    transition: border-color 0.15s, box-shadow 0.15s;
+                    background: rgba(30, 30, 30, 1);
+                    color: rgba(253, 246, 236, 0.85);
+                }
+                .settings-input::placeholder {
+                    color: rgba(253, 246, 236, 0.2);
+                }
+                .settings-input:focus {
+                    outline: none;
+                    background: rgba(35, 35, 35, 1);
+                    border-color: rgba(53, 94, 59, 0.4);
+                    box-shadow: 0 0 0 3px rgba(53, 94, 59, 0.1);
+                }
+                .scrollbar-hide::-webkit-scrollbar { display: none; }
+                .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+            `}</style>
+
+            {/* Fixed save bar — positioned within main content area */}
+            <div className="fixed bottom-0 right-0 left-0 lg:left-60 z-40 px-4 sm:px-6 lg:px-10 py-3.5 bg-gradient-to-r from-[#161616] via-[#1a1a1a] to-[#161616] border-t border-warm-cream/10 shadow-[0_-4px_20px_rgba(0,0,0,0.4)] flex items-center justify-between">
+                <p className="text-xs text-warm-cream/40 hidden sm:flex items-center gap-1.5">
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-brand-green/50" />
+                    Changes are saved across all tabs at once
+                </p>
+                <Button type="submit" disabled={saving} className="bg-brand-green text-white hover:bg-brand-green/90 shadow-lg shadow-brand-green/20">
                     <span className="flex items-center gap-2">
                         <Save size={14} />
                         {saving ? "Saving..." : "Save All Settings"}
                     </span>
                 </Button>
             </div>
-
-            <style jsx>{`
-                .settings-input {
-                    width: 100%;
-                    border: 1px solid rgba(200, 162, 200, 0.15);
-                    border-radius: 0.625rem;
-                    padding: 0.5rem 0.75rem;
-                    font-size: 0.875rem;
-                    transition: border-color 0.15s, box-shadow 0.15s;
-                    background: #fafafa;
-                }
-                .settings-input:focus {
-                    outline: none;
-                    background: white;
-                    border-color: rgba(182, 101, 210, 0.4);
-                    box-shadow: 0 0 0 3px rgba(182, 101, 210, 0.08);
-                }
-                .scrollbar-hide::-webkit-scrollbar { display: none; }
-                .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-            `}</style>
         </form>
     );
 }
@@ -590,13 +600,13 @@ function Card({ title, description, icon: Icon, children }: {
     title: string; description?: string; icon?: React.ElementType; children: React.ReactNode;
 }) {
     return (
-        <div className="bg-white rounded-xl border border-brand-lilac/10 shadow-sm overflow-hidden">
-            <div className="px-5 py-4 border-b border-brand-lilac/8 bg-neutral-50/50">
+        <div className="bg-white/[0.04] rounded-xl border border-warm-cream/10 shadow-sm overflow-hidden">
+            <div className="px-5 py-4 border-b border-warm-cream/8 bg-[#111]/50">
                 <div className="flex items-center gap-2">
-                    {Icon && <Icon size={16} className="text-brand-purple" />}
-                    <h3 className="text-sm font-semibold text-brand-dark">{title}</h3>
+                    {Icon && <Icon size={16} className="text-brand-green" />}
+                    <h3 className="text-sm font-semibold text-warm-cream">{title}</h3>
                 </div>
-                {description && <p className="text-xs text-brand-dark/40 mt-0.5 ml-0.5">{description}</p>}
+                {description && <p className="text-xs text-warm-cream/40 mt-0.5 ml-0.5">{description}</p>}
             </div>
             <div className="px-5 py-5 space-y-5">
                 {children}
@@ -608,8 +618,8 @@ function Card({ title, description, icon: Icon, children }: {
 function Field({ label, icon: Icon, children }: { label: string; icon?: React.ElementType; children: React.ReactNode }) {
     return (
         <div>
-            <label className="flex items-center gap-1.5 text-xs font-medium text-brand-dark/55 mb-1.5 uppercase tracking-wider">
-                {Icon && <Icon size={12} className="text-brand-dark/35" />}
+            <label className="flex items-center gap-1.5 text-xs font-medium text-warm-cream/55 mb-1.5 uppercase tracking-wider">
+                {Icon && <Icon size={12} className="text-warm-cream/35" />}
                 {label}
             </label>
             {children}
@@ -628,7 +638,7 @@ function ImageUpload({ value, name, onChange, onUpload, uploadId, previewClass }
             <div className="flex gap-2">
                 <input type="text" name={name} value={value || ""} onChange={onChange} className="settings-input flex-1" placeholder="https://..." />
                 <input type="file" accept="image/*" onChange={onUpload} className="hidden" id={uploadId} />
-                <label htmlFor={uploadId} className="shrink-0 cursor-pointer bg-neutral-100 hover:bg-neutral-200 px-3 py-2 rounded-lg text-xs font-medium text-brand-dark/60 transition-colors flex items-center gap-1.5">
+                <label htmlFor={uploadId} className="shrink-0 cursor-pointer bg-warm-cream/5 hover:bg-warm-cream/10 px-3 py-2 rounded-lg text-xs font-medium text-warm-cream/60 transition-colors flex items-center gap-1.5 border border-warm-cream/[0.08]">
                     <ImageIcon size={12} />
                     Upload
                 </label>
@@ -648,11 +658,11 @@ function SocialField({ label, icon: Icon, name, value, onChange, placeholder }: 
 }) {
     return (
         <div>
-            <label className="flex items-center gap-1.5 text-xs font-medium text-brand-dark/55 mb-1.5 uppercase tracking-wider">
-                <Icon size={12} className="text-brand-dark/35" />
+            <label className="flex items-center gap-1.5 text-xs font-medium text-warm-cream/55 mb-1.5 uppercase tracking-wider">
+                <Icon size={12} className="text-warm-cream/35" />
                 {label}
             </label>
-            <input type="url" name={name} value={value} onChange={onChange} className="w-full border border-brand-lilac/15 rounded-[0.625rem] px-3 py-2 text-sm bg-[#fafafa] focus:outline-none focus:ring-2 focus:ring-brand-purple/10 focus:border-brand-purple/40 focus:bg-white transition-all" placeholder={placeholder} />
+            <input type="url" name={name} value={value} onChange={onChange} className="w-full border border-warm-cream/15 rounded-[0.625rem] px-3 py-2 text-sm bg-[#1e1e1e] text-warm-cream focus:outline-none focus:ring-2 focus:ring-brand-green/10 focus:border-brand-green/40 focus:bg-[#252525] transition-all placeholder:text-warm-cream/30" placeholder={placeholder} />
         </div>
     );
 }

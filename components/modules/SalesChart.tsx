@@ -27,8 +27,8 @@ export default function SalesChart({ orders }: SalesChartProps) {
     const maxTotal = Math.max(...data.map((d) => d.total), 100); // Prevent div by zero, min scale 100
 
     return (
-        <div className="bg-white rounded-lg shadow-sm border border-brand-lilac/20 p-6">
-            <h3 className="font-serif text-lg text-brand-dark mb-6">Sales (Last 7 Days)</h3>
+        <div className="bg-white/[0.04] rounded-lg shadow-sm border border-warm-cream/20 p-6">
+            <h3 className="font-serif text-lg text-warm-cream mb-6">Sales (Last 7 Days)</h3>
             <div className="h-48 flex items-end justify-between gap-2">
                 {data.map((day) => {
                     const heightPercent = Math.max((day.total / maxTotal) * 100, 4); // Min 4% height
@@ -36,9 +36,9 @@ export default function SalesChart({ orders }: SalesChartProps) {
 
                     return (
                         <div key={day.date} className="flex-1 flex flex-col items-center gap-2 group">
-                            <div className="relative w-full bg-brand-lilac/10 rounded-t-sm h-full flex items-end overflow-hidden group-hover:bg-brand-lilac/20 transition-colors">
+                            <div className="relative w-full bg-warm-cream/10 rounded-t-sm h-full flex items-end overflow-hidden group-hover:bg-warm-cream/20 transition-colors">
                                 <div
-                                    className="w-full bg-brand-purple/80 transition-all duration-500 ease-out rounded-t-sm group-hover:bg-brand-purple"
+                                    className="w-full bg-brand-green/80 transition-all duration-500 ease-out rounded-t-sm group-hover:bg-brand-green"
                                     style={{ height: `${heightPercent}%` }}
                                 ></div>
                                 {/* Tooltip */}
@@ -46,7 +46,7 @@ export default function SalesChart({ orders }: SalesChartProps) {
                                     {formatCurrency(day.total)}
                                 </div>
                             </div>
-                            <span className="text-xs text-brand-dark/50 font-medium">{displayDate}</span>
+                            <span className="text-xs text-warm-cream/50 font-medium">{displayDate}</span>
                         </div>
                     );
                 })}

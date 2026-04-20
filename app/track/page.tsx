@@ -116,14 +116,14 @@ function TrackContent() {
                                     initial={{ scale: 0.8, opacity: 0 }}
                                     animate={{ scale: 1, opacity: 1 }}
                                     transition={{ delay: 0.1, type: "spring", stiffness: 200, damping: 15 }}
-                                    className="w-16 h-16 rounded-full bg-brand-purple/5 flex items-center justify-center mx-auto mb-5"
+                                    className="w-16 h-16 rounded-full bg-brand-green/5 flex items-center justify-center mx-auto mb-5"
                                 >
-                                    <Package size={28} className="text-brand-purple" strokeWidth={1.5} />
+                                    <Package size={28} className="text-brand-green" strokeWidth={1.5} />
                                 </motion.div>
-                                <h1 className="font-serif text-3xl md:text-4xl text-brand-dark mb-3">
+                                <h1 className="font-serif text-3xl md:text-4xl text-warm-cream mb-3">
                                     Track Your Order
                                 </h1>
-                                <p className="text-sm text-brand-dark/45 max-w-sm mx-auto leading-relaxed">
+                                <p className="text-sm text-warm-cream/45 max-w-sm mx-auto leading-relaxed">
                                     Enter your order ID and the email you used at checkout to see your order status.
                                 </p>
                             </div>
@@ -137,11 +137,11 @@ function TrackContent() {
                                         value={orderId}
                                         onChange={(e) => { setOrderId(e.target.value); setError(""); }}
                                         placeholder=" "
-                                        className={`peer w-full border rounded-xl px-4 pt-5 pb-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple/40 transition-all bg-white font-mono ${error ? "border-red-300" : "border-brand-dark/10"}`}
+                                        className={`peer w-full border rounded-xl px-4 pt-5 pb-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green/40 transition-all bg-warm-cream/5 font-mono ${error ? "border-red-300" : "border-warm-cream/10"}`}
                                     />
                                     <label
                                         htmlFor="orderId"
-                                        className="absolute left-4 top-2 text-[10px] text-brand-dark/40 transition-all pointer-events-none peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:text-[10px] peer-focus:text-brand-purple uppercase tracking-wide font-medium"
+                                        className="absolute left-4 top-2 text-[10px] text-warm-cream/40 transition-all pointer-events-none peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:text-[10px] peer-focus:text-brand-green uppercase tracking-wide font-medium"
                                     >
                                         Order ID
                                     </label>
@@ -155,11 +155,11 @@ function TrackContent() {
                                         value={email}
                                         onChange={(e) => { setEmail(e.target.value); setError(""); }}
                                         placeholder=" "
-                                        className={`peer w-full border rounded-xl px-4 pt-5 pb-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple/40 transition-all bg-white ${error ? "border-red-300" : "border-brand-dark/10"}`}
+                                        className={`peer w-full border rounded-xl px-4 pt-5 pb-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green/40 transition-all bg-warm-cream/5 ${error ? "border-red-300" : "border-warm-cream/10"}`}
                                     />
                                     <label
                                         htmlFor="email"
-                                        className="absolute left-4 top-2 text-[10px] text-brand-dark/40 transition-all pointer-events-none peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:text-[10px] peer-focus:text-brand-purple uppercase tracking-wide font-medium"
+                                        className="absolute left-4 top-2 text-[10px] text-warm-cream/40 transition-all pointer-events-none peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:text-[10px] peer-focus:text-brand-green uppercase tracking-wide font-medium"
                                     >
                                         Email Address
                                     </label>
@@ -188,7 +188,7 @@ function TrackContent() {
                             </form>
 
                             {/* Help text */}
-                            <p className="text-center text-[11px] text-brand-dark/25 mt-6">
+                            <p className="text-center text-[11px] text-warm-cream/25 mt-6">
                                 Your Order ID was included in your confirmation email.
                             </p>
                         </motion.div>
@@ -204,7 +204,7 @@ function TrackContent() {
                             {/* Back button */}
                             <button
                                 onClick={handleReset}
-                                className="flex items-center gap-1.5 text-xs text-brand-dark/35 hover:text-brand-purple transition-colors cursor-pointer mb-8"
+                                className="flex items-center gap-1.5 text-xs text-warm-cream/35 hover:text-brand-green transition-colors cursor-pointer mb-8"
                             >
                                 <ArrowLeft size={12} />
                                 Track another order
@@ -213,24 +213,24 @@ function TrackContent() {
                             {/* Header */}
                             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
                                 <div>
-                                    <p className="text-[10px] text-brand-dark/30 uppercase tracking-[0.2em] font-medium mb-2">
+                                    <p className="text-[10px] text-warm-cream/30 uppercase tracking-[0.2em] font-medium mb-2">
                                         Order Tracking
                                     </p>
-                                    <h1 className="font-serif text-2xl md:text-3xl text-brand-dark">
+                                    <h1 className="font-serif text-2xl md:text-3xl text-warm-cream">
                                         {order.id}
                                     </h1>
-                                    <p className="text-sm text-brand-dark/40 mt-1">
+                                    <p className="text-sm text-warm-cream/40 mt-1">
                                         Placed on {formatDate(order.createdAt)}
                                     </p>
                                 </div>
                                 <div className={`
                                     inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold self-start
-                                    ${order.status === "pending" ? "bg-amber-50 text-amber-700" : ""}
-                                    ${order.status === "processing" || order.status === "packed" ? "bg-blue-50 text-blue-700" : ""}
-                                    ${order.status === "out_for_delivery" ? "bg-indigo-50 text-indigo-700" : ""}
-                                    ${order.status === "delivered" ? "bg-emerald-50 text-emerald-700" : ""}
+                                    ${order.status === "pending" ? "bg-amber-500/10 text-amber-400" : ""}
+                                    ${order.status === "processing" || order.status === "packed" ? "bg-blue-500/10 text-blue-400" : ""}
+                                    ${order.status === "out_for_delivery" ? "bg-indigo-500/10 text-indigo-400" : ""}
+                                    ${order.status === "delivered" ? "bg-brand-green/10 text-brand-green" : ""}
                                 `}>
-                                    <span className={`w-1.5 h-1.5 rounded-full ${order.status === "pending" ? "bg-amber-500" : ""} ${order.status === "processing" || order.status === "packed" ? "bg-blue-500" : ""} ${order.status === "out_for_delivery" ? "bg-indigo-500" : ""} ${order.status === "delivered" ? "bg-emerald-500" : ""}`} />
+                                    <span className={`w-1.5 h-1.5 rounded-full ${order.status === "pending" ? "bg-amber-400" : ""} ${order.status === "processing" || order.status === "packed" ? "bg-blue-400" : ""} ${order.status === "out_for_delivery" ? "bg-indigo-400" : ""} ${order.status === "delivered" ? "bg-brand-green" : ""}`} />
                                     {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                                 </div>
                             </div>
@@ -240,7 +240,7 @@ function TrackContent() {
                                 initial={{ opacity: 0, y: 16 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.15 }}
-                                className="bg-white border border-brand-dark/5 rounded-2xl p-6 md:p-8 mb-6 shadow-sm"
+                                className="bg-warm-cream/5 border border-warm-cream/5 rounded-2xl p-6 md:p-8 mb-6 shadow-sm"
                             >
                                 <OrderTimeline
                                     status={order.status}
@@ -257,21 +257,21 @@ function TrackContent() {
                                     initial={{ opacity: 0, y: 16 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.25 }}
-                                    className="lg:col-span-2 bg-white border border-brand-dark/5 rounded-2xl p-6 shadow-sm"
+                                    className="lg:col-span-2 bg-warm-cream/5 border border-warm-cream/5 rounded-2xl p-6 shadow-sm"
                                 >
-                                    <h2 className="flex items-center gap-2 text-sm font-semibold text-brand-dark mb-5">
-                                        <ShoppingBag size={16} className="text-brand-purple" />
+                                    <h2 className="flex items-center gap-2 text-sm font-semibold text-warm-cream mb-5">
+                                        <ShoppingBag size={16} className="text-brand-green" />
                                         Order Items
                                     </h2>
 
-                                    <div className="divide-y divide-brand-dark/5">
+                                    <div className="divide-y divide-warm-cream/[0.06]">
                                         {order.items.map((item) => {
                                             const price = item.variant?.price || item.product.price;
                                             return (
                                                 <div key={`${item.product.id}-${item.variant?.name ?? ""}`} className="flex items-center gap-4 py-4 first:pt-0 last:pb-0">
                                                     {/* Product image */}
                                                     {item.product.images?.[0] ? (
-                                                        <div className="w-14 h-14 rounded-xl bg-neutral-50 overflow-hidden shrink-0">
+                                                        <div className="w-14 h-14 rounded-xl bg-warm-cream/10 overflow-hidden shrink-0">
                                                             <img
                                                                 src={item.product.images[0]}
                                                                 alt={item.product.name}
@@ -279,26 +279,26 @@ function TrackContent() {
                                                             />
                                                         </div>
                                                     ) : (
-                                                        <div className="w-14 h-14 rounded-xl bg-brand-purple/5 flex items-center justify-center shrink-0">
-                                                            <Package size={20} className="text-brand-purple/30" />
+                                                        <div className="w-14 h-14 rounded-xl bg-brand-green/5 flex items-center justify-center shrink-0">
+                                                            <Package size={20} className="text-brand-green/30" />
                                                         </div>
                                                     )}
 
                                                     <div className="flex-1 min-w-0">
-                                                        <p className="text-sm font-medium text-brand-dark truncate">
+                                                        <p className="text-sm font-medium text-warm-cream truncate">
                                                             {item.product.name}
                                                         </p>
                                                         {item.variant && (
-                                                            <p className="text-[11px] text-brand-dark/40 mt-0.5">
+                                                            <p className="text-[11px] text-warm-cream/40 mt-0.5">
                                                                 {item.variant.name}
                                                             </p>
                                                         )}
-                                                        <p className="text-[11px] text-brand-dark/35 mt-0.5">
+                                                        <p className="text-[11px] text-warm-cream/35 mt-0.5">
                                                             Qty: {item.quantity}
                                                         </p>
                                                     </div>
 
-                                                    <p className="text-sm font-semibold text-brand-dark shrink-0">
+                                                    <p className="text-sm font-semibold text-warm-cream shrink-0">
                                                         ₦{(price * item.quantity).toLocaleString()}
                                                     </p>
                                                 </div>
@@ -307,8 +307,8 @@ function TrackContent() {
                                     </div>
 
                                     {/* Totals */}
-                                    <div className="mt-5 pt-5 border-t border-brand-dark/5 space-y-2">
-                                        <div className="flex justify-between text-sm text-brand-dark/50">
+                                    <div className="mt-5 pt-5 border-t border-warm-cream/5 space-y-2">
+                                        <div className="flex justify-between text-sm text-warm-cream/50">
                                             <span>Subtotal</span>
                                             <span>₦{order.subtotal.toLocaleString()}</span>
                                         </div>
@@ -318,11 +318,11 @@ function TrackContent() {
                                                 <span>-₦{order.discountTotal.toLocaleString()}</span>
                                             </div>
                                         ) : null}
-                                        <div className="flex justify-between text-sm text-brand-dark/50">
+                                        <div className="flex justify-between text-sm text-warm-cream/50">
                                             <span>Shipping</span>
                                             <span>{order.shipping === 0 ? "Free" : `₦${order.shipping.toLocaleString()}`}</span>
                                         </div>
-                                        <div className="flex justify-between text-base font-bold text-brand-dark pt-2 border-t border-brand-dark/5">
+                                        <div className="flex justify-between text-base font-bold text-warm-cream pt-2 border-t border-warm-cream/5">
                                             <span>Total</span>
                                             <span>₦{order.total.toLocaleString()}</span>
                                         </div>
@@ -337,13 +337,13 @@ function TrackContent() {
                                     className="space-y-6"
                                 >
                                     {/* Shipping Address */}
-                                    <div className="bg-white border border-brand-dark/5 rounded-2xl p-6 shadow-sm">
-                                        <h2 className="flex items-center gap-2 text-sm font-semibold text-brand-dark mb-4">
-                                            <MapPin size={16} className="text-brand-purple" />
+                                    <div className="bg-warm-cream/5 border border-warm-cream/5 rounded-2xl p-6 shadow-sm">
+                                        <h2 className="flex items-center gap-2 text-sm font-semibold text-warm-cream mb-4">
+                                            <MapPin size={16} className="text-brand-green" />
                                             Shipping Address
                                         </h2>
-                                        <div className="text-sm text-brand-dark/60 space-y-1 leading-relaxed">
-                                            <p className="font-medium text-brand-dark">{order.customerName}</p>
+                                        <div className="text-sm text-warm-cream/60 space-y-1 leading-relaxed">
+                                            <p className="font-medium text-warm-cream">{order.customerName}</p>
                                             <p>{order.shippingAddress.address}</p>
                                             <p>{order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.zip}</p>
                                             <p>{order.shippingAddress.country}</p>
@@ -351,21 +351,21 @@ function TrackContent() {
                                     </div>
 
                                     {/* Payment Info */}
-                                    <div className="bg-white border border-brand-dark/5 rounded-2xl p-6 shadow-sm">
-                                        <h2 className="flex items-center gap-2 text-sm font-semibold text-brand-dark mb-4">
-                                            <CreditCard size={16} className="text-brand-purple" />
+                                    <div className="bg-warm-cream/5 border border-warm-cream/5 rounded-2xl p-6 shadow-sm">
+                                        <h2 className="flex items-center gap-2 text-sm font-semibold text-warm-cream mb-4">
+                                            <CreditCard size={16} className="text-brand-green" />
                                             Payment
                                         </h2>
-                                        <div className="text-sm text-brand-dark/60 space-y-2">
+                                        <div className="text-sm text-warm-cream/60 space-y-2">
                                             <div className="flex justify-between">
-                                                <span className="text-brand-dark/40">Method</span>
-                                                <span className="font-medium text-brand-dark capitalize">
+                                                <span className="text-warm-cream/40">Method</span>
+                                                <span className="font-medium text-warm-cream capitalize">
                                                     {order.paymentMethod === "bank_transfer" ? "Bank Transfer" : order.paymentMethod === "whatsapp" ? "WhatsApp" : "—"}
                                                 </span>
                                             </div>
                                             {order.paymentMethod === "bank_transfer" && order.paymentStatus && (
                                                 <div className="flex justify-between">
-                                                    <span className="text-brand-dark/40">Status</span>
+                                                    <span className="text-warm-cream/40">Status</span>
                                                     <span className={`font-medium capitalize ${order.paymentStatus === "payment_confirmed" ? "text-emerald-600" :
                                                             order.paymentStatus === "payment_submitted" ? "text-blue-600" : "text-amber-600"
                                                         }`}>
@@ -399,7 +399,7 @@ export default function TrackPage() {
     return (
         <Suspense fallback={
             <div className="min-h-screen flex items-center justify-center">
-                <div className="w-8 h-8 border-2 border-brand-purple/20 border-t-brand-purple rounded-full animate-spin" />
+                <div className="w-8 h-8 border-2 border-brand-green/20 border-t-brand-green rounded-full animate-spin" />
             </div>
         }>
             <TrackContent />

@@ -57,7 +57,7 @@ export default function CouponInput() {
             <button
                 type="button"
                 onClick={() => setExpanded(!expanded)}
-                className="flex items-center gap-2 text-xs text-brand-dark/40 hover:text-brand-purple transition-colors cursor-pointer mb-2"
+                className="flex items-center gap-2 text-xs text-warm-cream/40 hover:text-brand-green transition-colors cursor-pointer mb-2"
             >
                 <Tag size={12} />
                 <span>Have a coupon code?</span>
@@ -78,7 +78,7 @@ export default function CouponInput() {
                                 value={code}
                                 onChange={(e) => { setCode(e.target.value); setError(""); }}
                                 placeholder="Enter code"
-                                className={`flex-1 bg-white border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple/40 uppercase tracking-wide transition-all ${error ? "border-red-300 shake" : "border-brand-dark/10"}`}
+                                className={`flex-1 bg-[#222] border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green/40 uppercase tracking-wide transition-all ${error ? "border-red-300 shake" : "border-brand-dark/10"}`}
                             />
                             <Button size="sm" variant="outline" onClick={handleApply} loading={loading}>
                                 Apply

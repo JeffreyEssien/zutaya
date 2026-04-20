@@ -23,20 +23,20 @@ export default function NewArrivals({ products, customTexts }: NewArrivalsProps)
                 className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-16 gap-4"
             >
                 <div>
-                    <p className="text-[11px] uppercase tracking-[0.3em] text-brand-purple mb-3 font-medium">
+                    <p className="text-[11px] uppercase tracking-[0.3em] text-brand-green mb-3 font-medium">
                         {getText(customTexts, "arrivals.eyebrow")}
                     </p>
-                    <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-brand-dark tracking-tight">
+                    <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-warm-cream tracking-tight">
                         {getText(customTexts, "arrivals.heading")}
                     </h2>
                 </div>
                 <Link
                     href="/shop?sort=newest"
-                    className="group inline-flex items-center gap-2 text-sm text-brand-dark/50 hover:text-brand-purple transition-colors duration-300"
+                    className="group inline-flex items-center gap-2 text-sm text-warm-cream/50 hover:text-brand-green transition-colors duration-300"
                 >
                     <span className="relative">
                         {getText(customTexts, "arrivals.link")}
-                        <span className="absolute -bottom-0.5 left-0 w-full h-[1px] bg-brand-purple origin-left scale-x-0 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-x-100" />
+                        <span className="absolute -bottom-0.5 left-0 w-full h-[1px] bg-brand-green origin-left scale-x-0 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-x-100" />
                     </span>
                     <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform duration-300" />
                 </Link>
@@ -48,7 +48,7 @@ export default function NewArrivals({ products, customTexts }: NewArrivalsProps)
                 whileInView={{ scaleX: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                className="h-[1px] bg-gradient-to-r from-transparent via-brand-lilac/40 to-transparent mb-16 origin-left"
+                className="h-[1px] bg-gradient-to-r from-transparent via-brand-green/20 to-transparent mb-16 origin-left"
             />
 
             {/* Grid */}

@@ -140,12 +140,12 @@ export default function AdminNewsletterPage() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
                 <div>
                     <h1 className="text-2xl font-bold text-brand-black">Newsletter</h1>
-                    <p className="text-sm text-muted-brown mt-1">Manage subscribers and email campaigns</p>
+                    <p className="text-sm text-warm-cream/40 mt-1">Manage subscribers and email campaigns</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <button
                         onClick={fetchData}
-                        className="p-2 rounded-lg border border-warm-tan/20 text-muted-brown hover:bg-warm-cream transition-colors"
+                        className="p-2 rounded-lg border border-warm-tan/20 text-warm-cream/40 hover:bg-warm-cream transition-colors"
                         title="Refresh"
                     >
                         <RefreshCw size={16} />
@@ -200,8 +200,8 @@ export default function AdminNewsletterPage() {
                         onClick={() => setTab(t)}
                         className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
                             tab === t
-                                ? "bg-white text-brand-black shadow-sm"
-                                : "text-muted-brown hover:text-brand-black"
+                                ? "bg-white/[0.04] text-brand-black shadow-sm"
+                                : "text-warm-cream/40 hover:text-brand-black"
                         }`}
                     >
                         {t === "campaigns" ? "Campaigns" : `Subscribers (${activeSubscribers.length})`}
@@ -213,9 +213,9 @@ export default function AdminNewsletterPage() {
             {tab === "campaigns" && (
                 <div className="space-y-4">
                     {campaigns.length === 0 ? (
-                        <div className="bg-white rounded-xl border border-warm-tan/20 p-12 text-center">
-                            <Mail size={40} className="mx-auto text-muted-brown/30 mb-3" />
-                            <p className="text-muted-brown mb-4">No campaigns yet. Create your first one!</p>
+                        <div className="bg-white/[0.04] rounded-xl border border-warm-tan/20 p-12 text-center">
+                            <Mail size={40} className="mx-auto text-warm-cream/40/30 mb-3" />
+                            <p className="text-warm-cream/40 mb-4">No campaigns yet. Create your first one!</p>
                             <button
                                 onClick={() => openEditor()}
                                 className="bg-brand-red text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-brand-red/90 transition-colors"
@@ -227,7 +227,7 @@ export default function AdminNewsletterPage() {
                         campaigns.map((c) => (
                             <div
                                 key={c.id}
-                                className="bg-white rounded-xl border border-warm-tan/20 p-5 hover:shadow-sm transition-shadow"
+                                className="bg-white/[0.04] rounded-xl border border-warm-tan/20 p-5 hover:shadow-sm transition-shadow"
                             >
                                 <div className="flex items-start justify-between gap-4">
                                     <div className="flex-1 min-w-0">
@@ -241,7 +241,7 @@ export default function AdminNewsletterPage() {
                                                 {c.status}
                                             </span>
                                         </div>
-                                        <div className="flex items-center gap-4 text-xs text-muted-brown">
+                                        <div className="flex items-center gap-4 text-xs text-warm-cream/40">
                                             <span>
                                                 Created{" "}
                                                 {new Date(c.createdAt).toLocaleDateString("en-NG", {
@@ -268,7 +268,7 @@ export default function AdminNewsletterPage() {
                                     <div className="flex items-center gap-2 shrink-0">
                                         <button
                                             onClick={() => setPreviewCampaign(previewCampaign?.id === c.id ? null : c)}
-                                            className="p-2 rounded-lg text-muted-brown hover:bg-warm-cream transition-colors"
+                                            className="p-2 rounded-lg text-warm-cream/40 hover:bg-warm-cream transition-colors"
                                             title="Preview"
                                         >
                                             <Eye size={16} />
@@ -277,7 +277,7 @@ export default function AdminNewsletterPage() {
                                             <>
                                                 <button
                                                     onClick={() => openEditor(c)}
-                                                    className="p-2 rounded-lg text-muted-brown hover:bg-warm-cream transition-colors"
+                                                    className="p-2 rounded-lg text-warm-cream/40 hover:bg-warm-cream transition-colors"
                                                     title="Edit"
                                                 >
                                                     <Edit3 size={16} />
@@ -328,36 +328,36 @@ export default function AdminNewsletterPage() {
                     <div className="relative mb-4">
                         <Search
                             size={16}
-                            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-brown/50"
+                            className="absolute left-3 top-1/2 -translate-y-1/2 text-warm-cream/40/50"
                         />
                         <input
                             type="text"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder="Search by email or name..."
-                            className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-warm-tan/20 text-sm focus:outline-none focus:border-brand-red/40 bg-white"
+                            className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-warm-tan/20 text-sm focus:outline-none focus:border-brand-red/40 bg-[#1e1e1e]"
                         />
                     </div>
 
-                    <div className="bg-white rounded-xl border border-warm-tan/20 overflow-hidden">
+                    <div className="bg-white/[0.04] rounded-xl border border-warm-tan/20 overflow-hidden">
                         <table className="w-full text-sm">
                             <thead className="bg-warm-cream/50">
                                 <tr>
-                                    <th className="text-left px-4 py-3 font-medium text-muted-brown">Email</th>
-                                    <th className="text-left px-4 py-3 font-medium text-muted-brown hidden sm:table-cell">Name</th>
-                                    <th className="text-left px-4 py-3 font-medium text-muted-brown hidden md:table-cell">Source</th>
-                                    <th className="text-left px-4 py-3 font-medium text-muted-brown">Status</th>
-                                    <th className="text-left px-4 py-3 font-medium text-muted-brown hidden lg:table-cell">Subscribed</th>
-                                    <th className="text-right px-4 py-3 font-medium text-muted-brown w-12"></th>
+                                    <th className="text-left px-4 py-3 font-medium text-warm-cream/40">Email</th>
+                                    <th className="text-left px-4 py-3 font-medium text-warm-cream/40 hidden sm:table-cell">Name</th>
+                                    <th className="text-left px-4 py-3 font-medium text-warm-cream/40 hidden md:table-cell">Source</th>
+                                    <th className="text-left px-4 py-3 font-medium text-warm-cream/40">Status</th>
+                                    <th className="text-left px-4 py-3 font-medium text-warm-cream/40 hidden lg:table-cell">Subscribed</th>
+                                    <th className="text-right px-4 py-3 font-medium text-warm-cream/40 w-12"></th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {filteredSubscribers.map((sub) => (
                                     <tr key={sub.id} className="border-t border-warm-tan/10 hover:bg-warm-cream/30 transition-colors">
                                         <td className="px-4 py-3 text-brand-black font-medium">{sub.email}</td>
-                                        <td className="px-4 py-3 text-muted-brown hidden sm:table-cell">{sub.firstName || "—"}</td>
+                                        <td className="px-4 py-3 text-warm-cream/40 hidden sm:table-cell">{sub.firstName || "—"}</td>
                                         <td className="px-4 py-3 hidden md:table-cell">
-                                            <span className="px-2 py-0.5 rounded text-xs bg-warm-cream text-muted-brown">
+                                            <span className="px-2 py-0.5 rounded text-xs bg-warm-cream text-warm-cream/40">
                                                 {sub.source}
                                             </span>
                                         </td>
@@ -372,7 +372,7 @@ export default function AdminNewsletterPage() {
                                                 </span>
                                             )}
                                         </td>
-                                        <td className="px-4 py-3 text-muted-brown text-xs hidden lg:table-cell">
+                                        <td className="px-4 py-3 text-warm-cream/40 text-xs hidden lg:table-cell">
                                             {new Date(sub.subscribedAt).toLocaleDateString("en-NG", {
                                                 month: "short",
                                                 day: "numeric",
@@ -392,7 +392,7 @@ export default function AdminNewsletterPage() {
                                 ))}
                                 {filteredSubscribers.length === 0 && (
                                     <tr>
-                                        <td colSpan={6} className="px-4 py-8 text-center text-muted-brown">
+                                        <td colSpan={6} className="px-4 py-8 text-center text-warm-cream/40">
                                             {searchQuery ? "No subscribers match your search." : "No subscribers yet."}
                                         </td>
                                     </tr>
@@ -406,7 +406,7 @@ export default function AdminNewsletterPage() {
             {/* ── Campaign Editor Modal ── */}
             {showEditor && (
                 <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <div className="bg-white/[0.04] rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                         {/* Editor Header */}
                         <div className="flex items-center justify-between px-6 py-4 border-b border-warm-tan/10">
                             <h2 className="text-lg font-bold text-brand-black">
@@ -414,7 +414,7 @@ export default function AdminNewsletterPage() {
                             </h2>
                             <button
                                 onClick={() => setShowEditor(false)}
-                                className="p-2 rounded-lg text-muted-brown hover:bg-warm-cream transition-colors"
+                                className="p-2 rounded-lg text-warm-cream/40 hover:bg-warm-cream transition-colors"
                             >
                                 <X size={18} />
                             </button>
@@ -446,7 +446,7 @@ export default function AdminNewsletterPage() {
                                     rows={12}
                                     className="w-full border border-warm-tan/30 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-brand-red/40 font-mono leading-relaxed resize-y"
                                 />
-                                <p className="text-xs text-muted-brown mt-1.5">
+                                <p className="text-xs text-warm-cream/40 mt-1.5">
                                     Tip: Use HTML tags like &lt;h2&gt;, &lt;p&gt;, &lt;strong&gt;, &lt;a href=&quot;...&quot;&gt; for rich formatting.
                                 </p>
                             </div>
@@ -471,7 +471,7 @@ export default function AdminNewsletterPage() {
                         <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-warm-tan/10 bg-warm-cream/30 rounded-b-2xl">
                             <button
                                 onClick={() => setShowEditor(false)}
-                                className="px-4 py-2 rounded-lg text-sm text-muted-brown hover:bg-warm-cream transition-colors"
+                                className="px-4 py-2 rounded-lg text-sm text-warm-cream/40 hover:bg-warm-cream transition-colors"
                             >
                                 Cancel
                             </button>
@@ -507,12 +507,12 @@ function StatCard({
     bg: string;
 }) {
     return (
-        <div className="bg-white rounded-xl border border-warm-tan/20 p-4">
+        <div className="bg-white/[0.04] rounded-xl border border-warm-tan/20 p-4">
             <div className="flex items-center justify-between mb-3">
                 <span className={`p-2 rounded-lg ${bg} ${color}`}>{icon}</span>
             </div>
             <p className="text-2xl font-bold text-brand-black">{value.toLocaleString()}</p>
-            <p className="text-xs text-muted-brown mt-0.5">{label}</p>
+            <p className="text-xs text-warm-cream/40 mt-0.5">{label}</p>
         </div>
     );
 }

@@ -211,24 +211,24 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
     return (
         <div className="space-y-6">
             {!initialData && (
-                <div className="flex gap-4 border-b border-brand-lilac/20 pb-4">
-                    <button onClick={() => setMode("new")} className={`pb-2 px-1 text-sm font-medium border-b-2 transition-colors ${mode === "new" ? "border-brand-purple text-brand-purple" : "border-transparent text-gray-500"}`}>
+                <div className="flex gap-4 border-b border-warm-cream/20 pb-4">
+                    <button onClick={() => setMode("new")} className={`pb-2 px-1 text-sm font-medium border-b-2 transition-colors ${mode === "new" ? "border-brand-green text-brand-green" : "border-transparent text-warm-cream/40"}`}>
                         Create New (Full)
                     </button>
-                    <button onClick={() => setMode("existing")} className={`pb-2 px-1 text-sm font-medium border-b-2 transition-colors ${mode === "existing" ? "border-brand-purple text-brand-purple" : "border-transparent text-gray-500"}`}>
+                    <button onClick={() => setMode("existing")} className={`pb-2 px-1 text-sm font-medium border-b-2 transition-colors ${mode === "existing" ? "border-brand-green text-brand-green" : "border-transparent text-warm-cream/40"}`}>
                         Select from Inventory
                     </button>
                 </div>
             )}
 
-            <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-brand-lilac/20 p-6 mb-8 space-y-6 animate-slideUp">
-                <h2 className="font-serif text-lg text-brand-dark mb-4">{initialData ? "Edit Product" : (mode === "new" ? "Create New Item & Product" : "Publish Inventory Item")}</h2>
+            <form onSubmit={handleSubmit} className="bg-white/[0.04] rounded-lg border border-warm-cream/20 p-6 mb-8 space-y-6 animate-slideUp">
+                <h2 className="font-serif text-lg text-warm-cream mb-4">{initialData ? "Edit Product" : (mode === "new" ? "Create New Item & Product" : "Publish Inventory Item")}</h2>
 
                 {mode === "existing" && !initialData && (
-                    <div className="bg-brand-lilac/5 p-4 rounded-md border border-brand-lilac/10">
-                        <label className="block text-sm font-medium text-brand-dark mb-2">Select Inventory Item</label>
+                    <div className="bg-warm-cream/5 p-4 rounded-md border border-warm-cream/10">
+                        <label className="block text-sm font-medium text-warm-cream mb-2">Select Inventory Item</label>
                         <select
-                            className="w-full px-3 py-2 border border-brand-lilac/30 rounded focus:border-brand-purple"
+                            className="w-full px-3 py-2 border border-warm-cream/30 rounded focus:border-brand-green"
                             onChange={handleSelectInventory}
                             value={selectedInvItem?.id || ""}
                         >
@@ -239,7 +239,7 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                                 </option>
                             ))}
                         </select>
-                        <p className="text-xs text-gray-500 mt-2">
+                        <p className="text-xs text-warm-cream/40 mt-2">
                             Selecting an item will auto-fill Name, Price, and Stock.
                         </p>
                     </div>
@@ -252,8 +252,8 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                 </div>
 
                 {/* Financials / Inventory Data */}
-                <div className="border border-brand-lilac/20 rounded p-4 bg-gray-50">
-                    <h3 className="text-sm font-semibold text-brand-dark mb-3">Pricing & Inventory</h3>
+                <div className="border border-warm-cream/20 rounded p-4 bg-warm-cream/[0.03]">
+                    <h3 className="text-sm font-semibold text-warm-cream mb-3">Pricing & Inventory</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         {/* Cost Price only for New Mode or if we want to show it in existing? */}
                         {mode === "new" && !initialData && (
@@ -268,7 +268,7 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                             onChange={handleChange}
                             required
                             readOnly={mode === "existing"}
-                            className={mode === "existing" ? "bg-gray-100 text-gray-500 cursor-not-allowed" : ""}
+                            className={mode === "existing" ? "bg-warm-cream/5 text-warm-cream/40 cursor-not-allowed" : ""}
                         />
 
                         <InputField
@@ -279,12 +279,12 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                             onChange={handleChange}
                             required
                             readOnly={mode === "existing" || variantStockTotal !== null}
-                            className={mode === "existing" || variantStockTotal !== null ? "bg-gray-100 text-gray-500 cursor-not-allowed" : ""}
+                            className={mode === "existing" || variantStockTotal !== null ? "bg-warm-cream/5 text-warm-cream/40 cursor-not-allowed" : ""}
                         />
                     </div>
                     {/* Margin Calc Visual */}
                     {mode === "new" && invForm.costPrice && form.price && (
-                        <div className="mt-2 text-xs text-gray-500">
+                        <div className="mt-2 text-xs text-warm-cream/40">
                             Estimated Margin: <strong className="text-green-600">
                                 {(((Number(form.price) - Number(invForm.costPrice)) / Number(form.price)) * 100).toFixed(1)}%
                             </strong>
@@ -292,7 +292,7 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                     )}
 
                     {mode === "new" && !initialData && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 pt-4 border-t border-gray-200/50">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 pt-4 border-t border-warm-cream/10/50">
                             <InputField label="SKU (Optional)" name="sku" value={invForm.sku} onChange={handleInvChange} />
                             <InputField label="Supplier (Optional)" name="supplier" value={invForm.supplier} onChange={handleInvChange} />
                         </div>
@@ -300,17 +300,17 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                 </div>
 
                 {/* Meat Commerce Fields */}
-                <div className="border border-brand-lilac/20 rounded p-4 bg-gray-50">
-                    <h3 className="text-sm font-semibold text-brand-dark mb-3">Meat Details</h3>
+                <div className="border border-warm-cream/20 rounded p-4 bg-warm-cream/[0.03]">
+                    <h3 className="text-sm font-semibold text-warm-cream mb-3">Meat Details</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
-                            <label htmlFor="priceUnit" className="block text-xs text-brand-dark/60 mb-1">Price Unit</label>
+                            <label htmlFor="priceUnit" className="block text-xs text-warm-cream/60 mb-1">Price Unit</label>
                             <select
                                 id="priceUnit"
                                 name="priceUnit"
                                 value={form.priceUnit}
                                 onChange={handleChange}
-                                className="w-full border border-brand-lilac/20 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/30"
+                                className="w-full border border-warm-cream/20 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/30"
                             >
                                 <option value="per_kg">Per KG</option>
                                 <option value="per_pack">Per Pack</option>
@@ -320,13 +320,13 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                         </div>
                         <InputField label="Cut Type" name="cutType" value={form.cutType} onChange={handleChange} />
                         <div>
-                            <label htmlFor="storageType" className="block text-xs text-brand-dark/60 mb-1">Storage Type</label>
+                            <label htmlFor="storageType" className="block text-xs text-warm-cream/60 mb-1">Storage Type</label>
                             <select
                                 id="storageType"
                                 name="storageType"
                                 value={form.storageType}
                                 onChange={handleChange}
-                                className="w-full border border-brand-lilac/20 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/30"
+                                className="w-full border border-warm-cream/20 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/30"
                             >
                                 <option value="fresh">Fresh</option>
                                 <option value="chilled">Chilled</option>
@@ -341,9 +341,9 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                     )}
 
                     {/* Prep Options */}
-                    <div className="mt-4 pt-4 border-t border-gray-200/50">
+                    <div className="mt-4 pt-4 border-t border-warm-cream/10/50">
                         <div className="flex justify-between items-center mb-3">
-                            <label className="text-xs text-brand-dark/60 font-medium">Prep Options</label>
+                            <label className="text-xs text-warm-cream/60 font-medium">Prep Options</label>
                             <Button
                                 type="button"
                                 variant="outline"
@@ -361,15 +361,15 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                                     { id: crypto.randomUUID(), label: "Mince", extraFee: 400 },
                                     { id: crypto.randomUUID(), label: "Season", extraFee: 600 },
                                 ])}
-                                className="text-xs text-brand-purple hover:underline cursor-pointer"
+                                className="text-xs text-brand-green hover:underline cursor-pointer"
                             >
                                 Seed default options (Debone, Dice, Mince, Season)
                             </button>
                         )}
                         {prepOptions.map((opt, idx) => (
-                            <div key={opt.id} className="flex gap-2 items-end bg-white p-3 rounded-md mb-2">
+                            <div key={opt.id} className="flex gap-2 items-end bg-white/[0.04] p-3 rounded-md mb-2">
                                 <div className="flex-1">
-                                    <label className="text-xs text-brand-dark/60">Label</label>
+                                    <label className="text-xs text-warm-cream/60">Label</label>
                                     <input
                                         type="text"
                                         value={opt.label}
@@ -378,12 +378,12 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                                             next[idx] = { ...next[idx], label: e.target.value };
                                             setPrepOptions(next);
                                         }}
-                                        className="w-full border border-brand-lilac/20 rounded-md px-2 py-1 text-sm"
+                                        className="w-full border border-warm-cream/20 rounded-md px-2 py-1 text-sm"
                                         placeholder="e.g. Debone"
                                     />
                                 </div>
                                 <div className="w-28">
-                                    <label className="text-xs text-brand-dark/60">Extra Fee (₦)</label>
+                                    <label className="text-xs text-warm-cream/60">Extra Fee (₦)</label>
                                     <input
                                         type="number"
                                         value={opt.extraFee}
@@ -392,7 +392,7 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                                             next[idx] = { ...next[idx], extraFee: parseInt(e.target.value) || 0 };
                                             setPrepOptions(next);
                                         }}
-                                        className="w-full border border-brand-lilac/20 rounded-md px-2 py-1 text-sm"
+                                        className="w-full border border-warm-cream/20 rounded-md px-2 py-1 text-sm"
                                     />
                                 </div>
                                 <button
@@ -408,7 +408,7 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-brand-dark mb-1">Description</label>
+                    <label className="block text-sm font-medium text-warm-cream mb-1">Description</label>
                     <RichTextEditor
                         value={form.description}
                         onChange={(content: string) => setForm((prev) => ({ ...prev, description: content }))}
@@ -416,9 +416,9 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                 </div>
 
                 {/* Variants Section */}
-                <div className="space-y-3 border-t border-brand-lilac/20 pt-4">
+                <div className="space-y-3 border-t border-warm-cream/20 pt-4">
                     <div className="flex justify-between items-center">
-                        <label className="block text-sm font-medium text-brand-dark">Variants (Optional)</label>
+                        <label className="block text-sm font-medium text-warm-cream">Variants (Optional)</label>
                         <Button
                             type="button"
                             variant="outline"
@@ -428,9 +428,9 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                         </Button>
                     </div>
                     {variants.map((variant, idx) => (
-                        <div key={idx} className="flex gap-2 items-end bg-brand-lilac/5 p-3 rounded-md">
+                        <div key={idx} className="flex gap-2 items-end bg-warm-cream/5 p-3 rounded-md">
                             <div className="flex-1">
-                                <label className="text-xs text-brand-dark/60">Name (e.g. Red, XL)</label>
+                                <label className="text-xs text-warm-cream/60">Name (e.g. Red, XL)</label>
                                 <input
                                     type="text"
                                     value={variant.name}
@@ -439,12 +439,12 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                                         newVariants[idx].name = e.target.value;
                                         setVariants(newVariants);
                                     }}
-                                    className="w-full border border-brand-lilac/20 rounded-md px-2 py-1 text-sm"
+                                    className="w-full border border-warm-cream/20 rounded-md px-2 py-1 text-sm"
                                     placeholder="Variant Name"
                                 />
                             </div>
                             <div className="w-24">
-                                <label className="text-xs text-brand-dark/60">Stock</label>
+                                <label className="text-xs text-warm-cream/60">Stock</label>
                                 <input
                                     type="number"
                                     value={variant.stock || 0}
@@ -453,7 +453,7 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                                         newVariants[idx].stock = parseInt(e.target.value) || 0;
                                         setVariants(newVariants);
                                     }}
-                                    className="w-full border border-brand-lilac/20 rounded-md px-2 py-1 text-sm"
+                                    className="w-full border border-warm-cream/20 rounded-md px-2 py-1 text-sm"
                                 />
                             </div>
                             <button
@@ -470,19 +470,19 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                 {/* Images */}
                 <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                        <label className="block text-xs text-brand-dark/60">Product Images</label>
+                        <label className="block text-xs text-warm-cream/60">Product Images</label>
                         <div className="flex gap-2">
                             <button
                                 type="button"
                                 onClick={() => setImageInputMode("upload")}
-                                className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${imageInputMode === "upload" ? "bg-brand-purple text-white border-brand-purple" : "border-brand-lilac/30 text-brand-dark/60 hover:bg-brand-lilac/10"}`}
+                                className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${imageInputMode === "upload" ? "bg-brand-green text-white border-brand-green" : "border-warm-cream/30 text-warm-cream/60 hover:bg-warm-cream/10"}`}
                             >
                                 Upload File
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setImageInputMode("url")}
-                                className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${imageInputMode === "url" ? "bg-brand-purple text-white border-brand-purple" : "border-brand-lilac/30 text-brand-dark/60 hover:bg-brand-lilac/10"}`}
+                                className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${imageInputMode === "url" ? "bg-brand-green text-white border-brand-green" : "border-warm-cream/30 text-warm-cream/60 hover:bg-warm-cream/10"}`}
                             >
                                 Paste URL
                             </button>
@@ -490,7 +490,7 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-2">
                         {imageUrls.map((url, idx) => (
-                            <div key={idx} className="relative aspect-square rounded-md overflow-hidden border border-brand-lilac/20 group">
+                            <div key={idx} className="relative aspect-square rounded-md overflow-hidden border border-warm-cream/20 group">
                                 <img src={url} alt="Preview" className="w-full h-full object-cover" />
                                 <button
                                     type="button"
@@ -502,17 +502,17 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                             </div>
                         ))}
                         {uploading && (
-                            <div className="aspect-square rounded-md bg-brand-lilac/5 flex items-center justify-center border border-brand-lilac/20">
-                                <span className="text-xs text-brand-dark/50 animate-pulse">Uploading...</span>
+                            <div className="aspect-square rounded-md bg-warm-cream/5 flex items-center justify-center border border-warm-cream/20">
+                                <span className="text-xs text-warm-cream/50 animate-pulse">Uploading...</span>
                             </div>
                         )}
                     </div>
                     {imageInputMode === "upload" ? (
-                        <div className="border-2 border-dashed border-brand-lilac/30 rounded-md p-8 text-center hover:bg-brand-lilac/5 transition-colors relative">
+                        <div className="border-2 border-dashed border-warm-cream/30 rounded-md p-8 text-center hover:bg-warm-cream/5 transition-colors relative">
                             <input type="file" multiple accept="image/*" onChange={handleFileChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                             <div className="space-y-1 pointer-events-none">
-                                <p className="text-sm text-brand-dark/60 font-medium">Click or drag images here</p>
-                                <p className="text-xs text-brand-dark/40">JPG, PNG, WEBP</p>
+                                <p className="text-sm text-warm-cream/60 font-medium">Click or drag images here</p>
+                                <p className="text-xs text-warm-cream/40">JPG, PNG, WEBP</p>
                             </div>
                         </div>
                     ) : (
@@ -523,7 +523,7 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                                 onChange={(e) => setUrlInput(e.target.value)}
                                 onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddImageUrl(); } }}
                                 placeholder="https://example.com/image.jpg"
-                                className="flex-1 border border-brand-lilac/20 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/30"
+                                className="flex-1 border border-warm-cream/20 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/30"
                             />
                             <Button type="button" variant="outline" onClick={handleAddImageUrl}>
                                 Add
@@ -551,10 +551,10 @@ function InputField({ label, name, type = "text", value, onChange, required, rea
 }) {
     return (
         <div>
-            <label htmlFor={name} className="block text-xs text-brand-dark/60 mb-1">{label}</label>
+            <label htmlFor={name} className="block text-xs text-warm-cream/60 mb-1">{label}</label>
             <input
                 id={name} name={name} type={type} value={value} onChange={onChange} required={required} readOnly={readOnly}
-                className={`w-full border border-brand-lilac/20 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/30 ${className || ""}`}
+                className={`w-full border border-warm-cream/20 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/30 ${className || ""}`}
             />
         </div>
     );
@@ -568,10 +568,10 @@ function SelectField({ label, name, value, onChange, required, options }: {
 }) {
     return (
         <div>
-            <label htmlFor={name} className="block text-xs text-brand-dark/60 mb-1">{label}</label>
+            <label htmlFor={name} className="block text-xs text-warm-cream/60 mb-1">{label}</label>
             <select
                 id={name} name={name} value={value} onChange={onChange} required={required}
-                className="w-full border border-brand-lilac/20 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/30"
+                className="w-full border border-warm-cream/20 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/30"
             >
                 <option value="">Select category</option>
                 {options.map((cat) => (

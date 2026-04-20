@@ -43,16 +43,16 @@ export default function AdminSubscriptionsPage() {
     };
 
     if (loading) {
-        return <div className="p-8 text-center text-muted-brown">Loading subscriptions...</div>;
+        return <div className="p-8 text-center text-warm-cream/40">Loading subscriptions...</div>;
     }
 
     return (
         <div className="p-6 max-w-5xl mx-auto">
-            <h1 className="text-2xl font-bold text-brand-black mb-6">Subscriptions</h1>
+            <h1 className="text-2xl font-bold text-warm-cream mb-6">Subscriptions</h1>
 
-            <div className="bg-white rounded-xl shadow-sm border border-warm-tan/20 overflow-hidden">
+            <div className="bg-white/[0.04] rounded-xl shadow-sm border border-warm-cream/20 overflow-hidden">
                 <table className="w-full text-sm">
-                    <thead className="bg-warm-cream text-muted-brown">
+                    <thead className="bg-warm-cream text-warm-cream/40">
                         <tr>
                             <th className="text-left px-4 py-3 font-medium">Customer</th>
                             <th className="text-left px-4 py-3 font-medium">Frequency</th>
@@ -65,15 +65,15 @@ export default function AdminSubscriptionsPage() {
                     <tbody>
                         {subs.map((sub) => (
                             <>
-                                <tr key={sub.id} className="border-t border-warm-tan/10">
+                                <tr key={sub.id} className="border-t border-warm-cream/10">
                                     <td className="px-4 py-3">
-                                        <div className="font-medium text-brand-black">{sub.customerName}</div>
-                                        <div className="text-xs text-muted-brown">{sub.customerEmail}</div>
+                                        <div className="font-medium text-warm-cream">{sub.customerName}</div>
+                                        <div className="text-xs text-warm-cream/40">{sub.customerEmail}</div>
                                     </td>
-                                    <td className="px-4 py-3 text-muted-brown">
+                                    <td className="px-4 py-3 text-warm-cream/40">
                                         {FREQUENCY_LABELS[sub.frequency] || sub.frequency}
                                     </td>
-                                    <td className="px-4 py-3 text-muted-brown">
+                                    <td className="px-4 py-3 text-warm-cream/40">
                                         {new Date(sub.nextOrderDate).toLocaleDateString("en-NG", {
                                             month: "short",
                                             day: "numeric",
@@ -89,7 +89,7 @@ export default function AdminSubscriptionsPage() {
                                         </button>
                                     </td>
                                     <td className="px-4 py-3">
-                                        <span className={`px-2 py-0.5 rounded text-xs font-semibold ${STATUS_COLORS[sub.status] || "bg-gray-100 text-gray-500"}`}>
+                                        <span className={`px-2 py-0.5 rounded text-xs font-semibold ${STATUS_COLORS[sub.status] || "bg-warm-cream/5 text-warm-cream/40"}`}>
                                             {sub.status}
                                         </span>
                                     </td>
@@ -125,12 +125,12 @@ export default function AdminSubscriptionsPage() {
                                         <td colSpan={6} className="px-4 py-3">
                                             <div className="text-xs space-y-1">
                                                 {sub.items?.map((item, idx) => (
-                                                    <div key={idx} className="flex justify-between text-muted-brown">
+                                                    <div key={idx} className="flex justify-between text-warm-cream/40">
                                                         <span>{item.productName} x{item.quantity}</span>
                                                         <span>&#8358;{(item.price * item.quantity).toLocaleString()}</span>
                                                     </div>
                                                 ))}
-                                                <div className="flex justify-between font-semibold text-brand-black border-t border-warm-tan/20 pt-1">
+                                                <div className="flex justify-between font-semibold text-warm-cream border-t border-warm-cream/20 pt-1">
                                                     <span>Total per delivery</span>
                                                     <span>
                                                         &#8358;{(sub.items?.reduce((s, i) => s + i.price * i.quantity, 0) || 0).toLocaleString()}
@@ -144,7 +144,7 @@ export default function AdminSubscriptionsPage() {
                         ))}
                         {subs.length === 0 && (
                             <tr>
-                                <td colSpan={6} className="px-4 py-8 text-center text-muted-brown">
+                                <td colSpan={6} className="px-4 py-8 text-center text-warm-cream/40">
                                     No subscriptions yet.
                                 </td>
                             </tr>

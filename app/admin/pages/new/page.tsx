@@ -26,7 +26,7 @@ export default function NewPage() {
         content: "<p>Start writing your page content here...</p>",
         editorProps: {
             attributes: {
-                class: "prose prose-sm sm:prose lg:prose-lg xl:prose-xl focus:outline-none min-h-[300px] p-4 border rounded-md border-gray-200",
+                class: "prose prose-sm sm:prose lg:prose-lg xl:prose-xl focus:outline-none min-h-[300px] p-4 border rounded-md border-warm-cream/10",
             },
         },
     });
@@ -60,11 +60,11 @@ export default function NewPage() {
 
     return (
         <div className="max-w-4xl mx-auto space-y-8 pb-20">
-            <h1 className="text-3xl font-serif text-brand-dark">Create New Page</h1>
+            <h1 className="text-3xl font-serif text-warm-cream">Create New Page</h1>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Page Title</label>
+                    <label className="block text-sm font-medium text-warm-cream/60 mb-1">Page Title</label>
                     <input
                         type="text"
                         value={title}
@@ -73,26 +73,26 @@ export default function NewPage() {
                             // Auto-generate slug
                             setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""));
                         }}
-                        className="w-full border border-gray-300 rounded-md p-2"
+                        className="w-full border border-warm-cream/15 rounded-md p-2"
                         placeholder="e.g. About Us"
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Slug (URL)</label>
+                    <label className="block text-sm font-medium text-warm-cream/60 mb-1">Slug (URL)</label>
                     <input
                         type="text"
                         value={slug}
                         onChange={(e) => setSlug(e.target.value)}
-                        className="w-full border border-gray-300 rounded-md p-2"
+                        className="w-full border border-warm-cream/15 rounded-md p-2"
                         placeholder="e.g. about-us"
                     />
                 </div>
             </div>
 
             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Content</label>
-                <div className="bg-white rounded-md">
-                    <div className="border-b border-gray-200 p-2 flex gap-2">
+                <label className="block text-sm font-medium text-warm-cream/60 mb-1">Content</label>
+                <div className="bg-white/[0.04] rounded-md">
+                    <div className="border-b border-warm-cream/10 p-2 flex gap-2">
                         <button
                             onClick={() => editor?.chain().focus().toggleBold().run()}
                             className={`px-2 py-1 rounded ${editor?.isActive('bold') ? 'bg-gray-200' : ''}`}
@@ -122,16 +122,16 @@ export default function NewPage() {
                         type="checkbox"
                         checked={isPublished}
                         onChange={(e) => setIsPublished(e.target.checked)}
-                        className="rounded text-brand-dark focus:ring-brand-lilac"
+                        className="rounded text-warm-cream focus:ring-warm-cream"
                     />
-                    <span className="text-sm font-medium text-gray-700">Publish immediately</span>
+                    <span className="text-sm font-medium text-warm-cream/60">Publish immediately</span>
                 </label>
             </div>
 
             <div className="flex justify-end gap-4">
                 <button
                     onClick={() => router.back()}
-                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 bg-white"
+                    className="px-4 py-2 border border-warm-cream/15 rounded-md text-warm-cream/60 hover:bg-warm-cream/[0.03] bg-[#1e1e1e]"
                 >
                     Cancel
                 </button>

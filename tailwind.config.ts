@@ -9,20 +9,20 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        'brand-red':     '#C0392B',
-        'brand-green':   '#27AE60',
+        'brand-red':     '#B5332E',
+        'brand-green':   '#355E3B',
         'brand-black':   '#1A1A1A',
         'warm-cream':    '#FDF6EC',
         'warm-tan':      '#C8955A',
         'deep-espresso': '#2C1A0E',
         'muted-brown':   '#7A5C3A',
-        'fresh-green':   '#D4EDDA',
+        'fresh-green':   '#E8F0E9',
         'chilled-blue':  '#D0E8FF',
         'frozen-ice':    '#E8F4FD',
         // Legacy aliases for gradual migration
         brand: {
           lilac: '#C8955A',
-          purple: '#C0392B',
+          purple: '#B5332E',
           dark: '#1A1A1A',
           white: '#FDF6EC',
           cream: '#FDF6EC',

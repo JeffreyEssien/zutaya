@@ -48,10 +48,10 @@ export default function ProductCard({ product }: ProductCardProps) {
 
     return (
         <>
-            <div className="group relative">
+            <div className="group relative rounded-2xl bg-[#1e1e1e] border border-warm-cream/[0.06] hover:border-brand-green/20 transition-all duration-500 hover:shadow-[0_8px_40px_rgba(53,94,59,0.12)] overflow-hidden">
                 <Link href={`/product/${product.slug}`} className="block">
                     {/* Image */}
-                    <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-neutral-50">
+                    <div className="relative aspect-[3/4] overflow-hidden bg-[#2a2a2a]">
                         {product.images[0] ? (
                             <Image
                                 src={product.images[0]}
@@ -83,7 +83,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                         {/* Badges */}
                         <div className="absolute top-3 left-3 flex flex-col gap-1.5">
                             {product.isNew && totalStock > LOW_STOCK_THRESHOLD && (
-                                <span className="bg-brand-dark text-white text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full">
+                                <span className="bg-brand-green text-white text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full">
                                     New
                                 </span>
                             )}
@@ -104,14 +104,14 @@ export default function ProductCard({ product }: ProductCardProps) {
                             <button
                                 type="button"
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                                className="p-2 rounded-full bg-white/80 backdrop-blur-sm text-brand-dark/40 hover:text-red-400 cursor-pointer shadow-sm hover:shadow-md transition-all"
+                                className="p-2 rounded-full bg-brand-black/70 backdrop-blur-sm text-warm-cream/40 hover:text-red-400 cursor-pointer shadow-sm hover:shadow-md transition-all"
                             >
                                 <Heart size={14} strokeWidth={1.5} />
                             </button>
                             <button
                                 type="button"
                                 onClick={handleQuickView}
-                                className="p-2 rounded-full bg-white/80 backdrop-blur-sm text-brand-dark/40 hover:text-brand-purple cursor-pointer shadow-sm hover:shadow-md transition-all"
+                                className="p-2 rounded-full bg-brand-black/70 backdrop-blur-sm text-warm-cream/40 hover:text-brand-green cursor-pointer shadow-sm hover:shadow-md transition-all"
                             >
                                 <Eye size={14} strokeWidth={1.5} />
                             </button>
@@ -122,12 +122,12 @@ export default function ProductCard({ product }: ProductCardProps) {
                             type="button"
                             onClick={handleQuickAdd}
                             disabled={isSoldOut}
-                            className="hidden sm:flex absolute bottom-3 left-3 right-3 items-center justify-center gap-2 bg-white/95 backdrop-blur-md text-brand-dark text-xs font-semibold tracking-wide py-3 rounded-full opacity-0 translate-y-3 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer shadow-lg hover:bg-white active:scale-[0.97]"
+                            className="hidden sm:flex absolute bottom-3 left-3 right-3 items-center justify-center gap-2 bg-brand-black/90 backdrop-blur-md text-warm-cream text-xs font-semibold tracking-wide py-3 rounded-full opacity-0 translate-y-3 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer shadow-lg hover:bg-brand-black active:scale-[0.97]"
                         >
                             {isSoldOut ? (
                                 "Sold Out"
                             ) : justAdded ? (
-                                <span className="flex items-center gap-1.5 text-brand-purple">
+                                <span className="flex items-center gap-1.5 text-brand-green">
                                     <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
                                     Added
                                 </span>
@@ -141,22 +141,22 @@ export default function ProductCard({ product }: ProductCardProps) {
                     </div>
 
                     {/* Info */}
-                    <div className="mt-4 space-y-1.5">
+                    <div className="p-4 pt-3 space-y-1.5">
                         <div className="flex items-center gap-2">
-                            <p className="text-[10px] text-brand-dark/35 uppercase tracking-[0.15em] font-medium">
+                            <p className="text-[10px] text-warm-cream/35 uppercase tracking-[0.15em] font-medium">
                                 {product.category}
                             </p>
                             {product.storageType && <StorageBadge type={product.storageType} />}
                         </div>
-                        <h3 className="font-serif text-[15px] text-brand-dark leading-snug line-clamp-1 group-hover:text-brand-purple transition-colors duration-300">
+                        <h3 className="font-serif text-[15px] text-warm-cream leading-snug line-clamp-1 group-hover:text-brand-green transition-colors duration-300">
                             {product.name}
                         </h3>
                         <div className="flex items-baseline gap-1.5 pt-0.5">
-                            <p className="font-serif text-base font-semibold text-brand-dark">
+                            <p className="font-serif text-base font-semibold text-warm-cream">
                                 {formatCurrency(product.price)}
                             </p>
                             {product.priceUnit && (
-                                <span className="text-[10px] text-brand-dark/35 font-light">
+                                <span className="text-[10px] text-warm-cream/35 font-light">
                                     / {product.priceUnit === "per_kg" ? "kg" : product.priceUnit === "per_pack" ? "pack" : product.priceUnit === "per_piece" ? "piece" : "whole"}
                                 </span>
                             )}

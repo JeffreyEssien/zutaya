@@ -265,22 +265,22 @@ export default function CheckoutForm({ onComplete, onShippingChange, onPackaging
         return (
             <div className="flex flex-col items-center justify-center py-20 text-center">
                 <div className="relative mb-6">
-                    <div className="w-16 h-16 rounded-full border-4 border-warm-tan/20 border-t-brand-red animate-spin" />
+                    <div className="w-16 h-16 rounded-full border-4 border-warm-cream/20 border-t-brand-red animate-spin" />
                     <div className="absolute inset-0 flex items-center justify-center">
                         <Package size={20} className="text-brand-red" />
                     </div>
                 </div>
-                <h2 className="font-serif text-xl text-brand-dark mb-2">
+                <h2 className="font-serif text-xl text-warm-cream mb-2">
                     {queueStatus === "queued" ? "You're in the Queue" : "Processing Your Order"}
                 </h2>
-                <p className="text-sm text-brand-dark/50 max-w-xs leading-relaxed">
+                <p className="text-sm text-warm-cream/50 max-w-xs leading-relaxed">
                     {queueStatus === "queued"
                         ? "We're preparing to process your order. Please hold tight — this only takes a moment."
                         : "Confirming stock and finalising your order. Almost there..."}
                 </p>
                 <div className="flex items-center gap-3 mt-6">
                     <span className={`w-2.5 h-2.5 rounded-full ${queueStatus === "queued" ? "bg-amber-400 animate-pulse" : "bg-green-500"}`} />
-                    <span className="text-xs text-brand-dark/40 uppercase tracking-wider font-medium">
+                    <span className="text-xs text-warm-cream/40 uppercase tracking-wider font-medium">
                         {queueStatus === "queued" ? "Queued" : "Processing"}
                     </span>
                 </div>
@@ -340,8 +340,8 @@ export default function CheckoutForm({ onComplete, onShippingChange, onPackaging
                         >
                             <ul className="space-y-1.5">
                                 {LAGOS_TERMS.map((term, i) => (
-                                    <li key={i} className="flex items-start gap-2 text-[11px] text-brand-dark/45 leading-relaxed">
-                                        <span className="mt-1 w-1 h-1 rounded-full bg-brand-dark/20 shrink-0" />
+                                    <li key={i} className="flex items-start gap-2 text-[11px] text-warm-cream/45 leading-relaxed">
+                                        <span className="mt-1 w-1 h-1 rounded-full bg-warm-cream/20 shrink-0" />
                                         {term}
                                     </li>
                                 ))}
@@ -364,7 +364,7 @@ export default function CheckoutForm({ onComplete, onShippingChange, onPackaging
                         selectedSlot={requestedDeliverySlot || undefined}
                     />
                     {!requestedDeliveryDate && (
-                        <p className="text-[11px] text-brand-dark/35 mt-3 flex items-center gap-1.5">
+                        <p className="text-[11px] text-warm-cream/35 mt-3 flex items-center gap-1.5">
                             <CalendarCheck size={12} />
                             Optional — select a preferred date and time slot for delivery
                         </p>
@@ -384,34 +384,34 @@ export default function CheckoutForm({ onComplete, onShippingChange, onPackaging
                             placeholder="Any special preparation instructions? e.g. 'Debone the chicken', 'Cut into thin strips', 'Season with suya spice'..."
                             rows={3}
                             maxLength={500}
-                            className="w-full border border-brand-dark/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple/40 transition-all bg-white placeholder:text-brand-dark/25 resize-none"
+                            className="w-full border border-warm-cream/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green/40 transition-all bg-[#222] placeholder:text-warm-cream/25 resize-none"
                         />
                         <div className="flex items-center justify-between mt-1.5 px-1">
-                            <div className="flex items-center gap-1.5 text-brand-dark/30">
+                            <div className="flex items-center gap-1.5 text-warm-cream/30">
                                 <UtensilsCrossed size={11} />
                                 <span className="text-[10px]">Optional</span>
                             </div>
-                            <span className="text-[10px] text-brand-dark/25">{prepInstructions.length}/500</span>
+                            <span className="text-[10px] text-warm-cream/25">{prepInstructions.length}/500</span>
                         </div>
                     </div>
 
                     {/* Packaging Fee */}
-                    <label className={`flex items-start gap-4 p-4 border rounded-xl cursor-pointer transition-all duration-300 ${addPackaging ? "border-brand-purple bg-brand-purple/[0.04] shadow-sm shadow-brand-purple/5" : "border-brand-dark/8 hover:border-brand-purple/30"}`}>
+                    <label className={`flex items-start gap-4 p-4 border rounded-xl cursor-pointer transition-all duration-300 ${addPackaging ? "border-brand-green bg-brand-green/[0.04] shadow-sm shadow-brand-green/5" : "border-warm-cream/8 hover:border-brand-green/30"}`}>
                         <input
                             type="checkbox"
                             checked={addPackaging}
                             onChange={(e) => setAddPackaging(e.target.checked)}
-                            className="mt-1 accent-brand-purple"
+                            className="mt-1 accent-brand-green"
                         />
                         <div className="flex-1">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
-                                    <Package size={16} className="text-brand-purple" />
-                                    <span className="font-medium text-brand-dark text-sm">{packagingConfig.label}</span>
+                                    <Package size={16} className="text-brand-green" />
+                                    <span className="font-medium text-warm-cream text-sm">{packagingConfig.label}</span>
                                 </div>
-                                <span className="text-sm font-semibold text-brand-dark">₦{packagingConfig.fee.toLocaleString()}</span>
+                                <span className="text-sm font-semibold text-warm-cream">₦{packagingConfig.fee.toLocaleString()}</span>
                             </div>
-                            <span className="block text-xs text-brand-dark/45 mt-1">{packagingConfig.description}</span>
+                            <span className="block text-xs text-warm-cream/45 mt-1">{packagingConfig.description}</span>
                         </div>
                     </label>
                 </div>
@@ -421,32 +421,32 @@ export default function CheckoutForm({ onComplete, onShippingChange, onPackaging
             <div>
                 <SectionTitle step={5}>Payment Method</SectionTitle>
                 <div className="space-y-3 mt-5">
-                    <label className={`flex items-start gap-4 p-4 border rounded-xl cursor-pointer transition-all duration-300 ${paymentMethod === 'whatsapp' ? 'border-brand-purple bg-brand-purple/[0.04] shadow-sm shadow-brand-purple/5' : 'border-brand-dark/8 hover:border-brand-purple/30'}`}>
-                        <input type="radio" name="payment" value="whatsapp" checked={paymentMethod === 'whatsapp'} onChange={() => setPaymentMethod('whatsapp')} className="mt-1 accent-brand-purple" />
+                    <label className={`flex items-start gap-4 p-4 border rounded-xl cursor-pointer transition-all duration-300 ${paymentMethod === 'whatsapp' ? 'border-brand-green bg-brand-green/[0.04] shadow-sm shadow-brand-green/5' : 'border-warm-cream/8 hover:border-brand-green/30'}`}>
+                        <input type="radio" name="payment" value="whatsapp" checked={paymentMethod === 'whatsapp'} onChange={() => setPaymentMethod('whatsapp')} className="mt-1 accent-brand-green" />
                         <div className="flex-1">
                             <div className="flex items-center gap-2">
-                                <MessageCircle size={16} className="text-brand-purple" />
-                                <span className="font-medium text-brand-dark text-sm">Pay on WhatsApp</span>
+                                <MessageCircle size={16} className="text-brand-green" />
+                                <span className="font-medium text-warm-cream text-sm">Pay on WhatsApp</span>
                             </div>
-                            <span className="block text-xs text-brand-dark/45 mt-1">Chat with us to complete your payment. Fast & secure.</span>
+                            <span className="block text-xs text-warm-cream/45 mt-1">Chat with us to complete your payment. Fast & secure.</span>
                         </div>
                     </label>
 
-                    <label className={`flex items-start gap-4 p-4 border rounded-xl cursor-pointer transition-all duration-300 ${paymentMethod === 'manual' ? 'border-brand-purple bg-brand-purple/[0.04] shadow-sm shadow-brand-purple/5' : 'border-brand-dark/8 hover:border-brand-purple/30'}`}>
-                        <input type="radio" name="payment" value="manual" checked={paymentMethod === 'manual'} onChange={() => setPaymentMethod('manual')} className="mt-1 accent-brand-purple" />
+                    <label className={`flex items-start gap-4 p-4 border rounded-xl cursor-pointer transition-all duration-300 ${paymentMethod === 'manual' ? 'border-brand-green bg-brand-green/[0.04] shadow-sm shadow-brand-green/5' : 'border-warm-cream/8 hover:border-brand-green/30'}`}>
+                        <input type="radio" name="payment" value="manual" checked={paymentMethod === 'manual'} onChange={() => setPaymentMethod('manual')} className="mt-1 accent-brand-green" />
                         <div className="flex-1">
                             <div className="flex items-center gap-2">
-                                <Clock size={16} className="text-brand-purple" />
-                                <span className="font-medium text-brand-dark text-sm">Wait for Admin Confirmation</span>
+                                <Clock size={16} className="text-brand-green" />
+                                <span className="font-medium text-warm-cream text-sm">Wait for Admin Confirmation</span>
                             </div>
-                            <span className="block text-xs text-brand-dark/45 mt-1">Place order now and wait for an admin to contact you for payment.</span>
+                            <span className="block text-xs text-warm-cream/45 mt-1">Place order now and wait for an admin to contact you for payment.</span>
                         </div>
                     </label>
                 </div>
             </div>
 
             {/* Security notice */}
-            <div className="flex items-center gap-2 text-[10px] text-brand-dark/30">
+            <div className="flex items-center gap-2 text-[10px] text-warm-cream/30">
                 <Lock size={10} />
                 <span>Your information is protected and secure</span>
             </div>
@@ -468,7 +468,7 @@ function SectionTitle({ children, step }: { children: React.ReactNode; step: num
             <span className="w-7 h-7 rounded-full bg-brand-dark text-white text-xs font-bold flex items-center justify-center shrink-0">
                 {step}
             </span>
-            <h2 className="font-serif text-lg text-brand-dark">{children}</h2>
+            <h2 className="font-serif text-lg text-warm-cream">{children}</h2>
         </div>
     );
 }
@@ -486,11 +486,11 @@ function FloatingField({ label, name, type = "text", value, error, onChange }: {
                 value={value}
                 onChange={onChange}
                 placeholder=" "
-                className={`peer w-full border rounded-xl px-4 pt-5 pb-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple/40 transition-all bg-white ${error ? "border-red-300 focus:ring-red-200 focus:border-red-400" : "border-brand-dark/10"}`}
+                className={`peer w-full border rounded-xl px-4 pt-5 pb-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green/40 transition-all bg-[#222] ${error ? "border-red-300 focus:ring-red-200 focus:border-red-400" : "border-warm-cream/10"}`}
             />
             <label
                 htmlFor={name}
-                className="absolute left-4 top-2 text-[10px] text-brand-dark/40 transition-all pointer-events-none peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:text-[10px] peer-focus:text-brand-purple uppercase tracking-wide font-medium"
+                className="absolute left-4 top-2 text-[10px] text-warm-cream/40 transition-all pointer-events-none peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:text-[10px] peer-focus:text-brand-green uppercase tracking-wide font-medium"
             >
                 {label}
             </label>
@@ -510,16 +510,16 @@ function SelectField({ icon, value, placeholder, error, children, onChange }: {
     return (
         <div>
             <div className="relative">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-dark/30 pointer-events-none">{icon}</div>
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-warm-cream/30 pointer-events-none">{icon}</div>
                 <select
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
-                    className={`w-full border rounded-xl pl-10 pr-10 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple/40 transition-all bg-white appearance-none cursor-pointer ${error ? "border-red-300" : "border-brand-dark/10"} ${!value ? "text-brand-dark/40" : "text-brand-dark"}`}
+                    className={`w-full border rounded-xl pl-10 pr-10 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green/40 transition-all bg-[#222] appearance-none cursor-pointer ${error ? "border-red-300" : "border-warm-cream/10"} ${!value ? "text-warm-cream/40" : "text-warm-cream"}`}
                 >
                     <option value="">{placeholder}</option>
                     {children}
                 </select>
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 text-brand-dark/30 pointer-events-none">
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 text-warm-cream/30 pointer-events-none">
                     <ChevronDown size={14} />
                 </div>
             </div>
@@ -537,26 +537,26 @@ function DeliveryResultCard({ icon, title, fee, originalFee, discount, children 
     children: React.ReactNode;
 }) {
     return (
-        <div className="rounded-xl bg-gradient-to-br from-neutral-50/80 to-white border border-brand-dark/5 p-5 space-y-4 shadow-sm">
+        <div className="rounded-xl bg-gradient-to-br from-[#1e1e1e] to-[#252525] border border-warm-cream/10 p-5 space-y-4 shadow-sm">
             <div className="flex items-center justify-between flex-wrap gap-2">
-                <div className="flex items-center gap-2 text-brand-dark/70">
-                    <span className="text-brand-purple">{icon}</span>
+                <div className="flex items-center gap-2 text-warm-cream/70">
+                    <span className="text-brand-green">{icon}</span>
                     <span className="text-sm font-medium">{title}</span>
                 </div>
                 <div className="flex items-center gap-2">
                     {originalFee && originalFee !== fee && (
-                        <span className="text-xs text-brand-dark/30 line-through">₦{originalFee.toLocaleString()}</span>
+                        <span className="text-xs text-warm-cream/30 line-through">₦{originalFee.toLocaleString()}</span>
                     )}
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border bg-emerald-50 text-emerald-700 border-emerald-100">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border bg-brand-green/10 text-brand-green border-brand-green/20">
                         <Truck size={11} />
                         ₦{fee.toLocaleString()}
                     </span>
                 </div>
             </div>
             {discount && discount.percent > 0 && (
-                <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 rounded-lg border border-emerald-100">
-                    <Tag size={12} className="text-emerald-600" />
-                    <span className="text-xs text-emerald-700 font-medium">
+                <div className="flex items-center gap-2 px-3 py-2 bg-brand-green/10 rounded-lg border border-brand-green/20">
+                    <Tag size={12} className="text-brand-green" />
+                    <span className="text-xs text-brand-green font-medium">
                         {discount.percent}% delivery discount{discount.label ? ` — ${discount.label}` : ""}
                     </span>
                 </div>

@@ -111,12 +111,12 @@ export default function Hero({ customTexts, settings, heroMedia = [], featuredSl
   return (
     <section
       ref={sectionRef}
-      className="relative min-h-dvh overflow-hidden bg-warm-cream"
+      className="relative min-h-dvh overflow-hidden bg-brand-black"
     >
       <div
         className="absolute inset-0 opacity-[0.02] pointer-events-none"
         style={{
-          backgroundImage: "radial-gradient(circle at 1px 1px, #7A5C3A 0.5px, transparent 0)",
+          backgroundImage: "radial-gradient(circle at 1px 1px, rgba(53,94,59,0.3) 0.5px, transparent 0)",
           backgroundSize: "32px 32px",
         }}
       />
@@ -134,15 +134,15 @@ export default function Hero({ customTexts, settings, heroMedia = [], featuredSl
             className="max-w-xl"
           >
             <motion.div variants={fadeUp} className="mb-5">
-              <span className="inline-flex items-center gap-2.5 text-[10px] uppercase tracking-[0.35em] text-muted-brown font-semibold">
-                <span className="w-6 h-[2px] bg-brand-red rounded-full" />
+              <span className="inline-flex items-center gap-2.5 text-[10px] uppercase tracking-[0.35em] text-warm-cream/60 font-semibold">
+                <span className="w-6 h-[2px] bg-brand-green rounded-full" />
                 Premium Meat Delivery
               </span>
             </motion.div>
 
             <motion.h1
               variants={fadeUp}
-              className="font-serif text-[clamp(2.2rem,5.5vw,4.5rem)] text-deep-espresso leading-[1.08] tracking-tight mb-5"
+              className="font-serif text-[clamp(2.2rem,5.5vw,4.5rem)] text-warm-cream leading-[1.08] tracking-tight mb-5"
             >
               {headingText || (
                 <>
@@ -155,7 +155,7 @@ export default function Hero({ customTexts, settings, heroMedia = [], featuredSl
 
             <motion.p
               variants={fadeUp}
-              className="text-[15px] md:text-base text-muted-brown/70 max-w-md leading-relaxed mb-8"
+              className="text-[15px] md:text-base text-warm-cream/60/70 max-w-md leading-relaxed mb-8"
             >
               {subheading}
             </motion.p>
@@ -175,7 +175,7 @@ export default function Hero({ customTexts, settings, heroMedia = [], featuredSl
               </Link>
               <Link
                 href="/bundles"
-                className="group flex items-center gap-2 text-sm uppercase tracking-[0.18em] text-deep-espresso/50 hover:text-brand-red transition-colors duration-300"
+                className="group flex items-center gap-2 text-sm uppercase tracking-[0.18em] text-warm-cream/50 hover:text-brand-red transition-colors duration-300"
               >
                 <span className="relative">
                   Build Your Box
@@ -188,10 +188,10 @@ export default function Hero({ customTexts, settings, heroMedia = [], featuredSl
               {badges.map((badge) => (
                 <div
                   key={badge.label}
-                  className="flex items-center gap-2 text-deep-espresso/40"
+                  className="flex items-center gap-2 text-warm-cream/40"
                 >
-                  <div className="w-7 h-7 rounded-full bg-deep-espresso/[0.04] flex items-center justify-center">
-                    <badge.icon size={14} strokeWidth={1.5} className="text-brand-red/60" />
+                  <div className="w-7 h-7 rounded-full bg-brand-green/[0.06] flex items-center justify-center">
+                    <badge.icon size={14} strokeWidth={1.5} className="text-brand-green" />
                   </div>
                   <span className="text-[11px] font-medium tracking-wide uppercase">
                     {badge.label}
@@ -389,13 +389,13 @@ export default function Hero({ customTexts, settings, heroMedia = [], featuredSl
               )
             )}
 
-            <div className="absolute inset-0 bg-gradient-to-t from-warm-cream via-transparent to-transparent lg:bg-none lg:hidden z-10" />
-            <div className="hidden lg:block absolute inset-0 bg-gradient-to-r from-warm-cream/20 to-transparent w-24 z-10" />
+            <div className="absolute inset-0 bg-gradient-to-t from-brand-black via-transparent to-transparent lg:bg-none lg:hidden z-10" />
+            <div className="hidden lg:block absolute inset-0 bg-gradient-to-r from-brand-black/20 to-transparent w-24 z-10" />
             <div className="hidden lg:block absolute bottom-8 left-8 w-20 h-20 border-l-2 border-b-2 border-white/10 rounded-bl-xl z-10" />
             <div className="hidden lg:block absolute top-8 right-8 w-20 h-20 border-r-2 border-t-2 border-white/10 rounded-tr-xl z-10" />
 
             <div className="hidden lg:flex absolute bottom-8 right-8 items-center gap-2 bg-deep-espresso/60 backdrop-blur-md rounded-full px-4 py-2 border border-white/10 z-10">
-              <span className="w-1.5 h-1.5 rounded-full bg-brand-red animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse" />
               <span className="text-[10px] uppercase tracking-[0.25em] text-white/70 font-medium">
                 Lagos, Nigeria
               </span>
@@ -417,7 +417,7 @@ export default function Hero({ customTexts, settings, heroMedia = [], featuredSl
             const next = sectionRef.current?.nextElementSibling;
             next?.scrollIntoView({ behavior: "smooth" });
           }}
-          className="flex flex-col items-center gap-1.5 text-deep-espresso/20 hover:text-brand-red/40 transition-colors cursor-pointer"
+          className="flex flex-col items-center gap-1.5 text-warm-cream/20 hover:text-brand-red/40 transition-colors cursor-pointer"
         >
           <span className="text-[9px] uppercase tracking-[0.3em]">Explore</span>
           <ArrowDown size={14} strokeWidth={1.5} />

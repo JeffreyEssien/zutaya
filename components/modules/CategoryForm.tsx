@@ -83,43 +83,43 @@ export default function CategoryForm({ initialData, onSuccess, onCancel }: Categ
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-                <label className="block text-sm font-medium text-brand-dark mb-1">Name</label>
+                <label className="block text-sm font-medium text-warm-cream mb-1">Name</label>
                 <input
                     type="text"
                     name="name"
                     required
                     value={form.name}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 bg-transparent border border-brand-lilac/30 rounded-sm focus:outline-none focus:border-brand-purple"
+                    className="w-full px-4 py-2 bg-transparent border border-warm-cream/30 rounded-sm focus:outline-none focus:border-brand-green"
                 />
             </div>
 
             <div>
-                <label className="block text-sm font-medium text-brand-dark mb-1">Slug</label>
+                <label className="block text-sm font-medium text-warm-cream mb-1">Slug</label>
                 <input
                     type="text"
                     name="slug"
                     required
                     value={form.slug}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 bg-transparent border border-brand-lilac/30 rounded-sm focus:outline-none focus:border-brand-purple font-mono text-sm"
+                    className="w-full px-4 py-2 bg-transparent border border-warm-cream/30 rounded-sm focus:outline-none focus:border-brand-green font-mono text-sm"
                 />
             </div>
 
             <div>
-                <label className="block text-sm font-medium text-brand-dark mb-1">Category Image</label>
+                <label className="block text-sm font-medium text-warm-cream mb-1">Category Image</label>
                 <div className="flex gap-2 mb-3">
                     <button
                         type="button"
                         onClick={() => setImageMode("upload")}
-                        className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${imageMode === "upload" ? "bg-brand-purple text-white border-brand-purple" : "border-brand-lilac/30 text-brand-dark/60 hover:bg-brand-lilac/10"}`}
+                        className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${imageMode === "upload" ? "bg-brand-green text-white border-brand-green" : "border-warm-cream/30 text-warm-cream/60 hover:bg-warm-cream/10"}`}
                     >
                         Upload File
                     </button>
                     <button
                         type="button"
                         onClick={() => setImageMode("url")}
-                        className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${imageMode === "url" ? "bg-brand-purple text-white border-brand-purple" : "border-brand-lilac/30 text-brand-dark/60 hover:bg-brand-lilac/10"}`}
+                        className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${imageMode === "url" ? "bg-brand-green text-white border-brand-green" : "border-warm-cream/30 text-warm-cream/60 hover:bg-warm-cream/10"}`}
                     >
                         Paste URL
                     </button>
@@ -137,9 +137,9 @@ export default function CategoryForm({ initialData, onSuccess, onCancel }: Categ
                                     type="file"
                                     accept="image/*"
                                     onChange={handleImageUpload}
-                                    className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-brand-lilac/10 file:text-brand-purple hover:file:bg-brand-lilac/20"
+                                    className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-warm-cream/10 file:text-brand-green hover:file:bg-warm-cream/20"
                                 />
-                                <p className="mt-1 text-xs text-gray-500">Upload an image file for this category.</p>
+                                <p className="mt-1 text-xs text-warm-cream/40">Upload an image file for this category.</p>
                             </>
                         ) : (
                             <>
@@ -148,9 +148,9 @@ export default function CategoryForm({ initialData, onSuccess, onCancel }: Categ
                                     value={form.image}
                                     onChange={handleImageUrl}
                                     placeholder="https://example.com/image.jpg"
-                                    className="w-full px-4 py-2 bg-transparent border border-brand-lilac/30 rounded-sm focus:outline-none focus:border-brand-purple text-sm"
+                                    className="w-full px-4 py-2 bg-transparent border border-warm-cream/30 rounded-sm focus:outline-none focus:border-brand-green text-sm"
                                 />
-                                <p className="mt-1 text-xs text-gray-500">Paste a direct link to the image.</p>
+                                <p className="mt-1 text-xs text-warm-cream/40">Paste a direct link to the image.</p>
                             </>
                         )}
                     </div>
@@ -158,13 +158,13 @@ export default function CategoryForm({ initialData, onSuccess, onCancel }: Categ
             </div>
 
             <div>
-                <label className="block text-sm font-medium text-brand-dark mb-1">Description</label>
+                <label className="block text-sm font-medium text-warm-cream mb-1">Description</label>
                 <textarea
                     name="description"
                     rows={4}
                     value={form.description}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 bg-transparent border border-brand-lilac/30 rounded-sm focus:outline-none focus:border-brand-purple"
+                    className="w-full px-4 py-2 bg-transparent border border-warm-cream/30 rounded-sm focus:outline-none focus:border-brand-green"
                 />
             </div>
 

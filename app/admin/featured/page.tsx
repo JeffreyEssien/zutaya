@@ -31,7 +31,7 @@ const OVERLAY_POSITIONS = [
 
 const OVERLAY_STYLES = [
     { value: "dark", label: "Dark", preview: "bg-black/60 text-white" },
-    { value: "light", label: "Light", preview: "bg-white/80 text-brand-dark" },
+    { value: "light", label: "Light", preview: "bg-white/80 text-warm-cream" },
     { value: "gradient", label: "Gradient", preview: "bg-gradient-to-t from-black/70 to-transparent text-white" },
 ] as const;
 
@@ -235,7 +235,7 @@ export default function FeaturedPage() {
     if (loading) {
         return (
             <div className="flex items-center justify-center h-96">
-                <Loader2 className="w-8 h-8 animate-spin text-brand-purple/40" />
+                <Loader2 className="w-8 h-8 animate-spin text-brand-green/40" />
             </div>
         );
     }
@@ -249,22 +249,22 @@ export default function FeaturedPage() {
                         <div className="p-2 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl">
                             <Star size={20} className="text-white" />
                         </div>
-                        <h1 className="text-2xl font-serif text-brand-dark font-bold">Featured Slides</h1>
+                        <h1 className="text-2xl font-serif text-warm-cream font-bold">Featured Slides</h1>
                     </div>
-                    <p className="text-sm text-brand-dark/50">Curate the hero slideshow — add products, media, or custom promos.</p>
+                    <p className="text-sm text-warm-cream/50">Curate the hero slideshow — add products, media, or custom promos.</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <button
                         onClick={() => { setPreviewMode(true); setPreviewIndex(0); }}
                         disabled={activeSlides.length === 0}
-                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-brand-dark/10 text-sm text-brand-dark/60 hover:border-brand-purple/30 hover:text-brand-purple transition-all cursor-pointer disabled:opacity-40"
+                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-brand-dark/10 text-sm text-warm-cream/60 hover:border-brand-green/30 hover:text-brand-green transition-all cursor-pointer disabled:opacity-40"
                     >
                         <Eye size={16} /> Preview
                     </button>
                     <Button
                         onClick={handleSave}
                         disabled={saving}
-                        className="!bg-brand-purple !text-white hover:!bg-brand-purple/90 gap-2"
+                        className="!bg-brand-green !text-white hover:!bg-brand-green/90 gap-2"
                     >
                         {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
                         Save Changes
@@ -273,13 +273,13 @@ export default function FeaturedPage() {
             </div>
 
             {/* Hero Mode Toggle */}
-            <div className="bg-white rounded-2xl border border-brand-lilac/15 p-5 shadow-sm">
+            <div className="bg-white/[0.04] rounded-2xl border border-warm-cream/15 p-5 shadow-sm">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <Zap size={18} className="text-amber-500" />
                         <div>
-                            <h3 className="text-sm font-semibold text-brand-dark">Use Featured Slides in Hero</h3>
-                            <p className="text-xs text-brand-dark/40 mt-0.5">When enabled, the hero slideshow uses your curated slides instead of raw gallery media</p>
+                            <h3 className="text-sm font-semibold text-warm-cream">Use Featured Slides in Hero</h3>
+                            <p className="text-xs text-warm-cream/40 mt-0.5">When enabled, the hero slideshow uses your curated slides instead of raw gallery media</p>
                         </div>
                     </div>
                     <button
@@ -288,15 +288,15 @@ export default function FeaturedPage() {
                             mode: prev.useFeaturedSlides ? prev.mode : "slideshow",
                             useFeaturedSlides: !prev.useFeaturedSlides,
                         }))}
-                        className={`relative w-12 h-6 rounded-full transition-colors cursor-pointer ${heroDisplay.useFeaturedSlides ? "bg-brand-purple" : "bg-brand-dark/15"}`}
+                        className={`relative w-12 h-6 rounded-full transition-colors cursor-pointer ${heroDisplay.useFeaturedSlides ? "bg-brand-green" : "bg-brand-dark/15"}`}
                     >
-                        <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${heroDisplay.useFeaturedSlides ? "left-[26px]" : "left-0.5"}`} />
+                        <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white/[0.04] shadow transition-all ${heroDisplay.useFeaturedSlides ? "left-[26px]" : "left-0.5"}`} />
                     </button>
                 </div>
 
                 {heroDisplay.useFeaturedSlides && (
-                    <div className="mt-4 pt-4 border-t border-brand-lilac/10 flex items-center gap-4">
-                        <label className="text-xs text-brand-dark/50 font-medium">Slide Interval</label>
+                    <div className="mt-4 pt-4 border-t border-warm-cream/10 flex items-center gap-4">
+                        <label className="text-xs text-warm-cream/50 font-medium">Slide Interval</label>
                         <div className="flex items-center gap-2">
                             <input
                                 type="range"
@@ -304,9 +304,9 @@ export default function FeaturedPage() {
                                 max={15}
                                 value={heroDisplay.slideshowInterval}
                                 onChange={(e) => setHeroDisplay((prev) => ({ ...prev, slideshowInterval: parseInt(e.target.value) }))}
-                                className="w-32 accent-brand-purple"
+                                className="w-32 accent-brand-green"
                             />
-                            <span className="text-xs text-brand-dark/60 w-8">{heroDisplay.slideshowInterval}s</span>
+                            <span className="text-xs text-warm-cream/60 w-8">{heroDisplay.slideshowInterval}s</span>
                         </div>
                     </div>
                 )}
@@ -317,15 +317,15 @@ export default function FeaturedPage() {
                 {[
                     { label: "Total Slides", value: slides.length, icon: Layers, color: "text-blue-600 bg-blue-50" },
                     { label: "Active", value: activeSlides.length, icon: Eye, color: "text-emerald-600 bg-emerald-50" },
-                    { label: "Inactive", value: slides.length - activeSlides.length, icon: EyeOff, color: "text-gray-500 bg-gray-50" },
+                    { label: "Inactive", value: slides.length - activeSlides.length, icon: EyeOff, color: "text-warm-cream/40 bg-warm-cream/[0.03]" },
                 ].map((stat) => (
-                    <div key={stat.label} className="bg-white rounded-xl border border-brand-lilac/10 p-4 flex items-center gap-3">
+                    <div key={stat.label} className="bg-white/[0.04] rounded-xl border border-warm-cream/10 p-4 flex items-center gap-3">
                         <div className={`w-10 h-10 rounded-lg ${stat.color} flex items-center justify-center`}>
                             <stat.icon size={18} />
                         </div>
                         <div>
-                            <p className="text-xl font-bold text-brand-dark">{stat.value}</p>
-                            <p className="text-[10px] text-brand-dark/40 uppercase tracking-wider">{stat.label}</p>
+                            <p className="text-xl font-bold text-warm-cream">{stat.value}</p>
+                            <p className="text-[10px] text-warm-cream/40 uppercase tracking-wider">{stat.label}</p>
                         </div>
                     </div>
                 ))}
@@ -335,48 +335,48 @@ export default function FeaturedPage() {
             <div className="relative">
                 <button
                     onClick={() => setAddMenuOpen(!addMenuOpen)}
-                    className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-brand-purple to-brand-purple/80 text-white rounded-xl text-sm font-medium hover:shadow-lg hover:shadow-brand-purple/20 transition-all cursor-pointer"
+                    className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-brand-green to-brand-green/80 text-white rounded-xl text-sm font-medium hover:shadow-lg hover:shadow-brand-green/20 transition-all cursor-pointer"
                 >
                     <Plus size={18} /> Add Slide
                     <ChevronDown size={14} className={`transition-transform ${addMenuOpen ? "rotate-180" : ""}`} />
                 </button>
 
                 {addMenuOpen && (
-                    <div className="absolute top-full left-0 mt-2 w-72 bg-white rounded-xl shadow-2xl border border-brand-lilac/15 overflow-hidden z-30">
+                    <div className="absolute top-full left-0 mt-2 w-72 bg-white/[0.04] rounded-xl shadow-2xl border border-warm-cream/15 overflow-hidden z-30">
                         <button
                             onClick={() => { setProductSearchOpen(true); setAddMenuOpen(false); }}
-                            className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-brand-purple/5 transition-colors cursor-pointer text-left"
+                            className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-brand-green/5 transition-colors cursor-pointer text-left"
                         >
                             <div className="w-9 h-9 rounded-lg bg-purple-50 flex items-center justify-center">
                                 <ShoppingBag size={16} className="text-purple-600" />
                             </div>
                             <div>
-                                <p className="text-sm font-medium text-brand-dark">Product Slide</p>
-                                <p className="text-[10px] text-brand-dark/40">Showcase a product with auto-filled details</p>
+                                <p className="text-sm font-medium text-warm-cream">Product Slide</p>
+                                <p className="text-[10px] text-warm-cream/40">Showcase a product with auto-filled details</p>
                             </div>
                         </button>
                         <button
                             onClick={() => { setMediaPickerTarget("slide"); setMediaPickerOpen(true); setAddMenuOpen(false); }}
-                            className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-brand-purple/5 transition-colors cursor-pointer text-left border-t border-brand-lilac/5"
+                            className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-brand-green/5 transition-colors cursor-pointer text-left border-t border-warm-cream/5"
                         >
                             <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center">
                                 <ImageIcon size={16} className="text-blue-600" />
                             </div>
                             <div>
-                                <p className="text-sm font-medium text-brand-dark">Media Slide</p>
-                                <p className="text-[10px] text-brand-dark/40">Pick from gallery with optional text overlay</p>
+                                <p className="text-sm font-medium text-warm-cream">Media Slide</p>
+                                <p className="text-[10px] text-warm-cream/40">Pick from gallery with optional text overlay</p>
                             </div>
                         </button>
                         <button
                             onClick={addPromoSlide}
-                            className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-brand-purple/5 transition-colors cursor-pointer text-left border-t border-brand-lilac/5"
+                            className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-brand-green/5 transition-colors cursor-pointer text-left border-t border-warm-cream/5"
                         >
                             <div className="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center">
                                 <Megaphone size={16} className="text-amber-600" />
                             </div>
                             <div>
-                                <p className="text-sm font-medium text-brand-dark">Promo Slide</p>
-                                <p className="text-[10px] text-brand-dark/40">Custom headline, subtitle & CTA</p>
+                                <p className="text-sm font-medium text-warm-cream">Promo Slide</p>
+                                <p className="text-[10px] text-warm-cream/40">Custom headline, subtitle & CTA</p>
                             </div>
                         </button>
                     </div>
@@ -385,10 +385,10 @@ export default function FeaturedPage() {
 
             {/* Slide List */}
             {slides.length === 0 ? (
-                <div className="bg-white rounded-2xl border-2 border-dashed border-brand-lilac/20 p-16 text-center">
-                    <Sparkles size={40} className="mx-auto text-brand-dark/10 mb-4" />
-                    <h3 className="text-lg font-serif text-brand-dark/50 mb-2">No featured slides yet</h3>
-                    <p className="text-sm text-brand-dark/30 max-w-md mx-auto">
+                <div className="bg-white/[0.04] rounded-2xl border-2 border-dashed border-warm-cream/20 p-16 text-center">
+                    <Sparkles size={40} className="mx-auto text-warm-cream/10 mb-4" />
+                    <h3 className="text-lg font-serif text-warm-cream/50 mb-2">No featured slides yet</h3>
+                    <p className="text-sm text-warm-cream/30 max-w-md mx-auto">
                         Add product highlights, gallery media, or custom promos to create a stunning hero slideshow.
                     </p>
                 </div>
@@ -409,11 +409,11 @@ export default function FeaturedPage() {
                                 onDragOver={(e) => handleDragOver(e, idx)}
                                 onDrop={() => handleDrop(idx)}
                                 onDragEnd={() => { setDragIdx(null); setDragOverIdx(null); }}
-                                className={`bg-white rounded-xl border transition-all ${
+                                className={`bg-white/[0.04] rounded-xl border transition-all ${
                                     dragOverIdx === idx
-                                        ? "border-brand-purple/40 shadow-lg shadow-brand-purple/10"
+                                        ? "border-brand-green/40 shadow-lg shadow-brand-green/10"
                                         : slide.isActive
-                                            ? "border-brand-lilac/15 shadow-sm"
+                                            ? "border-warm-cream/15 shadow-sm"
                                             : "border-brand-dark/8 opacity-60"
                                 }`}
                             >
@@ -422,7 +422,7 @@ export default function FeaturedPage() {
                                     className="flex items-center gap-3 px-4 py-3 cursor-pointer"
                                     onClick={() => setExpandedSlide(isExpanded ? null : slide.id)}
                                 >
-                                    <div className="cursor-grab active:cursor-grabbing text-brand-dark/20 hover:text-brand-dark/40" onClick={(e) => e.stopPropagation()}>
+                                    <div className="cursor-grab active:cursor-grabbing text-warm-cream/20 hover:text-warm-cream/40" onClick={(e) => e.stopPropagation()}>
                                         <GripVertical size={16} />
                                     </div>
 
@@ -438,7 +438,7 @@ export default function FeaturedPage() {
                                             )
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center">
-                                                <ImageIcon size={16} className="text-brand-dark/20" />
+                                                <ImageIcon size={16} className="text-warm-cream/20" />
                                             </div>
                                         )}
                                     </div>
@@ -447,12 +447,12 @@ export default function FeaturedPage() {
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2">
                                             <span className={`text-[9px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full ${typeColor}`}>{typeLabel}</span>
-                                            <p className="text-sm font-medium text-brand-dark truncate">
+                                            <p className="text-sm font-medium text-warm-cream truncate">
                                                 {slide.headline || (product ? product.name : "Untitled")}
                                             </p>
                                         </div>
                                         {slide.subtitle && (
-                                            <p className="text-xs text-brand-dark/40 truncate mt-0.5">{slide.subtitle}</p>
+                                            <p className="text-xs text-warm-cream/40 truncate mt-0.5">{slide.subtitle}</p>
                                         )}
                                     </div>
 
@@ -461,49 +461,49 @@ export default function FeaturedPage() {
                                         <button
                                             onClick={() => moveSlide(idx, -1)}
                                             disabled={idx === 0}
-                                            className="p-1.5 rounded-lg hover:bg-brand-lilac/10 text-brand-dark/30 hover:text-brand-dark/60 transition-colors cursor-pointer disabled:opacity-20"
+                                            className="p-1.5 rounded-lg hover:bg-warm-cream/10 text-warm-cream/30 hover:text-warm-cream/60 transition-colors cursor-pointer disabled:opacity-20"
                                         >
                                             <ChevronUp size={14} />
                                         </button>
                                         <button
                                             onClick={() => moveSlide(idx, 1)}
                                             disabled={idx === slides.length - 1}
-                                            className="p-1.5 rounded-lg hover:bg-brand-lilac/10 text-brand-dark/30 hover:text-brand-dark/60 transition-colors cursor-pointer disabled:opacity-20"
+                                            className="p-1.5 rounded-lg hover:bg-warm-cream/10 text-warm-cream/30 hover:text-warm-cream/60 transition-colors cursor-pointer disabled:opacity-20"
                                         >
                                             <ChevronDown size={14} />
                                         </button>
                                         <button
                                             onClick={() => updateSlide(slide.id, { isActive: !slide.isActive })}
-                                            className={`p-1.5 rounded-lg transition-colors cursor-pointer ${slide.isActive ? "hover:bg-amber-50 text-emerald-500 hover:text-amber-500" : "hover:bg-emerald-50 text-brand-dark/20 hover:text-emerald-500"}`}
+                                            className={`p-1.5 rounded-lg transition-colors cursor-pointer ${slide.isActive ? "hover:bg-amber-50 text-emerald-500 hover:text-amber-500" : "hover:bg-emerald-50 text-warm-cream/20 hover:text-emerald-500"}`}
                                             title={slide.isActive ? "Deactivate" : "Activate"}
                                         >
                                             {slide.isActive ? <Eye size={14} /> : <EyeOff size={14} />}
                                         </button>
                                         <button
                                             onClick={() => duplicateSlide(slide)}
-                                            className="p-1.5 rounded-lg hover:bg-brand-lilac/10 text-brand-dark/20 hover:text-brand-purple transition-colors cursor-pointer"
+                                            className="p-1.5 rounded-lg hover:bg-warm-cream/10 text-warm-cream/20 hover:text-brand-green transition-colors cursor-pointer"
                                             title="Duplicate"
                                         >
                                             <Layers size={14} />
                                         </button>
                                         <button
                                             onClick={() => removeSlide(slide.id)}
-                                            className="p-1.5 rounded-lg hover:bg-red-50 text-brand-dark/20 hover:text-red-500 transition-colors cursor-pointer"
+                                            className="p-1.5 rounded-lg hover:bg-red-50 text-warm-cream/20 hover:text-red-500 transition-colors cursor-pointer"
                                         >
                                             <Trash2 size={14} />
                                         </button>
                                     </div>
 
-                                    <ChevronDown size={16} className={`text-brand-dark/20 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
+                                    <ChevronDown size={16} className={`text-warm-cream/20 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
                                 </div>
 
                                 {/* Expanded Editor */}
                                 {isExpanded && (
-                                    <div className="px-4 pb-4 border-t border-brand-lilac/10 pt-4 space-y-4">
+                                    <div className="px-4 pb-4 border-t border-warm-cream/10 pt-4 space-y-4">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             {/* Left — image/media */}
                                             <div>
-                                                <label className="text-xs font-medium text-brand-dark/50 uppercase tracking-wider mb-2 block">
+                                                <label className="text-xs font-medium text-warm-cream/50 uppercase tracking-wider mb-2 block">
                                                     {slide.type === "product" ? "Product Image" : "Slide Media"}
                                                 </label>
                                                 <div className="aspect-video rounded-xl overflow-hidden bg-brand-dark/5 relative group">
@@ -515,7 +515,7 @@ export default function FeaturedPage() {
                                                         )
                                                     ) : (
                                                         <div className="w-full h-full flex items-center justify-center">
-                                                            <ImageIcon size={32} className="text-brand-dark/10" />
+                                                            <ImageIcon size={32} className="text-warm-cream/10" />
                                                         </div>
                                                     )}
                                                     {(slide.type === "media" || slide.type === "promo") && (
@@ -543,8 +543,8 @@ export default function FeaturedPage() {
                                                     <div className="mt-3 flex items-center gap-3 p-3 bg-purple-50/50 rounded-lg">
                                                         <Package size={14} className="text-purple-500" />
                                                         <div className="text-xs">
-                                                            <p className="font-medium text-brand-dark">{product.name}</p>
-                                                            <p className="text-brand-dark/40">{product.category} &middot; {formatCurrency(product.price)}</p>
+                                                            <p className="font-medium text-warm-cream">{product.name}</p>
+                                                            <p className="text-warm-cream/40">{product.category} &middot; {formatCurrency(product.price)}</p>
                                                         </div>
                                                     </div>
                                                 )}
@@ -553,7 +553,7 @@ export default function FeaturedPage() {
                                             {/* Right — text overlay settings */}
                                             <div className="space-y-3">
                                                 <div>
-                                                    <label className="text-xs font-medium text-brand-dark/50 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                                    <label className="text-xs font-medium text-warm-cream/50 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
                                                         <Type size={12} /> Headline
                                                     </label>
                                                     <input
@@ -561,22 +561,22 @@ export default function FeaturedPage() {
                                                         value={slide.headline || ""}
                                                         onChange={(e) => updateSlide(slide.id, { headline: e.target.value })}
                                                         placeholder="e.g. Premium Beef Selection"
-                                                        className="w-full px-3 py-2 rounded-lg border border-brand-dark/10 text-sm focus:outline-none focus:border-brand-purple/30 transition-colors"
+                                                        className="w-full px-3 py-2 rounded-lg border border-brand-dark/10 text-sm focus:outline-none focus:border-brand-green/30 transition-colors"
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="text-xs font-medium text-brand-dark/50 uppercase tracking-wider mb-1.5 block">Subtitle</label>
+                                                    <label className="text-xs font-medium text-warm-cream/50 uppercase tracking-wider mb-1.5 block">Subtitle</label>
                                                     <input
                                                         type="text"
                                                         value={slide.subtitle || ""}
                                                         onChange={(e) => updateSlide(slide.id, { subtitle: e.target.value })}
                                                         placeholder="e.g. Fresh, quality-assured cuts"
-                                                        className="w-full px-3 py-2 rounded-lg border border-brand-dark/10 text-sm focus:outline-none focus:border-brand-purple/30 transition-colors"
+                                                        className="w-full px-3 py-2 rounded-lg border border-brand-dark/10 text-sm focus:outline-none focus:border-brand-green/30 transition-colors"
                                                     />
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-3">
                                                     <div>
-                                                        <label className="text-xs font-medium text-brand-dark/50 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                                        <label className="text-xs font-medium text-warm-cream/50 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
                                                             <MousePointer size={12} /> CTA Text
                                                         </label>
                                                         <input
@@ -584,11 +584,11 @@ export default function FeaturedPage() {
                                                             value={slide.ctaText || ""}
                                                             onChange={(e) => updateSlide(slide.id, { ctaText: e.target.value })}
                                                             placeholder="Shop Now"
-                                                            className="w-full px-3 py-2 rounded-lg border border-brand-dark/10 text-sm focus:outline-none focus:border-brand-purple/30 transition-colors"
+                                                            className="w-full px-3 py-2 rounded-lg border border-brand-dark/10 text-sm focus:outline-none focus:border-brand-green/30 transition-colors"
                                                         />
                                                     </div>
                                                     <div>
-                                                        <label className="text-xs font-medium text-brand-dark/50 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                                        <label className="text-xs font-medium text-warm-cream/50 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
                                                             <Link2 size={12} /> CTA Link
                                                         </label>
                                                         <input
@@ -596,14 +596,14 @@ export default function FeaturedPage() {
                                                             value={slide.ctaLink || ""}
                                                             onChange={(e) => updateSlide(slide.id, { ctaLink: e.target.value })}
                                                             placeholder="/shop"
-                                                            className="w-full px-3 py-2 rounded-lg border border-brand-dark/10 text-sm focus:outline-none focus:border-brand-purple/30 transition-colors"
+                                                            className="w-full px-3 py-2 rounded-lg border border-brand-dark/10 text-sm focus:outline-none focus:border-brand-green/30 transition-colors"
                                                         />
                                                     </div>
                                                 </div>
 
                                                 {/* Overlay Position */}
                                                 <div>
-                                                    <label className="text-xs font-medium text-brand-dark/50 uppercase tracking-wider mb-2 block">Overlay Position</label>
+                                                    <label className="text-xs font-medium text-warm-cream/50 uppercase tracking-wider mb-2 block">Overlay Position</label>
                                                     <div className="grid grid-cols-4 gap-2">
                                                         {OVERLAY_POSITIONS.map((pos) => (
                                                             <button
@@ -611,8 +611,8 @@ export default function FeaturedPage() {
                                                                 onClick={() => updateSlide(slide.id, { overlayPosition: pos.value })}
                                                                 className={`py-1.5 px-2 rounded-lg text-[10px] font-medium border transition-all cursor-pointer ${
                                                                     slide.overlayPosition === pos.value
-                                                                        ? "border-brand-purple bg-brand-purple/5 text-brand-purple"
-                                                                        : "border-brand-dark/8 text-brand-dark/40 hover:border-brand-dark/20"
+                                                                        ? "border-brand-green bg-brand-green/5 text-brand-green"
+                                                                        : "border-brand-dark/8 text-warm-cream/40 hover:border-brand-dark/20"
                                                                 }`}
                                                             >
                                                                 {pos.label}
@@ -623,7 +623,7 @@ export default function FeaturedPage() {
 
                                                 {/* Overlay Style */}
                                                 <div>
-                                                    <label className="text-xs font-medium text-brand-dark/50 uppercase tracking-wider mb-2 block">Overlay Style</label>
+                                                    <label className="text-xs font-medium text-warm-cream/50 uppercase tracking-wider mb-2 block">Overlay Style</label>
                                                     <div className="grid grid-cols-3 gap-2">
                                                         {OVERLAY_STYLES.map((style) => (
                                                             <button
@@ -631,8 +631,8 @@ export default function FeaturedPage() {
                                                                 onClick={() => updateSlide(slide.id, { overlayStyle: style.value })}
                                                                 className={`py-2 px-3 rounded-lg text-[10px] font-medium border transition-all cursor-pointer ${
                                                                     slide.overlayStyle === style.value
-                                                                        ? "border-brand-purple bg-brand-purple/5 text-brand-purple"
-                                                                        : "border-brand-dark/8 text-brand-dark/40 hover:border-brand-dark/20"
+                                                                        ? "border-brand-green bg-brand-green/5 text-brand-green"
+                                                                        : "border-brand-dark/8 text-warm-cream/40 hover:border-brand-dark/20"
                                                                 }`}
                                                             >
                                                                 {style.label}
@@ -653,29 +653,29 @@ export default function FeaturedPage() {
             {/* Product Search Modal */}
             {productSearchOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] overflow-hidden flex flex-col">
-                        <div className="px-5 py-4 border-b border-brand-lilac/10 flex items-center justify-between">
-                            <h3 className="text-sm font-semibold text-brand-dark">Select Product</h3>
-                            <button onClick={() => { setProductSearchOpen(false); setProductSearch(""); }} className="p-1 hover:bg-brand-lilac/10 rounded-lg cursor-pointer">
-                                <X size={16} className="text-brand-dark/40" />
+                    <div className="bg-white/[0.04] rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] overflow-hidden flex flex-col">
+                        <div className="px-5 py-4 border-b border-warm-cream/10 flex items-center justify-between">
+                            <h3 className="text-sm font-semibold text-warm-cream">Select Product</h3>
+                            <button onClick={() => { setProductSearchOpen(false); setProductSearch(""); }} className="p-1 hover:bg-warm-cream/10 rounded-lg cursor-pointer">
+                                <X size={16} className="text-warm-cream/40" />
                             </button>
                         </div>
-                        <div className="px-5 py-3 border-b border-brand-lilac/5">
+                        <div className="px-5 py-3 border-b border-warm-cream/5">
                             <div className="relative">
-                                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-dark/30" />
+                                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-warm-cream/30" />
                                 <input
                                     type="text"
                                     autoFocus
                                     value={productSearch}
                                     onChange={(e) => setProductSearch(e.target.value)}
                                     placeholder="Search products..."
-                                    className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-brand-dark/10 text-sm focus:outline-none focus:border-brand-purple/30"
+                                    className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-brand-dark/10 text-sm focus:outline-none focus:border-brand-green/30"
                                 />
                             </div>
                         </div>
                         <div className="overflow-y-auto flex-1">
                             {filteredProducts.length === 0 ? (
-                                <p className="py-10 text-center text-sm text-brand-dark/30">No products found</p>
+                                <p className="py-10 text-center text-sm text-warm-cream/30">No products found</p>
                             ) : (
                                 filteredProducts.map((product) => {
                                     const alreadyAdded = slides.some((s) => s.productId === product.id);
@@ -684,23 +684,23 @@ export default function FeaturedPage() {
                                             key={product.id}
                                             onClick={() => !alreadyAdded && addProductSlide(product)}
                                             disabled={alreadyAdded}
-                                            className="w-full flex items-center gap-3 px-5 py-3 hover:bg-brand-purple/5 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed text-left border-b border-brand-lilac/5"
+                                            className="w-full flex items-center gap-3 px-5 py-3 hover:bg-brand-green/5 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed text-left border-b border-warm-cream/5"
                                         >
                                             <div className="w-10 h-10 rounded-lg overflow-hidden bg-brand-dark/5 flex-shrink-0">
                                                 {product.images[0] ? (
                                                     <Image src={product.images[0]} alt="" width={40} height={40} className="w-full h-full object-cover" />
                                                 ) : (
                                                     <div className="w-full h-full flex items-center justify-center">
-                                                        <Package size={14} className="text-brand-dark/15" />
+                                                        <Package size={14} className="text-warm-cream/15" />
                                                     </div>
                                                 )}
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <p className="text-sm font-medium text-brand-dark truncate">{product.name}</p>
-                                                <p className="text-xs text-brand-dark/40">{product.category} &middot; {formatCurrency(product.price)}</p>
+                                                <p className="text-sm font-medium text-warm-cream truncate">{product.name}</p>
+                                                <p className="text-xs text-warm-cream/40">{product.category} &middot; {formatCurrency(product.price)}</p>
                                             </div>
                                             {alreadyAdded && (
-                                                <span className="text-[10px] text-brand-purple font-medium">Added</span>
+                                                <span className="text-[10px] text-brand-green font-medium">Added</span>
                                             )}
                                         </button>
                                     );
@@ -760,7 +760,7 @@ function OverlayPreview({ slide }: { slide: FeaturedSlide }) {
 
     const styleClass = {
         dark: "bg-black/60 text-white",
-        light: "bg-white/80 text-brand-dark",
+        light: "bg-white/80 text-warm-cream",
         gradient: "bg-gradient-to-t from-black/70 via-black/30 to-transparent text-white",
     }[slide.overlayStyle || "dark"];
 
@@ -874,7 +874,7 @@ function SlidePreviewModal({
                         <button
                             key={i}
                             onClick={() => onIndexChange(i)}
-                            className={`w-2 h-2 rounded-full transition-all cursor-pointer ${i === index ? "bg-white w-6" : "bg-white/30 hover:bg-white/50"}`}
+                            className={`w-2 h-2 rounded-full transition-all cursor-pointer ${i === index ? "bg-white/[0.04] w-6" : "bg-white/30 hover:bg-white/50"}`}
                         />
                     ))}
                     <span className="text-[10px] text-white/50 ml-2">{index + 1}/{slides.length}</span>

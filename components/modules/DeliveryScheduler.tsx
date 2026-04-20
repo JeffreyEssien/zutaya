@@ -75,8 +75,8 @@ export default function DeliveryScheduler({ onSelect, selectedDate, selectedSlot
             {/* Date Picker */}
             <div>
                 <div className="flex items-center gap-2 mb-3">
-                    <Calendar size={16} className="text-brand-red" />
-                    <h4 className="text-sm font-semibold text-brand-dark">Delivery Date</h4>
+                    <Calendar size={16} className="text-brand-green" />
+                    <h4 className="text-sm font-semibold text-warm-cream">Delivery Date</h4>
                 </div>
                 <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
                     {dates.map((d) => (
@@ -86,8 +86,8 @@ export default function DeliveryScheduler({ onSelect, selectedDate, selectedSlot
                             onClick={() => setPickedDate(d.date)}
                             className={`flex flex-col items-center py-3 px-2 rounded-xl border text-center transition-all cursor-pointer ${
                                 pickedDate === d.date
-                                    ? "border-brand-red bg-brand-red/5 text-brand-dark"
-                                    : "border-warm-tan/15 hover:border-warm-tan/40 text-muted-brown"
+                                    ? "border-brand-green bg-brand-green/5 text-warm-cream"
+                                    : "border-warm-cream/10 hover:border-warm-cream/20 text-warm-cream/40"
                             }`}
                         >
                             <span className="text-[10px] uppercase tracking-wider font-medium">{d.dayName}</span>
@@ -101,8 +101,8 @@ export default function DeliveryScheduler({ onSelect, selectedDate, selectedSlot
             {pickedDate && (
                 <div>
                     <div className="flex items-center gap-2 mb-3">
-                        <Clock size={16} className="text-brand-red" />
-                        <h4 className="text-sm font-semibold text-brand-dark">Delivery Slot</h4>
+                        <Clock size={16} className="text-brand-green" />
+                        <h4 className="text-sm font-semibold text-warm-cream">Delivery Slot</h4>
                     </div>
 
                     {loadingSlots ? (
@@ -125,16 +125,16 @@ export default function DeliveryScheduler({ onSelect, selectedDate, selectedSlot
                                         disabled={!isAvailable}
                                         className={`flex flex-col items-center py-4 px-3 rounded-xl border text-center transition-all ${
                                             !isAvailable
-                                                ? "border-brand-dark/5 bg-brand-dark/[0.02] text-brand-dark/20 cursor-not-allowed"
+                                                ? "border-warm-cream/[0.04] bg-warm-cream/[0.02] text-warm-cream/20 cursor-not-allowed"
                                                 : isSelected
-                                                  ? "border-brand-red bg-brand-red/5 text-brand-dark cursor-pointer"
-                                                  : "border-warm-tan/15 hover:border-warm-tan/40 text-muted-brown cursor-pointer"
+                                                  ? "border-brand-green bg-brand-green/5 text-warm-cream cursor-pointer"
+                                                  : "border-warm-cream/10 hover:border-warm-cream/20 text-warm-cream/40 cursor-pointer"
                                         }`}
                                     >
                                         <span className="text-sm font-semibold">{SLOT_LABELS[slot].label}</span>
                                         <span className="text-[11px] mt-1 opacity-70">{SLOT_LABELS[slot].time}</span>
                                         {!isAvailable && (
-                                            <span className="text-[10px] mt-1 text-brand-red/50 font-medium">Full</span>
+                                            <span className="text-[10px] mt-1 text-brand-green/50 font-medium">Full</span>
                                         )}
                                     </button>
                                 );

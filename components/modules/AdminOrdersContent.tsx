@@ -125,14 +125,14 @@ export default function AdminOrdersContent({ initialOrders }: AdminOrdersContent
     return (
         <div>
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
-                <h1 className="font-serif text-2xl sm:text-3xl text-brand-dark">Orders</h1>
+                <h1 className="font-serif text-2xl sm:text-3xl text-warm-cream">Orders</h1>
                 <div className="flex items-center gap-3 w-full sm:w-auto">
                     <input
                         type="text"
                         placeholder="Search by ID, name, or email..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="px-4 py-2 border border-brand-lilac/30 rounded-sm focus:outline-none focus:border-brand-purple w-full sm:w-80"
+                        className="px-4 py-2 border border-warm-cream/30 rounded-sm focus:outline-none focus:border-brand-green w-full sm:w-80"
                     />
                     <Button onClick={() => setShowCreate(true)} className="shrink-0">
                         <span className="flex items-center gap-2">
@@ -187,26 +187,26 @@ function OrderCard({ order, onStatusChange, onSelect, isSelected }: {
     return (
         <div
             onClick={() => onSelect(order)}
-            className={`bg-white rounded-lg border p-4 cursor-pointer transition-colors ${isSelected ? "border-brand-purple ring-1 ring-brand-purple/20" : "border-brand-lilac/20 hover:border-brand-lilac/40"}`}
+            className={`bg-white/[0.04] rounded-lg border p-4 cursor-pointer transition-colors ${isSelected ? "border-brand-green ring-1 ring-brand-green/20" : "border-warm-cream/20 hover:border-warm-cream/40"}`}
         >
             <div className="flex items-start justify-between gap-3 mb-3">
                 <div className="min-w-0">
-                    <p className="text-sm font-medium text-brand-dark truncate">{order.customerName}</p>
-                    <p className="text-xs text-brand-dark/50 truncate">{order.email}</p>
+                    <p className="text-sm font-medium text-warm-cream truncate">{order.customerName}</p>
+                    <p className="text-xs text-warm-cream/50 truncate">{order.email}</p>
                 </div>
                 <Badge variant={statusVariant[order.status]}>{order.status}</Badge>
             </div>
             <div className="flex items-center justify-between text-xs">
-                <span className="font-mono text-brand-dark/40">{order.id}</span>
-                <span className="font-medium text-brand-dark">{formatCurrency(order.total)}</span>
+                <span className="font-mono text-warm-cream/40">{order.id}</span>
+                <span className="font-medium text-warm-cream">{formatCurrency(order.total)}</span>
             </div>
-            <div className="flex items-center justify-between mt-3 pt-3 border-t border-brand-lilac/10">
-                <span className="text-xs text-brand-dark/50">{new Date(order.createdAt).toLocaleDateString()}</span>
+            <div className="flex items-center justify-between mt-3 pt-3 border-t border-warm-cream/10">
+                <span className="text-xs text-warm-cream/50">{new Date(order.createdAt).toLocaleDateString()}</span>
                 <div onClick={(e) => e.stopPropagation()}>
                     <select
                         value={order.status}
                         onChange={(e) => onStatusChange(order.id, e.target.value as Order["status"])}
-                        className="text-xs border border-brand-lilac/20 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brand-purple/30 bg-white"
+                        className="text-xs border border-warm-cream/20 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brand-green/30 bg-[#1e1e1e]"
                     >
                         {getAllowedStatuses(order.status).map((s) => (
                             <option key={s} value={s}>{s}</option>
@@ -224,43 +224,43 @@ function OrderTable({ orders, onStatusChange, onSelect, selectedId }: {
     onSelect: (o: Order) => void; selectedId?: string;
 }) {
     return (
-        <div className="bg-white rounded-lg border border-brand-lilac/20 overflow-hidden">
+        <div className="bg-white/[0.04] rounded-lg border border-warm-cream/20 overflow-hidden">
             <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                     <thead>
-                        <tr className="border-b border-brand-lilac/20 bg-brand-lilac/5">
-                            <th className="text-left px-4 py-3 font-medium text-brand-dark/60">Order</th>
-                            <th className="text-left px-4 py-3 font-medium text-brand-dark/60">Customer</th>
-                            <th className="text-left px-4 py-3 font-medium text-brand-dark/60">Total</th>
-                            <th className="text-left px-4 py-3 font-medium text-brand-dark/60">Status</th>
-                            <th className="text-left px-4 py-3 font-medium text-brand-dark/60">Date</th>
-                            <th className="text-right px-4 py-3 font-medium text-brand-dark/60">Action</th>
+                        <tr className="border-b border-warm-cream/20 bg-warm-cream/5">
+                            <th className="text-left px-4 py-3 font-medium text-warm-cream/60">Order</th>
+                            <th className="text-left px-4 py-3 font-medium text-warm-cream/60">Customer</th>
+                            <th className="text-left px-4 py-3 font-medium text-warm-cream/60">Total</th>
+                            <th className="text-left px-4 py-3 font-medium text-warm-cream/60">Status</th>
+                            <th className="text-left px-4 py-3 font-medium text-warm-cream/60">Date</th>
+                            <th className="text-right px-4 py-3 font-medium text-warm-cream/60">Action</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-brand-lilac/10">
+                    <tbody className="divide-y divide-warm-cream/10">
                         {orders.map((o) => (
                             <tr
                                 key={o.id}
                                 onClick={() => onSelect(o)}
-                                className={`cursor-pointer transition-colors hover:bg-brand-lilac/5 ${selectedId === o.id ? "bg-brand-purple/5" : ""}`}
+                                className={`cursor-pointer transition-colors hover:bg-warm-cream/5 ${selectedId === o.id ? "bg-brand-green/5" : ""}`}
                             >
-                                <td className="px-4 py-3 font-mono text-xs text-brand-dark">{o.id}</td>
+                                <td className="px-4 py-3 font-mono text-xs text-warm-cream">{o.id}</td>
                                 <td className="px-4 py-3">
-                                    <p className="text-brand-dark font-medium">{o.customerName}</p>
-                                    <p className="text-brand-dark/50 text-xs">{o.email}</p>
+                                    <p className="text-warm-cream font-medium">{o.customerName}</p>
+                                    <p className="text-warm-cream/50 text-xs">{o.email}</p>
                                 </td>
-                                <td className="px-4 py-3 text-brand-dark/70">{formatCurrency(o.total)}</td>
+                                <td className="px-4 py-3 text-warm-cream/70">{formatCurrency(o.total)}</td>
                                 <td className="px-4 py-3">
                                     <Badge variant={statusVariant[o.status]}>{o.status}</Badge>
                                 </td>
-                                <td className="px-4 py-3 text-brand-dark/50 text-xs">
+                                <td className="px-4 py-3 text-warm-cream/50 text-xs">
                                     {new Date(o.createdAt).toLocaleDateString()}
                                 </td>
                                 <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
                                     <select
                                         value={o.status}
                                         onChange={(e) => onStatusChange(o.id, e.target.value as Order["status"])}
-                                        className="text-xs border border-brand-lilac/20 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brand-purple/30"
+                                        className="text-xs border border-warm-cream/20 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brand-green/30"
                                     >
                                         {getAllowedStatuses(o.status).map((s) => (
                                             <option key={s} value={s}>{s}</option>

@@ -16,7 +16,7 @@ export default function CategoryTile({ category }: CategoryTileProps) {
             <motion.div
                 whileHover="hover"
                 initial="initial"
-                className="relative aspect-[3/4] sm:aspect-square overflow-hidden rounded-2xl transition-shadow duration-500 hover:shadow-2xl hover:shadow-brand-purple/10"
+                className="relative aspect-[3/4] sm:aspect-square overflow-hidden rounded-2xl transition-shadow duration-500 hover:shadow-2xl hover:shadow-brand-green/10"
             >
                 {/* Parallax image */}
                 <motion.div

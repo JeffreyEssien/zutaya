@@ -9,9 +9,9 @@ export default function HomeCta({ customTexts }: { customTexts?: Record<string, 
     return (
         <section className="py-20 md:py-28 px-6">
             <div className="max-w-[1400px] mx-auto">
-                <div className="relative bg-deep-espresso rounded-3xl overflow-hidden px-8 md:px-16 py-16 md:py-20">
+                <div className="relative bg-brand-green/20 border border-brand-green/20 rounded-3xl overflow-hidden px-8 md:px-16 py-16 md:py-20">
                     {/* Decorative elements */}
-                    <div className="absolute top-0 right-0 w-80 h-80 bg-brand-red/10 rounded-full blur-[100px] pointer-events-none" />
+                    <div className="absolute top-0 right-0 w-80 h-80 bg-brand-green/15 rounded-full blur-[100px] pointer-events-none" />
                     <div className="absolute bottom-0 left-0 w-60 h-60 bg-warm-tan/8 rounded-full blur-[80px] pointer-events-none" />
 
                     <div className="relative z-10 flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
@@ -22,7 +22,7 @@ export default function HomeCta({ customTexts }: { customTexts?: Record<string, 
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.6 }}
                             >
-                                <p className="text-[11px] uppercase tracking-[0.3em] text-brand-red mb-4 font-medium">{getText(customTexts, "cta.eyebrow")}</p>
+                                <p className="text-[11px] uppercase tracking-[0.3em] text-brand-green mb-4 font-medium">{getText(customTexts, "cta.eyebrow")}</p>
                                 <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl text-warm-cream leading-tight mb-4">
                                     {getText(customTexts, "cta.heading")}
                                 </h2>

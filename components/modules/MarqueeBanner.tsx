@@ -2,11 +2,11 @@
 
 interface MarqueeBannerProps {
     text?: string;
-    variant?: "dark" | "red";
+    variant?: "dark" | "red" | "green";
 }
 
-export default function MarqueeBanner({ text = "FRESH MEAT", variant = "dark" }: MarqueeBannerProps) {
-    const bg = variant === "red" ? "bg-brand-red" : "bg-deep-espresso";
+export default function MarqueeBanner({ text = "FRESH MEAT", variant = "green" }: MarqueeBannerProps) {
+    const bg = variant === "red" ? "bg-brand-red" : variant === "green" ? "bg-brand-green" : "bg-deep-espresso";
     const textColor = "text-warm-cream";
 
     return (

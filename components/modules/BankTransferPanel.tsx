@@ -68,12 +68,12 @@ export default function BankTransferPanel({ orderId, totalAmount, onPaymentConfi
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ delay: 0.2, type: "spring", stiffness: 200, damping: 15 }}
-                    className="w-16 h-16 rounded-full bg-brand-purple/10 flex items-center justify-center mx-auto mb-4"
+                    className="w-16 h-16 rounded-full bg-brand-green/10 flex items-center justify-center mx-auto mb-4"
                 >
-                    <Building2 size={28} className="text-brand-purple" />
+                    <Building2 size={28} className="text-brand-green" />
                 </motion.div>
-                <h2 className="font-serif text-2xl text-brand-dark mb-2">Complete Your Payment</h2>
-                <p className="text-brand-dark/50 text-sm">
+                <h2 className="font-serif text-2xl text-warm-cream mb-2">Complete Your Payment</h2>
+                <p className="text-warm-cream/50 text-sm">
                     Transfer the exact amount below to complete your order.
                 </p>
             </div>
@@ -95,12 +95,12 @@ export default function BankTransferPanel({ orderId, totalAmount, onPaymentConfi
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="bg-white border border-brand-lilac/15 rounded-2xl overflow-hidden mb-6"
+                className="bg-[#222] border border-warm-cream/15 rounded-2xl overflow-hidden mb-6"
             >
-                <div className="px-6 py-4 border-b border-brand-lilac/10 bg-brand-lilac/[0.03]">
+                <div className="px-6 py-4 border-b border-warm-cream/10 bg-brand-black/[0.03]">
                     <div className="flex items-center gap-2">
-                        <CreditCard size={14} className="text-brand-purple" />
-                        <h3 className="text-sm font-semibold text-brand-dark">Bank Account Details</h3>
+                        <CreditCard size={14} className="text-brand-green" />
+                        <h3 className="text-sm font-semibold text-warm-cream">Bank Account Details</h3>
                     </div>
                 </div>
                 <div className="px-6 py-5 space-y-4">
@@ -131,13 +131,13 @@ export default function BankTransferPanel({ orderId, totalAmount, onPaymentConfi
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className="bg-white border border-brand-lilac/15 rounded-2xl p-6 mb-6"
+                className="bg-[#222] border border-warm-cream/15 rounded-2xl p-6 mb-6"
             >
                 <div className="flex items-center gap-2 mb-4">
-                    <User size={14} className="text-brand-purple" />
-                    <h3 className="text-sm font-semibold text-brand-dark">Payment Confirmation</h3>
+                    <User size={14} className="text-brand-green" />
+                    <h3 className="text-sm font-semibold text-warm-cream">Payment Confirmation</h3>
                 </div>
-                <label className="block text-xs text-brand-dark/50 mb-2">
+                <label className="block text-xs text-warm-cream/50 mb-2">
                     Name on the account you sent payment from
                 </label>
                 <input
@@ -145,9 +145,9 @@ export default function BankTransferPanel({ orderId, totalAmount, onPaymentConfi
                     value={senderName}
                     onChange={(e) => setSenderName(e.target.value)}
                     placeholder="e.g. John Doe"
-                    className="w-full border border-brand-lilac/20 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple/40 transition-all"
+                    className="w-full border border-warm-cream/20 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green/40 transition-all"
                 />
-                <p className="text-[10px] text-brand-dark/30 mt-2">
+                <p className="text-[10px] text-warm-cream/30 mt-2">
                     This helps the admin verify your payment faster.
                 </p>
             </motion.div>
@@ -168,7 +168,7 @@ export default function BankTransferPanel({ orderId, totalAmount, onPaymentConfi
                         I&apos;ve Made Payment <ArrowRight size={16} />
                     </span>
                 </Button>
-                <p className="text-center text-[10px] text-brand-dark/30 mt-3">
+                <p className="text-center text-[10px] text-warm-cream/30 mt-3">
                     After confirming, the admin will verify your payment and approve your order.
                 </p>
             </motion.div>
@@ -182,21 +182,21 @@ function DetailRow({ label, value, onCopy, isCopied, mono }: {
     return (
         <div className="flex items-center justify-between">
             <div>
-                <p className="text-[10px] text-brand-dark/40 uppercase tracking-wider">{label}</p>
-                <p className={`text-sm text-brand-dark font-medium mt-0.5 ${mono ? "font-mono tracking-wider" : ""}`}>
+                <p className="text-[10px] text-warm-cream/40 uppercase tracking-wider">{label}</p>
+                <p className={`text-sm text-warm-cream font-medium mt-0.5 ${mono ? "font-mono tracking-wider" : ""}`}>
                     {value}
                 </p>
             </div>
             <button
                 type="button"
                 onClick={onCopy}
-                className="p-2 hover:bg-brand-lilac/10 rounded-lg transition-colors cursor-pointer"
+                className="p-2 hover:bg-warm-cream/5 rounded-lg transition-colors cursor-pointer"
                 title={`Copy ${label}`}
             >
                 {isCopied ? (
                     <Check size={14} className="text-emerald-500" />
                 ) : (
-                    <Copy size={14} className="text-brand-dark/30" />
+                    <Copy size={14} className="text-warm-cream/30" />
                 )}
             </button>
         </div>

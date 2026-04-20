@@ -150,19 +150,19 @@ export default function MediaPicker({
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden">
+      <div className="relative bg-white/[0.04] rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-brand-dark/8">
-          <h2 className="font-serif text-lg text-brand-dark">{title}</h2>
+          <h2 className="font-serif text-lg text-warm-cream">{title}</h2>
           <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-brand-dark/5 transition-colors cursor-pointer">
-            <X size={18} className="text-brand-dark/40" />
+            <X size={18} className="text-warm-cream/40" />
           </button>
         </div>
 
         {/* Toolbar */}
         <div className="flex items-center gap-3 px-6 py-3 border-b border-brand-dark/5">
           <div className="relative flex-1">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-dark/30" />
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-warm-cream/30" />
             <input
               type="text"
               placeholder="Search..."
@@ -194,12 +194,12 @@ export default function MediaPicker({
         <div className="flex-1 overflow-y-auto p-4">
           {loading ? (
             <div className="flex items-center justify-center py-16">
-              <Loader2 size={24} className="animate-spin text-brand-dark/30" />
+              <Loader2 size={24} className="animate-spin text-warm-cream/30" />
             </div>
           ) : filtered.length === 0 ? (
             <div className="text-center py-16">
-              <ImageIcon size={40} className="mx-auto mb-3 text-brand-dark/15" />
-              <p className="text-sm text-brand-dark/40">
+              <ImageIcon size={40} className="mx-auto mb-3 text-warm-cream/15" />
+              <p className="text-sm text-warm-cream/40">
                 {media.length === 0 ? "No media uploaded yet" : "No results"}
               </p>
             </div>
@@ -259,7 +259,7 @@ export default function MediaPicker({
 
         {/* Footer */}
         <div className="flex items-center justify-between px-6 py-3 border-t border-brand-dark/8 bg-brand-dark/[0.02]">
-          <p className="text-xs text-brand-dark/40">
+          <p className="text-xs text-warm-cream/40">
             {selected.size} selected
           </p>
           <div className="flex items-center gap-2">

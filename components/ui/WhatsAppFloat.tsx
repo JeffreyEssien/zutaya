@@ -47,16 +47,16 @@ export default function WhatsAppFloat() {
                         animate={{ opacity: 1, x: 0, scale: 1 }}
                         exit={{ opacity: 0, x: 10, scale: 0.9 }}
                         transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                        className="bg-white rounded-2xl shadow-xl border border-brand-lilac/15 p-4 max-w-[220px] relative"
+                        className="bg-[#222] rounded-2xl shadow-xl border border-warm-cream/15 p-4 max-w-[220px] relative"
                     >
                         <button
                             onClick={() => setShowTooltip(false)}
-                            className="absolute top-2 right-2 text-brand-dark/20 hover:text-brand-dark/50 transition-colors cursor-pointer"
+                            className="absolute top-2 right-2 text-warm-cream/20 hover:text-warm-cream/50 transition-colors cursor-pointer"
                         >
                             <X size={12} />
                         </button>
-                        <p className="text-xs text-brand-dark/70 leading-relaxed">
-                            👋 <span className="font-semibold text-brand-dark">Need help?</span>
+                        <p className="text-xs text-warm-cream/70 leading-relaxed">
+                            👋 <span className="font-semibold text-warm-cream">Need help?</span>
                             <br />Chat with us on WhatsApp!
                         </p>
                     </motion.div>

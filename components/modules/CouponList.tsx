@@ -36,7 +36,7 @@ export default function CouponList({ initialCoupons }: { initialCoupons: Coupon[
     };
 
     if (initialCoupons.length === 0) {
-        return <div className="p-8 text-center text-brand-dark/40 text-sm">No coupons found. Create one above.</div>;
+        return <div className="p-8 text-center text-warm-cream/40 text-sm">No coupons found. Create one above.</div>;
     }
 
     return (
@@ -45,19 +45,19 @@ export default function CouponList({ initialCoupons }: { initialCoupons: Coupon[
             <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-sm">
                     <thead>
-                        <tr className="border-b border-brand-lilac/20 bg-brand-lilac/5">
-                            <th className="text-left px-4 py-3 font-medium text-brand-dark/60">Code</th>
-                            <th className="text-left px-4 py-3 font-medium text-brand-dark/60">Discount</th>
-                            <th className="text-left px-4 py-3 font-medium text-brand-dark/60">Status</th>
-                            <th className="text-left px-4 py-3 font-medium text-brand-dark/60">Usage</th>
-                            <th className="text-right px-4 py-3 font-medium text-brand-dark/60">Actions</th>
+                        <tr className="border-b border-warm-cream/20 bg-warm-cream/5">
+                            <th className="text-left px-4 py-3 font-medium text-warm-cream/60">Code</th>
+                            <th className="text-left px-4 py-3 font-medium text-warm-cream/60">Discount</th>
+                            <th className="text-left px-4 py-3 font-medium text-warm-cream/60">Status</th>
+                            <th className="text-left px-4 py-3 font-medium text-warm-cream/60">Usage</th>
+                            <th className="text-right px-4 py-3 font-medium text-warm-cream/60">Actions</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-brand-lilac/10">
+                    <tbody className="divide-y divide-warm-cream/10">
                         {initialCoupons.map((c) => (
-                            <tr key={c.id} className="hover:bg-brand-lilac/5 transition-colors">
-                                <td className="px-4 py-3 font-mono font-medium text-brand-dark">{c.code}</td>
-                                <td className="px-4 py-3 text-brand-dark">{c.discountPercent}%</td>
+                            <tr key={c.id} className="hover:bg-warm-cream/5 transition-colors">
+                                <td className="px-4 py-3 font-mono font-medium text-warm-cream">{c.code}</td>
+                                <td className="px-4 py-3 text-warm-cream">{c.discountPercent}%</td>
                                 <td className="px-4 py-3">
                                     <button
                                         onClick={() => handleToggle(c.id, c.isActive)}
@@ -69,7 +69,7 @@ export default function CouponList({ initialCoupons }: { initialCoupons: Coupon[
                                         </Badge>
                                     </button>
                                 </td>
-                                <td className="px-4 py-3 text-brand-dark/60">{c.usageCount}</td>
+                                <td className="px-4 py-3 text-warm-cream/60">{c.usageCount}</td>
                                 <td className="px-4 py-3 text-right">
                                     <button
                                         onClick={() => handleDelete(c.id)}
@@ -87,9 +87,9 @@ export default function CouponList({ initialCoupons }: { initialCoupons: Coupon[
             {/* Mobile Cards */}
             <div className="md:hidden flex flex-col gap-3">
                 {initialCoupons.map((c) => (
-                    <div key={c.id} className="bg-white rounded-xl border border-brand-lilac/20 p-4 shadow-sm flex flex-col gap-3">
-                        <div className="flex justify-between items-center pb-3 border-b border-brand-lilac/10">
-                            <span className="font-mono font-medium text-brand-dark text-lg px-2 py-1 bg-brand-lilac/10 rounded-md border border-brand-lilac/20">
+                    <div key={c.id} className="bg-white/[0.04] rounded-xl border border-warm-cream/20 p-4 shadow-sm flex flex-col gap-3">
+                        <div className="flex justify-between items-center pb-3 border-b border-warm-cream/10">
+                            <span className="font-mono font-medium text-warm-cream text-lg px-2 py-1 bg-warm-cream/10 rounded-md border border-warm-cream/20">
                                 {c.code}
                             </span>
                             <button
@@ -104,12 +104,12 @@ export default function CouponList({ initialCoupons }: { initialCoupons: Coupon[
                         </div>
                         <div className="flex justify-between items-center text-sm">
                             <div className="flex flex-col">
-                                <span className="text-[10px] uppercase text-brand-dark/40">Discount</span>
-                                <span className="font-medium text-brand-dark text-base">{c.discountPercent}% off</span>
+                                <span className="text-[10px] uppercase text-warm-cream/40">Discount</span>
+                                <span className="font-medium text-warm-cream text-base">{c.discountPercent}% off</span>
                             </div>
                             <div className="flex flex-col items-center">
-                                <span className="text-[10px] uppercase text-brand-dark/40">Usages</span>
-                                <span className="font-medium text-brand-dark">{c.usageCount}</span>
+                                <span className="text-[10px] uppercase text-warm-cream/40">Usages</span>
+                                <span className="font-medium text-warm-cream">{c.usageCount}</span>
                             </div>
                             <button
                                 onClick={() => handleDelete(c.id)}

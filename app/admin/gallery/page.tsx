@@ -243,8 +243,8 @@ export default function GalleryPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-serif text-2xl text-brand-dark">Media Gallery</h1>
-          <p className="text-sm text-brand-dark/50 mt-1">
+          <h1 className="font-serif text-2xl text-warm-cream">Media Gallery</h1>
+          <p className="text-sm text-warm-cream/50 mt-1">
             {media.length} file{media.length !== 1 ? "s" : ""} uploaded
           </p>
         </div>
@@ -280,16 +280,16 @@ export default function GalleryPage() {
       </div>
 
       {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-white rounded-xl border border-brand-dark/8 p-3">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-white/[0.04] rounded-xl border border-warm-cream/8 p-3">
         {/* Search */}
         <div className="relative flex-1 w-full">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-dark/30" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-warm-cream/30" />
           <input
             type="text"
             placeholder="Search files..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-sm bg-brand-dark/[0.03] border border-brand-dark/8 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-red/20 focus:border-brand-red/30"
+            className="w-full pl-9 pr-3 py-2 text-sm bg-brand-dark/[0.03] border border-warm-cream/8 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-red/20 focus:border-brand-red/30"
           />
         </div>
 
@@ -302,7 +302,7 @@ export default function GalleryPage() {
               className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors cursor-pointer capitalize ${
                 filter === f
                   ? "bg-brand-red text-white"
-                  : "bg-brand-dark/5 text-brand-dark/50 hover:bg-brand-dark/10"
+                  : "bg-brand-dark/5 text-warm-cream/50 hover:bg-brand-dark/10"
               }`}
             >
               {f === "all" ? "All" : f === "image" ? "Images" : "Videos"}
@@ -314,13 +314,13 @@ export default function GalleryPage() {
         <div className="flex items-center gap-0.5 bg-brand-dark/5 rounded-lg p-0.5">
           <button
             onClick={() => setView("grid")}
-            className={`p-1.5 rounded-md cursor-pointer transition-colors ${view === "grid" ? "bg-white shadow-sm text-brand-dark" : "text-brand-dark/40"}`}
+            className={`p-1.5 rounded-md cursor-pointer transition-colors ${view === "grid" ? "bg-white/[0.04] shadow-sm text-warm-cream" : "text-warm-cream/40"}`}
           >
             <Grid3X3 size={14} />
           </button>
           <button
             onClick={() => setView("list")}
-            className={`p-1.5 rounded-md cursor-pointer transition-colors ${view === "list" ? "bg-white shadow-sm text-brand-dark" : "text-brand-dark/40"}`}
+            className={`p-1.5 rounded-md cursor-pointer transition-colors ${view === "list" ? "bg-white/[0.04] shadow-sm text-warm-cream" : "text-warm-cream/40"}`}
           >
             <List size={14} />
           </button>
@@ -329,10 +329,10 @@ export default function GalleryPage() {
 
       {/* Upload progress */}
       {uploading && (
-        <div className="bg-white rounded-xl border border-brand-dark/8 p-4">
+        <div className="bg-white/[0.04] rounded-xl border border-warm-cream/8 p-4">
           <div className="flex items-center gap-3 mb-2">
             <Loader2 size={16} className="animate-spin text-brand-red" />
-            <span className="text-sm text-brand-dark/70">Uploading... {uploadProgress}%</span>
+            <span className="text-sm text-warm-cream/70">Uploading... {uploadProgress}%</span>
           </div>
           <div className="w-full h-1.5 bg-brand-dark/5 rounded-full overflow-hidden">
             <div
@@ -350,14 +350,14 @@ export default function GalleryPage() {
           onDragLeave={() => setDragOver(false)}
           onDrop={handleDrop}
           className={`border-2 border-dashed rounded-2xl p-12 text-center transition-colors ${
-            dragOver ? "border-brand-red/40 bg-brand-red/5" : "border-brand-dark/10 bg-brand-dark/[0.02]"
+            dragOver ? "border-brand-red/40 bg-brand-red/5" : "border-warm-cream/10 bg-brand-dark/[0.02]"
           }`}
         >
-          <Upload size={40} className="mx-auto mb-4 text-brand-dark/20" />
-          <p className="text-brand-dark/60 font-medium mb-1">
+          <Upload size={40} className="mx-auto mb-4 text-warm-cream/20" />
+          <p className="text-warm-cream/60 font-medium mb-1">
             Drop images or videos here
           </p>
-          <p className="text-xs text-brand-dark/40">
+          <p className="text-xs text-warm-cream/40">
             or click Upload to browse files
           </p>
         </div>
@@ -366,7 +366,7 @@ export default function GalleryPage() {
       {/* Loading */}
       {loading && (
         <div className="flex items-center justify-center py-20">
-          <Loader2 size={24} className="animate-spin text-brand-dark/30" />
+          <Loader2 size={24} className="animate-spin text-warm-cream/30" />
         </div>
       )}
 
@@ -381,13 +381,13 @@ export default function GalleryPage() {
           {filtered.map((item) => (
             <div
               key={item.id}
-              className={`group relative bg-white rounded-xl border overflow-hidden transition-all cursor-pointer hover:shadow-md ${
-                selected.has(item.id) ? "border-brand-red ring-2 ring-brand-red/20" : "border-brand-dark/8"
+              className={`group relative bg-white/[0.04] rounded-xl border overflow-hidden transition-all cursor-pointer hover:shadow-md ${
+                selected.has(item.id) ? "border-brand-red ring-2 ring-brand-red/20" : "border-warm-cream/8"
               }`}
               onClick={() => toggleSelect(item.id)}
             >
               {/* Thumbnail */}
-              <div className="relative aspect-square bg-neutral-50">
+              <div className="relative aspect-square bg-[#111]">
                 {item.type === "video" ? (
                   <img
                     src={videoThumb(item.url)}
@@ -415,21 +415,21 @@ export default function GalleryPage() {
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
                   <button
                     onClick={(e) => startRename(item, e)}
-                    className="p-2 bg-white rounded-full shadow-lg hover:scale-110 transition-transform cursor-pointer"
+                    className="p-2 bg-white/[0.04] rounded-full shadow-lg hover:scale-110 transition-transform cursor-pointer"
                     title="Rename"
                   >
                     <Pencil size={14} />
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); handleCopy(item.url, item.id); }}
-                    className="p-2 bg-white rounded-full shadow-lg hover:scale-110 transition-transform cursor-pointer"
+                    className="p-2 bg-white/[0.04] rounded-full shadow-lg hover:scale-110 transition-transform cursor-pointer"
                     title="Copy URL"
                   >
                     {copiedId === item.id ? <Check size={14} className="text-green-600" /> : <Copy size={14} />}
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); handleDelete([item.id]); }}
-                    className="p-2 bg-white rounded-full shadow-lg hover:scale-110 transition-transform cursor-pointer"
+                    className="p-2 bg-white/[0.04] rounded-full shadow-lg hover:scale-110 transition-transform cursor-pointer"
                     title="Delete"
                   >
                     <Trash2 size={14} className="text-red-500" />
@@ -466,19 +466,19 @@ export default function GalleryPage() {
                       if (e.key === "Escape") setRenamingId(null);
                     }}
                     onClick={(e) => e.stopPropagation()}
-                    className="w-full text-xs font-medium text-brand-dark bg-brand-dark/5 border border-brand-red/30 rounded px-1.5 py-1 focus:outline-none focus:ring-2 focus:ring-brand-red/20"
+                    className="w-full text-xs font-medium text-warm-cream bg-brand-dark/5 border border-brand-red/30 rounded px-1.5 py-1 focus:outline-none focus:ring-2 focus:ring-brand-red/20"
                     autoFocus
                   />
                 ) : (
                   <p
-                    className="text-xs font-medium text-brand-dark truncate"
+                    className="text-xs font-medium text-warm-cream truncate"
                     onDoubleClick={(e) => startRename(item, e)}
                     title="Double-click to rename"
                   >
                     {item.name}
                   </p>
                 )}
-                <p className="text-[10px] text-brand-dark/40 mt-0.5">
+                <p className="text-[10px] text-warm-cream/40 mt-0.5">
                   {item.sizeBytes ? formatBytes(item.sizeBytes) : ""}
                   {item.width && item.height ? ` · ${item.width}×${item.height}` : ""}
                 </p>
@@ -491,7 +491,7 @@ export default function GalleryPage() {
       {/* List View */}
       {!loading && filtered.length > 0 && view === "list" && (
         <div
-          className="bg-white rounded-xl border border-brand-dark/8 divide-y divide-brand-dark/5"
+          className="bg-white/[0.04] rounded-xl border border-warm-cream/8 divide-y divide-warm-cream/5"
           onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
           onDragLeave={() => setDragOver(false)}
           onDrop={handleDrop}
@@ -506,13 +506,13 @@ export default function GalleryPage() {
             >
               {/* Checkbox */}
               <div className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 ${
-                selected.has(item.id) ? "bg-brand-red border-brand-red" : "border-brand-dark/20"
+                selected.has(item.id) ? "bg-brand-red border-brand-red" : "border-warm-cream/20"
               }`}>
                 {selected.has(item.id) && <Check size={10} className="text-white" strokeWidth={3} />}
               </div>
 
               {/* Thumb */}
-              <div className="w-12 h-12 rounded-lg overflow-hidden bg-neutral-50 shrink-0 relative">
+              <div className="w-12 h-12 rounded-lg overflow-hidden bg-[#111] shrink-0 relative">
                 {item.type === "video" ? (
                   <>
                     <img src={videoThumb(item.url)} alt={item.name} className="absolute inset-0 w-full h-full object-cover" />
@@ -538,19 +538,19 @@ export default function GalleryPage() {
                       if (e.key === "Escape") setRenamingId(null);
                     }}
                     onClick={(e) => e.stopPropagation()}
-                    className="w-full text-sm font-medium text-brand-dark bg-brand-dark/5 border border-brand-red/30 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brand-red/20"
+                    className="w-full text-sm font-medium text-warm-cream bg-brand-dark/5 border border-brand-red/30 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brand-red/20"
                     autoFocus
                   />
                 ) : (
                   <p
-                    className="text-sm font-medium text-brand-dark truncate"
+                    className="text-sm font-medium text-warm-cream truncate"
                     onDoubleClick={(e) => startRename(item, e)}
                     title="Double-click to rename"
                   >
                     {item.name}
                   </p>
                 )}
-                <p className="text-xs text-brand-dark/40">
+                <p className="text-xs text-warm-cream/40">
                   {item.type} · {item.sizeBytes ? formatBytes(item.sizeBytes) : "unknown size"}
                   {item.width && item.height ? ` · ${item.width}×${item.height}` : ""}
                   {item.createdAt ? ` · ${timeAgo(item.createdAt)}` : ""}
@@ -561,21 +561,21 @@ export default function GalleryPage() {
               <div className="flex items-center gap-1 shrink-0">
                 <button
                   onClick={(e) => startRename(item, e)}
-                  className="p-2 rounded-lg hover:bg-brand-dark/5 text-brand-dark/40 hover:text-brand-dark transition-colors cursor-pointer"
+                  className="p-2 rounded-lg hover:bg-brand-dark/5 text-warm-cream/40 hover:text-warm-cream transition-colors cursor-pointer"
                   title="Rename"
                 >
                   <Pencil size={14} />
                 </button>
                 <button
                   onClick={(e) => { e.stopPropagation(); handleCopy(item.url, item.id); }}
-                  className="p-2 rounded-lg hover:bg-brand-dark/5 text-brand-dark/40 hover:text-brand-dark transition-colors cursor-pointer"
+                  className="p-2 rounded-lg hover:bg-brand-dark/5 text-warm-cream/40 hover:text-warm-cream transition-colors cursor-pointer"
                   title="Copy URL"
                 >
                   {copiedId === item.id ? <Check size={14} className="text-green-600" /> : <Copy size={14} />}
                 </button>
                 <button
                   onClick={(e) => { e.stopPropagation(); handleDelete([item.id]); }}
-                  className="p-2 rounded-lg hover:bg-red-50 text-brand-dark/40 hover:text-red-500 transition-colors cursor-pointer"
+                  className="p-2 rounded-lg hover:bg-red-50 text-warm-cream/40 hover:text-red-500 transition-colors cursor-pointer"
                   title="Delete"
                 >
                   <Trash2 size={14} />
@@ -589,8 +589,8 @@ export default function GalleryPage() {
       {/* Empty state */}
       {!loading && filtered.length === 0 && media.length > 0 && (
         <div className="text-center py-12">
-          <Search size={32} className="mx-auto mb-3 text-brand-dark/15" />
-          <p className="text-sm text-brand-dark/40">No files match your search</p>
+          <Search size={32} className="mx-auto mb-3 text-warm-cream/15" />
+          <p className="text-sm text-warm-cream/40">No files match your search</p>
         </div>
       )}
     </div>

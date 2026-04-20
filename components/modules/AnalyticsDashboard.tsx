@@ -76,13 +76,13 @@ export default function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
             {/* Header + Velocity Badge */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
                 <div>
-                    <h1 className="text-3xl font-serif text-brand-dark">Analytics</h1>
+                    <h1 className="text-3xl font-serif text-warm-cream">Analytics</h1>
                     <div className="flex items-center gap-3 mt-2">
-                        <p className="text-brand-dark/50 text-sm">Comprehensive store insights</p>
+                        <p className="text-warm-cream/50 text-sm">Comprehensive store insights</p>
                         {data.revenueVelocity.trendPercent !== 0 && (
                             <span className={`inline-flex items-center gap-1 text-xs font-medium px-2.5 py-0.5 rounded-full ${data.revenueVelocity.trendPercent > 0
-                                ? "bg-emerald-100 text-emerald-700"
-                                : "bg-red-100 text-red-700"
+                                ? "bg-emerald-500/10 text-emerald-400"
+                                : "bg-red-500/10 text-red-400"
                                 }`}>
                                 {data.revenueVelocity.trendPercent > 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                                 {Math.abs(data.revenueVelocity.trendPercent).toFixed(1)}% vs 30d avg
@@ -90,20 +90,20 @@ export default function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
                         )}
                     </div>
                 </div>
-                <div className="flex space-x-1 bg-white/60 backdrop-blur-sm p-1 rounded-xl border border-brand-lilac/15 shadow-sm">
+                <div className="flex space-x-1 bg-white/[0.04] backdrop-blur-sm p-1 rounded-xl border border-warm-cream/[0.08] shadow-sm">
                     {tabs.map(tab => (
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             className={`relative px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 flex items-center gap-2 cursor-pointer ${activeTab === tab.id
-                                ? "text-brand-purple"
-                                : "text-brand-dark/50 hover:text-brand-dark"
+                                ? "text-brand-green"
+                                : "text-warm-cream/50 hover:text-warm-cream"
                                 }`}
                         >
                             {activeTab === tab.id && (
                                 <motion.div
                                     layoutId="activeTab"
-                                    className="absolute inset-0 bg-white rounded-lg shadow-md border border-brand-lilac/20"
+                                    className="absolute inset-0 bg-white/[0.08] rounded-lg shadow-md border border-warm-cream/10"
                                     transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
                                 />
                             )}
@@ -161,7 +161,7 @@ function SalesView({ data }: { data: AnalyticsData }) {
                         <Zap size={20} className={data.revenueVelocity.trendPercent >= 0 ? "text-emerald-600" : "text-red-600"} />
                     </div>
                     <div>
-                        <p className="text-xs text-brand-dark/50 font-medium">Momentum</p>
+                        <p className="text-xs text-warm-cream/50 font-medium">Momentum</p>
                         <p className={`text-xl font-bold font-serif ${data.revenueVelocity.trendPercent >= 0 ? "text-emerald-600" : "text-red-600"}`}>
                             {data.revenueVelocity.trendPercent >= 0 ? "+" : ""}{data.revenueVelocity.trendPercent.toFixed(1)}%
                         </p>
@@ -171,42 +171,42 @@ function SalesView({ data }: { data: AnalyticsData }) {
 
             <motion.div variants={fadeUp} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 glass-card p-6">
-                    <h3 className="text-lg font-medium text-brand-dark mb-6">Revenue Trend</h3>
+                    <h3 className="text-lg font-medium text-warm-cream mb-6">Revenue Trend</h3>
                     <div className="h-[300px]">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                             <LineChart data={data.sales.trend}>
                                 <defs>
                                     <linearGradient id="purpleGrad" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
-                                        <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                                        <stop offset="5%" stopColor="#355E3B" stopOpacity={0.3} />
+                                        <stop offset="95%" stopColor="#355E3B" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                                <XAxis dataKey="date" stroke="#888" fontSize={12} tickFormatter={d => new Date(d).toLocaleDateString(undefined, { weekday: 'short' })} />
-                                <YAxis stroke="#888" fontSize={12} tickFormatter={v => `₦${v / 1000}k`} />
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.06)" />
+                                <XAxis dataKey="date" stroke="rgba(255,255,255,0.25)" fontSize={12} tickFormatter={d => new Date(d).toLocaleDateString(undefined, { weekday: 'short' })} />
+                                <YAxis stroke="rgba(255,255,255,0.25)" fontSize={12} tickFormatter={v => `₦${v / 1000}k`} />
                                 <Tooltip formatter={(val) => formatCurrency(Number(val))} />
-                                <Line type="monotone" dataKey="value" stroke="#8b5cf6" strokeWidth={3} dot={{ r: 4, fill: "#8b5cf6" }} activeDot={{ r: 6 }} fill="url(#purpleGrad)" />
+                                <Line type="monotone" dataKey="value" stroke="#355E3B" strokeWidth={3} dot={{ r: 4, fill: "#355E3B" }} activeDot={{ r: 6 }} fill="url(#purpleGrad)" />
                             </LineChart>
                         </ResponsiveContainer>
                     </div>
                 </div>
                 <div className="glass-card p-6">
-                    <h3 className="text-lg font-medium text-brand-dark mb-6">Revenue by Status</h3>
+                    <h3 className="text-lg font-medium text-warm-cream mb-6">Revenue by Status</h3>
                     <div className="space-y-4">
                         {Object.entries(data.sales.revenueByStatus).map(([status, amount]) => {
                             const pct = data.sales.totalRevenue > 0 ? (amount / data.sales.totalRevenue) * 100 : 0;
                             return (
                                 <div key={status}>
                                     <div className="flex justify-between items-center mb-1">
-                                        <span className="capitalize text-sm text-gray-600">{status}</span>
+                                        <span className="capitalize text-sm text-warm-cream/50">{status}</span>
                                         <span className="font-medium text-sm">{formatCurrency(amount)}</span>
                                     </div>
-                                    <div className="h-2 bg-brand-lilac/10 rounded-full overflow-hidden">
+                                    <div className="h-2 bg-warm-cream/10 rounded-full overflow-hidden">
                                         <motion.div
                                             initial={{ width: 0 }}
                                             animate={{ width: `${pct}%` }}
                                             transition={{ duration: 0.8, ease: "easeOut" }}
-                                            className="h-full bg-gradient-to-r from-brand-purple to-violet-400 rounded-full"
+                                            className="h-full bg-gradient-to-r from-brand-green to-violet-400 rounded-full"
                                         />
                                     </div>
                                 </div>
@@ -219,49 +219,49 @@ function SalesView({ data }: { data: AnalyticsData }) {
             {/* Category Performance + Top Selling */}
             <motion.div variants={fadeUp} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="glass-card p-6">
-                    <h3 className="text-lg font-medium text-brand-dark mb-4">Category Performance</h3>
+                    <h3 className="text-lg font-medium text-warm-cream mb-4">Category Performance</h3>
                     {data.categoryPerformance.length > 0 ? (
                         <div className="h-[250px]">
-                            <ResponsiveContainer width="100%" height="100%">
+                            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                                 <BarChart data={data.categoryPerformance} layout="vertical">
-                                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f0f0f0" />
+                                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="rgba(255,255,255,0.06)" />
                                     <XAxis type="number" fontSize={12} tickFormatter={v => `₦${v / 1000}k`} />
                                     <YAxis type="category" dataKey="name" fontSize={12} width={90} />
                                     <Tooltip formatter={(val) => formatCurrency(Number(val))} />
                                     <Bar dataKey="revenue" fill="url(#barGrad)" radius={[0, 6, 6, 0]} />
                                     <defs>
                                         <linearGradient id="barGrad" x1="0" y1="0" x2="1" y2="0">
-                                            <stop offset="0%" stopColor="#8b5cf6" />
-                                            <stop offset="100%" stopColor="#a78bfa" />
+                                            <stop offset="0%" stopColor="#355E3B" />
+                                            <stop offset="100%" stopColor="#4a8055" />
                                         </linearGradient>
                                     </defs>
                                 </BarChart>
                             </ResponsiveContainer>
                         </div>
                     ) : (
-                        <p className="text-brand-dark/40 text-sm py-10 text-center">No category data yet</p>
+                        <p className="text-warm-cream/40 text-sm py-10 text-center">No category data yet</p>
                     )}
                 </div>
                 <div className="glass-card p-6">
-                    <h3 className="text-lg font-medium text-brand-dark mb-4">Top Selling Products</h3>
+                    <h3 className="text-lg font-medium text-warm-cream mb-4">Top Selling Products</h3>
                     {/* Desktop Table */}
                     <div className="hidden md:block overflow-x-auto">
                         <table className="w-full text-sm text-left">
-                            <thead className="text-gray-400 text-xs uppercase tracking-wider">
+                            <thead className="text-warm-cream/30 text-xs uppercase tracking-wider">
                                 <tr>
                                     <th className="pb-3">Product</th>
                                     <th className="pb-3 text-right">Units</th>
                                     <th className="pb-3 text-right">Revenue</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-100/50">
+                            <tbody className="divide-y divide-warm-cream/[0.06]">
                                 {data.products.topSelling.map((p, i) => (
-                                    <tr key={p.id} className="hover:bg-brand-lilac/5 transition-colors">
-                                        <td className="py-3 font-medium text-brand-dark flex items-center gap-2">
-                                            <span className="text-xs text-brand-purple/60 font-mono w-5">#{i + 1}</span>
+                                    <tr key={p.id} className="hover:bg-white/[0.03] transition-colors">
+                                        <td className="py-3 font-medium text-warm-cream flex items-center gap-2">
+                                            <span className="text-xs text-brand-green/60 font-mono w-5">#{i + 1}</span>
                                             {p.name}
                                         </td>
-                                        <td className="py-3 text-right text-brand-dark/70">{p.quantity}</td>
+                                        <td className="py-3 text-right text-warm-cream/70">{p.quantity}</td>
                                         <td className="py-3 text-right font-medium">{formatCurrency(p.revenue)}</td>
                                     </tr>
                                 ))}
@@ -271,25 +271,25 @@ function SalesView({ data }: { data: AnalyticsData }) {
                     {/* Mobile Cards */}
                     <div className="md:hidden flex flex-col gap-3">
                         {data.products.topSelling.map((p, i) => (
-                            <div key={p.id} className="bg-white rounded-lg border border-brand-lilac/20 p-3 shadow-sm flex flex-col gap-2">
-                                <div className="flex items-center gap-2 border-b border-brand-lilac/10 pb-2">
-                                    <span className="text-xs font-mono font-bold text-brand-purple bg-brand-lilac/10 px-2 py-0.5 rounded-full">#{i + 1}</span>
-                                    <span className="font-medium text-brand-dark">{p.name}</span>
+                            <div key={p.id} className="bg-white/[0.04] rounded-lg border border-warm-cream/[0.08] p-3 shadow-sm flex flex-col gap-2">
+                                <div className="flex items-center gap-2 border-b border-warm-cream/10 pb-2">
+                                    <span className="text-xs font-mono font-bold text-brand-green bg-warm-cream/10 px-2 py-0.5 rounded-full">#{i + 1}</span>
+                                    <span className="font-medium text-warm-cream">{p.name}</span>
                                 </div>
                                 <div className="flex justify-between items-center text-sm">
                                     <div className="flex flex-col">
-                                        <span className="text-[10px] uppercase text-brand-dark/40">Units Sold</span>
-                                        <span className="font-medium text-brand-dark">{p.quantity}</span>
+                                        <span className="text-[10px] uppercase text-warm-cream/40">Units Sold</span>
+                                        <span className="font-medium text-warm-cream">{p.quantity}</span>
                                     </div>
                                     <div className="flex flex-col text-right">
-                                        <span className="text-[10px] uppercase text-brand-dark/40">Revenue</span>
-                                        <span className="font-medium text-brand-dark">{formatCurrency(p.revenue)}</span>
+                                        <span className="text-[10px] uppercase text-warm-cream/40">Revenue</span>
+                                        <span className="font-medium text-warm-cream">{formatCurrency(p.revenue)}</span>
                                     </div>
                                 </div>
                             </div>
                         ))}
                         {data.products.topSelling.length === 0 && (
-                            <div className="text-center py-6 text-brand-dark/50 text-sm border border-brand-lilac/20 rounded-lg border-dashed">
+                            <div className="text-center py-6 text-warm-cream/50 text-sm border border-warm-cream/20 rounded-lg border-dashed">
                                 No products found
                             </div>
                         )}
@@ -305,7 +305,7 @@ function SalesView({ data }: { data: AnalyticsData }) {
 //  MEAT & DELIVERY VIEW
 // ============================================================
 
-const ZONE_COLORS = ["#8b5cf6", "#06b6d4", "#f59e0b", "#10b981", "#ef4444", "#6366f1", "#ec4899", "#14b8a6"];
+const ZONE_COLORS = ["#355E3B", "#06b6d4", "#f59e0b", "#10b981", "#ef4444", "#6366f1", "#ec4899", "#14b8a6"];
 
 function MeatDeliveryView({ data }: { data: AnalyticsData }) {
     const m = data.meat;
@@ -324,14 +324,14 @@ function MeatDeliveryView({ data }: { data: AnalyticsData }) {
             <motion.div variants={fadeUp} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Kg Sold by Category */}
                 <div className="glass-card p-6">
-                    <h3 className="text-lg font-medium text-brand-dark mb-4">Kg Sold by Category</h3>
+                    <h3 className="text-lg font-medium text-warm-cream mb-4">Kg Sold by Category</h3>
                     {m.kgByCategory.length > 0 ? (
                         <div className="h-[280px]">
-                            <ResponsiveContainer width="100%" height="100%">
+                            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                                 <BarChart data={m.kgByCategory}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                                    <XAxis dataKey="name" fontSize={12} stroke="#888" />
-                                    <YAxis fontSize={12} stroke="#888" tickFormatter={v => `${v}kg`} />
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.06)" />
+                                    <XAxis dataKey="name" fontSize={12} stroke="rgba(255,255,255,0.25)" />
+                                    <YAxis fontSize={12} stroke="rgba(255,255,255,0.25)" tickFormatter={v => `${v}kg`} />
                                     <Tooltip formatter={(val) => [`${Number(val).toFixed(1)} kg`, "Weight"]} />
                                     <defs>
                                         <linearGradient id="kgGrad" x1="0" y1="0" x2="0" y2="1">
@@ -344,16 +344,16 @@ function MeatDeliveryView({ data }: { data: AnalyticsData }) {
                             </ResponsiveContainer>
                         </div>
                     ) : (
-                        <p className="text-brand-dark/40 text-sm py-10 text-center">No sales data yet</p>
+                        <p className="text-warm-cream/40 text-sm py-10 text-center">No sales data yet</p>
                     )}
                 </div>
 
                 {/* Delivery Zone Breakdown */}
                 <div className="glass-card p-6">
-                    <h3 className="text-lg font-medium text-brand-dark mb-4">Delivery Zone Breakdown</h3>
+                    <h3 className="text-lg font-medium text-warm-cream mb-4">Delivery Zone Breakdown</h3>
                     {m.deliveryZoneBreakdown.length > 0 ? (
                         <div className="h-[280px]">
-                            <ResponsiveContainer width="100%" height="100%">
+                            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                                 <PieChart>
                                     <Pie
                                         data={m.deliveryZoneBreakdown.map(d => ({ name: d.zone, value: d.orders }))}
@@ -375,20 +375,20 @@ function MeatDeliveryView({ data }: { data: AnalyticsData }) {
                             </ResponsiveContainer>
                         </div>
                     ) : (
-                        <p className="text-brand-dark/40 text-sm py-10 text-center">No delivery data yet</p>
+                        <p className="text-warm-cream/40 text-sm py-10 text-center">No delivery data yet</p>
                     )}
                 </div>
             </motion.div>
 
             {/* Gross Margin Trend */}
             <motion.div variants={fadeUp} className="glass-card p-6">
-                <h3 className="text-lg font-medium text-brand-dark mb-4">Gross Margin Trend (7d)</h3>
+                <h3 className="text-lg font-medium text-warm-cream mb-4">Gross Margin Trend (7d)</h3>
                 <div className="h-[250px]">
-                    <ResponsiveContainer width="100%" height="100%">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                         <LineChart data={m.grossMarginTrend}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                            <XAxis dataKey="date" fontSize={12} stroke="#888" tickFormatter={d => new Date(d).toLocaleDateString(undefined, { weekday: "short" })} />
-                            <YAxis fontSize={12} stroke="#888" tickFormatter={v => `${v}%`} domain={[0, 100]} />
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.06)" />
+                            <XAxis dataKey="date" fontSize={12} stroke="rgba(255,255,255,0.25)" tickFormatter={d => new Date(d).toLocaleDateString(undefined, { weekday: "short" })} />
+                            <YAxis fontSize={12} stroke="rgba(255,255,255,0.25)" tickFormatter={v => `${v}%`} domain={[0, 100]} />
                             <Tooltip formatter={(val) => [`${Number(val).toFixed(1)}%`, "Margin"]} />
                             <defs>
                                 <linearGradient id="marginGrad" x1="0" y1="0" x2="0" y2="1">
@@ -405,12 +405,12 @@ function MeatDeliveryView({ data }: { data: AnalyticsData }) {
             {/* Expiring Stock Table */}
             {m.expiringItems.length > 0 && (
                 <motion.div variants={fadeUp} className="glass-card p-6">
-                    <h3 className="text-lg font-medium text-brand-dark mb-4 flex items-center gap-2">
+                    <h3 className="text-lg font-medium text-warm-cream mb-4 flex items-center gap-2">
                         <AlertTriangle size={18} className="text-red-500" /> Expiring Stock (Next 7 Days)
                     </h3>
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm text-left">
-                            <thead className="text-gray-400 text-xs uppercase tracking-wider">
+                            <thead className="text-warm-cream/30 text-xs uppercase tracking-wider">
                                 <tr>
                                     <th className="pb-3">Product</th>
                                     <th className="pb-3 text-right">Stock</th>
@@ -418,16 +418,16 @@ function MeatDeliveryView({ data }: { data: AnalyticsData }) {
                                     <th className="pb-3 text-right">Days Left</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-100/50">
+                            <tbody className="divide-y divide-warm-cream/[0.06]">
                                 {m.expiringItems.map((item, i) => {
                                     const daysLeft = Math.ceil((new Date(item.expiryDate).getTime() - Date.now()) / 86400000);
                                     return (
-                                        <tr key={i} className="hover:bg-red-50/30 transition-colors">
-                                            <td className="py-3 font-medium text-brand-dark">{item.name}</td>
-                                            <td className="py-3 text-right text-brand-dark/70">{item.stock}</td>
-                                            <td className="py-3 text-right text-brand-dark/70">{new Date(item.expiryDate).toLocaleDateString("en-NG", { month: "short", day: "numeric" })}</td>
+                                        <tr key={i} className="hover:bg-red-500/5 transition-colors">
+                                            <td className="py-3 font-medium text-warm-cream">{item.name}</td>
+                                            <td className="py-3 text-right text-warm-cream/70">{item.stock}</td>
+                                            <td className="py-3 text-right text-warm-cream/70">{new Date(item.expiryDate).toLocaleDateString("en-NG", { month: "short", day: "numeric" })}</td>
                                             <td className="py-3 text-right">
-                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${daysLeft <= 2 ? "bg-red-100 text-red-700" : daysLeft <= 5 ? "bg-amber-100 text-amber-700" : "bg-yellow-100 text-yellow-700"}`}>
+                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${daysLeft <= 2 ? "bg-red-500/10 text-red-400" : daysLeft <= 5 ? "bg-amber-500/10 text-amber-400" : "bg-yellow-500/10 text-yellow-400"}`}>
                                                     {daysLeft <= 0 ? "Expired" : `${daysLeft}d`}
                                                 </span>
                                             </td>
@@ -443,10 +443,10 @@ function MeatDeliveryView({ data }: { data: AnalyticsData }) {
             {/* Zone Revenue Table */}
             {m.deliveryZoneBreakdown.length > 0 && (
                 <motion.div variants={fadeUp} className="glass-card p-6">
-                    <h3 className="text-lg font-medium text-brand-dark mb-4">Zone Performance</h3>
+                    <h3 className="text-lg font-medium text-warm-cream mb-4">Zone Performance</h3>
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm text-left">
-                            <thead className="text-gray-400 text-xs uppercase tracking-wider">
+                            <thead className="text-warm-cream/30 text-xs uppercase tracking-wider">
                                 <tr>
                                     <th className="pb-3">Zone</th>
                                     <th className="pb-3 text-right">Orders</th>
@@ -454,16 +454,16 @@ function MeatDeliveryView({ data }: { data: AnalyticsData }) {
                                     <th className="pb-3 text-right">Avg Order</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-100/50">
+                            <tbody className="divide-y divide-warm-cream/[0.06]">
                                 {m.deliveryZoneBreakdown.map((z, i) => (
-                                    <tr key={i} className="hover:bg-brand-lilac/5 transition-colors">
-                                        <td className="py-3 font-medium text-brand-dark flex items-center gap-2">
+                                    <tr key={i} className="hover:bg-white/[0.03] transition-colors">
+                                        <td className="py-3 font-medium text-warm-cream flex items-center gap-2">
                                             <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: ZONE_COLORS[i % ZONE_COLORS.length] }} />
                                             {z.zone}
                                         </td>
-                                        <td className="py-3 text-right text-brand-dark/70">{z.orders}</td>
+                                        <td className="py-3 text-right text-warm-cream/70">{z.orders}</td>
                                         <td className="py-3 text-right font-medium">{formatCurrency(z.revenue)}</td>
-                                        <td className="py-3 text-right text-brand-dark/70">{formatCurrency(z.orders > 0 ? z.revenue / z.orders : 0)}</td>
+                                        <td className="py-3 text-right text-warm-cream/70">{formatCurrency(z.orders > 0 ? z.revenue / z.orders : 0)}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -492,7 +492,7 @@ function InventoryView({ data }: { data: AnalyticsData }) {
 
             <motion.div variants={fadeUp} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="glass-card p-6">
-                    <h3 className="text-lg font-medium text-brand-dark mb-4">Stock Health</h3>
+                    <h3 className="text-lg font-medium text-warm-cream mb-4">Stock Health</h3>
                     <div className="grid grid-cols-2 gap-4">
                         <MiniGlassKPI label="Low Stock" value={data.inventory.lowStockCount.toString()} alert={data.inventory.lowStockCount > 0} />
                         <MiniGlassKPI label="Out of Stock" value={data.inventory.outOfStockCount.toString()} alert={data.inventory.outOfStockCount > 0} />
@@ -500,13 +500,13 @@ function InventoryView({ data }: { data: AnalyticsData }) {
                         <MiniGlassKPI label="Total Items" value={data.inventory.totalItems.toString()} />
                     </div>
                 </div>
-                <div className="glass-card p-6 bg-gradient-to-br from-brand-lilac/5 to-violet-50/30">
-                    <h3 className="text-sm font-bold text-gray-500 uppercase mb-4 flex items-center gap-2">
+                <div className="glass-card p-6 bg-gradient-to-br from-brand-green/5 to-brand-green/[0.02]">
+                    <h3 className="text-sm font-bold text-warm-cream/40 uppercase mb-4 flex items-center gap-2">
                         <AlertTriangle size={14} /> Inventory Insights
                     </h3>
-                    <ul className="space-y-3 text-sm text-gray-600">
+                    <ul className="space-y-3 text-sm text-warm-cream/50">
                         <li className="flex items-start gap-2">
-                            <span className="text-brand-purple mt-1">•</span>
+                            <span className="text-brand-green mt-1">•</span>
                             <span><b>{data.inventory.lowStockCount}</b> items below reorder level.</span>
                         </li>
                         <li className="flex items-start gap-2">
@@ -541,16 +541,16 @@ function CustomersView({ data }: { data: AnalyticsData }) {
 
             <motion.div variants={fadeUp} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="glass-card p-6">
-                    <h3 className="text-lg font-medium text-brand-dark mb-6">Guest vs Registered</h3>
+                    <h3 className="text-lg font-medium text-warm-cream mb-6">Guest vs Registered</h3>
                     <div className="h-[220px] flex items-center justify-center">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                             <PieChart>
                                 <Pie data={[
                                     { name: "Registered", value: data.customers.registeredVsGuest.registered },
                                     { name: "Guest", value: data.customers.registeredVsGuest.guest }
                                 ]} cx="50%" cy="50%" innerRadius={65} outerRadius={85} paddingAngle={5} dataKey="value">
-                                    <Cell fill="#8b5cf6" />
-                                    <Cell fill="#e2e8f0" />
+                                    <Cell fill="#355E3B" />
+                                    <Cell fill="rgba(253,246,236,0.15)" />
                                 </Pie>
                                 <Tooltip />
                                 <Legend />
@@ -561,8 +561,8 @@ function CustomersView({ data }: { data: AnalyticsData }) {
 
                 {/* Conversion Funnel */}
                 <div className="glass-card p-6">
-                    <h3 className="text-lg font-medium text-brand-dark mb-6 flex items-center gap-2">
-                        <Target size={18} className="text-brand-purple" /> Order Funnel
+                    <h3 className="text-lg font-medium text-warm-cream mb-6 flex items-center gap-2">
+                        <Target size={18} className="text-brand-green" /> Order Funnel
                     </h3>
                     <FunnelViz data={data.conversionFunnel} total={data.conversionFunnel.pending + data.conversionFunnel.shipped + data.conversionFunnel.delivered} />
                 </div>
@@ -587,25 +587,25 @@ function MarketingView({ data }: { data: AnalyticsData }) {
             </motion.div>
 
             <motion.div variants={fadeUp} className="glass-card p-6">
-                <h3 className="text-lg font-medium text-brand-dark mb-4">Top Performing Coupons</h3>
+                <h3 className="text-lg font-medium text-warm-cream mb-4">Top Performing Coupons</h3>
                 {/* Desktop Table */}
                 <div className="hidden md:block overflow-x-auto">
                     <table className="w-full text-sm text-left">
-                        <thead className="text-gray-400 text-xs uppercase tracking-wider">
+                        <thead className="text-warm-cream/30 text-xs uppercase tracking-wider">
                             <tr>
                                 <th className="pb-3">Code</th>
                                 <th className="pb-3 text-right">Usage Count</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100/50">
+                        <tbody className="divide-y divide-warm-cream/[0.06]">
                             {data.marketing.topCoupons.map(c => (
-                                <tr key={c.code} className="hover:bg-brand-lilac/5 transition-colors">
-                                    <td className="py-3 font-mono font-medium text-brand-purple">{c.code}</td>
+                                <tr key={c.code} className="hover:bg-white/[0.03] transition-colors">
+                                    <td className="py-3 font-mono font-medium text-brand-green">{c.code}</td>
                                     <td className="py-3 text-right">{c.count}</td>
                                 </tr>
                             ))}
                             {data.marketing.topCoupons.length === 0 && (
-                                <tr><td colSpan={2} className="p-6 text-center text-gray-400">No coupon usage yet</td></tr>
+                                <tr><td colSpan={2} className="p-6 text-center text-warm-cream/30">No coupon usage yet</td></tr>
                             )}
                         </tbody>
                     </table>
@@ -613,16 +613,16 @@ function MarketingView({ data }: { data: AnalyticsData }) {
                 {/* Mobile Cards */}
                 <div className="md:hidden flex flex-col gap-3">
                     {data.marketing.topCoupons.map(c => (
-                        <div key={c.code} className="bg-white flex justify-between items-center rounded-lg border border-brand-lilac/20 p-4 shadow-sm">
-                            <span className="font-mono font-bold text-brand-purple">{c.code}</span>
+                        <div key={c.code} className="bg-white/[0.04] flex justify-between items-center rounded-lg border border-warm-cream/20 p-4 shadow-sm">
+                            <span className="font-mono font-bold text-brand-green">{c.code}</span>
                             <div className="flex flex-col text-right">
-                                <span className="text-[10px] uppercase text-brand-dark/40">Uses</span>
-                                <span className="font-medium text-brand-dark text-lg leading-none">{c.count}</span>
+                                <span className="text-[10px] uppercase text-warm-cream/40">Uses</span>
+                                <span className="font-medium text-warm-cream text-lg leading-none">{c.count}</span>
                             </div>
                         </div>
                     ))}
                     {data.marketing.topCoupons.length === 0 && (
-                        <div className="text-center py-6 text-brand-dark/50 text-sm border border-brand-lilac/20 rounded-lg border-dashed">
+                        <div className="text-center py-6 text-warm-cream/50 text-sm border border-warm-cream/20 rounded-lg border-dashed">
                             No coupon usage yet
                         </div>
                     )}
@@ -648,15 +648,15 @@ function OperationsView({ data }: { data: AnalyticsData }) {
 
             {/* Peak Hours Heatmap */}
             <motion.div variants={fadeUp} className="glass-card p-6">
-                <h3 className="text-lg font-medium text-brand-dark mb-2">Peak Sales Hours</h3>
-                <p className="text-xs text-brand-dark/40 mb-6">Order volume by hour of day</p>
+                <h3 className="text-lg font-medium text-warm-cream mb-2">Peak Sales Hours</h3>
+                <p className="text-xs text-warm-cream/40 mb-6">Order volume by hour of day</p>
                 <PeakHoursHeatmap data={data.peakHours} />
             </motion.div>
 
             {/* Conversion Funnel */}
             <motion.div variants={fadeUp} className="glass-card p-6">
-                <h3 className="text-lg font-medium text-brand-dark mb-6 flex items-center gap-2">
-                    <Target size={18} className="text-brand-purple" /> Conversion Funnel
+                <h3 className="text-lg font-medium text-warm-cream mb-6 flex items-center gap-2">
+                    <Target size={18} className="text-brand-green" /> Conversion Funnel
                 </h3>
                 <div className="grid grid-cols-3 gap-4 text-center mb-6">
                     <FunnelStat label="Processing Rate" value={data.conversionFunnel.pendingToShippedRate} />
@@ -675,10 +675,10 @@ function OperationsView({ data }: { data: AnalyticsData }) {
 // ============================================================
 
 const ACCENT_MAP = {
-    purple: { bg: "from-violet-500/10 to-purple-500/10", icon: "bg-violet-500/10 text-violet-600", ring: "ring-violet-500/20" },
-    green: { bg: "from-emerald-500/10 to-green-500/10", icon: "bg-emerald-500/10 text-emerald-600", ring: "ring-emerald-500/20" },
-    amber: { bg: "from-amber-500/10 to-yellow-500/10", icon: "bg-amber-500/10 text-amber-600", ring: "ring-amber-500/20" },
-    red: { bg: "from-red-500/10 to-rose-500/10", icon: "bg-red-500/10 text-red-600", ring: "ring-red-500/20" },
+    purple: { bg: "from-brand-green/10 to-brand-green/5", icon: "bg-brand-green/10 text-brand-green", ring: "ring-brand-green/20" },
+    green: { bg: "from-emerald-500/10 to-green-500/5", icon: "bg-emerald-500/10 text-emerald-400", ring: "ring-emerald-500/20" },
+    amber: { bg: "from-amber-500/10 to-yellow-500/5", icon: "bg-amber-500/10 text-amber-400", ring: "ring-amber-500/20" },
+    red: { bg: "from-red-500/10 to-rose-500/5", icon: "bg-red-500/10 text-red-400", ring: "ring-red-500/20" },
 };
 
 function GlassKPI({ title, value, format, icon: Icon, accent = "purple", subtitle }: {
@@ -698,9 +698,9 @@ function GlassKPI({ title, value, format, icon: Icon, accent = "purple", subtitl
         <motion.div variants={fadeUp} className={`glass-card p-5 bg-gradient-to-br ${colors.bg} group hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300`}>
             <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-brand-dark/50 uppercase tracking-wider">{title}</p>
-                    <h3 className="text-2xl font-serif text-brand-dark mt-1 font-bold truncate">{displayValue}</h3>
-                    {subtitle && <p className="text-xs text-brand-dark/40 mt-0.5">{subtitle}</p>}
+                    <p className="text-xs font-medium text-warm-cream/50 uppercase tracking-wider">{title}</p>
+                    <h3 className="text-2xl font-serif text-warm-cream mt-1 font-bold truncate">{displayValue}</h3>
+                    {subtitle && <p className="text-xs text-warm-cream/40 mt-0.5">{subtitle}</p>}
                 </div>
                 <div className={`p-2.5 rounded-xl ${colors.icon} transition-transform group-hover:scale-110`}>
                     <Icon size={18} />
@@ -713,24 +713,24 @@ function GlassKPI({ title, value, format, icon: Icon, accent = "purple", subtitl
 function VelocityCard({ label, value }: { label: string; value: number }) {
     return (
         <div className="glass-card p-5">
-            <p className="text-xs text-brand-dark/50 font-medium">{label}</p>
-            <p className="text-xl font-bold font-serif text-brand-dark mt-1">{formatCurrency(value)}</p>
-            <p className="text-xs text-brand-dark/30 mt-0.5">per day</p>
+            <p className="text-xs text-warm-cream/50 font-medium">{label}</p>
+            <p className="text-xl font-bold font-serif text-warm-cream mt-1">{formatCurrency(value)}</p>
+            <p className="text-xs text-warm-cream/30 mt-0.5">per day</p>
         </div>
     );
 }
 
 function MiniGlassKPI({ label, value, alert = false }: { label: string; value: string; alert?: boolean }) {
     return (
-        <div className={`p-4 rounded-xl border text-center transition-colors ${alert ? "border-red-200/50 bg-red-50/30" : "border-brand-lilac/15 bg-white/40"}`}>
-            <p className="text-xs text-brand-dark/50 uppercase tracking-wider">{label}</p>
-            <p className={`text-lg font-bold font-serif mt-1 ${alert ? "text-red-600" : "text-brand-dark"}`}>{value}</p>
+        <div className={`p-4 rounded-xl border text-center transition-colors ${alert ? "border-red-500/20 bg-red-500/5" : "border-warm-cream/[0.08] bg-white/[0.03]"}`}>
+            <p className="text-xs text-warm-cream/50 uppercase tracking-wider">{label}</p>
+            <p className={`text-lg font-bold font-serif mt-1 ${alert ? "text-red-600" : "text-warm-cream"}`}>{value}</p>
         </div>
     );
 }
 
 function FunnelViz({ data, total }: { data: AnalyticsData["conversionFunnel"]; total: number }) {
-    if (total === 0) return <p className="text-brand-dark/40 text-sm text-center py-6">No order data yet</p>;
+    if (total === 0) return <p className="text-warm-cream/40 text-sm text-center py-6">No order data yet</p>;
 
     const stages = [
         { label: "Pending", count: data.pending, color: "bg-amber-400" },
@@ -745,10 +745,10 @@ function FunnelViz({ data, total }: { data: AnalyticsData["conversionFunnel"]; t
                 return (
                     <div key={s.label}>
                         <div className="flex justify-between text-sm mb-1">
-                            <span className="text-gray-600">{s.label}</span>
+                            <span className="text-warm-cream/50">{s.label}</span>
                             <span className="font-medium">{s.count} ({pct.toFixed(0)}%)</span>
                         </div>
-                        <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+                        <div className="h-3 bg-warm-cream/5 rounded-full overflow-hidden">
                             <motion.div
                                 initial={{ width: 0 }}
                                 animate={{ width: `${pct}%` }}
@@ -766,8 +766,8 @@ function FunnelViz({ data, total }: { data: AnalyticsData["conversionFunnel"]; t
 function FunnelStat({ label, value }: { label: string; value: number }) {
     return (
         <div>
-            <p className="text-xs text-brand-dark/40 uppercase tracking-wider">{label}</p>
-            <p className="text-2xl font-bold font-serif text-brand-dark mt-1">{value.toFixed(1)}%</p>
+            <p className="text-xs text-warm-cream/40 uppercase tracking-wider">{label}</p>
+            <p className="text-2xl font-bold font-serif text-warm-cream mt-1">{value.toFixed(1)}%</p>
         </div>
     );
 }
@@ -780,14 +780,14 @@ function PeakHoursHeatmap({ data }: { data: AnalyticsData["peakHours"] }) {
             {data.map(d => {
                 const intensity = d.count / maxCount;
                 const bg = d.count === 0
-                    ? "bg-gray-100"
+                    ? "bg-warm-cream/5 text-warm-cream/20"
                     : intensity > 0.75
-                        ? "bg-violet-600 text-white"
+                        ? "bg-brand-green text-white"
                         : intensity > 0.5
-                            ? "bg-violet-400 text-white"
+                            ? "bg-brand-green/60 text-white"
                             : intensity > 0.25
-                                ? "bg-violet-200 text-violet-800"
-                                : "bg-violet-100 text-violet-600";
+                                ? "bg-brand-green/25 text-brand-green"
+                                : "bg-brand-green/10 text-brand-green/70";
 
                 const label = d.hour === 0 ? "12am" : d.hour < 12 ? `${d.hour}am` : d.hour === 12 ? "12pm" : `${d.hour - 12}pm`;
 

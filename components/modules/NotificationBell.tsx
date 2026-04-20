@@ -12,10 +12,10 @@ const POLL_INTERVAL = 30000;
 
 const typeConfig: Record<AdminNotification["type"], { icon: typeof Bell; color: string; bg: string }> = {
     new_order: { icon: ShoppingBag, color: "text-purple-600", bg: "bg-purple-50" },
-    payment_submitted: { icon: CreditCard, color: "text-amber-600", bg: "bg-amber-50" },
-    payment_confirmed: { icon: Check, color: "text-emerald-600", bg: "bg-emerald-50" },
-    low_stock: { icon: AlertTriangle, color: "text-red-600", bg: "bg-red-50" },
-    order_status: { icon: Package, color: "text-blue-600", bg: "bg-blue-50" },
+    payment_submitted: { icon: CreditCard, color: "text-amber-400", bg: "bg-amber-500/10" },
+    payment_confirmed: { icon: Check, color: "text-emerald-400", bg: "bg-emerald-500/10" },
+    low_stock: { icon: AlertTriangle, color: "text-red-400", bg: "bg-red-500/10" },
+    order_status: { icon: Package, color: "text-blue-400", bg: "bg-blue-500/10" },
 };
 
 function getNotificationHref(notif: AdminNotification): string {
@@ -157,7 +157,7 @@ export default function NotificationBell() {
                     <motion.span
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
-                        className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-sm"
+                        className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-red-500/100 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-sm"
                     >
                         {unreadCount > 9 ? "9+" : unreadCount}
                     </motion.span>
@@ -175,13 +175,13 @@ export default function NotificationBell() {
                     {/* Panel */}
                     <div
                         ref={panelRef}
-                        className="absolute top-2 right-2 sm:top-4 sm:right-4 w-[calc(100vw-16px)] sm:w-[400px] max-h-[80vh] bg-white rounded-2xl shadow-2xl border border-brand-lilac/15 overflow-hidden flex flex-col"
+                        className="absolute top-2 right-2 sm:top-4 sm:right-4 w-[calc(100vw-16px)] sm:w-[400px] max-h-[80vh] bg-white/[0.04] rounded-2xl shadow-2xl border border-warm-cream/15 overflow-hidden flex flex-col"
                     >
                         {/* Header */}
-                        <div className="px-5 py-4 border-b border-brand-lilac/10 flex items-center justify-between bg-brand-lilac/[0.02] shrink-0">
+                        <div className="px-5 py-4 border-b border-warm-cream/10 flex items-center justify-between bg-warm-cream/[0.02] shrink-0">
                             <div>
-                                <h3 className="text-sm font-semibold text-brand-dark">Notifications</h3>
-                                <p className="text-[10px] text-brand-dark/40 mt-0.5">
+                                <h3 className="text-sm font-semibold text-warm-cream">Notifications</h3>
+                                <p className="text-[10px] text-warm-cream/40 mt-0.5">
                                     {notifications.length === 0
                                         ? "No notifications yet"
                                         : `${notifications.length} notification${notifications.length !== 1 ? "s" : ""}`}
@@ -189,9 +189,9 @@ export default function NotificationBell() {
                             </div>
                             <button
                                 onClick={() => setIsOpen(false)}
-                                className="p-1.5 hover:bg-brand-lilac/10 rounded-lg transition-colors cursor-pointer"
+                                className="p-1.5 hover:bg-warm-cream/10 rounded-lg transition-colors cursor-pointer"
                             >
-                                <X size={16} className="text-brand-dark/40" />
+                                <X size={16} className="text-warm-cream/40" />
                             </button>
                         </div>
 
@@ -199,9 +199,9 @@ export default function NotificationBell() {
                         <div className="overflow-y-auto flex-1">
                             {notifications.length === 0 ? (
                                 <div className="py-16 text-center">
-                                    <Bell size={36} className="mx-auto text-brand-dark/10 mb-3" />
-                                    <p className="text-sm text-brand-dark/30">All quiet for now</p>
-                                    <p className="text-[10px] text-brand-dark/20 mt-1">New orders will appear here in real-time</p>
+                                    <Bell size={36} className="mx-auto text-warm-cream/10 mb-3" />
+                                    <p className="text-sm text-warm-cream/30">All quiet for now</p>
+                                    <p className="text-[10px] text-warm-cream/20 mt-1">New orders will appear here in real-time</p>
                                 </div>
                             ) : (
                                 notifications.map((notif) => (
@@ -220,10 +220,10 @@ export default function NotificationBell() {
 
                         {/* Footer */}
                         {notifications.length > 0 && (
-                            <div className="px-5 py-3 border-t border-brand-lilac/10 bg-brand-lilac/[0.02] shrink-0">
+                            <div className="px-5 py-3 border-t border-warm-cream/10 bg-warm-cream/[0.02] shrink-0">
                                 <button
                                     onClick={() => markAllRead()}
-                                    className="text-xs text-brand-purple hover:text-brand-purple/70 font-medium transition-colors cursor-pointer"
+                                    className="text-xs text-brand-green hover:text-brand-green/70 font-medium transition-colors cursor-pointer"
                                 >
                                     Mark all as read
                                 </button>
@@ -245,7 +245,7 @@ function NotificationItem({ notification, onClick }: { notification: AdminNotifi
 
     return (
         <div
-            className={`px-5 py-4 border-b border-brand-lilac/5 hover:bg-brand-lilac/[0.03] transition-colors cursor-pointer ${!notification.read ? "bg-brand-purple/[0.03]" : ""}`}
+            className={`px-5 py-4 border-b border-warm-cream/5 hover:bg-warm-cream/[0.03] transition-colors cursor-pointer ${!notification.read ? "bg-brand-green/[0.03]" : ""}`}
             onClick={onClick}
         >
             <div className="flex gap-3">
@@ -254,19 +254,19 @@ function NotificationItem({ notification, onClick }: { notification: AdminNotifi
                 </div>
                 <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
-                        <p className={`text-sm leading-tight ${!notification.read ? "font-semibold text-brand-dark" : "text-brand-dark/70"}`}>
+                        <p className={`text-sm leading-tight ${!notification.read ? "font-semibold text-warm-cream" : "text-warm-cream/70"}`}>
                             {notification.title}
                         </p>
                         {!notification.read && (
-                            <span className="w-2 h-2 rounded-full bg-brand-purple flex-shrink-0 mt-1.5" />
+                            <span className="w-2 h-2 rounded-full bg-brand-green flex-shrink-0 mt-1.5" />
                         )}
                     </div>
-                    <p className="text-xs text-brand-dark/50 mt-1 leading-relaxed">
+                    <p className="text-xs text-warm-cream/50 mt-1 leading-relaxed">
                         {notification.message}
                     </p>
                     <div className="flex items-center justify-between mt-1.5">
-                        <p className="text-[10px] text-brand-dark/25">{timeAgo}</p>
-                        <span className="text-[10px] text-brand-purple/40 font-medium">
+                        <p className="text-[10px] text-warm-cream/25">{timeAgo}</p>
+                        <span className="text-[10px] text-brand-green/40 font-medium">
                             {notification.type === "low_stock" ? "View Inventory →" : "View Order →"}
                         </span>
                     </div>

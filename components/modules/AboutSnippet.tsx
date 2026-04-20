@@ -39,13 +39,13 @@ const features = [
         icon: Truck,
         title: "Swift Delivery",
         desc: "Same-day and next-day delivery across all Lagos zones.",
-        accent: "bg-green-50 text-green-600",
+        accent: "bg-brand-green/10 text-brand-green",
     },
     {
         icon: ShieldCheck,
         title: "Quality Guaranteed",
         desc: "Every cut inspected. Not satisfied? We make it right.",
-        accent: "bg-purple-50 text-purple-600",
+        accent: "bg-brand-green/10 text-brand-green",
     },
 ];
 
@@ -88,8 +88,8 @@ export default function AboutSnippet({ customTexts }: { customTexts?: Record<str
     return (
         <section id="about" ref={sectionRef} className="relative overflow-hidden">
             {/* ── Story Section ── */}
-            <div className="py-24 md:py-32 px-6 bg-warm-cream relative">
-                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-warm-tan/20 to-transparent" />
+            <div className="py-24 md:py-32 px-6 bg-brand-black relative">
+                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-green/20 to-transparent" />
 
                 <div className="max-w-6xl mx-auto">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
@@ -101,8 +101,8 @@ export default function AboutSnippet({ customTexts }: { customTexts?: Record<str
                                 viewport={{ once: true, margin: "-80px" }}
                                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                             >
-                                <p className="text-[11px] uppercase tracking-[0.3em] text-brand-red mb-4 font-medium">{getText(customTexts, "about.eyebrow")}</p>
-                                <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-brand-dark tracking-tight leading-[1.1] mb-8">
+                                <p className="text-[11px] uppercase tracking-[0.3em] text-brand-green mb-4 font-medium">{getText(customTexts, "about.eyebrow")}</p>
+                                <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-warm-cream tracking-tight leading-[1.1] mb-8">
                                     {settings?.ourStoryHeading || getText(customTexts, "about.heading") || (
                                         <>From the Market to <span className="text-gradient-luxury italic">Your Kitchen</span></>
                                     )}
@@ -120,7 +120,7 @@ export default function AboutSnippet({ customTexts }: { customTexts?: Record<str
                                         whileInView={{ opacity: 1, y: 0 }}
                                         viewport={{ once: true }}
                                         transition={{ delay: 0.1 * (idx + 1), duration: 0.6 }}
-                                        className="text-base md:text-lg text-brand-dark/50 leading-relaxed font-light"
+                                        className="text-base md:text-lg text-warm-cream/50 leading-relaxed font-light"
                                     >
                                         {paragraph}
                                     </motion.p>
@@ -156,10 +156,10 @@ export default function AboutSnippet({ customTexts }: { customTexts?: Record<str
                                         whileInView={{ opacity: 1, scale: 1 }}
                                         viewport={{ once: true }}
                                         transition={{ delay: idx * 0.08, duration: 0.5 }}
-                                        className="bg-white rounded-2xl p-6 border border-warm-tan/10 text-center hover:shadow-md hover:border-brand-red/10 transition-all duration-300"
+                                        className="bg-warm-cream/5 rounded-2xl p-6 border border-warm-cream/10 text-center hover:shadow-md hover:border-brand-green/20 transition-all duration-300"
                                     >
-                                        <p className="font-serif text-3xl md:text-4xl font-bold text-brand-dark mb-1">{stat.value}</p>
-                                        <p className="text-xs uppercase tracking-widest text-muted-brown">{stat.label}</p>
+                                        <p className="font-serif text-3xl md:text-4xl font-bold text-warm-cream mb-1">{stat.value}</p>
+                                        <p className="text-xs uppercase tracking-widest text-warm-cream/60">{stat.label}</p>
                                     </motion.div>
                                 ))}
                             </div>
@@ -170,10 +170,10 @@ export default function AboutSnippet({ customTexts }: { customTexts?: Record<str
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: 0.3, duration: 0.6 }}
-                                className="bg-deep-espresso rounded-2xl p-8 text-warm-cream relative overflow-hidden"
+                                className="bg-brand-green rounded-2xl p-8 text-warm-cream relative overflow-hidden"
                             >
-                                <div className="absolute top-0 right-0 w-40 h-40 bg-brand-red/10 rounded-full blur-[80px] pointer-events-none" />
-                                <Award size={28} strokeWidth={1.5} className="text-brand-red mb-4" />
+                                <div className="absolute top-0 right-0 w-40 h-40 bg-warm-cream/10 rounded-full blur-[80px] pointer-events-none" />
+                                <Award size={28} strokeWidth={1.5} className="text-warm-cream/80 mb-4" />
                                 <h3 className="font-serif text-xl font-bold mb-2">Our Promise</h3>
                                 <p className="text-warm-cream/60 text-sm leading-relaxed">
                                     {promiseText}
@@ -185,7 +185,7 @@ export default function AboutSnippet({ customTexts }: { customTexts?: Record<str
             </div>
 
             {/* ── Features Strip ── */}
-            <div className="bg-white py-20 md:py-24 px-6 border-t border-warm-tan/10">
+            <div className="bg-brand-black py-20 md:py-24 px-6 border-t border-warm-cream/5">
                 <div className="max-w-6xl mx-auto">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -194,8 +194,8 @@ export default function AboutSnippet({ customTexts }: { customTexts?: Record<str
                         transition={{ duration: 0.6 }}
                         className="text-center mb-14"
                     >
-                        <p className="text-[11px] uppercase tracking-[0.3em] text-brand-red mb-3 font-medium">{getText(customTexts, "about.features.eyebrow")}</p>
-                        <h2 className="font-serif text-2xl md:text-3xl text-brand-dark">{settings?.whyZutaYaHeading || getText(customTexts, "about.features.heading")}</h2>
+                        <p className="text-[11px] uppercase tracking-[0.3em] text-brand-green mb-3 font-medium">{getText(customTexts, "about.features.eyebrow")}</p>
+                        <h2 className="font-serif text-2xl md:text-3xl text-warm-cream">{settings?.whyZutaYaHeading || getText(customTexts, "about.features.heading")}</h2>
                     </motion.div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -206,13 +206,13 @@ export default function AboutSnippet({ customTexts }: { customTexts?: Record<str
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: idx * 0.1, duration: 0.5 }}
-                                className="group relative rounded-2xl p-6 border border-warm-tan/10 hover:border-brand-red/15 hover:shadow-lg hover:shadow-brand-red/[0.04] transition-all duration-500"
+                                className="group relative rounded-2xl p-6 border border-warm-cream/10 hover:border-brand-green/20 hover:shadow-lg hover:shadow-brand-green/[0.04] transition-all duration-500"
                             >
                                 <div className={`w-12 h-12 rounded-xl ${feature.accent.split(" ")[0]} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300`}>
                                     <feature.icon size={22} strokeWidth={1.5} className={feature.accent.split(" ")[1]} />
                                 </div>
-                                <h3 className="font-serif text-lg text-brand-dark mb-2">{feature.title}</h3>
-                                <p className="text-sm text-brand-dark/45 leading-relaxed font-light">{feature.desc}</p>
+                                <h3 className="font-serif text-lg text-warm-cream mb-2">{feature.title}</h3>
+                                <p className="text-sm text-warm-cream/45 leading-relaxed font-light">{feature.desc}</p>
                             </motion.div>
                         ))}
                     </div>
@@ -220,7 +220,7 @@ export default function AboutSnippet({ customTexts }: { customTexts?: Record<str
             </div>
 
             {/* ── Contact / CTA Strip ── */}
-            <div className="bg-warm-cream py-16 md:py-20 px-6 border-t border-warm-tan/10">
+            <div className="bg-brand-black py-16 md:py-20 px-6 border-t border-warm-cream/5">
                 <div className="max-w-6xl mx-auto">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {/* Contact info */}
@@ -230,16 +230,16 @@ export default function AboutSnippet({ customTexts }: { customTexts?: Record<str
                             viewport={{ once: true }}
                             className="space-y-4"
                         >
-                            <h3 className="font-serif text-xl text-brand-dark font-bold">Get in Touch</h3>
+                            <h3 className="font-serif text-xl text-warm-cream font-bold">Get in Touch</h3>
                             <div className="space-y-3">
-                                <a href={`tel:${BUSINESS_PHONE}`} className="flex items-center gap-3 text-sm text-brand-dark/60 hover:text-brand-red transition-colors">
+                                <a href={`tel:${BUSINESS_PHONE}`} className="flex items-center gap-3 text-sm text-warm-cream/60 hover:text-brand-red transition-colors">
                                     <Phone size={16} /> {BUSINESS_PHONE}
                                 </a>
                                 <a
                                     href={`https://wa.me/${WHATSAPP_NUMBER}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="flex items-center gap-3 text-sm text-brand-dark/60 hover:text-green-600 transition-colors"
+                                    className="flex items-center gap-3 text-sm text-warm-cream/60 hover:text-green-600 transition-colors"
                                 >
                                     <MessageCircle size={16} /> Chat on WhatsApp
                                 </a>
@@ -247,7 +247,7 @@ export default function AboutSnippet({ customTexts }: { customTexts?: Record<str
                                     href={`https://instagram.com/${INSTAGRAM_HANDLE.replace("@", "")}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="flex items-center gap-3 text-sm text-brand-dark/60 hover:text-pink-600 transition-colors"
+                                    className="flex items-center gap-3 text-sm text-warm-cream/60 hover:text-pink-600 transition-colors"
                                 >
                                     <Instagram size={16} /> {INSTAGRAM_HANDLE}
                                 </a>
@@ -262,12 +262,12 @@ export default function AboutSnippet({ customTexts }: { customTexts?: Record<str
                             transition={{ delay: 0.1 }}
                             className="space-y-4"
                         >
-                            <h3 className="font-serif text-xl text-brand-dark font-bold">Business Hours</h3>
+                            <h3 className="font-serif text-xl text-warm-cream font-bold">Business Hours</h3>
                             <div className="space-y-3">
-                                <div className="flex items-center gap-3 text-sm text-brand-dark/60">
+                                <div className="flex items-center gap-3 text-sm text-warm-cream/60">
                                     <Clock size={16} /> {BUSINESS_HOURS}
                                 </div>
-                                <div className="flex items-center gap-3 text-sm text-brand-dark/60">
+                                <div className="flex items-center gap-3 text-sm text-warm-cream/60">
                                     <MapPin size={16} /> Lagos, Nigeria
                                 </div>
                             </div>
@@ -281,7 +281,7 @@ export default function AboutSnippet({ customTexts }: { customTexts?: Record<str
                             transition={{ delay: 0.2 }}
                             className="flex flex-col justify-center"
                         >
-                            <p className="font-serif text-xl md:text-2xl text-brand-dark/70 italic leading-relaxed mb-6">
+                            <p className="font-serif text-xl md:text-2xl text-warm-cream/70 italic leading-relaxed mb-6">
                                 &ldquo;{signatureQuote}&rdquo;
                             </p>
                             <Link

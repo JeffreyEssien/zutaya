@@ -35,12 +35,12 @@ const ACTION_CONFIG: Record<string, { icon: typeof Shield; color: string; bg: st
     delete: { icon: Trash2, color: "text-red-600", bg: "bg-red-50", border: "border-red-200", label: "Deleted" },
     status_change: { icon: Package, color: "text-purple-600", bg: "bg-purple-50", border: "border-purple-200", label: "Status Changed" },
     payment_update: { icon: CreditCard, color: "text-teal-600", bg: "bg-teal-50", border: "border-teal-200", label: "Payment Updated" },
-    view: { icon: Eye, color: "text-gray-500", bg: "bg-gray-50", border: "border-gray-200", label: "Viewed" },
+    view: { icon: Eye, color: "text-warm-cream/40", bg: "bg-warm-cream/[0.03]", border: "border-warm-cream/10", label: "Viewed" },
     settings: { icon: Settings, color: "text-indigo-600", bg: "bg-indigo-50", border: "border-indigo-200", label: "Settings" },
 };
 
 function getActionConfig(action: string) {
-    return ACTION_CONFIG[action] || { icon: Shield, color: "text-brand-dark/50", bg: "bg-brand-dark/5", border: "border-brand-dark/10", label: action };
+    return ACTION_CONFIG[action] || { icon: Shield, color: "text-warm-cream/50", bg: "bg-brand-dark/5", border: "border-brand-dark/10", label: action };
 }
 
 function formatRelativeTime(dateStr: string) {
@@ -262,13 +262,13 @@ export default function AuditLogView({ initialLogs }: { initialLogs: AuditLog[] 
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h1 className="text-2xl sm:text-3xl font-serif text-brand-dark flex items-center gap-3">
+                    <h1 className="text-2xl sm:text-3xl font-serif text-warm-cream flex items-center gap-3">
                         <div className="w-10 h-10 bg-gradient-to-br from-brand-dark to-brand-dark/80 rounded-xl flex items-center justify-center shadow-lg shadow-brand-dark/10">
                             <Shield size={20} className="text-white" />
                         </div>
                         Audit Log
                     </h1>
-                    <p className="text-sm text-brand-dark/40 mt-1.5 ml-[52px]">
+                    <p className="text-sm text-warm-cream/40 mt-1.5 ml-[52px]">
                         Immutable record of all admin activity
                     </p>
                 </div>
@@ -287,7 +287,7 @@ export default function AuditLogView({ initialLogs }: { initialLogs: AuditLog[] 
 
             {/* Stat Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                <StatCard icon={Activity} label="Total Events" value={stats.total} color="text-brand-dark" bg="bg-brand-dark/5" />
+                <StatCard icon={Activity} label="Total Events" value={stats.total} color="text-warm-cream" bg="bg-brand-dark/5" />
                 <StatCard icon={Clock} label="Today" value={stats.todayCount} color="text-emerald-600" bg="bg-emerald-50" />
                 <StatCard icon={User} label="Active Admins" value={stats.uniqueAdminCount} color="text-blue-600" bg="bg-blue-50" />
                 <StatCard
@@ -300,19 +300,19 @@ export default function AuditLogView({ initialLogs }: { initialLogs: AuditLog[] 
             </div>
 
             {/* Filters */}
-            <div className="bg-white rounded-2xl border border-brand-dark/[0.06] p-4 space-y-3">
+            <div className="bg-white/[0.04] rounded-2xl border border-brand-dark/[0.06] p-4 space-y-3">
                 <div className="flex flex-col sm:flex-row gap-3">
                     <div className="relative flex-1">
-                        <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-dark/25" />
+                        <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-warm-cream/25" />
                         <input
                             type="text"
                             value={search}
                             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
                             placeholder="Search by name, email, action, details..."
-                            className="w-full pl-10 pr-4 py-2.5 border border-brand-dark/[0.08] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-dark/10 focus:border-brand-dark/20 bg-brand-dark/[0.02] placeholder:text-brand-dark/25"
+                            className="w-full pl-10 pr-4 py-2.5 border border-brand-dark/[0.08] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-dark/10 focus:border-brand-dark/20 bg-brand-dark/[0.02] placeholder:text-warm-cream/25"
                         />
                         {search && (
-                            <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-dark/25 hover:text-brand-dark/50">
+                            <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-warm-cream/25 hover:text-warm-cream/50">
                                 <X size={14} />
                             </button>
                         )}
@@ -356,7 +356,7 @@ export default function AuditLogView({ initialLogs }: { initialLogs: AuditLog[] 
                     <div className="flex items-center gap-2 flex-wrap">
                         {activeFilters > 0 && (
                             <>
-                                <span className="text-xs text-brand-dark/40">{filtered.length} of {logs.length} results</span>
+                                <span className="text-xs text-warm-cream/40">{filtered.length} of {logs.length} results</span>
                                 <button onClick={clearFilters} className="text-xs text-red-500 hover:text-red-700 flex items-center gap-1">
                                     <X size={10} /> Clear filters
                                 </button>
@@ -364,7 +364,7 @@ export default function AuditLogView({ initialLogs }: { initialLogs: AuditLog[] 
                         )}
                     </div>
                     <div className="flex items-center gap-1">
-                        <span className="text-[10px] text-brand-dark/30 uppercase tracking-wider mr-1">Sort:</span>
+                        <span className="text-[10px] text-warm-cream/30 uppercase tracking-wider mr-1">Sort:</span>
                         {(["created_at", "action", "admin_name"] as SortField[]).map((field) => (
                             <button
                                 key={field}
@@ -372,7 +372,7 @@ export default function AuditLogView({ initialLogs }: { initialLogs: AuditLog[] 
                                 className={`text-[11px] px-2 py-1 rounded-lg transition-colors ${
                                     sortField === field
                                         ? "bg-brand-dark text-white"
-                                        : "text-brand-dark/40 hover:bg-brand-dark/5"
+                                        : "text-warm-cream/40 hover:bg-brand-dark/5"
                                 }`}
                             >
                                 {field === "created_at" ? "Time" : field === "action" ? "Action" : "Admin"}
@@ -387,12 +387,12 @@ export default function AuditLogView({ initialLogs }: { initialLogs: AuditLog[] 
 
             {/* Timeline */}
             {filtered.length === 0 ? (
-                <div className="bg-white rounded-2xl border border-brand-dark/[0.06] p-20 text-center">
+                <div className="bg-white/[0.04] rounded-2xl border border-brand-dark/[0.06] p-20 text-center">
                     <div className="w-16 h-16 bg-brand-dark/5 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                        <Shield size={28} className="text-brand-dark/15" />
+                        <Shield size={28} className="text-warm-cream/15" />
                     </div>
-                    <p className="text-brand-dark/40 text-sm font-medium">No logs match your filters</p>
-                    <p className="text-brand-dark/25 text-xs mt-1">Try adjusting your search or filter criteria</p>
+                    <p className="text-warm-cream/40 text-sm font-medium">No logs match your filters</p>
+                    <p className="text-warm-cream/25 text-xs mt-1">Try adjusting your search or filter criteria</p>
                     {activeFilters > 0 && (
                         <Button variant="ghost" size="sm" onClick={clearFilters} className="mt-4">
                             Clear all filters
@@ -403,11 +403,11 @@ export default function AuditLogView({ initialLogs }: { initialLogs: AuditLog[] 
                 <div className="space-y-6">
                     {Array.from(grouped.entries()).map(([day, dayLogs]) => (
                         <div key={day}>
-                            <div className="flex items-center gap-3 mb-3 sticky top-0 bg-neutral-50/95 backdrop-blur-sm py-2 z-10">
-                                <Calendar size={13} className="text-brand-dark/30" />
-                                <h2 className="text-xs font-semibold text-brand-dark/50 uppercase tracking-wider">{day}</h2>
+                            <div className="flex items-center gap-3 mb-3 sticky top-0 bg-[#111]/95 backdrop-blur-sm py-2 z-10">
+                                <Calendar size={13} className="text-warm-cream/30" />
+                                <h2 className="text-xs font-semibold text-warm-cream/50 uppercase tracking-wider">{day}</h2>
                                 <div className="h-px flex-1 bg-brand-dark/[0.06]" />
-                                <span className="text-[10px] text-brand-dark/30 tabular-nums">{dayLogs.length} event{dayLogs.length !== 1 ? "s" : ""}</span>
+                                <span className="text-[10px] text-warm-cream/30 tabular-nums">{dayLogs.length} event{dayLogs.length !== 1 ? "s" : ""}</span>
                             </div>
 
                             {/* Timeline connector */}
@@ -429,8 +429,8 @@ export default function AuditLogView({ initialLogs }: { initialLogs: AuditLog[] 
 
                     {/* Pagination */}
                     {totalPages > 1 && (
-                        <div className="flex items-center justify-between bg-white rounded-2xl border border-brand-dark/[0.06] px-5 py-3">
-                            <span className="text-xs text-brand-dark/40">
+                        <div className="flex items-center justify-between bg-white/[0.04] rounded-2xl border border-brand-dark/[0.06] px-5 py-3">
+                            <span className="text-xs text-warm-cream/40">
                                 Page {page} of {totalPages} ({filtered.length} entries)
                             </span>
                             <div className="flex items-center gap-1.5">
@@ -454,7 +454,7 @@ export default function AuditLogView({ initialLogs }: { initialLogs: AuditLog[] 
                                             className={`w-8 h-8 text-xs rounded-lg transition-colors ${
                                                 page === pageNum
                                                     ? "bg-brand-dark text-white"
-                                                    : "hover:bg-brand-dark/5 text-brand-dark/50"
+                                                    : "hover:bg-brand-dark/5 text-warm-cream/50"
                                             }`}
                                         >
                                             {pageNum}
@@ -487,14 +487,14 @@ function StatCard({ icon: Icon, label, value, color, bg }: {
     bg: string;
 }) {
     return (
-        <div className="bg-white rounded-2xl border border-brand-dark/[0.06] p-4 hover:shadow-md hover:shadow-brand-dark/[0.03] transition-shadow">
+        <div className="bg-white/[0.04] rounded-2xl border border-brand-dark/[0.06] p-4 hover:shadow-md hover:shadow-brand-dark/[0.03] transition-shadow">
             <div className="flex items-center gap-3">
                 <div className={`w-9 h-9 ${bg} rounded-xl flex items-center justify-center shrink-0`}>
                     <Icon size={16} className={color} />
                 </div>
                 <div className="min-w-0">
-                    <p className="text-[10px] uppercase tracking-wider text-brand-dark/35 font-medium">{label}</p>
-                    <p className="text-lg font-semibold text-brand-dark truncate">{value}</p>
+                    <p className="text-[10px] uppercase tracking-wider text-warm-cream/35 font-medium">{label}</p>
+                    <p className="text-lg font-semibold text-warm-cream truncate">{value}</p>
                 </div>
             </div>
         </div>
@@ -518,7 +518,7 @@ function LogEntry({ log, expanded, onToggle }: { log: AuditLog; expanded: boolea
 
             <div
                 onClick={onToggle}
-                className={`bg-white rounded-xl border transition-all cursor-pointer group ${
+                className={`bg-white/[0.04] rounded-xl border transition-all cursor-pointer group ${
                     expanded
                         ? "border-brand-dark/15 shadow-md shadow-brand-dark/[0.04]"
                         : "border-brand-dark/[0.06] hover:border-brand-dark/10 hover:shadow-sm hover:shadow-brand-dark/[0.02]"
@@ -533,7 +533,7 @@ function LogEntry({ log, expanded, onToggle }: { log: AuditLog; expanded: boolea
                     {/* Main content */}
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-sm font-medium text-brand-dark">{log.admin_name}</span>
+                            <span className="text-sm font-medium text-warm-cream">{log.admin_name}</span>
                             <Badge variant={
                                 log.action === "delete" ? "danger"
                                     : log.action === "login" ? "success"
@@ -543,24 +543,24 @@ function LogEntry({ log, expanded, onToggle }: { log: AuditLog; expanded: boolea
                                 {config.label}
                             </Badge>
                             {log.entity_type && (
-                                <span className="text-xs text-brand-dark/35 font-medium">
+                                <span className="text-xs text-warm-cream/35 font-medium">
                                     {log.entity_type}
-                                    {log.entity_id && <span className="text-brand-dark/25 font-mono"> #{log.entity_id.slice(0, 8)}</span>}
+                                    {log.entity_id && <span className="text-warm-cream/25 font-mono"> #{log.entity_id.slice(0, 8)}</span>}
                                 </span>
                             )}
                         </div>
                         {log.details && !expanded && (
-                            <p className="text-xs text-brand-dark/40 mt-0.5 truncate max-w-md">{log.details}</p>
+                            <p className="text-xs text-warm-cream/40 mt-0.5 truncate max-w-md">{log.details}</p>
                         )}
                     </div>
 
                     {/* Right side */}
                     <div className="flex items-center gap-3 shrink-0">
                         <div className="text-right hidden sm:block">
-                            <p className="text-[10px] text-brand-dark/30 font-mono">{time}</p>
-                            <p className="text-[10px] text-brand-dark/20">{relative}</p>
+                            <p className="text-[10px] text-warm-cream/30 font-mono">{time}</p>
+                            <p className="text-[10px] text-warm-cream/20">{relative}</p>
                         </div>
-                        <div className="text-brand-dark/20 group-hover:text-brand-dark/40 transition-colors">
+                        <div className="text-warm-cream/20 group-hover:text-warm-cream/40 transition-colors">
                             {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                         </div>
                     </div>
@@ -582,8 +582,8 @@ function LogEntry({ log, expanded, onToggle }: { log: AuditLog; expanded: boolea
                         </div>
                         {log.details && (
                             <div className="mt-3 pt-3 border-t border-brand-dark/[0.04]">
-                                <p className="text-[10px] text-brand-dark/30 uppercase tracking-wider font-medium mb-1">Details</p>
-                                <p className="text-xs text-brand-dark/60 leading-relaxed whitespace-pre-wrap">{log.details}</p>
+                                <p className="text-[10px] text-warm-cream/30 uppercase tracking-wider font-medium mb-1">Details</p>
+                                <p className="text-xs text-warm-cream/60 leading-relaxed whitespace-pre-wrap">{log.details}</p>
                             </div>
                         )}
                     </div>
@@ -596,8 +596,8 @@ function LogEntry({ log, expanded, onToggle }: { log: AuditLog; expanded: boolea
 function DetailRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
     return (
         <div>
-            <p className="text-[10px] text-brand-dark/30 uppercase tracking-wider font-medium">{label}</p>
-            <p className={`text-xs text-brand-dark/70 mt-0.5 ${mono ? "font-mono" : ""}`}>{value}</p>
+            <p className="text-[10px] text-warm-cream/30 uppercase tracking-wider font-medium">{label}</p>
+            <p className={`text-xs text-warm-cream/70 mt-0.5 ${mono ? "font-mono" : ""}`}>{value}</p>
         </div>
     );
 }

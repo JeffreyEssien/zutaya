@@ -121,7 +121,7 @@ function NavLinks({ pathname }: { pathname: string }) {
                             href={link.href}
                             className={cn(
                                 "flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors relative",
-                                active ? "bg-brand-purple text-white" : "text-white/60 hover:text-white hover:bg-white/5",
+                                active ? "bg-brand-green text-white" : "text-white/60 hover:text-white hover:bg-white/5",
                             )}
                         >
                             {active && (

@@ -318,9 +318,9 @@ export async function sendOrderDeliveredEmail(order: Order): Promise<void> {
     title: "Your Order Has Been Delivered!",
     accentColor: "#C0392B",
     accentBg: "#f5f3ff",
-    message: "Your order has been successfully delivered! We hope you love your new items.",
+    message: "Your fresh cuts have arrived! We hope every bite is as premium as you deserve.",
     statusLabel: "Delivered",
-    nextStep: "If you have any questions about your order, don't hesitate to reach out. Thank you for shopping with us! 💜",
+    nextStep: "Store your meats properly for maximum freshness. Questions about your order? We're just a message away. Thank you for choosing Zúta Ya! 🥩",
   });
 
   try {
@@ -462,7 +462,7 @@ export async function sendReviewRequestEmail(order: Order): Promise<void> {
       <div style="text-align: center;">
         <a href="https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hi! I just received my order *${order.id}* and I wanted to share some feedback: `)}" style="display: inline-block; background: #25D366; color: white; text-decoration: none; font-size: 14px; font-weight: 600; padding: 12px 28px; border-radius: 25px; margin-bottom: 12px;">💬 Share Feedback on WhatsApp</a>
         <br>
-        <a href="https://wa.me/${WHATSAPP_NUMBER}?text=${reorderMessage}" style="display: inline-block; background: #C0392B; color: white; text-decoration: none; font-size: 14px; font-weight: 600; padding: 12px 28px; border-radius: 25px;">🔄 Reorder on WhatsApp</a>
+        <a href="${SITE_URL}/shop" style="display: inline-block; background: #C0392B; color: white; text-decoration: none; font-size: 14px; font-weight: 600; padding: 12px 28px; border-radius: 25px;">🔄 Reorder via Our Shop</a>
       </div>
     </div>
 
@@ -748,7 +748,7 @@ export async function sendSubscriptionConfirmedEmail(
 
     <div style="background: white; padding: 40px 32px; border-left: 1px solid #f3ede3; border-right: 1px solid #f3ede3;">
       <div style="text-align: center; margin-bottom: 24px;">
-        <div style="display: inline-block; width: 72px; height: 72px; line-height: 72px; font-size: 36px; background: #27AE6020; border-radius: 50%; text-align: center;">
+        <div style="display: inline-block; width: 72px; height: 72px; line-height: 72px; font-size: 36px; background: #355E3B20; border-radius: 50%; text-align: center;">
           ✅
         </div>
       </div>
@@ -909,7 +909,7 @@ export async function sendDeliveryReminderEmail(order: Order): Promise<void> {
   </div>
   <div style="background:white;padding:40px 32px;border-left:1px solid #f3ede3;border-right:1px solid #f3ede3;">
     <div style="text-align:center;margin-bottom:24px;">
-      <div style="display:inline-block;width:72px;height:72px;line-height:72px;font-size:36px;background:#27AE6020;border-radius:50%;">🚚</div>
+      <div style="display:inline-block;width:72px;height:72px;line-height:72px;font-size:36px;background:#355E3B20;border-radius:50%;">🚚</div>
     </div>
     <h2 style="font-size:22px;color:#1A1A1A;text-align:center;margin:0 0 8px;font-family:Georgia,serif;">Heads Up, ${firstName}!</h2>
     <p style="font-size:15px;color:#7A5C3A;margin:0 0 24px;line-height:1.7;text-align:center;">

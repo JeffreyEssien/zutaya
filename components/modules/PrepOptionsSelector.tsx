@@ -26,7 +26,7 @@ export default function PrepOptionsSelector({ options, selected, onChange }: Pre
 
     return (
         <div className="space-y-3">
-            <h4 className="text-sm font-semibold text-brand-dark">Prep Options</h4>
+            <h4 className="text-sm font-semibold text-warm-cream">Prep Options</h4>
             <div className="space-y-2">
                 {options.map((option) => {
                     const isChecked = selected.some((s) => s.id === option.id);
@@ -36,7 +36,7 @@ export default function PrepOptionsSelector({ options, selected, onChange }: Pre
                             className={`flex items-center justify-between px-4 py-3 rounded-xl border cursor-pointer transition-all ${
                                 isChecked
                                     ? "border-brand-red/30 bg-brand-red/5"
-                                    : "border-warm-tan/20 hover:border-warm-tan/40"
+                                    : "border-warm-cream/20 hover:border-warm-cream/40"
                             }`}
                         >
                             <div className="flex items-center gap-3">
@@ -44,11 +44,11 @@ export default function PrepOptionsSelector({ options, selected, onChange }: Pre
                                     type="checkbox"
                                     checked={isChecked}
                                     onChange={() => toggle(option)}
-                                    className="w-4 h-4 rounded border-warm-tan/30 text-brand-red focus:ring-brand-red/20"
+                                    className="w-4 h-4 rounded border-warm-cream/30 text-brand-red focus:ring-brand-red/20"
                                 />
-                                <span className="text-sm text-brand-dark">{option.label}</span>
+                                <span className="text-sm text-warm-cream">{option.label}</span>
                             </div>
-                            <span className="text-sm text-muted-brown font-medium">
+                            <span className="text-sm text-warm-cream/40 font-medium">
                                 +{formatCurrency(option.extraFee)}
                             </span>
                         </label>

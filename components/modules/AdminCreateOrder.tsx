@@ -172,22 +172,22 @@ export default function AdminCreateOrder({ onClose, onSuccess }: AdminCreateOrde
     }
 
     const inputClass =
-        "w-full px-3 py-2.5 border border-brand-lilac/20 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple/30 bg-white transition-all";
-    const labelClass = "block text-xs font-medium text-brand-dark/60 mb-1.5";
-    const sectionClass = "bg-white rounded-xl border border-brand-lilac/10 p-5";
+        "w-full px-3 py-2.5 border border-warm-cream/20 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green/30 bg-white/[0.04] transition-all";
+    const labelClass = "block text-xs font-medium text-warm-cream/60 mb-1.5";
+    const sectionClass = "bg-white/[0.04] rounded-xl border border-warm-cream/10 p-5";
 
     return (
         <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/30 backdrop-blur-sm p-4 sm:p-8">
-            <div className="bg-neutral-50 rounded-2xl shadow-2xl w-full max-w-3xl my-4 border border-brand-lilac/10 overflow-hidden">
+            <div className="bg-[#111] rounded-2xl shadow-2xl w-full max-w-3xl my-4 border border-warm-cream/10 overflow-hidden">
                 {/* Header */}
-                <div className="sticky top-0 z-10 bg-white border-b border-brand-lilac/10 px-6 py-4 flex items-center justify-between">
+                <div className="sticky top-0 z-10 bg-white/[0.04] border-b border-warm-cream/10 px-6 py-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-brand-purple/10 rounded-lg">
-                            <ShoppingBag size={18} className="text-brand-purple" />
+                        <div className="p-2 bg-brand-green/10 rounded-lg">
+                            <ShoppingBag size={18} className="text-brand-green" />
                         </div>
                         <div>
-                            <h2 className="font-serif text-lg text-brand-dark">Create Order</h2>
-                            <p className="text-xs text-brand-dark/40">Manually create a new order</p>
+                            <h2 className="font-serif text-lg text-warm-cream">Create Order</h2>
+                            <p className="text-xs text-warm-cream/40">Manually create a new order</p>
                         </div>
                     </div>
                     <button
@@ -195,7 +195,7 @@ export default function AdminCreateOrder({ onClose, onSuccess }: AdminCreateOrde
                         onClick={onClose}
                         className="p-2 hover:bg-neutral-100 rounded-lg transition-colors cursor-pointer"
                     >
-                        <X size={18} className="text-brand-dark/40" />
+                        <X size={18} className="text-warm-cream/40" />
                     </button>
                 </div>
 
@@ -208,8 +208,8 @@ export default function AdminCreateOrder({ onClose, onSuccess }: AdminCreateOrde
 
                     {/* ── Customer Info ── */}
                     <div className={sectionClass}>
-                        <h3 className="text-sm font-semibold text-brand-dark flex items-center gap-2 mb-4">
-                            <User size={14} className="text-brand-purple" /> Customer Information
+                        <h3 className="text-sm font-semibold text-warm-cream flex items-center gap-2 mb-4">
+                            <User size={14} className="text-brand-green" /> Customer Information
                         </h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="sm:col-span-2">
@@ -229,8 +229,8 @@ export default function AdminCreateOrder({ onClose, onSuccess }: AdminCreateOrde
 
                     {/* ── Shipping Address ── */}
                     <div className={sectionClass}>
-                        <h3 className="text-sm font-semibold text-brand-dark flex items-center gap-2 mb-4">
-                            <MapPin size={14} className="text-brand-purple" /> Shipping Address
+                        <h3 className="text-sm font-semibold text-warm-cream flex items-center gap-2 mb-4">
+                            <MapPin size={14} className="text-brand-green" /> Shipping Address
                         </h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
@@ -263,22 +263,22 @@ export default function AdminCreateOrder({ onClose, onSuccess }: AdminCreateOrde
                     {/* ── Items ── */}
                     <div className={sectionClass}>
                         <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-sm font-semibold text-brand-dark flex items-center gap-2">
-                                <Package size={14} className="text-brand-purple" /> Order Items
+                            <h3 className="text-sm font-semibold text-warm-cream flex items-center gap-2">
+                                <Package size={14} className="text-brand-green" /> Order Items
                             </h3>
                             <button
                                 type="button"
                                 onClick={addItem}
-                                className="flex items-center gap-1 text-xs text-brand-purple hover:text-brand-dark font-medium transition-colors cursor-pointer"
+                                className="flex items-center gap-1 text-xs text-brand-green hover:text-warm-cream font-medium transition-colors cursor-pointer"
                             >
                                 <Plus size={14} /> Add Item
                             </button>
                         </div>
                         <div className="space-y-3">
                             {items.map((item, idx) => (
-                                <div key={idx} className="bg-neutral-50 rounded-lg p-4 border border-brand-lilac/10">
+                                <div key={idx} className="bg-[#111] rounded-lg p-4 border border-warm-cream/10">
                                     <div className="flex items-start justify-between gap-2 mb-3">
-                                        <span className="text-xs font-medium text-brand-dark/40">Item {idx + 1}</span>
+                                        <span className="text-xs font-medium text-warm-cream/40">Item {idx + 1}</span>
                                         {items.length > 1 && (
                                             <button
                                                 type="button"
@@ -335,7 +335,7 @@ export default function AdminCreateOrder({ onClose, onSuccess }: AdminCreateOrde
                                             </div>
                                         </div>
                                     </div>
-                                    <p className="text-xs text-brand-dark/30 mt-2 text-right">
+                                    <p className="text-xs text-warm-cream/30 mt-2 text-right">
                                         Line total: {formatCurrency(item.unitPrice * item.quantity)}
                                     </p>
                                 </div>
@@ -345,8 +345,8 @@ export default function AdminCreateOrder({ onClose, onSuccess }: AdminCreateOrde
 
                     {/* ── Financials ── */}
                     <div className={sectionClass}>
-                        <h3 className="text-sm font-semibold text-brand-dark flex items-center gap-2 mb-4">
-                            <CreditCard size={14} className="text-brand-purple" /> Financials & Payment
+                        <h3 className="text-sm font-semibold text-warm-cream flex items-center gap-2 mb-4">
+                            <CreditCard size={14} className="text-brand-green" /> Financials & Payment
                         </h3>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
                             <div>
@@ -364,8 +364,8 @@ export default function AdminCreateOrder({ onClose, onSuccess }: AdminCreateOrde
                         </div>
 
                         {/* Totals summary */}
-                        <div className="bg-neutral-50 rounded-lg p-4 border border-brand-lilac/10 mb-4">
-                            <div className="flex justify-between text-sm text-brand-dark/60 mb-1">
+                        <div className="bg-[#111] rounded-lg p-4 border border-warm-cream/10 mb-4">
+                            <div className="flex justify-between text-sm text-warm-cream/60 mb-1">
                                 <span>Subtotal</span>
                                 <span>{formatCurrency(subtotal)}</span>
                             </div>
@@ -375,11 +375,11 @@ export default function AdminCreateOrder({ onClose, onSuccess }: AdminCreateOrde
                                     <span>-{formatCurrency(discountTotal)}</span>
                                 </div>
                             )}
-                            <div className="flex justify-between text-sm text-brand-dark/60 mb-2">
+                            <div className="flex justify-between text-sm text-warm-cream/60 mb-2">
                                 <span>Shipping</span>
                                 <span>{shippingFee === 0 ? "Free" : formatCurrency(shippingFee)}</span>
                             </div>
-                            <div className="border-t border-brand-lilac/10 pt-2 flex justify-between text-base font-bold text-brand-dark">
+                            <div className="border-t border-warm-cream/10 pt-2 flex justify-between text-base font-bold text-warm-cream">
                                 <span>Total</span>
                                 <span>{formatCurrency(total)}</span>
                             </div>
@@ -414,8 +414,8 @@ export default function AdminCreateOrder({ onClose, onSuccess }: AdminCreateOrde
 
                     {/* ── Delivery ── */}
                     <div className={sectionClass}>
-                        <h3 className="text-sm font-semibold text-brand-dark flex items-center gap-2 mb-4">
-                            <Truck size={14} className="text-brand-purple" /> Delivery Details
+                        <h3 className="text-sm font-semibold text-warm-cream flex items-center gap-2 mb-4">
+                            <Truck size={14} className="text-brand-green" /> Delivery Details
                         </h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
@@ -434,8 +434,8 @@ export default function AdminCreateOrder({ onClose, onSuccess }: AdminCreateOrde
 
                     {/* ── Notes ── */}
                     <div className={sectionClass}>
-                        <h3 className="text-sm font-semibold text-brand-dark flex items-center gap-2 mb-4">
-                            <FileText size={14} className="text-brand-purple" /> Notes
+                        <h3 className="text-sm font-semibold text-warm-cream flex items-center gap-2 mb-4">
+                            <FileText size={14} className="text-brand-green" /> Notes
                         </h3>
                         <textarea
                             className={`${inputClass} min-h-[80px] resize-y`}

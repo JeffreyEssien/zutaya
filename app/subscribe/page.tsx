@@ -125,34 +125,35 @@ export default function SubscribePage() {
 
     if (success) {
         return (
-            <div className="min-h-screen bg-warm-cream flex items-center justify-center px-4">
-                <div className="bg-white rounded-2xl p-10 shadow-lg max-w-lg w-full text-center border border-warm-tan/20 animate-scaleIn">
+            <div className="min-h-screen bg-brand-black flex items-center justify-center px-4">
+                <div className="relative bg-gradient-to-br from-[#1e1e1e] to-[#252525] rounded-2xl p-10 shadow-2xl max-w-lg w-full text-center border border-warm-cream/[0.06] animate-scaleIn overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-t from-brand-green/5 via-transparent to-transparent" />
                     {/* Success animation */}
                     <div className="relative w-24 h-24 mx-auto mb-6">
                         <div className="absolute inset-0 bg-brand-green/10 rounded-full animate-ping" />
-                        <div className="relative w-24 h-24 bg-brand-green/10 rounded-full flex items-center justify-center">
+                        <div className="relative w-24 h-24 bg-brand-green/10 rounded-full flex items-center justify-center border border-brand-green/20">
                             <Check size={40} className="text-brand-green" strokeWidth={2.5} />
                         </div>
                     </div>
-                    <h2 className="font-serif text-3xl font-bold text-brand-black mb-3">
+                    <h2 className="font-serif text-3xl font-bold text-warm-cream mb-3">
                         Subscription Confirmed!
                     </h2>
-                    <p className="text-muted-brown mb-2 leading-relaxed">
-                        Your <span className="font-semibold text-brand-black">{
+                    <p className="text-warm-cream/40 mb-2 leading-relaxed">
+                        Your <span className="font-semibold text-warm-cream">{
                             form.frequency === "weekly" ? "weekly" : form.frequency === "biweekly" ? "bi-weekly" : "monthly"
                         }</span> meat box is all set up.
                     </p>
-                    <p className="text-sm text-muted-brown/70 mb-8">
+                    <p className="text-sm text-warm-cream/40/70 mb-8">
                         We&apos;ll send you a confirmation email with all the details shortly.
                     </p>
 
-                    <div className="bg-warm-cream/50 rounded-xl p-4 mb-8 border border-warm-tan/10">
+                    <div className="bg-warm-cream/5 rounded-xl p-4 mb-8 border border-warm-cream/10">
                         <div className="flex items-center justify-between text-sm">
-                            <span className="text-muted-brown">Items per delivery</span>
-                            <span className="font-semibold text-brand-black">{items.length} products</span>
+                            <span className="text-warm-cream/40">Items per delivery</span>
+                            <span className="font-semibold text-warm-cream">{items.length} products</span>
                         </div>
                         <div className="flex items-center justify-between text-sm mt-2">
-                            <span className="text-muted-brown">Estimated per delivery</span>
+                            <span className="text-warm-cream/40">Estimated per delivery</span>
                             <span className="font-bold text-brand-red text-lg">&#8358;{subtotal.toLocaleString()}</span>
                         </div>
                     </div>
@@ -160,13 +161,13 @@ export default function SubscribePage() {
                     <div className="flex flex-col sm:flex-row gap-3 justify-center">
                         <Link
                             href="/"
-                            className="inline-flex items-center justify-center gap-2 bg-brand-red text-white px-6 py-3 rounded-xl font-semibold hover:bg-brand-red/90 transition-colors"
+                            className="inline-flex items-center justify-center gap-2 bg-brand-green text-white px-6 py-3 rounded-xl font-semibold hover:bg-brand-green/90 transition-colors shadow-lg shadow-brand-green/20"
                         >
                             Back to Home
                         </Link>
                         <Link
                             href="/shop"
-                            className="inline-flex items-center justify-center gap-2 border border-warm-tan/30 text-brand-black px-6 py-3 rounded-xl font-semibold hover:bg-warm-cream transition-colors"
+                            className="inline-flex items-center justify-center gap-2 border border-warm-cream/10 text-warm-cream px-6 py-3 rounded-xl font-semibold hover:bg-warm-cream/10 transition-colors"
                         >
                             Continue Shopping
                         </Link>
@@ -178,35 +179,38 @@ export default function SubscribePage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-warm-cream flex items-center justify-center">
+            <div className="min-h-screen bg-brand-black flex items-center justify-center">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-brand-red mx-auto mb-4" />
-                    <p className="text-muted-brown text-sm">Loading products...</p>
+                    <p className="text-warm-cream/40 text-sm">Loading products...</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-warm-cream">
+        <div className="min-h-screen bg-brand-black">
             {/* Hero Header */}
-            <div className="bg-brand-black text-white">
-                <div className="max-w-5xl mx-auto px-4 py-16 md:py-20 text-center">
-                    <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/10 rounded-full text-xs text-warm-tan uppercase tracking-widest mb-6">
+            <div className="relative overflow-hidden bg-gradient-to-br from-brand-green via-brand-green/90 to-brand-black text-warm-cream">
+                <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgba(253,246,236,0.5) 0.5px, transparent 0)", backgroundSize: "24px 24px" }} />
+                <div className="absolute top-0 right-0 w-96 h-96 bg-brand-red/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3" />
+                <div className="absolute bottom-0 left-0 w-64 h-64 bg-warm-cream/5 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/4" />
+                <div className="max-w-5xl mx-auto px-4 py-16 md:py-20 text-center relative z-10">
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/[0.06] backdrop-blur-sm rounded-full text-xs text-warm-cream/70 uppercase tracking-widest mb-6 border border-white/10">
                         <RefreshCw size={12} />
                         Subscribe & Save
                     </div>
                     <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4 tracking-tight">
                         Your Recurring Meat Box
                     </h1>
-                    <p className="text-white/60 max-w-xl mx-auto text-lg leading-relaxed">
+                    <p className="text-warm-cream/50 max-w-xl mx-auto text-lg leading-relaxed">
                         Choose your favourite cuts, set your delivery schedule, and never run out of premium meat again.
                     </p>
                 </div>
             </div>
 
             {/* Progress Steps */}
-            <div className="bg-white border-b border-warm-tan/10 sticky top-0 z-30">
+            <div className="bg-[#1a1a1a] border-b border-warm-cream/[0.06] sticky top-0 z-30">
                 <div className="max-w-5xl mx-auto px-4 py-4">
                     <div className="flex items-center justify-center gap-2 md:gap-4">
                         {[
@@ -219,7 +223,7 @@ export default function SubscribePage() {
                                 {idx > 0 && (
                                     <div
                                         className={`hidden sm:block w-8 md:w-12 h-[2px] ${
-                                            step > idx ? "bg-brand-red" : "bg-warm-tan/20"
+                                            step > idx ? "bg-brand-green" : "bg-warm-cream/10"
                                         } transition-colors`}
                                     />
                                 )}
@@ -227,12 +231,12 @@ export default function SubscribePage() {
                                     onClick={() => {
                                         if (s.num <= step) setStep(s.num);
                                     }}
-                                    className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                                    className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer ${
                                         step === s.num
-                                            ? "bg-brand-red text-white"
+                                            ? "bg-brand-green text-white"
                                             : step > s.num
                                               ? "bg-brand-green/10 text-brand-green"
-                                              : "bg-warm-cream text-muted-brown"
+                                              : "bg-warm-cream/5 text-warm-cream/30"
                                     }`}
                                 >
                                     {step > s.num ? (
@@ -258,17 +262,17 @@ export default function SubscribePage() {
                             {step === 1 && (
                                 <div className="space-y-6 animate-fade-in">
                                     <div>
-                                        <h2 className="font-serif text-2xl font-bold text-brand-black mb-1">
+                                        <h2 className="font-serif text-2xl font-bold text-warm-cream mb-1">
                                             Choose Your Cuts
                                         </h2>
-                                        <p className="text-muted-brown text-sm">
+                                        <p className="text-warm-cream/40 text-sm">
                                             Select the products you&apos;d like in every delivery.
                                         </p>
                                     </div>
 
                                     {/* Frequency Selector */}
                                     <div>
-                                        <label className="block text-xs font-semibold text-muted-brown uppercase tracking-wider mb-3">
+                                        <label className="block text-xs font-semibold text-warm-cream/40 uppercase tracking-wider mb-3">
                                             Delivery Frequency
                                         </label>
                                         <div className="grid grid-cols-3 gap-3">
@@ -279,17 +283,17 @@ export default function SubscribePage() {
                                                     onClick={() => setForm((p) => ({ ...p, frequency: opt.value }))}
                                                     className={`relative p-4 rounded-xl border-2 text-left transition-all ${
                                                         form.frequency === opt.value
-                                                            ? "border-brand-red bg-brand-red/5"
-                                                            : "border-warm-tan/20 hover:border-warm-tan/40 bg-white"
+                                                            ? "border-brand-green bg-brand-green/5"
+                                                            : "border-warm-cream/[0.08] hover:border-warm-cream/15 bg-[#1e1e1e]"
                                                     }`}
                                                 >
                                                     {opt.savings && (
-                                                        <span className="absolute -top-2 right-3 px-2 py-0.5 bg-brand-red text-white text-[10px] font-bold rounded-full uppercase">
+                                                        <span className="absolute -top-2 right-3 px-2 py-0.5 bg-brand-green text-white text-[10px] font-bold rounded-full uppercase shadow-md shadow-brand-green/20">
                                                             {opt.savings}
                                                         </span>
                                                     )}
-                                                    <p className="font-semibold text-brand-black text-sm">{opt.label}</p>
-                                                    <p className="text-xs text-muted-brown mt-0.5">{opt.desc}</p>
+                                                    <p className="font-semibold text-warm-cream text-sm">{opt.label}</p>
+                                                    <p className="text-xs text-warm-cream/40 mt-0.5">{opt.desc}</p>
                                                 </button>
                                             ))}
                                         </div>
@@ -302,9 +306,9 @@ export default function SubscribePage() {
                                             value={searchQuery}
                                             onChange={(e) => setSearchQuery(e.target.value)}
                                             placeholder="Search products..."
-                                            className="w-full bg-white border border-warm-tan/20 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red/40 pl-10"
+                                            className="w-full bg-[#1e1e1e] border border-warm-cream/[0.08] rounded-xl px-4 py-3 text-sm text-warm-cream placeholder:text-warm-cream/25 focus:outline-none focus:border-brand-green/30 focus:ring-2 focus:ring-brand-green/10 pl-10"
                                         />
-                                        <Package size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-brown/40" />
+                                        <Package size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-warm-cream/40/40" />
                                     </div>
 
                                     {/* Product Grid */}
@@ -317,10 +321,10 @@ export default function SubscribePage() {
                                                     type="button"
                                                     onClick={() => addItem(product)}
                                                     disabled={isSelected}
-                                                    className={`group relative text-left p-4 rounded-xl border-2 transition-all ${
+                                                    className={`group relative text-left p-4 rounded-xl border-2 transition-all duration-300 ${
                                                         isSelected
                                                             ? "border-brand-green bg-brand-green/5 cursor-default"
-                                                            : "border-transparent bg-white hover:border-brand-red/30 hover:shadow-sm"
+                                                            : "border-transparent bg-[#1e1e1e] hover:border-brand-green/20 hover:shadow-[0_4px_20px_rgba(53,94,59,0.08)]"
                                                     }`}
                                                 >
                                                     {isSelected && (
@@ -329,7 +333,7 @@ export default function SubscribePage() {
                                                         </div>
                                                     )}
                                                     {product.images?.[0] && (
-                                                        <div className="w-full aspect-square rounded-lg bg-warm-cream mb-3 overflow-hidden">
+                                                        <div className="w-full aspect-square rounded-lg bg-brand-black mb-3 overflow-hidden">
                                                             <img
                                                                 src={product.images[0]}
                                                                 alt={product.name}
@@ -337,7 +341,7 @@ export default function SubscribePage() {
                                                             />
                                                         </div>
                                                     )}
-                                                    <p className="text-sm font-medium text-brand-black truncate">
+                                                    <p className="text-sm font-medium text-warm-cream truncate">
                                                         {product.name}
                                                     </p>
                                                     <p className="text-xs text-brand-red font-bold mt-0.5">
@@ -363,7 +367,7 @@ export default function SubscribePage() {
                                         type="button"
                                         disabled={!canProceedStep1}
                                         onClick={() => setStep(2)}
-                                        className="w-full flex items-center justify-center gap-2 bg-brand-red text-white py-3.5 rounded-xl font-semibold hover:bg-brand-red/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                                        className="w-full flex items-center justify-center gap-2 bg-brand-green text-white py-3.5 rounded-xl font-semibold hover:bg-brand-green/90 shadow-lg shadow-brand-green/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                                     >
                                         Continue
                                         <ArrowRight size={18} />
@@ -375,18 +379,18 @@ export default function SubscribePage() {
                             {step === 2 && (
                                 <div className="space-y-6 animate-fade-in">
                                     <div>
-                                        <h2 className="font-serif text-2xl font-bold text-brand-black mb-1">
+                                        <h2 className="font-serif text-2xl font-bold text-warm-cream mb-1">
                                             Your Details
                                         </h2>
-                                        <p className="text-muted-brown text-sm">
+                                        <p className="text-warm-cream/40 text-sm">
                                             Tell us how to reach you about your subscription.
                                         </p>
                                     </div>
 
-                                    <div className="bg-white rounded-xl p-6 border border-warm-tan/20 space-y-5">
+                                    <div className="bg-gradient-to-br from-[#1e1e1e] to-[#252525] rounded-xl p-6 border border-warm-cream/[0.06] space-y-5">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-xs font-semibold text-muted-brown uppercase tracking-wider mb-2">
+                                                <label className="block text-xs font-semibold text-warm-cream/40 uppercase tracking-wider mb-2">
                                                     Full Name *
                                                 </label>
                                                 <input
@@ -395,11 +399,11 @@ export default function SubscribePage() {
                                                     onChange={(e) => setForm((p) => ({ ...p, customerName: e.target.value }))}
                                                     required
                                                     placeholder="e.g. Amara Obi"
-                                                    className="w-full border border-warm-tan/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red/40"
+                                                    className="w-full bg-[#1e1e1e] border border-warm-cream/[0.08] rounded-xl px-4 py-3 text-sm text-warm-cream placeholder:text-warm-cream/25 focus:outline-none focus:border-brand-green/30 focus:ring-2 focus:ring-brand-green/10"
                                                 />
                                             </div>
                                             <div>
-                                                <label className="block text-xs font-semibold text-muted-brown uppercase tracking-wider mb-2">
+                                                <label className="block text-xs font-semibold text-warm-cream/40 uppercase tracking-wider mb-2">
                                                     Email Address *
                                                 </label>
                                                 <input
@@ -408,12 +412,12 @@ export default function SubscribePage() {
                                                     onChange={(e) => setForm((p) => ({ ...p, customerEmail: e.target.value }))}
                                                     required
                                                     placeholder="amara@email.com"
-                                                    className="w-full border border-warm-tan/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red/40"
+                                                    className="w-full bg-[#1e1e1e] border border-warm-cream/[0.08] rounded-xl px-4 py-3 text-sm text-warm-cream placeholder:text-warm-cream/25 focus:outline-none focus:border-brand-green/30 focus:ring-2 focus:ring-brand-green/10"
                                                 />
                                             </div>
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-semibold text-muted-brown uppercase tracking-wider mb-2">
+                                            <label className="block text-xs font-semibold text-warm-cream/40 uppercase tracking-wider mb-2">
                                                 Phone Number
                                             </label>
                                             <input
@@ -421,7 +425,7 @@ export default function SubscribePage() {
                                                 value={form.phone}
                                                 onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
                                                 placeholder="+234 xxx xxxx xxx"
-                                                className="w-full border border-warm-tan/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red/40"
+                                                className="w-full bg-[#1e1e1e] border border-warm-cream/[0.08] rounded-xl px-4 py-3 text-sm text-warm-cream placeholder:text-warm-cream/25 focus:outline-none focus:border-brand-green/30 focus:ring-2 focus:ring-brand-green/10"
                                             />
                                         </div>
                                     </div>
@@ -430,7 +434,7 @@ export default function SubscribePage() {
                                         <button
                                             type="button"
                                             onClick={() => setStep(1)}
-                                            className="px-6 py-3 rounded-xl border border-warm-tan/30 text-brand-black font-semibold hover:bg-warm-cream transition-colors text-sm"
+                                            className="px-6 py-3 rounded-xl border border-warm-cream/10 text-warm-cream font-semibold hover:bg-warm-cream/10 transition-colors text-sm"
                                         >
                                             Back
                                         </button>
@@ -438,7 +442,7 @@ export default function SubscribePage() {
                                             type="button"
                                             disabled={!canProceedStep2}
                                             onClick={() => setStep(3)}
-                                            className="flex-1 flex items-center justify-center gap-2 bg-brand-red text-white py-3 rounded-xl font-semibold hover:bg-brand-red/90 transition-colors disabled:opacity-40"
+                                            className="flex-1 flex items-center justify-center gap-2 bg-brand-green text-white py-3 rounded-xl font-semibold hover:bg-brand-green/90 shadow-lg shadow-brand-green/20 transition-colors disabled:opacity-40"
                                         >
                                             Continue
                                             <ArrowRight size={18} />
@@ -451,17 +455,17 @@ export default function SubscribePage() {
                             {step === 3 && (
                                 <div className="space-y-6 animate-fade-in">
                                     <div>
-                                        <h2 className="font-serif text-2xl font-bold text-brand-black mb-1">
+                                        <h2 className="font-serif text-2xl font-bold text-warm-cream mb-1">
                                             Delivery Address
                                         </h2>
-                                        <p className="text-muted-brown text-sm">
+                                        <p className="text-warm-cream/40 text-sm">
                                             Where should we deliver your meat box?
                                         </p>
                                     </div>
 
-                                    <div className="bg-white rounded-xl p-6 border border-warm-tan/20 space-y-5">
+                                    <div className="bg-gradient-to-br from-[#1e1e1e] to-[#252525] rounded-xl p-6 border border-warm-cream/[0.06] space-y-5">
                                         <div>
-                                            <label className="block text-xs font-semibold text-muted-brown uppercase tracking-wider mb-2">
+                                            <label className="block text-xs font-semibold text-warm-cream/40 uppercase tracking-wider mb-2">
                                                 Street Address *
                                             </label>
                                             <input
@@ -470,12 +474,12 @@ export default function SubscribePage() {
                                                 onChange={(e) => setForm((p) => ({ ...p, address: e.target.value }))}
                                                 required
                                                 placeholder="e.g. 12 Ozumba Mbadiwe Ave"
-                                                className="w-full border border-warm-tan/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red/40"
+                                                className="w-full bg-[#1e1e1e] border border-warm-cream/[0.08] rounded-xl px-4 py-3 text-sm text-warm-cream placeholder:text-warm-cream/25 focus:outline-none focus:border-brand-green/30 focus:ring-2 focus:ring-brand-green/10"
                                             />
                                         </div>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-xs font-semibold text-muted-brown uppercase tracking-wider mb-2">
+                                                <label className="block text-xs font-semibold text-warm-cream/40 uppercase tracking-wider mb-2">
                                                     City *
                                                 </label>
                                                 <input
@@ -484,11 +488,11 @@ export default function SubscribePage() {
                                                     onChange={(e) => setForm((p) => ({ ...p, city: e.target.value }))}
                                                     required
                                                     placeholder="Lagos"
-                                                    className="w-full border border-warm-tan/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red/40"
+                                                    className="w-full bg-[#1e1e1e] border border-warm-cream/[0.08] rounded-xl px-4 py-3 text-sm text-warm-cream placeholder:text-warm-cream/25 focus:outline-none focus:border-brand-green/30 focus:ring-2 focus:ring-brand-green/10"
                                                 />
                                             </div>
                                             <div>
-                                                <label className="block text-xs font-semibold text-muted-brown uppercase tracking-wider mb-2">
+                                                <label className="block text-xs font-semibold text-warm-cream/40 uppercase tracking-wider mb-2">
                                                     State *
                                                 </label>
                                                 <input
@@ -497,15 +501,15 @@ export default function SubscribePage() {
                                                     onChange={(e) => setForm((p) => ({ ...p, state: e.target.value }))}
                                                     required
                                                     placeholder="Lagos"
-                                                    className="w-full border border-warm-tan/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red/40"
+                                                    className="w-full bg-[#1e1e1e] border border-warm-cream/[0.08] rounded-xl px-4 py-3 text-sm text-warm-cream placeholder:text-warm-cream/25 focus:outline-none focus:border-brand-green/30 focus:ring-2 focus:ring-brand-green/10"
                                                 />
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Payment Method */}
-                                    <div className="bg-white rounded-xl p-6 border border-warm-tan/20">
-                                        <label className="block text-xs font-semibold text-muted-brown uppercase tracking-wider mb-3">
+                                    <div className="bg-gradient-to-br from-[#1e1e1e] to-[#252525] rounded-xl p-6 border border-warm-cream/[0.06]">
+                                        <label className="block text-xs font-semibold text-warm-cream/40 uppercase tracking-wider mb-3">
                                             Payment Method
                                         </label>
                                         <div className="grid grid-cols-2 gap-3">
@@ -514,14 +518,14 @@ export default function SubscribePage() {
                                                 onClick={() => setForm((p) => ({ ...p, paymentMethod: "bank_transfer" }))}
                                                 className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${
                                                     form.paymentMethod === "bank_transfer"
-                                                        ? "border-brand-red bg-brand-red/5"
-                                                        : "border-warm-tan/20 hover:border-warm-tan/40"
+                                                        ? "border-brand-green bg-brand-green/5"
+                                                        : "border-warm-cream/[0.08] hover:border-warm-cream/40"
                                                 }`}
                                             >
-                                                <CreditCard size={20} className={form.paymentMethod === "bank_transfer" ? "text-brand-red" : "text-muted-brown"} />
+                                                <CreditCard size={20} className={form.paymentMethod === "bank_transfer" ? "text-brand-green" : "text-warm-cream/40"} />
                                                 <div className="text-left">
-                                                    <p className="text-sm font-semibold text-brand-black">Bank Transfer</p>
-                                                    <p className="text-xs text-muted-brown">Pay via bank</p>
+                                                    <p className="text-sm font-semibold text-warm-cream">Bank Transfer</p>
+                                                    <p className="text-xs text-warm-cream/40">Pay via bank</p>
                                                 </div>
                                             </button>
                                             <button
@@ -529,16 +533,16 @@ export default function SubscribePage() {
                                                 onClick={() => setForm((p) => ({ ...p, paymentMethod: "whatsapp" }))}
                                                 className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${
                                                     form.paymentMethod === "whatsapp"
-                                                        ? "border-brand-red bg-brand-red/5"
-                                                        : "border-warm-tan/20 hover:border-warm-tan/40"
+                                                        ? "border-brand-green bg-brand-green/5"
+                                                        : "border-warm-cream/[0.08] hover:border-warm-cream/40"
                                                 }`}
                                             >
-                                                <svg viewBox="0 0 24 24" className={`w-5 h-5 ${form.paymentMethod === "whatsapp" ? "text-brand-red" : "text-muted-brown"}`} fill="currentColor">
+                                                <svg viewBox="0 0 24 24" className={`w-5 h-5 ${form.paymentMethod === "whatsapp" ? "text-brand-green" : "text-warm-cream/40"}`} fill="currentColor">
                                                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
                                                 </svg>
                                                 <div className="text-left">
-                                                    <p className="text-sm font-semibold text-brand-black">WhatsApp</p>
-                                                    <p className="text-xs text-muted-brown">Pay via chat</p>
+                                                    <p className="text-sm font-semibold text-warm-cream">WhatsApp</p>
+                                                    <p className="text-xs text-warm-cream/40">Pay via chat</p>
                                                 </div>
                                             </button>
                                         </div>
@@ -548,7 +552,7 @@ export default function SubscribePage() {
                                         <button
                                             type="button"
                                             onClick={() => setStep(2)}
-                                            className="px-6 py-3 rounded-xl border border-warm-tan/30 text-brand-black font-semibold hover:bg-warm-cream transition-colors text-sm"
+                                            className="px-6 py-3 rounded-xl border border-warm-cream/10 text-warm-cream font-semibold hover:bg-warm-cream/10 transition-colors text-sm"
                                         >
                                             Back
                                         </button>
@@ -556,7 +560,7 @@ export default function SubscribePage() {
                                             type="button"
                                             disabled={!canProceedStep3}
                                             onClick={() => setStep(4)}
-                                            className="flex-1 flex items-center justify-center gap-2 bg-brand-red text-white py-3 rounded-xl font-semibold hover:bg-brand-red/90 transition-colors disabled:opacity-40"
+                                            className="flex-1 flex items-center justify-center gap-2 bg-brand-green text-white py-3 rounded-xl font-semibold hover:bg-brand-green/90 shadow-lg shadow-brand-green/20 transition-colors disabled:opacity-40"
                                         >
                                             Review Order
                                             <ArrowRight size={18} />
@@ -569,10 +573,10 @@ export default function SubscribePage() {
                             {step === 4 && (
                                 <div className="space-y-6 animate-fade-in">
                                     <div>
-                                        <h2 className="font-serif text-2xl font-bold text-brand-black mb-1">
+                                        <h2 className="font-serif text-2xl font-bold text-warm-cream mb-1">
                                             Review & Confirm
                                         </h2>
-                                        <p className="text-muted-brown text-sm">
+                                        <p className="text-warm-cream/40 text-sm">
                                             Double-check everything before starting your subscription.
                                         </p>
                                     </div>
@@ -580,9 +584,9 @@ export default function SubscribePage() {
                                     {/* Summary Cards */}
                                     <div className="space-y-4">
                                         {/* Customer Info */}
-                                        <div className="bg-white rounded-xl p-5 border border-warm-tan/20">
+                                        <div className="bg-gradient-to-br from-[#1e1e1e] to-[#252525] rounded-xl p-5 border border-warm-cream/[0.06]">
                                             <div className="flex items-center justify-between mb-3">
-                                                <h3 className="text-xs font-semibold text-muted-brown uppercase tracking-wider">
+                                                <h3 className="text-xs font-semibold text-warm-cream/40 uppercase tracking-wider">
                                                     Contact Info
                                                 </h3>
                                                 <button
@@ -593,15 +597,15 @@ export default function SubscribePage() {
                                                     Edit
                                                 </button>
                                             </div>
-                                            <p className="text-sm text-brand-black font-medium">{form.customerName}</p>
-                                            <p className="text-sm text-muted-brown">{form.customerEmail}</p>
-                                            {form.phone && <p className="text-sm text-muted-brown">{form.phone}</p>}
+                                            <p className="text-sm text-warm-cream font-medium">{form.customerName}</p>
+                                            <p className="text-sm text-warm-cream/40">{form.customerEmail}</p>
+                                            {form.phone && <p className="text-sm text-warm-cream/40">{form.phone}</p>}
                                         </div>
 
                                         {/* Delivery */}
-                                        <div className="bg-white rounded-xl p-5 border border-warm-tan/20">
+                                        <div className="bg-gradient-to-br from-[#1e1e1e] to-[#252525] rounded-xl p-5 border border-warm-cream/[0.06]">
                                             <div className="flex items-center justify-between mb-3">
-                                                <h3 className="text-xs font-semibold text-muted-brown uppercase tracking-wider">
+                                                <h3 className="text-xs font-semibold text-warm-cream/40 uppercase tracking-wider">
                                                     Delivery
                                                 </h3>
                                                 <button
@@ -612,16 +616,16 @@ export default function SubscribePage() {
                                                     Edit
                                                 </button>
                                             </div>
-                                            <p className="text-sm text-brand-black">{form.address}</p>
-                                            <p className="text-sm text-muted-brown">
+                                            <p className="text-sm text-warm-cream">{form.address}</p>
+                                            <p className="text-sm text-warm-cream/40">
                                                 {form.city}, {form.state}
                                             </p>
                                             <div className="flex items-center gap-4 mt-2 text-sm">
-                                                <span className="text-muted-brown">
+                                                <span className="text-warm-cream/40">
                                                     <Calendar size={14} className="inline mr-1" />
                                                     {form.frequency === "weekly" ? "Weekly" : form.frequency === "biweekly" ? "Bi-weekly" : "Monthly"}
                                                 </span>
-                                                <span className="text-muted-brown">
+                                                <span className="text-warm-cream/40">
                                                     <CreditCard size={14} className="inline mr-1" />
                                                     {form.paymentMethod === "bank_transfer" ? "Bank Transfer" : "WhatsApp"}
                                                 </span>
@@ -629,9 +633,9 @@ export default function SubscribePage() {
                                         </div>
 
                                         {/* Products */}
-                                        <div className="bg-white rounded-xl p-5 border border-warm-tan/20">
+                                        <div className="bg-gradient-to-br from-[#1e1e1e] to-[#252525] rounded-xl p-5 border border-warm-cream/[0.06]">
                                             <div className="flex items-center justify-between mb-3">
-                                                <h3 className="text-xs font-semibold text-muted-brown uppercase tracking-wider">
+                                                <h3 className="text-xs font-semibold text-warm-cream/40 uppercase tracking-wider">
                                                     Products ({items.length})
                                                 </h3>
                                                 <button
@@ -646,12 +650,12 @@ export default function SubscribePage() {
                                                 {items.map((item) => (
                                                     <div key={item.productId} className="flex items-center justify-between">
                                                         <div>
-                                                            <p className="text-sm font-medium text-brand-black">{item.productName}</p>
-                                                            <p className="text-xs text-muted-brown">
+                                                            <p className="text-sm font-medium text-warm-cream">{item.productName}</p>
+                                                            <p className="text-xs text-warm-cream/40">
                                                                 &#8358;{item.price.toLocaleString()} x {item.quantity}
                                                             </p>
                                                         </div>
-                                                        <span className="text-sm font-semibold text-brand-black">
+                                                        <span className="text-sm font-semibold text-warm-cream">
                                                             &#8358;{(item.price * item.quantity).toLocaleString()}
                                                         </span>
                                                     </div>
@@ -664,7 +668,7 @@ export default function SubscribePage() {
                                         <button
                                             type="button"
                                             onClick={() => setStep(3)}
-                                            className="px-6 py-3 rounded-xl border border-warm-tan/30 text-brand-black font-semibold hover:bg-warm-cream transition-colors text-sm"
+                                            className="px-6 py-3 rounded-xl border border-warm-cream/10 text-warm-cream font-semibold hover:bg-warm-cream/10 transition-colors text-sm"
                                         >
                                             Back
                                         </button>
@@ -692,15 +696,15 @@ export default function SubscribePage() {
 
                         {/* Right Column — Live Order Summary */}
                         <div className="lg:col-span-1">
-                            <div className="bg-white rounded-2xl p-6 border border-warm-tan/20 shadow-sm sticky top-20">
-                                <h3 className="text-xs font-semibold text-muted-brown uppercase tracking-wider mb-4">
+                            <div className="bg-gradient-to-b from-[#1e1e1e] to-[#222] rounded-2xl p-6 border border-warm-cream/[0.06] shadow-xl shadow-black/20 sticky top-20">
+                                <h3 className="text-xs font-semibold text-warm-cream/40 uppercase tracking-wider mb-4">
                                     Your Recurring Box
                                 </h3>
 
                                 {items.length === 0 ? (
                                     <div className="py-8 text-center">
-                                        <Package size={32} className="mx-auto text-muted-brown/20 mb-3" />
-                                        <p className="text-sm text-muted-brown">
+                                        <Package size={32} className="mx-auto text-warm-cream/40/20 mb-3" />
+                                        <p className="text-sm text-warm-cream/40">
                                             Select products to build your box.
                                         </p>
                                     </div>
@@ -709,7 +713,7 @@ export default function SubscribePage() {
                                         {items.map((item) => (
                                             <div key={item.productId} className="flex items-center gap-3 group">
                                                 {item.image && (
-                                                    <div className="w-10 h-10 rounded-lg overflow-hidden bg-warm-cream shrink-0">
+                                                    <div className="w-10 h-10 rounded-lg overflow-hidden bg-brand-black shrink-0">
                                                         <img
                                                             src={item.image}
                                                             alt={item.productName}
@@ -718,10 +722,10 @@ export default function SubscribePage() {
                                                     </div>
                                                 )}
                                                 <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-medium text-brand-black truncate">
+                                                    <p className="text-sm font-medium text-warm-cream truncate">
                                                         {item.productName}
                                                     </p>
-                                                    <p className="text-xs text-muted-brown">
+                                                    <p className="text-xs text-warm-cream/40">
                                                         &#8358;{item.price.toLocaleString()}
                                                     </p>
                                                 </div>
@@ -729,7 +733,7 @@ export default function SubscribePage() {
                                                     <button
                                                         type="button"
                                                         onClick={() => updateItemQuantity(item.productId, item.quantity - 1)}
-                                                        className="w-6 h-6 rounded-md bg-warm-cream text-brand-black flex items-center justify-center hover:bg-warm-tan/20 transition-colors"
+                                                        className="w-6 h-6 rounded-md bg-brand-black text-warm-cream flex items-center justify-center hover:bg-warm-tan/20 transition-colors"
                                                     >
                                                         <Minus size={12} />
                                                     </button>
@@ -737,7 +741,7 @@ export default function SubscribePage() {
                                                     <button
                                                         type="button"
                                                         onClick={() => updateItemQuantity(item.productId, item.quantity + 1)}
-                                                        className="w-6 h-6 rounded-md bg-warm-cream text-brand-black flex items-center justify-center hover:bg-warm-tan/20 transition-colors"
+                                                        className="w-6 h-6 rounded-md bg-brand-black text-warm-cream flex items-center justify-center hover:bg-warm-tan/20 transition-colors"
                                                     >
                                                         <Plus size={12} />
                                                     </button>
@@ -756,23 +760,23 @@ export default function SubscribePage() {
 
                                 {items.length > 0 && (
                                     <>
-                                        <div className="border-t border-warm-tan/10 pt-4 space-y-2">
-                                            <div className="flex justify-between text-sm text-muted-brown">
+                                        <div className="border-t border-warm-cream/10 pt-4 space-y-2">
+                                            <div className="flex justify-between text-sm text-warm-cream/40">
                                                 <span>Delivery frequency</span>
-                                                <span className="font-medium text-brand-black capitalize">{form.frequency}</span>
+                                                <span className="font-medium text-warm-cream capitalize">{form.frequency}</span>
                                             </div>
-                                            <div className="flex justify-between text-sm text-muted-brown">
+                                            <div className="flex justify-between text-sm text-warm-cream/40">
                                                 <span>Items</span>
-                                                <span className="font-medium text-brand-black">{items.reduce((s, i) => s + i.quantity, 0)}</span>
+                                                <span className="font-medium text-warm-cream">{items.reduce((s, i) => s + i.quantity, 0)}</span>
                                             </div>
                                         </div>
 
-                                        <div className="border-t border-warm-tan/10 mt-4 pt-4">
+                                        <div className="border-t border-warm-cream/10 mt-4 pt-4">
                                             <div className="flex justify-between items-center">
-                                                <span className="text-sm font-semibold text-brand-black">Per Delivery</span>
+                                                <span className="text-sm font-semibold text-warm-cream">Per Delivery</span>
                                                 <span className="text-xl font-bold text-brand-red">&#8358;{subtotal.toLocaleString()}</span>
                                             </div>
-                                            <p className="text-[11px] text-muted-brown/70 mt-1">
+                                            <p className="text-[11px] text-warm-cream/40/70 mt-1">
                                                 + delivery fee calculated at dispatch
                                             </p>
                                         </div>

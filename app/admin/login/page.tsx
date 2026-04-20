@@ -57,25 +57,25 @@ function LoginForm() {
                     <div className="inline-flex items-center justify-center w-16 h-16 bg-brand-dark rounded-2xl mb-4 shadow-lg">
                         <Lock size={24} className="text-white" />
                     </div>
-                    <h1 className="font-serif text-3xl text-brand-dark tracking-wider">Zúta Ya</h1>
-                    <p className="text-brand-dark/40 text-xs mt-1 uppercase tracking-widest">Admin Portal</p>
+                    <h1 className="font-serif text-3xl text-warm-cream tracking-wider">Zúta Ya</h1>
+                    <p className="text-warm-cream/40 text-xs mt-1 uppercase tracking-widest">Admin Portal</p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-xl shadow-brand-dark/5 border border-brand-lilac/10 p-7 space-y-5">
+                <form onSubmit={handleSubmit} className="bg-white/[0.04] rounded-2xl shadow-xl shadow-brand-dark/5 border border-warm-cream/10 p-7 space-y-5">
                     {/* Email */}
                     <div>
-                        <label htmlFor="email" className="block text-[10px] text-brand-dark/40 mb-1.5 uppercase tracking-wider font-medium">
+                        <label htmlFor="email" className="block text-[10px] text-warm-cream/40 mb-1.5 uppercase tracking-wider font-medium">
                             Email Address
                         </label>
                         <div className="relative">
-                            <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-dark/25" />
+                            <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-warm-cream/25" />
                             <input
                                 id="email"
                                 type="email"
                                 value={email}
                                 onChange={(e) => { setEmail(e.target.value); setError(""); }}
                                 placeholder="admin@zutayang.com"
-                                className="w-full border border-brand-lilac/20 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple/40 transition-all bg-white"
+                                className="w-full border border-warm-cream/20 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green/40 transition-all bg-[#1e1e1e]"
                                 autoFocus
                                 autoComplete="email"
                             />
@@ -84,24 +84,24 @@ function LoginForm() {
 
                     {/* Password */}
                     <div>
-                        <label htmlFor="password" className="block text-[10px] text-brand-dark/40 mb-1.5 uppercase tracking-wider font-medium">
+                        <label htmlFor="password" className="block text-[10px] text-warm-cream/40 mb-1.5 uppercase tracking-wider font-medium">
                             Password
                         </label>
                         <div className="relative">
-                            <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-dark/25" />
+                            <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-warm-cream/25" />
                             <input
                                 id="password"
                                 type={showPassword ? "text" : "password"}
                                 value={password}
                                 onChange={(e) => { setPassword(e.target.value); setError(""); }}
                                 placeholder="Enter your password"
-                                className="w-full border border-brand-lilac/20 rounded-xl pl-10 pr-11 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple/40 transition-all bg-white"
+                                className="w-full border border-warm-cream/20 rounded-xl pl-10 pr-11 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green/40 transition-all bg-[#1e1e1e]"
                                 autoComplete="current-password"
                             />
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-brand-dark/25 hover:text-brand-dark/50 transition-colors"
+                                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-warm-cream/25 hover:text-warm-cream/50 transition-colors"
                                 tabIndex={-1}
                             >
                                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -134,7 +134,7 @@ function LoginForm() {
                     </button>
                 </form>
 
-                <p className="text-center text-[10px] text-brand-dark/20 mt-6">
+                <p className="text-center text-[10px] text-warm-cream/20 mt-6">
                     All admin actions are monitored and logged
                 </p>
             </div>

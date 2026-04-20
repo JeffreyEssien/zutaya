@@ -21,15 +21,15 @@ export default async function AdminCouponsPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="font-serif text-2xl text-brand-dark">Coupons</h1>
-                <p className="text-brand-dark/60 text-sm">Manage discount codes.</p>
+                <h1 className="font-serif text-2xl text-warm-cream">Coupons</h1>
+                <p className="text-warm-cream/60 text-sm">Manage discount codes.</p>
             </div>
 
 
 
             <CouponFormWrapper />
 
-            <div className="bg-white rounded-lg border border-brand-lilac/20 overflow-hidden">
+            <div className="bg-white/[0.04] rounded-lg border border-warm-cream/20 overflow-hidden">
                 <CouponList initialCoupons={coupons} />
             </div>
         </div>

@@ -64,20 +64,20 @@ export default function CouponForm({ onSuccess }: { onSuccess: () => void }) {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 bg-white p-4 rounded-lg border border-brand-lilac/20">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 bg-white/[0.04] p-4 rounded-lg border border-warm-cream/20">
             <div className="flex gap-4 items-end">
                 <div>
-                    <label className="block text-xs text-brand-dark/60 mb-1">Coupon Code</label>
+                    <label className="block text-xs text-warm-cream/60 mb-1">Coupon Code</label>
                     <input
                         required
                         value={code}
                         onChange={(e) => setCode(e.target.value.toUpperCase())}
                         placeholder="e.g. SUMMER20"
-                        className="border border-brand-lilac/20 rounded px-3 py-2 text-sm uppercase w-48"
+                        className="border border-warm-cream/20 rounded px-3 py-2 text-sm uppercase w-48"
                     />
                 </div>
                 <div>
-                    <label className="block text-xs text-brand-dark/60 mb-1">Discount %</label>
+                    <label className="block text-xs text-warm-cream/60 mb-1">Discount %</label>
                     <input
                         required
                         type="number"
@@ -86,7 +86,7 @@ export default function CouponForm({ onSuccess }: { onSuccess: () => void }) {
                         value={discount}
                         onChange={(e) => handleDiscountChange(e.target.value)}
                         placeholder="20"
-                        className="border border-brand-lilac/20 rounded px-3 py-2 text-sm w-24"
+                        className="border border-warm-cream/20 rounded px-3 py-2 text-sm w-24"
                     />
                 </div>
                 <Button type="submit" disabled={loading}>
@@ -94,7 +94,7 @@ export default function CouponForm({ onSuccess }: { onSuccess: () => void }) {
                 </Button>
             </div>
             {warning && (
-                <div className={`text-xs px-3 py-2 rounded ${warning.includes("exceeds") ? "bg-red-50 text-red-600 border border-red-100" : "bg-amber-50 text-amber-600 border border-amber-100"}`}>
+                <div className={`text-xs px-3 py-2 rounded ${warning.includes("exceeds") ? "bg-red-500/10 text-red-400 border border-red-500/20" : "bg-amber-500/10 text-amber-400 border border-amber-500/20"}`}>
                     {warning}
                 </div>
             )}

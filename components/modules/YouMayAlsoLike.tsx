@@ -40,10 +40,10 @@ export default function YouMayAlsoLike({ currentProduct, allProducts }: YouMayAl
             >
                 <div className="flex items-end justify-between mb-12">
                     <div>
-                        <p className="text-[11px] uppercase tracking-[0.3em] text-brand-purple mb-3 font-medium">
+                        <p className="text-[11px] uppercase tracking-[0.3em] text-brand-green mb-3 font-medium">
                             Curated For You
                         </p>
-                        <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl text-brand-dark tracking-tight">
+                        <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl text-warm-cream tracking-tight">
                             You May Also Like
                         </h2>
                     </div>

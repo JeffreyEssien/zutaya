@@ -62,19 +62,19 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
                         exit={{ scale: 0.95, opacity: 0, y: 20 }}
                         transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                         onClick={(e) => e.stopPropagation()}
-                        className="relative bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[85vh] overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-0"
+                        className="relative bg-[#222] rounded-2xl shadow-2xl max-w-3xl w-full max-h-[85vh] overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-0"
                     >
                         {/* Close */}
                         <button
                             type="button"
                             onClick={onClose}
-                            className="absolute top-3 right-3 z-10 p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white shadow-md transition-all cursor-pointer"
+                            className="absolute top-3 right-3 z-10 p-2 bg-[#222]/90 backdrop-blur-sm rounded-full hover:bg-[#222] shadow-md transition-all cursor-pointer"
                         >
-                            <X size={16} className="text-brand-dark/60" />
+                            <X size={16} className="text-warm-cream/60" />
                         </button>
 
                         {/* Image */}
-                        <div className="relative aspect-[3/4] bg-neutral-50 rounded-l-2xl overflow-hidden">
+                        <div className="relative aspect-[3/4] bg-warm-cream/5 rounded-l-2xl overflow-hidden">
                             <Image
                                 src={product.images[imageIndex]}
                                 alt={product.name}
@@ -88,14 +88,14 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
                                     <button
                                         type="button"
                                         onClick={() => setImageIndex((i) => (i - 1 + product.images.length) % product.images.length)}
-                                        className="absolute left-2 top-1/2 -translate-y-1/2 p-2 bg-white/80 rounded-full hover:bg-white shadow transition-all cursor-pointer"
+                                        className="absolute left-2 top-1/2 -translate-y-1/2 p-2 bg-[#222]/80 rounded-full hover:bg-[#222] shadow transition-all cursor-pointer"
                                     >
                                         <ChevronLeft size={14} />
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => setImageIndex((i) => (i + 1) % product.images.length)}
-                                        className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-white/80 rounded-full hover:bg-white shadow transition-all cursor-pointer"
+                                        className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-[#222]/80 rounded-full hover:bg-[#222] shadow transition-all cursor-pointer"
                                     >
                                         <ChevronRight size={14} />
                                     </button>
@@ -111,8 +111,8 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
                                             type="button"
                                             onClick={() => setImageIndex(i)}
                                             className={`rounded-full transition-all cursor-pointer ${i === imageIndex
-                                                    ? "w-5 h-1.5 bg-white shadow"
-                                                    : "w-1.5 h-1.5 bg-white/50"
+                                                    ? "w-5 h-1.5 bg-[#222] shadow"
+                                                    : "w-1.5 h-1.5 bg-[#222]/50"
                                                 }`}
                                         />
                                     ))}
@@ -123,14 +123,14 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
                         {/* Details */}
                         <div className="p-6 md:p-8 flex flex-col justify-between">
                             <div>
-                                <p className="text-[10px] uppercase tracking-[0.25em] text-brand-purple font-semibold mb-2">{product.category}</p>
-                                <h3 className="font-serif text-xl md:text-2xl text-brand-dark mb-1">{product.name}</h3>
-                                <p className="text-xs text-brand-dark/35 mb-4">by {product.brand}</p>
-                                <p className="font-serif text-2xl font-bold text-brand-dark mb-5">{formatCurrency(currentPrice)}</p>
+                                <p className="text-[10px] uppercase tracking-[0.25em] text-brand-green font-semibold mb-2">{product.category}</p>
+                                <h3 className="font-serif text-xl md:text-2xl text-warm-cream mb-1">{product.name}</h3>
+                                <p className="text-xs text-warm-cream/35 mb-4">by {product.brand}</p>
+                                <p className="font-serif text-2xl font-bold text-warm-cream mb-5">{formatCurrency(currentPrice)}</p>
 
                                 {product.description && (
                                     <div
-                                        className="text-sm text-brand-dark/50 leading-relaxed mb-5 line-clamp-3"
+                                        className="text-sm text-warm-cream/50 leading-relaxed mb-5 line-clamp-3"
                                         dangerouslySetInnerHTML={{ __html: product.description }}
                                     />
                                 )}
@@ -138,7 +138,7 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
                                 {/* Variants */}
                                 {product.variants && product.variants.length > 0 && (
                                     <div className="mb-5">
-                                        <label className="block text-[10px] font-semibold text-brand-dark/40 uppercase tracking-[0.15em] mb-2">Options</label>
+                                        <label className="block text-[10px] font-semibold text-warm-cream/40 uppercase tracking-[0.15em] mb-2">Options</label>
                                         <div className="flex flex-wrap gap-2">
                                             {product.variants.map((v) => (
                                                 <button
@@ -146,7 +146,7 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
                                                     onClick={() => setSelectedVariant(v)}
                                                     className={`px-4 py-2 rounded-full text-xs font-medium transition-all cursor-pointer ${selectedVariant?.name === v.name
                                                             ? "bg-brand-dark text-white"
-                                                            : "bg-neutral-50 text-brand-dark/60 hover:bg-neutral-100 border border-brand-dark/8"
+                                                            : "bg-warm-cream/5 text-warm-cream/60 hover:bg-warm-cream/5 border border-warm-cream/8"
                                                         }`}
                                                 >
                                                     {v.name}
@@ -175,7 +175,7 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
                                     </span>
                                 </Button>
                                 <Link href={`/product/${product.slug}`} onClick={onClose} className="block">
-                                    <button className="w-full text-xs text-brand-dark/40 hover:text-brand-purple transition-colors py-2 cursor-pointer">
+                                    <button className="w-full text-xs text-warm-cream/40 hover:text-brand-green transition-colors py-2 cursor-pointer">
                                         View Full Details →
                                     </button>
                                 </Link>

@@ -91,7 +91,7 @@ export default function AdminBundlesPage() {
     };
 
     if (loading) {
-        return <div className="p-8 text-center text-muted-brown">Loading bundles...</div>;
+        return <div className="p-8 text-center text-warm-cream/40">Loading bundles...</div>;
     }
 
     return (
@@ -110,12 +110,12 @@ export default function AdminBundlesPage() {
             </div>
 
             {showForm && (
-                <form onSubmit={handleSubmit} className="bg-white rounded-xl p-6 shadow-sm border border-warm-tan/20 mb-6 space-y-4">
+                <form onSubmit={handleSubmit} className="bg-white/[0.04] rounded-xl p-6 shadow-sm border border-warm-tan/20 mb-6 space-y-4">
                     <h2 className="font-semibold text-brand-black">{editing ? "Edit Bundle" : "New Bundle"}</h2>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-muted-brown mb-1">Name</label>
+                            <label className="block text-sm font-medium text-warm-cream/40 mb-1">Name</label>
                             <input
                                 type="text"
                                 value={form.name}
@@ -125,7 +125,7 @@ export default function AdminBundlesPage() {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-muted-brown mb-1">Discount %</label>
+                            <label className="block text-sm font-medium text-warm-cream/40 mb-1">Discount %</label>
                             <input
                                 type="number"
                                 value={form.discountPercent}
@@ -139,7 +139,7 @@ export default function AdminBundlesPage() {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-muted-brown mb-1">Description</label>
+                        <label className="block text-sm font-medium text-warm-cream/40 mb-1">Description</label>
                         <textarea
                             value={form.description}
                             onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
@@ -150,7 +150,7 @@ export default function AdminBundlesPage() {
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-muted-brown mb-1">Min Items</label>
+                            <label className="block text-sm font-medium text-warm-cream/40 mb-1">Min Items</label>
                             <input
                                 type="number"
                                 value={form.minItems}
@@ -161,7 +161,7 @@ export default function AdminBundlesPage() {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-muted-brown mb-1">Max Items</label>
+                            <label className="block text-sm font-medium text-warm-cream/40 mb-1">Max Items</label>
                             <input
                                 type="number"
                                 value={form.maxItems}
@@ -185,7 +185,7 @@ export default function AdminBundlesPage() {
 
                     {categories.length > 0 && (
                         <div>
-                            <label className="block text-sm font-medium text-muted-brown mb-2">
+                            <label className="block text-sm font-medium text-warm-cream/40 mb-2">
                                 Allowed Categories (leave empty for all)
                             </label>
                             <div className="flex flex-wrap gap-2">
@@ -197,7 +197,7 @@ export default function AdminBundlesPage() {
                                         className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
                                             form.allowedCategoryIds.includes(cat.id)
                                                 ? "bg-brand-red text-white border-brand-red"
-                                                : "bg-white text-muted-brown border-warm-tan/30 hover:border-brand-red"
+                                                : "bg-white/[0.04] text-warm-cream/40 border-warm-tan/30 hover:border-brand-red"
                                         }`}
                                     >
                                         {cat.name}
@@ -211,16 +211,16 @@ export default function AdminBundlesPage() {
                         <button type="submit" className="bg-brand-red text-white px-6 py-2 rounded-lg text-sm font-semibold hover:bg-brand-red/90">
                             {editing ? "Update" : "Create"}
                         </button>
-                        <button type="button" onClick={resetForm} className="px-6 py-2 rounded-lg text-sm text-muted-brown border border-warm-tan/30 hover:bg-warm-cream">
+                        <button type="button" onClick={resetForm} className="px-6 py-2 rounded-lg text-sm text-warm-cream/40 border border-warm-tan/30 hover:bg-warm-cream">
                             Cancel
                         </button>
                     </div>
                 </form>
             )}
 
-            <div className="bg-white rounded-xl shadow-sm border border-warm-tan/20 overflow-hidden">
+            <div className="bg-white/[0.04] rounded-xl shadow-sm border border-warm-tan/20 overflow-hidden">
                 <table className="w-full text-sm">
-                    <thead className="bg-warm-cream text-muted-brown">
+                    <thead className="bg-warm-cream text-warm-cream/40">
                         <tr>
                             <th className="text-left px-4 py-3 font-medium">Name</th>
                             <th className="text-left px-4 py-3 font-medium">Items Range</th>
@@ -233,7 +233,7 @@ export default function AdminBundlesPage() {
                         {bundles.map((bundle) => (
                             <tr key={bundle.id} className="border-t border-warm-tan/10">
                                 <td className="px-4 py-3 font-medium text-brand-black">{bundle.name}</td>
-                                <td className="px-4 py-3 text-muted-brown">
+                                <td className="px-4 py-3 text-warm-cream/40">
                                     {bundle.minItems}–{bundle.maxItems}
                                 </td>
                                 <td className="px-4 py-3">
@@ -243,7 +243,7 @@ export default function AdminBundlesPage() {
                                 </td>
                                 <td className="px-4 py-3">
                                     <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
-                                        bundle.isActive ? "bg-brand-green/10 text-brand-green" : "bg-gray-100 text-gray-500"
+                                        bundle.isActive ? "bg-brand-green/10 text-brand-green" : "bg-warm-cream/5 text-warm-cream/40"
                                     }`}>
                                         {bundle.isActive ? "Active" : "Inactive"}
                                     </span>
@@ -260,7 +260,7 @@ export default function AdminBundlesPage() {
                         ))}
                         {bundles.length === 0 && (
                             <tr>
-                                <td colSpan={5} className="px-4 py-8 text-center text-muted-brown">
+                                <td colSpan={5} className="px-4 py-8 text-center text-warm-cream/40">
                                     No bundle rules yet.
                                 </td>
                             </tr>

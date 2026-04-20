@@ -218,10 +218,10 @@ export default function OrderDetailPanel({ order, onClose, onUpdate }: OrderDeta
             {/* Panel */}
             <div className="fixed inset-0 z-50 overflow-y-auto xl:relative xl:inset-auto xl:z-auto">
                 <div className="min-h-full flex items-end xl:items-start xl:min-h-0">
-                    <div className="w-full bg-white rounded-t-2xl xl:rounded-t-none xl:rounded-xl border border-brand-lilac/15 xl:sticky xl:top-24 animate-slideUp xl:animate-none shadow-2xl xl:shadow-md overflow-hidden">
+                    <div className="w-full bg-white/[0.04] rounded-t-2xl xl:rounded-t-none xl:rounded-xl border border-warm-cream/15 xl:sticky xl:top-24 animate-slideUp xl:animate-none shadow-2xl xl:shadow-md overflow-hidden">
 
                         {/* ═══ Header ═══ */}
-                        <div className="bg-gradient-to-r from-brand-dark to-brand-purple px-5 sm:px-6 py-4">
+                        <div className="bg-gradient-to-r from-brand-dark to-brand-green px-5 sm:px-6 py-4">
                             <div className="flex items-start justify-between">
                                 <div>
                                     <p className="font-mono text-sm text-white/80 bg-white/10 px-2.5 py-0.5 rounded-full inline-block">
@@ -330,7 +330,7 @@ export default function OrderDetailPanel({ order, onClose, onUpdate }: OrderDeta
                                     {order.paymentStatus === "payment_confirmed" && order.status === "pending" && (
                                         <button
                                             onClick={() => sendWhatsAppStatusUpdate("payment_confirmed")}
-                                            className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-colors cursor-pointer"
+                                            className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/15 border border-emerald-500/20 transition-colors cursor-pointer"
                                         >
                                             <Send size={12} /> Confirm via WA
                                         </button>
@@ -338,7 +338,7 @@ export default function OrderDetailPanel({ order, onClose, onUpdate }: OrderDeta
                                     {order.status === "packed" && (
                                         <button
                                             onClick={() => sendWhatsAppStatusUpdate("packed")}
-                                            className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors cursor-pointer"
+                                            className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-blue-400 bg-blue-500/10 hover:bg-blue-500/15 border border-blue-500/20 transition-colors cursor-pointer"
                                         >
                                             <Send size={12} /> Packed via WA
                                         </button>
@@ -346,7 +346,7 @@ export default function OrderDetailPanel({ order, onClose, onUpdate }: OrderDeta
                                     {order.status === "out_for_delivery" && (
                                         <button
                                             onClick={() => sendWhatsAppStatusUpdate("out_for_delivery")}
-                                            className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 transition-colors cursor-pointer"
+                                            className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/15 border border-indigo-500/20 transition-colors cursor-pointer"
                                         >
                                             <Send size={12} /> Dispatched via WA
                                         </button>
@@ -368,7 +368,7 @@ export default function OrderDetailPanel({ order, onClose, onUpdate }: OrderDeta
                                                 alert("Cancel logic not yet implemented in DB");
                                             }
                                         }}
-                                        className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                                        className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] text-red-400 hover:text-red-400 hover:bg-red-500/100/10 transition-colors cursor-pointer"
                                     >
                                         <Ban size={12} /> Cancel Order
                                     </button>
@@ -381,11 +381,11 @@ export default function OrderDetailPanel({ order, onClose, onUpdate }: OrderDeta
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                 {/* Customer */}
                                 <Card icon={<User size={14} />} title="Customer">
-                                    <p className="text-sm text-brand-dark font-medium">{order.customerName}</p>
-                                    <p className="text-xs text-brand-dark/50 mt-0.5">{order.email}</p>
-                                    <p className="text-xs text-brand-dark/50">{order.phone}</p>
+                                    <p className="text-sm text-warm-cream font-medium">{order.customerName}</p>
+                                    <p className="text-xs text-warm-cream/50 mt-0.5">{order.email}</p>
+                                    <p className="text-xs text-warm-cream/50">{order.phone}</p>
                                     {order.paymentMethod && (
-                                        <div className="mt-2 pt-2 border-t border-brand-lilac/10">
+                                        <div className="mt-2 pt-2 border-t border-warm-cream/10">
                                             <DetailRow label="Payment" value={order.paymentMethod === "bank_transfer" ? "Bank Transfer" : "WhatsApp"} />
                                             {order.senderName && <DetailRow label="Sender" value={order.senderName} />}
                                         </div>
@@ -394,9 +394,9 @@ export default function OrderDetailPanel({ order, onClose, onUpdate }: OrderDeta
 
                                 {/* Delivery */}
                                 <Card icon={<MapPin size={14} />} title="Delivery">
-                                    <p className="text-sm text-brand-dark leading-snug">{addr.address}</p>
-                                    <p className="text-xs text-brand-dark/60">{addr.city}, {addr.state} {addr.zip}</p>
-                                    <div className="mt-2 pt-2 border-t border-brand-lilac/10 space-y-1">
+                                    <p className="text-sm text-warm-cream leading-snug">{addr.address}</p>
+                                    <p className="text-xs text-warm-cream/60">{addr.city}, {addr.state} {addr.zip}</p>
+                                    <div className="mt-2 pt-2 border-t border-warm-cream/10 space-y-1">
                                         {order.deliveryZone && <DetailRow label="Zone" value={order.deliveryZone} />}
                                         <DetailRow label="Fee" value={deliveryFee === 0 ? "Free" : formatCurrency(deliveryFee)} />
                                         {order.requestedDeliveryDate && (
@@ -423,7 +423,7 @@ export default function OrderDetailPanel({ order, onClose, onUpdate }: OrderDeta
                                     <Card icon={<ChefHat size={14} />} title="Preparation">
                                         <div className="space-y-2">
                                             {order.prepInstructions && (
-                                                <div className="bg-amber-50 border border-amber-200/60 rounded-lg px-3 py-2.5">
+                                                <div className="bg-amber-500/10 border border-amber-500/20/60 rounded-lg px-3 py-2.5">
                                                     <p className="text-[10px] font-semibold text-amber-800/60 uppercase tracking-wider mb-1">Customer Instructions</p>
                                                     <p className="text-sm text-amber-900 leading-relaxed">{order.prepInstructions}</p>
                                                 </div>
@@ -444,16 +444,16 @@ export default function OrderDetailPanel({ order, onClose, onUpdate }: OrderDeta
                                     {Object.entries(bundleGroups).map(([bundleId, items]) => (
                                         <div key={bundleId} className="mb-3 last:mb-0">
                                             <div className="flex items-center gap-2 mb-1.5">
-                                                <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                                                <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
                                                     {items[0].bundleName || "Bundle"}
                                                 </span>
                                                 {items[0].bundleDiscount && items[0].bundleDiscount > 0 && (
-                                                    <span className="text-[10px] font-medium text-emerald-600">
+                                                    <span className="text-[10px] font-medium text-emerald-400">
                                                         {items[0].bundleDiscount}% off
                                                     </span>
                                                 )}
                                             </div>
-                                            <div className="border-l-2 border-emerald-200 pl-3 space-y-1.5">
+                                            <div className="border-l-2 border-emerald-500/20 pl-3 space-y-1.5">
                                                 {items.map((item, idx) => (
                                                     <ItemRow key={`${bundleId}-${idx}`} item={item} />
                                                 ))}
@@ -463,7 +463,7 @@ export default function OrderDetailPanel({ order, onClose, onUpdate }: OrderDeta
 
                                     {/* Standalone items */}
                                     {standaloneItems.length > 0 && Object.keys(bundleGroups).length > 0 && (
-                                        <p className="text-[10px] font-semibold uppercase tracking-wider text-brand-dark/40 mb-1.5 mt-3">Individual Items</p>
+                                        <p className="text-[10px] font-semibold uppercase tracking-wider text-warm-cream/40 mb-1.5 mt-3">Individual Items</p>
                                     )}
                                     <div className="space-y-1.5">
                                         {standaloneItems.map((item, idx) => (
@@ -489,8 +489,8 @@ export default function OrderDetailPanel({ order, onClose, onUpdate }: OrderDeta
                                     <BillRow label="Delivery" value={deliveryFee === 0 ? "Free" : formatCurrency(deliveryFee)} />
                                     {packagingFee > 0 && <BillRow label="Packaging" value={formatCurrency(packagingFee)} />}
                                     {prepFee > 0 && <BillRow label="Prep Fee" value={formatCurrency(prepFee)} />}
-                                    <div className="border-t border-brand-lilac/15 pt-2.5 mt-2.5">
-                                        <div className="flex justify-between text-brand-dark">
+                                    <div className="border-t border-warm-cream/15 pt-2.5 mt-2.5">
+                                        <div className="flex justify-between text-warm-cream">
                                             <span className="text-sm font-bold">Total</span>
                                             <span className="text-base font-bold">{formatCurrency(order.total)}</span>
                                         </div>
@@ -499,10 +499,10 @@ export default function OrderDetailPanel({ order, onClose, onUpdate }: OrderDeta
                             </Card>
 
                             {/* ═══ Policy Banner ═══ */}
-                            <div className="flex items-start gap-2.5 bg-red-50/80 border border-red-100 rounded-lg px-3.5 py-2.5">
+                            <div className="flex items-start gap-2.5 bg-red-500/10/80 border border-red-500/20 rounded-lg px-3.5 py-2.5">
                                 <ShieldAlert size={14} className="text-red-400 mt-0.5 shrink-0" />
                                 <div>
-                                    <p className="text-[10px] font-bold text-red-700 uppercase tracking-wider">No Returns / No Refunds</p>
+                                    <p className="text-[10px] font-bold text-red-400 uppercase tracking-wider">No Returns / No Refunds</p>
                                     <p className="text-[10px] text-red-500/80 leading-relaxed mt-0.5">
                                         All meat sales are final. Due to the perishable nature of our products, we do not accept returns or issue refunds once dispatched.
                                     </p>
@@ -512,7 +512,7 @@ export default function OrderDetailPanel({ order, onClose, onUpdate }: OrderDeta
                             {/* ═══ Internal Notes ═══ */}
                             <Card icon={<StickyNote size={14} />} title="Internal Notes">
                                 <textarea
-                                    className="w-full text-sm p-3 border border-brand-lilac/15 rounded-lg bg-neutral-50/80 focus:bg-white focus:outline-none focus:border-brand-purple focus:ring-1 focus:ring-brand-purple/30 transition-all resize-none"
+                                    className="w-full text-sm p-3 border border-warm-cream/15 rounded-lg bg-[#111]/80 focus:bg-white/[0.04] focus:outline-none focus:border-brand-green focus:ring-1 focus:ring-brand-green/30 transition-all resize-none"
                                     rows={3}
                                     placeholder="Add private notes about this order..."
                                     value={notes}
@@ -522,7 +522,7 @@ export default function OrderDetailPanel({ order, onClose, onUpdate }: OrderDeta
                                     <button
                                         onClick={handleSaveNotes}
                                         disabled={isSavingNotes || notes === (order.notes || "")}
-                                        className="text-xs font-medium px-3 py-1.5 rounded-md text-brand-purple hover:bg-brand-purple/5 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                                        className="text-xs font-medium px-3 py-1.5 rounded-md text-brand-green hover:bg-brand-green/5 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
                                     >
                                         {isSavingNotes ? "Saving..." : "Save Note"}
                                     </button>
@@ -542,8 +542,8 @@ function Card({ icon, title, children }: { icon: React.ReactNode; title: string;
     return (
         <div>
             <div className="flex items-center gap-1.5 mb-2.5">
-                <span className="text-brand-purple/60">{icon}</span>
-                <h3 className="text-[11px] font-semibold text-brand-dark/45 uppercase tracking-wider">{title}</h3>
+                <span className="text-brand-green/60">{icon}</span>
+                <h3 className="text-[11px] font-semibold text-warm-cream/45 uppercase tracking-wider">{title}</h3>
             </div>
             {children}
         </div>
@@ -551,14 +551,14 @@ function Card({ icon, title, children }: { icon: React.ReactNode; title: string;
 }
 
 function Divider() {
-    return <div className="border-t border-brand-lilac/10" />;
+    return <div className="border-t border-warm-cream/10" />;
 }
 
 function DetailRow({ label, value, highlight }: { label: string; value: string; highlight?: "green" }) {
     return (
         <div className="flex items-center justify-between text-xs">
-            <span className="text-brand-dark/45">{label}</span>
-            <span className={`font-medium ${highlight === "green" ? "text-emerald-600" : "text-brand-dark/80"}`}>{value}</span>
+            <span className="text-warm-cream/45">{label}</span>
+            <span className={`font-medium ${highlight === "green" ? "text-emerald-400" : "text-warm-cream/80"}`}>{value}</span>
         </div>
     );
 }
@@ -566,31 +566,32 @@ function DetailRow({ label, value, highlight }: { label: string; value: string; 
 function BillRow({ label, value, highlight }: { label: string; value: string; highlight?: "green" }) {
     return (
         <div className="flex justify-between text-sm">
-            <span className="text-brand-dark/55">{label}</span>
-            <span className={`font-medium ${highlight === "green" ? "text-emerald-600" : "text-brand-dark/70"}`}>{value}</span>
+            <span className="text-warm-cream/55">{label}</span>
+            <span className={`font-medium ${highlight === "green" ? "text-emerald-400" : "text-warm-cream/70"}`}>{value}</span>
         </div>
     );
 }
 
 function ItemRow({ item }: { item: Order["items"][number] }) {
+    if (!item.product) return null;
     const unitPrice = item.variant?.price || item.product.price;
     return (
         <div className="flex justify-between gap-3">
             <div className="min-w-0">
-                <p className="text-sm text-brand-dark font-medium truncate">
+                <p className="text-sm text-warm-cream font-medium truncate">
                     {item.product.name}
-                    <span className="text-brand-dark/40 font-normal ml-1">×{item.quantity}</span>
+                    <span className="text-warm-cream/40 font-normal ml-1">×{item.quantity}</span>
                 </p>
                 {item.variant?.name && (
-                    <p className="text-[11px] text-brand-dark/45 mt-0.5">{item.variant.name}</p>
+                    <p className="text-[11px] text-warm-cream/45 mt-0.5">{item.variant.name}</p>
                 )}
                 {item.selectedPrepOptions && item.selectedPrepOptions.length > 0 && (
-                    <p className="text-[11px] text-amber-700 mt-0.5">
+                    <p className="text-[11px] text-amber-400 mt-0.5">
                         Prep: {item.selectedPrepOptions.map(p => p.label).join(", ")}
                     </p>
                 )}
             </div>
-            <span className="text-sm text-brand-dark font-semibold shrink-0 tabular-nums">
+            <span className="text-sm text-warm-cream font-semibold shrink-0 tabular-nums">
                 {formatCurrency(unitPrice * item.quantity)}
             </span>
         </div>

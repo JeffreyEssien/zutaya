@@ -111,8 +111,8 @@ export default function DeliveryManagement({ initialZones }: Props) {
             {/* ── Header ── */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
                 <div>
-                    <h1 className="text-3xl font-serif text-brand-dark flex items-center gap-3">
-                        <Truck size={28} className="text-brand-purple" />
+                    <h1 className="text-3xl font-serif text-warm-cream flex items-center gap-3">
+                        <Truck size={28} className="text-brand-green" />
                         Delivery Management
                     </h1>
                     <div className="flex flex-wrap gap-5 mt-3">
@@ -128,7 +128,7 @@ export default function DeliveryManagement({ initialZones }: Props) {
 
             {/* ── Tabs + Search ── */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                <div className="flex gap-1 bg-brand-lilac/10 p-1 rounded-lg">
+                <div className="flex gap-1 bg-warm-cream/10 p-1 rounded-lg">
                     {([
                         { key: "lagos" as Tab, label: "Lagos Zones", icon: <MapPin size={13} /> },
                         { key: "discounts" as Tab, label: "Discounts", icon: <Tag size={13} /> },
@@ -137,8 +137,8 @@ export default function DeliveryManagement({ initialZones }: Props) {
                             key={t.key}
                             onClick={() => setTab(t.key)}
                             className={`flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-medium transition-all ${tab === t.key
-                                ? "bg-white shadow-sm text-brand-purple"
-                                : "text-brand-dark/50 hover:text-brand-purple"
+                                ? "bg-white/[0.04] shadow-sm text-brand-green"
+                                : "text-warm-cream/50 hover:text-brand-green"
                                 }`}
                         >
                             {t.icon} <span className="hidden sm:inline">{t.label}</span>
@@ -146,16 +146,16 @@ export default function DeliveryManagement({ initialZones }: Props) {
                     ))}
                 </div>
                 <div className="relative w-full sm:w-64">
-                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-dark/25" />
+                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-warm-cream/25" />
                     <input
                         type="text"
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                         placeholder="Search zones or locations..."
-                        className="w-full pl-9 pr-4 py-2.5 border border-brand-lilac/20 rounded-lg text-sm focus:outline-none focus:border-brand-purple/40 bg-white"
+                        className="w-full pl-9 pr-4 py-2.5 border border-warm-cream/20 rounded-lg text-sm focus:outline-none focus:border-brand-green/40 bg-[#1e1e1e]"
                     />
                     {search && (
-                        <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-dark/25 hover:text-brand-dark/50">
+                        <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-warm-cream/25 hover:text-warm-cream/50">
                             <X size={12} />
                         </button>
                     )}
@@ -181,15 +181,15 @@ export default function DeliveryManagement({ initialZones }: Props) {
                         const feeDisplay = zone.base_fee ? formatCurrency(zone.base_fee) : "—";
 
                         return (
-                            <div key={zone.id} className={`bg-white rounded-xl border overflow-hidden transition-all shadow-sm ${zone.is_active ? "border-brand-lilac/15" : "border-red-200/50 opacity-60"}`}>
+                            <div key={zone.id} className={`bg-white/[0.04] rounded-xl border overflow-hidden transition-all shadow-sm ${zone.is_active ? "border-warm-cream/15" : "border-red-200/50 opacity-60"}`}>
                                 {/* Zone Header */}
-                                <div className="flex items-center gap-3 p-4 cursor-pointer hover:bg-brand-lilac/[0.03] transition-colors" onClick={() => toggle(zone.id)}>
-                                    <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-brand-purple/8 text-brand-purple">
+                                <div className="flex items-center gap-3 p-4 cursor-pointer hover:bg-warm-cream/[0.03] transition-colors" onClick={() => toggle(zone.id)}>
+                                    <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-brand-green/8 text-brand-green">
                                         <MapPin size={18} />
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2 flex-wrap">
-                                            <span className="font-semibold text-brand-dark">{zone.name}</span>
+                                            <span className="font-semibold text-warm-cream">{zone.name}</span>
                                             {!zone.is_active && <Badge variant="danger">Inactive</Badge>}
                                             {zone.discount_percent > 0 && (
                                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-full border border-emerald-100">
@@ -197,28 +197,28 @@ export default function DeliveryManagement({ initialZones }: Props) {
                                                 </span>
                                             )}
                                         </div>
-                                        <div className="flex items-center gap-3 mt-0.5 text-xs text-brand-dark/35">
+                                        <div className="flex items-center gap-3 mt-0.5 text-xs text-warm-cream/35">
                                             <span>{activeLocs}/{zone.locations.length} locations active</span>
                                             <span className="font-mono">{feeDisplay}</span>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-1.5 shrink-0">
-                                        <button onClick={e => { e.stopPropagation(); handleToggleZone(zone); }} title={zone.is_active ? "Deactivate" : "Activate"} className="p-1.5 rounded-md hover:bg-brand-lilac/10 transition-colors">
-                                            {zone.is_active ? <ToggleRight size={20} className="text-emerald-500" /> : <ToggleLeft size={20} className="text-brand-dark/20" />}
+                                        <button onClick={e => { e.stopPropagation(); handleToggleZone(zone); }} title={zone.is_active ? "Deactivate" : "Activate"} className="p-1.5 rounded-md hover:bg-warm-cream/10 transition-colors">
+                                            {zone.is_active ? <ToggleRight size={20} className="text-emerald-500" /> : <ToggleLeft size={20} className="text-warm-cream/20" />}
                                         </button>
-                                        <button onClick={e => { e.stopPropagation(); setEditingZone(zone.id); setExpandedZone(zone.id); }} className="p-1.5 rounded-md hover:bg-brand-lilac/10 transition-colors text-brand-dark/30 hover:text-brand-purple">
+                                        <button onClick={e => { e.stopPropagation(); setEditingZone(zone.id); setExpandedZone(zone.id); }} className="p-1.5 rounded-md hover:bg-warm-cream/10 transition-colors text-warm-cream/30 hover:text-brand-green">
                                             <Edit3 size={14} />
                                         </button>
-                                        <button onClick={e => { e.stopPropagation(); handleDeleteZone(zone.id, zone.name); }} className="p-1.5 rounded-md hover:bg-red-50 transition-colors text-brand-dark/20 hover:text-red-500">
+                                        <button onClick={e => { e.stopPropagation(); handleDeleteZone(zone.id, zone.name); }} className="p-1.5 rounded-md hover:bg-red-50 transition-colors text-warm-cream/20 hover:text-red-500">
                                             <Trash2 size={14} />
                                         </button>
-                                        {isExpanded ? <ChevronUp size={14} className="text-brand-dark/20 ml-1" /> : <ChevronDown size={14} className="text-brand-dark/20 ml-1" />}
+                                        {isExpanded ? <ChevronUp size={14} className="text-warm-cream/20 ml-1" /> : <ChevronDown size={14} className="text-warm-cream/20 ml-1" />}
                                     </div>
                                 </div>
 
                                 {/* Expanded Content */}
                                 {isExpanded && (
-                                    <div className="border-t border-brand-lilac/8">
+                                    <div className="border-t border-warm-cream/8">
                                         {/* Edit Zone Panel */}
                                         {editingZone === zone.id && (
                                             <EditZonePanel
@@ -234,14 +234,14 @@ export default function DeliveryManagement({ initialZones }: Props) {
                                         {/* Locations */}
                                         <div className="p-4">
                                             <div className="flex items-center justify-between mb-3">
-                                                <span className="text-xs font-semibold text-brand-dark/40 uppercase tracking-wider">
+                                                <span className="text-xs font-semibold text-warm-cream/40 uppercase tracking-wider">
                                                     Locations ({zone.locations.length})
                                                 </span>
                                                 <div className="flex gap-2">
-                                                    <button onClick={() => setShowBulkAdd(zone.id)} className="flex items-center gap-1 text-[11px] text-brand-dark/40 hover:text-brand-purple font-medium transition-colors">
+                                                    <button onClick={() => setShowBulkAdd(zone.id)} className="flex items-center gap-1 text-[11px] text-warm-cream/40 hover:text-brand-green font-medium transition-colors">
                                                         <Copy size={11} /> Bulk Add
                                                     </button>
-                                                    <button onClick={() => setShowAddLoc(zone.id)} className="flex items-center gap-1 text-[11px] text-brand-purple hover:text-brand-dark font-medium transition-colors">
+                                                    <button onClick={() => setShowAddLoc(zone.id)} className="flex items-center gap-1 text-[11px] text-brand-green hover:text-warm-cream font-medium transition-colors">
                                                         <Plus size={11} /> Add Location
                                                     </button>
                                                 </div>
@@ -280,7 +280,7 @@ export default function DeliveryManagement({ initialZones }: Props) {
                                             )}
 
                                             {zone.locations.length === 0 ? (
-                                                <div className="text-center py-8 text-brand-dark/25 text-sm">
+                                                <div className="text-center py-8 text-warm-cream/25 text-sm">
                                                     <MapPin size={24} className="mx-auto mb-2 opacity-30" />
                                                     No locations yet. Add one above.
                                                 </div>
@@ -290,16 +290,16 @@ export default function DeliveryManagement({ initialZones }: Props) {
                                                     <div className="hidden md:block overflow-x-auto">
                                                         <table className="w-full text-sm">
                                                             <thead>
-                                                                <tr className="border-b border-brand-lilac/10 bg-brand-lilac/[0.03]">
-                                                                    <th className="text-left py-2.5 px-3 text-[10px] font-semibold text-brand-dark/40 uppercase tracking-wider">Location</th>
-                                                                    <th className="text-right py-2.5 px-3 text-[10px] font-semibold text-brand-dark/40 uppercase tracking-wider">Fee</th>
-                                                                    <th className="text-center py-2.5 px-3 text-[10px] font-semibold text-brand-dark/40 uppercase tracking-wider">Status</th>
-                                                                    <th className="text-right py-2.5 px-3 text-[10px] font-semibold text-brand-dark/40 uppercase tracking-wider">Actions</th>
+                                                                <tr className="border-b border-warm-cream/10 bg-warm-cream/[0.03]">
+                                                                    <th className="text-left py-2.5 px-3 text-[10px] font-semibold text-warm-cream/40 uppercase tracking-wider">Location</th>
+                                                                    <th className="text-right py-2.5 px-3 text-[10px] font-semibold text-warm-cream/40 uppercase tracking-wider">Fee</th>
+                                                                    <th className="text-center py-2.5 px-3 text-[10px] font-semibold text-warm-cream/40 uppercase tracking-wider">Status</th>
+                                                                    <th className="text-right py-2.5 px-3 text-[10px] font-semibold text-warm-cream/40 uppercase tracking-wider">Actions</th>
                                                                 </tr>
                                                             </thead>
-                                                            <tbody className="divide-y divide-brand-lilac/5">
+                                                            <tbody className="divide-y divide-warm-cream/5">
                                                                 {zone.locations.map(loc => (
-                                                                    <tr key={loc.id} className={`hover:bg-brand-lilac/[0.03] transition-colors ${!loc.is_active ? "opacity-35" : ""}`}>
+                                                                    <tr key={loc.id} className={`hover:bg-warm-cream/[0.03] transition-colors ${!loc.is_active ? "opacity-35" : ""}`}>
                                                                         {editingLoc === loc.id ? (
                                                                             <EditLocRow
                                                                                 loc={loc}
@@ -317,24 +317,24 @@ export default function DeliveryManagement({ initialZones }: Props) {
                                                                             />
                                                                         ) : (
                                                                             <>
-                                                                                <td className="py-2.5 px-3 font-medium text-brand-dark">{loc.name}</td>
-                                                                                <td className="py-2.5 px-3 text-right font-mono text-brand-dark/60">
+                                                                                <td className="py-2.5 px-3 font-medium text-warm-cream">{loc.name}</td>
+                                                                                <td className="py-2.5 px-3 text-right font-mono text-warm-cream/60">
                                                                                     {zone.base_fee ? formatCurrency(zone.base_fee) : "—"}
                                                                                 </td>
                                                                                 <td className="py-2.5 px-3 text-center">
                                                                                     <button onClick={() => handleToggleLoc(loc)} className="transition-colors">
                                                                                         {loc.is_active
                                                                                             ? <ToggleRight size={18} className="text-emerald-500" />
-                                                                                            : <ToggleLeft size={18} className="text-brand-dark/15" />
+                                                                                            : <ToggleLeft size={18} className="text-warm-cream/15" />
                                                                                         }
                                                                                     </button>
                                                                                 </td>
                                                                                 <td className="py-2.5 px-3 text-right">
                                                                                     <div className="flex justify-end gap-1">
-                                                                                        <button onClick={() => setEditingLoc(loc.id)} className="p-1 rounded hover:bg-brand-lilac/10 text-brand-dark/25 hover:text-brand-purple transition-colors" title="Edit">
+                                                                                        <button onClick={() => setEditingLoc(loc.id)} className="p-1 rounded hover:bg-warm-cream/10 text-warm-cream/25 hover:text-brand-green transition-colors" title="Edit">
                                                                                             <Edit3 size={12} />
                                                                                         </button>
-                                                                                        <button onClick={() => handleDeleteLoc(loc.id, loc.name)} className="p-1 rounded hover:bg-red-50 text-brand-dark/15 hover:text-red-500 transition-colors" title="Delete">
+                                                                                        <button onClick={() => handleDeleteLoc(loc.id, loc.name)} className="p-1 rounded hover:bg-red-50 text-warm-cream/15 hover:text-red-500 transition-colors" title="Delete">
                                                                                             <Trash2 size={12} />
                                                                                         </button>
                                                                                     </div>
@@ -350,7 +350,7 @@ export default function DeliveryManagement({ initialZones }: Props) {
                                                     {/* Mobile Cards */}
                                                     <div className="md:hidden space-y-2">
                                                         {zone.locations.map(loc => (
-                                                            <div key={loc.id} className={`p-3 rounded-lg border border-brand-lilac/10 bg-white ${!loc.is_active ? "opacity-35" : ""}`}>
+                                                            <div key={loc.id} className={`p-3 rounded-lg border border-warm-cream/10 bg-white/[0.04] ${!loc.is_active ? "opacity-35" : ""}`}>
                                                                 {editingLoc === loc.id ? (
                                                                     <EditLocMobile
                                                                         loc={loc}
@@ -369,13 +369,13 @@ export default function DeliveryManagement({ initialZones }: Props) {
                                                                 ) : (
                                                                     <>
                                                                         <div className="flex items-center justify-between mb-2">
-                                                                            <span className="font-medium text-brand-dark text-sm">{loc.name}</span>
+                                                                            <span className="font-medium text-warm-cream text-sm">{loc.name}</span>
                                                                             <div className="flex items-center gap-0.5">
                                                                                 <button onClick={() => handleToggleLoc(loc)} className="p-1">
-                                                                                    {loc.is_active ? <ToggleRight size={16} className="text-emerald-500" /> : <ToggleLeft size={16} className="text-brand-dark/15" />}
+                                                                                    {loc.is_active ? <ToggleRight size={16} className="text-emerald-500" /> : <ToggleLeft size={16} className="text-warm-cream/15" />}
                                                                                 </button>
-                                                                                <button onClick={() => setEditingLoc(loc.id)} className="p-1 text-brand-dark/25 hover:text-brand-purple"><Edit3 size={12} /></button>
-                                                                                <button onClick={() => handleDeleteLoc(loc.id, loc.name)} className="p-1 text-brand-dark/15 hover:text-red-500"><Trash2 size={12} /></button>
+                                                                                <button onClick={() => setEditingLoc(loc.id)} className="p-1 text-warm-cream/25 hover:text-brand-green"><Edit3 size={12} /></button>
+                                                                                <button onClick={() => handleDeleteLoc(loc.id, loc.name)} className="p-1 text-warm-cream/15 hover:text-red-500"><Trash2 size={12} /></button>
                                                                             </div>
                                                                         </div>
                                                                         <div className="flex gap-2 text-xs">
@@ -396,7 +396,7 @@ export default function DeliveryManagement({ initialZones }: Props) {
                     })}
 
                     {filteredZones.length === 0 && (
-                        <div className="text-center py-16 text-brand-dark/25">
+                        <div className="text-center py-16 text-warm-cream/25">
                             <Truck size={40} className="mx-auto mb-3 opacity-20" />
                             <p className="text-sm">{search ? "No zones match your search." : "No zones configured yet."}</p>
                             {!search && (
@@ -430,10 +430,10 @@ export default function DeliveryManagement({ initialZones }: Props) {
 function MetricCard({ label, value, icon, highlight }: { label: string; value: number; icon: React.ReactNode; highlight?: boolean }) {
     return (
         <div className="flex items-center gap-2">
-            <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${highlight ? "bg-emerald-50 text-emerald-600" : "bg-brand-lilac/10 text-brand-dark/30"}`}>{icon}</div>
+            <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${highlight ? "bg-emerald-50 text-emerald-600" : "bg-warm-cream/10 text-warm-cream/30"}`}>{icon}</div>
             <div>
-                <span className="block text-[10px] uppercase tracking-wider text-brand-dark/30">{label}</span>
-                <span className={`font-mono font-bold text-lg leading-none ${highlight ? "text-emerald-600" : "text-brand-dark"}`}>{value}</span>
+                <span className="block text-[10px] uppercase tracking-wider text-warm-cream/30">{label}</span>
+                <span className={`font-mono font-bold text-lg leading-none ${highlight ? "text-emerald-600" : "text-warm-cream"}`}>{value}</span>
             </div>
         </div>
     );
@@ -444,9 +444,9 @@ function MetricCard({ label, value, icon, highlight }: { label: string; value: n
 // ═══════════════════════════════════════════════════════════════════
 function PriceChip({ label, value }: { label: string; value: number | null | undefined }) {
     return (
-        <div className="bg-gray-50 px-2.5 py-1.5 rounded-md border border-gray-100/50">
-            <span className="text-[9px] text-brand-dark/30 uppercase tracking-wider block">{label}</span>
-            <span className="font-mono font-medium text-brand-dark/60">{value != null ? formatCurrency(value) : "—"}</span>
+        <div className="bg-warm-cream/[0.03] px-2.5 py-1.5 rounded-md border border-warm-cream/[0.06]/50">
+            <span className="text-[9px] text-warm-cream/30 uppercase tracking-wider block">{label}</span>
+            <span className="font-mono font-medium text-warm-cream/60">{value != null ? formatCurrency(value) : "—"}</span>
         </div>
     );
 }
@@ -486,19 +486,19 @@ function DiscountsPanel({ zones, onUpdate }: {
         <div className="space-y-6">
             {/* Active Discounts */}
             {zonesWithDiscounts.length > 0 && (
-                <div className="bg-white rounded-xl border border-brand-lilac/15 overflow-hidden shadow-sm">
+                <div className="bg-white/[0.04] rounded-xl border border-warm-cream/15 overflow-hidden shadow-sm">
                     <div className="px-4 py-3 bg-emerald-50/50 border-b border-emerald-100/50">
                         <h3 className="text-sm font-semibold text-emerald-800 flex items-center gap-2"><Tag size={14} /> Active Delivery Discounts</h3>
                     </div>
-                    <div className="divide-y divide-brand-lilac/5">
+                    <div className="divide-y divide-warm-cream/5">
                         {zonesWithDiscounts.map(zone => (
                             <div key={zone.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                 <div>
                                     <div className="flex items-center gap-2">
-                                        <span className="font-medium text-brand-dark">{zone.name}</span>
+                                        <span className="font-medium text-warm-cream">{zone.name}</span>
                                         <Badge variant="info">Lagos</Badge>
                                     </div>
-                                    <div className="text-xs text-brand-dark/40 mt-0.5">
+                                    <div className="text-xs text-warm-cream/40 mt-0.5">
                                         <span className="font-mono font-bold text-emerald-600">{zone.discount_percent}% off</span>
                                         {zone.discount_label && <span> — {zone.discount_label}</span>}
                                     </div>
@@ -516,18 +516,18 @@ function DiscountsPanel({ zones, onUpdate }: {
             )}
 
             {/* Apply New Discount */}
-            <div className="bg-white rounded-xl border border-brand-lilac/15 overflow-hidden shadow-sm">
-                <div className="px-4 py-3 border-b border-brand-lilac/10">
-                    <h3 className="text-sm font-semibold text-brand-dark flex items-center gap-2"><Percent size={14} className="text-brand-purple" /> Apply Discount to Zone</h3>
-                    <p className="text-[11px] text-brand-dark/35 mt-0.5">Customers will see the discount at checkout with the original price crossed out.</p>
+            <div className="bg-white/[0.04] rounded-xl border border-warm-cream/15 overflow-hidden shadow-sm">
+                <div className="px-4 py-3 border-b border-warm-cream/10">
+                    <h3 className="text-sm font-semibold text-warm-cream flex items-center gap-2"><Percent size={14} className="text-brand-green" /> Apply Discount to Zone</h3>
+                    <p className="text-[11px] text-warm-cream/35 mt-0.5">Customers will see the discount at checkout with the original price crossed out.</p>
                 </div>
-                <div className="divide-y divide-brand-lilac/5">
+                <div className="divide-y divide-warm-cream/5">
                     {zonesWithout.map(zone => (
                         <DiscountRow key={zone.id} zone={zone} onApply={applyDiscount} />
                     ))}
                 </div>
                 {zonesWithout.length === 0 && (
-                    <div className="p-8 text-center text-brand-dark/25 text-sm">All zones already have discounts applied.</div>
+                    <div className="p-8 text-center text-warm-cream/25 text-sm">All zones already have discounts applied.</div>
                 )}
             </div>
         </div>
@@ -543,22 +543,22 @@ function DiscountRow({ zone, onApply }: { zone: DeliveryZoneWithLocations; onApp
         <div className="p-4">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                    <span className="font-medium text-brand-dark text-sm">{zone.name}</span>
+                    <span className="font-medium text-warm-cream text-sm">{zone.name}</span>
                     <Badge variant="info">Lagos</Badge>
                 </div>
-                <button onClick={() => setOpen(!open)} className="text-[11px] text-brand-purple hover:text-brand-dark font-medium transition-colors">
+                <button onClick={() => setOpen(!open)} className="text-[11px] text-brand-green hover:text-warm-cream font-medium transition-colors">
                     {open ? "Cancel" : "+ Add Discount"}
                 </button>
             </div>
             {open && (
                 <div className="mt-3 flex flex-col sm:flex-row gap-2 items-end">
                     <div className="flex-1">
-                        <label className="block text-[10px] text-brand-dark/35 mb-1">Discount %</label>
-                        <input type="number" min="1" max="100" value={percent} onChange={e => setPercent(e.target.value)} placeholder="e.g. 20" className="w-full px-3 py-2 border border-brand-lilac/20 rounded-lg text-sm focus:outline-none focus:border-brand-purple" />
+                        <label className="block text-[10px] text-warm-cream/35 mb-1">Discount %</label>
+                        <input type="number" min="1" max="100" value={percent} onChange={e => setPercent(e.target.value)} placeholder="e.g. 20" className="w-full px-3 py-2 border border-warm-cream/20 rounded-lg text-sm focus:outline-none focus:border-brand-green" />
                     </div>
                     <div className="flex-1">
-                        <label className="block text-[10px] text-brand-dark/35 mb-1">Label (Optional)</label>
-                        <input type="text" value={label} onChange={e => setLabel(e.target.value)} placeholder="e.g. Holiday Promo" className="w-full px-3 py-2 border border-brand-lilac/20 rounded-lg text-sm focus:outline-none focus:border-brand-purple" />
+                        <label className="block text-[10px] text-warm-cream/35 mb-1">Label (Optional)</label>
+                        <input type="text" value={label} onChange={e => setLabel(e.target.value)} placeholder="e.g. Holiday Promo" className="w-full px-3 py-2 border border-warm-cream/20 rounded-lg text-sm focus:outline-none focus:border-brand-green" />
                     </div>
                     <Button size="sm" onClick={() => {
                         if (!percent || Number(percent) <= 0) return;
@@ -611,10 +611,10 @@ function EditZonePanel({ zone, onSave, onClose }: {
     };
 
     return (
-        <div className="p-4 bg-brand-creme/30 border-b border-brand-lilac/10">
+        <div className="p-4 bg-brand-creme/30 border-b border-warm-cream/10">
             <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-semibold text-brand-dark flex items-center gap-2"><Edit3 size={13} className="text-brand-purple" /> Edit Zone</h3>
-                <button onClick={onClose} className="text-brand-dark/25 hover:text-brand-dark/50"><X size={14} /></button>
+                <h3 className="text-sm font-semibold text-warm-cream flex items-center gap-2"><Edit3 size={13} className="text-brand-green" /> Edit Zone</h3>
+                <button onClick={onClose} className="text-warm-cream/25 hover:text-warm-cream/50"><X size={14} /></button>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 <InputField label="Zone Name" value={name} onChange={setName} />
@@ -668,19 +668,19 @@ function EditLocRow({ loc, isLagos, allowsHub, zoneFee, onSave, onCancel }: {
         <td colSpan={cols} className="p-3 bg-brand-creme/20">
             <div className="flex items-end gap-2 flex-wrap">
                 <div className="flex-1 min-w-[140px]">
-                    <label className="block text-[9px] text-brand-dark/30 mb-0.5 uppercase tracking-wider">Name</label>
-                    <input value={name} onChange={e => setName(e.target.value)} className="w-full px-2.5 py-1.5 border border-brand-lilac/25 rounded-lg text-sm focus:outline-none focus:border-brand-purple bg-white" />
+                    <label className="block text-[9px] text-warm-cream/30 mb-0.5 uppercase tracking-wider">Name</label>
+                    <input value={name} onChange={e => setName(e.target.value)} className="w-full px-2.5 py-1.5 border border-warm-cream/25 rounded-lg text-sm focus:outline-none focus:border-brand-green bg-[#1e1e1e]" />
                 </div>
                 {allowsHub && !isLagos && (
                     <div className="w-28">
-                        <label className="block text-[9px] text-brand-dark/30 mb-0.5 uppercase tracking-wider">Hub (₦)</label>
-                        <input type="number" value={hubFee} onChange={e => setHubFee(e.target.value)} className="w-full px-2.5 py-1.5 border border-brand-lilac/25 rounded-lg text-sm focus:outline-none focus:border-brand-purple bg-white" />
+                        <label className="block text-[9px] text-warm-cream/30 mb-0.5 uppercase tracking-wider">Hub (₦)</label>
+                        <input type="number" value={hubFee} onChange={e => setHubFee(e.target.value)} className="w-full px-2.5 py-1.5 border border-warm-cream/25 rounded-lg text-sm focus:outline-none focus:border-brand-green bg-[#1e1e1e]" />
                     </div>
                 )}
                 {!isLagos && (
                     <div className="w-28">
-                        <label className="block text-[9px] text-brand-dark/30 mb-0.5 uppercase tracking-wider">Door (₦)</label>
-                        <input type="number" value={doorFee} onChange={e => setDoorFee(e.target.value)} className="w-full px-2.5 py-1.5 border border-brand-lilac/25 rounded-lg text-sm focus:outline-none focus:border-brand-purple bg-white" />
+                        <label className="block text-[9px] text-warm-cream/30 mb-0.5 uppercase tracking-wider">Door (₦)</label>
+                        <input type="number" value={doorFee} onChange={e => setDoorFee(e.target.value)} className="w-full px-2.5 py-1.5 border border-warm-cream/25 rounded-lg text-sm focus:outline-none focus:border-brand-green bg-[#1e1e1e]" />
                     </div>
                 )}
                 <Button size="sm" onClick={save} loading={saving}><Save size={12} /></Button>
@@ -776,7 +776,7 @@ function AddLocationForm({ zoneId, isLagos, allowsHub, onCreated, onCancel }: {
     };
 
     return (
-        <form onSubmit={submit} className="mb-4 p-3 bg-brand-purple/[0.02] rounded-lg border border-brand-purple/10 border-dashed">
+        <form onSubmit={submit} className="mb-4 p-3 bg-brand-green/[0.02] rounded-lg border border-brand-green/10 border-dashed">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <InputField label="Location Name" required value={name} onChange={setName} placeholder="e.g. Lekki Phase 1" />
                 {allowsHub && !isLagos && <InputField label="Hub Fee (₦)" type="number" value={hubFee} onChange={setHubFee} placeholder="4000" />}
@@ -825,7 +825,7 @@ function BulkAddLocations({ zoneId, onDone, onCancel }: {
     return (
         <form onSubmit={submit} className="mb-4 p-3 bg-amber-50/30 rounded-lg border border-amber-200/30 border-dashed space-y-3">
             <div>
-                <label className="block text-[10px] text-brand-dark/40 mb-1 uppercase tracking-wider">
+                <label className="block text-[10px] text-warm-cream/40 mb-1 uppercase tracking-wider">
                     Paste location names (one per line)
                 </label>
                 <textarea
@@ -833,9 +833,9 @@ function BulkAddLocations({ zoneId, onDone, onCancel }: {
                     onChange={e => setText(e.target.value)}
                     rows={5}
                     placeholder={"Lekki Phase 1\nIkoyi\nVictoria Island"}
-                    className="w-full px-3 py-2 border border-brand-lilac/20 rounded-lg text-sm focus:outline-none focus:border-brand-purple resize-y font-mono"
+                    className="w-full px-3 py-2 border border-warm-cream/20 rounded-lg text-sm focus:outline-none focus:border-brand-green resize-y font-mono"
                 />
-                <p className="text-[10px] text-brand-dark/30 mt-1">{text.split("\n").filter(l => l.trim()).length} location(s) will be added</p>
+                <p className="text-[10px] text-warm-cream/30 mt-1">{text.split("\n").filter(l => l.trim()).length} location(s) will be added</p>
             </div>
             <div className="flex justify-end gap-2">
                 <Button type="button" variant="ghost" size="sm" onClick={onCancel}>Cancel</Button>
@@ -885,16 +885,16 @@ function CreateZoneModal({ defaultType, onCreated, onClose }: {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={onClose}>
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 overflow-y-auto max-h-[90vh]" onClick={e => e.stopPropagation()}>
+            <div className="bg-white/[0.04] rounded-xl shadow-2xl w-full max-w-lg p-6 overflow-y-auto max-h-[90vh]" onClick={e => e.stopPropagation()}>
                 <div className="flex items-center justify-between mb-5">
-                    <h2 className="text-xl font-serif text-brand-dark">Create Delivery Zone</h2>
-                    <button onClick={onClose} className="text-brand-dark/25 hover:text-brand-dark/50 p-1"><X size={18} /></button>
+                    <h2 className="text-xl font-serif text-warm-cream">Create Delivery Zone</h2>
+                    <button onClick={onClose} className="text-warm-cream/25 hover:text-warm-cream/50 p-1"><X size={18} /></button>
                 </div>
                 <form onSubmit={submit} className="space-y-4">
                     <InputField label="Zone Name" required value={name} onChange={setName} placeholder="e.g. Mainland Core" />
                     <InputField label="Flat Delivery Fee (₦)" type="number" value={baseFee} onChange={setBaseFee} placeholder="e.g. 3500" />
 
-                    <div className="flex justify-end gap-3 pt-4 border-t border-brand-lilac/10">
+                    <div className="flex justify-end gap-3 pt-4 border-t border-warm-cream/10">
                         <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
                         <Button type="submit" loading={loading}>
                             <span className="flex items-center gap-1.5"><Plus size={13} /> Create Zone</span>
@@ -915,14 +915,14 @@ function InputField({ label, required, type = "text", value, onChange, placehold
 }) {
     return (
         <div>
-            <label className="block text-[10px] font-medium text-brand-dark/40 mb-1 uppercase tracking-wider">{label}</label>
+            <label className="block text-[10px] font-medium text-warm-cream/40 mb-1 uppercase tracking-wider">{label}</label>
             <input
                 required={required}
                 type={type}
                 value={value}
                 onChange={e => onChange(e.target.value)}
                 placeholder={placeholder}
-                className="w-full px-3 py-2 border border-brand-lilac/20 rounded-lg text-sm focus:outline-none focus:border-brand-purple transition-colors bg-white"
+                className="w-full px-3 py-2 border border-warm-cream/20 rounded-lg text-sm focus:outline-none focus:border-brand-green transition-colors bg-[#1e1e1e]"
             />
         </div>
     );

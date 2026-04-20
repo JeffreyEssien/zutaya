@@ -36,11 +36,11 @@ export default function CheckoutPage() {
                         animate={{ opacity: 1, y: 0 }}
                         className="text-center"
                     >
-                        <div className="w-20 h-20 rounded-full bg-neutral-50 flex items-center justify-center mx-auto mb-6">
-                            <ShoppingBag size={32} className="text-brand-dark/15" />
+                        <div className="w-20 h-20 rounded-full bg-warm-cream/10 flex items-center justify-center mx-auto mb-6">
+                            <ShoppingBag size={32} className="text-warm-cream/15" />
                         </div>
-                        <h1 className="font-serif text-3xl text-brand-dark mb-3">Your cart is empty</h1>
-                        <p className="text-brand-dark/40 mb-8 text-sm">Add some items before checking out.</p>
+                        <h1 className="font-serif text-3xl text-warm-cream mb-3">Your cart is empty</h1>
+                        <p className="text-warm-cream/40 mb-8 text-sm">Add some items before checking out.</p>
                         <Button onClick={() => router.push("/shop")}>
                             <span className="flex items-center gap-2">
                                 Continue Shopping <ArrowRight size={16} />
@@ -129,7 +129,7 @@ export default function CheckoutPage() {
                 >
                     <button
                         onClick={() => router.back()}
-                        className="flex items-center gap-1.5 text-xs text-brand-dark/35 hover:text-brand-purple transition-colors cursor-pointer"
+                        className="flex items-center gap-1.5 text-xs text-warm-cream/35 hover:text-brand-green transition-colors cursor-pointer"
                     >
                         <ArrowLeft size={12} />
                         Back to cart
@@ -139,7 +139,7 @@ export default function CheckoutPage() {
                 <motion.h1
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="font-serif text-3xl md:text-4xl text-brand-dark mb-10"
+                    className="font-serif text-3xl md:text-4xl text-warm-cream mb-10"
                 >
                     Checkout
                 </motion.h1>
@@ -186,22 +186,22 @@ function SuccessBanner() {
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ delay: 0.2, type: "spring", stiffness: 200, damping: 15 }}
-                    className="w-20 h-20 rounded-full bg-emerald-50 flex items-center justify-center"
+                    className="w-20 h-20 rounded-full bg-brand-green/10 flex items-center justify-center border border-brand-green/20"
                 >
                     <motion.div
                         initial={{ scale: 0, rotate: -90 }}
                         animate={{ scale: 1, rotate: 0 }}
                         transition={{ delay: 0.5, type: "spring", stiffness: 300, damping: 20 }}
                     >
-                        <Check size={32} className="text-emerald-500" strokeWidth={3} />
+                        <Check size={32} className="text-brand-green" strokeWidth={3} />
                     </motion.div>
                 </motion.div>
             </div>
-            <h1 className="font-serif text-3xl text-brand-dark mb-3">Order Confirmed!</h1>
-            <p className="text-brand-dark/50 text-sm max-w-md mx-auto">
+            <h1 className="font-serif text-3xl text-warm-cream mb-3">Order Confirmed!</h1>
+            <p className="text-warm-cream/50 text-sm max-w-md mx-auto">
                 A confirmation email with your receipt has been sent to your inbox.
             </p>
-            <a href="/track" className="inline-flex items-center gap-2 mt-5 text-xs font-medium text-brand-purple hover:text-brand-dark transition-colors">
+            <a href="/track" className="inline-flex items-center gap-2 mt-5 text-xs font-medium text-brand-green hover:text-warm-cream transition-colors">
                 <Package size={14} />
                 Track Your Order →
             </a>
@@ -222,7 +222,7 @@ function PaymentSubmittedBanner({ orderId }: { orderId: string }) {
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ delay: 0.2, type: "spring", stiffness: 200, damping: 15 }}
-                    className="w-20 h-20 rounded-full bg-amber-50 flex items-center justify-center"
+                    className="w-20 h-20 rounded-full bg-amber-500/10 flex items-center justify-center border border-amber-500/20"
                 >
                     <motion.div
                         initial={{ scale: 0, rotate: -90 }}
@@ -233,17 +233,17 @@ function PaymentSubmittedBanner({ orderId }: { orderId: string }) {
                     </motion.div>
                 </motion.div>
             </div>
-            <h1 className="font-serif text-3xl text-brand-dark mb-3">Payment Submitted!</h1>
-            <p className="text-brand-dark/50 text-sm max-w-md mx-auto">
-                Your payment confirmation for order <span className="font-mono font-medium text-brand-dark">{orderId}</span> has been received.
+            <h1 className="font-serif text-3xl text-warm-cream mb-3">Payment Submitted!</h1>
+            <p className="text-warm-cream/50 text-sm max-w-md mx-auto">
+                Your payment confirmation for order <span className="font-mono font-medium text-warm-cream">{orderId}</span> has been received.
                 The admin will verify your payment shortly and update your order status.
             </p>
-            <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-700 text-xs font-medium rounded-full">
+            <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 text-amber-400 text-xs font-medium rounded-full">
                 <Clock size={12} />
                 Awaiting Admin Approval
             </div>
             <div className="mt-4">
-                <a href="/track" className="inline-flex items-center gap-2 text-xs font-medium text-brand-purple hover:text-brand-dark transition-colors">
+                <a href="/track" className="inline-flex items-center gap-2 text-xs font-medium text-brand-green hover:text-warm-cream transition-colors">
                     <Package size={14} />
                     Track Your Order →
                 </a>

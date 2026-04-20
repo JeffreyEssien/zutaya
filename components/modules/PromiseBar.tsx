@@ -14,7 +14,7 @@ export default function PromiseBar({ customTexts }: { customTexts?: Record<strin
         desc: getText(customTexts, `${key}.desc`),
     }));
     return (
-        <section className="py-12 md:py-16 px-6 border-b border-warm-tan/10">
+        <section className="py-12 md:py-16 px-6 border-b border-warm-cream/5">
             <div className="max-w-[1400px] mx-auto">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4">
                     {promises.map((p, i) => (
@@ -26,11 +26,11 @@ export default function PromiseBar({ customTexts }: { customTexts?: Record<strin
                             transition={{ delay: i * 0.1, duration: 0.5 }}
                             className="flex flex-col items-center text-center group"
                         >
-                            <div className="w-12 h-12 rounded-full bg-brand-red/[0.07] flex items-center justify-center mb-3 group-hover:bg-brand-red/[0.12] transition-colors duration-300">
-                                <p.icon size={20} strokeWidth={1.5} className="text-brand-red" />
+                            <div className="w-12 h-12 rounded-full bg-brand-green/[0.08] flex items-center justify-center mb-3 group-hover:bg-brand-green/[0.14] transition-colors duration-300">
+                                <p.icon size={20} strokeWidth={1.5} className="text-brand-green" />
                             </div>
-                            <h3 className="text-sm font-semibold text-brand-dark tracking-wide mb-1">{p.title}</h3>
-                            <p className="text-xs text-brand-dark/40 font-light">{p.desc}</p>
+                            <h3 className="text-sm font-semibold text-warm-cream tracking-wide mb-1">{p.title}</h3>
+                            <p className="text-xs text-warm-cream/40 font-light">{p.desc}</p>
                         </motion.div>
                     ))}
                 </div>

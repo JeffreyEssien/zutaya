@@ -82,18 +82,18 @@ function CollapsibleSection({ title, children, defaultOpen = true }: { title: st
     const [open, setOpen] = useState(defaultOpen);
 
     return (
-        <div className="border-b border-brand-lilac/10 py-4">
+        <div className="border-b border-warm-cream/10 py-4">
             <button
                 type="button"
                 onClick={() => setOpen(!open)}
                 className="w-full flex items-center justify-between py-1 cursor-pointer group"
             >
-                <h3 className="text-xs font-semibold text-brand-dark/60 uppercase tracking-[0.15em] group-hover:text-brand-dark transition-colors">
+                <h3 className="text-xs font-semibold text-warm-cream/60 uppercase tracking-[0.15em] group-hover:text-warm-cream transition-colors">
                     {title}
                 </h3>
                 <ChevronDown
                     size={14}
-                    className={`text-brand-dark/30 transition-transform duration-300 ${open ? "rotate-180" : ""}`}
+                    className={`text-warm-cream/30 transition-transform duration-300 ${open ? "rotate-180" : ""}`}
                 />
             </button>
             <AnimatePresence initial={false}>
@@ -119,8 +119,8 @@ function FilterChip({ label, active, onClick }: { label: string; active: boolean
             type="button"
             onClick={onClick}
             className={`px-3.5 py-1.5 text-xs rounded-full transition-all duration-300 cursor-pointer ${active
-                ? "bg-brand-purple text-white font-medium shadow-sm shadow-brand-purple/20"
-                : "bg-neutral-50 text-brand-dark/55 hover:bg-neutral-100 hover:text-brand-dark border border-transparent hover:border-brand-lilac/20"
+                ? "bg-brand-green text-white font-medium shadow-sm shadow-brand-green/20"
+                : "bg-warm-cream/5 text-warm-cream/55 hover:bg-warm-cream/10 hover:text-warm-cream border border-transparent hover:border-brand-green/20"
                 }`}
         >
             {label}

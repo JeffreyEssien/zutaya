@@ -70,11 +70,11 @@ export default function CustomersContent({ customers }: CustomersContentProps) {
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
                 <div>
-                    <h1 className="text-3xl font-serif text-brand-dark mb-2">Customers</h1>
-                    <p className="text-brand-dark/60">Manage your customer base and view insights</p>
+                    <h1 className="text-3xl font-serif text-warm-cream mb-2">Customers</h1>
+                    <p className="text-warm-cream/60">Manage your customer base and view insights</p>
                 </div>
                 <div className="flex gap-3">
-                    <button className="flex items-center gap-2 px-4 py-2 bg-white border border-brand-lilac/30 rounded-lg text-brand-dark hover:bg-brand-creme/50 transition-colors">
+                    <button className="flex items-center gap-2 px-4 py-2 bg-white/[0.04] border border-warm-cream/30 rounded-lg text-warm-cream hover:bg-brand-creme/50 transition-colors">
                         <ExternalLink size={16} />
                         <span>Export CSV</span>
                     </button>
@@ -114,20 +114,20 @@ export default function CustomersContent({ customers }: CustomersContentProps) {
                 {/* Controls */}
                 <div className="flex flex-col md:flex-row gap-4 mb-8 justify-between">
                     <div className="relative flex-1 max-w-md">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-dark/40" size={18} />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-warm-cream/40" size={18} />
                         <input
                             type="text"
                             placeholder="Search by name or email..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 bg-white/50 border border-brand-lilac/20 rounded-lg focus:outline-none focus:border-brand-purple/50 focus:ring-1 focus:ring-brand-purple/50 transition-all"
+                            className="w-full pl-10 pr-4 py-2 bg-white/50 border border-warm-cream/20 rounded-lg focus:outline-none focus:border-brand-green/50 focus:ring-1 focus:ring-brand-green/50 transition-all"
                         />
                     </div>
                     <div className="flex gap-3">
                         <select
                             value={filterRole}
                             onChange={(e) => setFilterRole(e.target.value as any)}
-                            className="px-4 py-2 bg-white/50 border border-brand-lilac/20 rounded-lg focus:outline-none focus:border-brand-purple/50 text-brand-dark/80"
+                            className="px-4 py-2 bg-white/50 border border-warm-cream/20 rounded-lg focus:outline-none focus:border-brand-green/50 text-warm-cream/80"
                         >
                             <option value="all">All Roles</option>
                             <option value="customer">Customers</option>
@@ -136,7 +136,7 @@ export default function CustomersContent({ customers }: CustomersContentProps) {
                         <select
                             value={sortBy}
                             onChange={(e) => setSortBy(e.target.value as any)}
-                            className="px-4 py-2 bg-white/50 border border-brand-lilac/20 rounded-lg focus:outline-none focus:border-brand-purple/50 text-brand-dark/80"
+                            className="px-4 py-2 bg-white/50 border border-warm-cream/20 rounded-lg focus:outline-none focus:border-brand-green/50 text-warm-cream/80"
                         >
                             <option value="newest">Newest Joined</option>
                             <option value="oldest">Oldest Joined</option>
@@ -150,7 +150,7 @@ export default function CustomersContent({ customers }: CustomersContentProps) {
                 <div className="hidden md:block overflow-x-auto">
                     <table className="w-full">
                         <thead>
-                            <tr className="border-b border-brand-lilac/10 text-left text-xs uppercase tracking-wider text-brand-dark/50">
+                            <tr className="border-b border-warm-cream/10 text-left text-xs uppercase tracking-wider text-warm-cream/50">
                                 <th className="pb-4 pl-4 font-medium">Customer</th>
                                 <th className="pb-4 font-medium">Status</th>
                                 <th className="pb-4 font-medium">Orders</th>
@@ -159,11 +159,11 @@ export default function CustomersContent({ customers }: CustomersContentProps) {
                                 <th className="pb-4 pr-4 text-right font-medium">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-brand-lilac/5">
+                        <tbody className="divide-y divide-warm-cream/5">
                             <AnimatePresence>
                                 {filteredCustomers.length === 0 ? (
                                     <tr>
-                                        <td colSpan={6} className="py-12 text-center text-brand-dark/40">
+                                        <td colSpan={6} className="py-12 text-center text-warm-cream/40">
                                             No customers found matching your filters.
                                         </td>
                                     </tr>
@@ -174,11 +174,11 @@ export default function CustomersContent({ customers }: CustomersContentProps) {
                                             initial={{ opacity: 0, y: 10 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             exit={{ opacity: 0 }}
-                                            className="group hover:bg-brand-lilac/5 transition-colors"
+                                            className="group hover:bg-warm-cream/5 transition-colors"
                                         >
                                             <td className="py-4 pl-4">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="relative h-10 w-10 rounded-full overflow-hidden bg-brand-lilac/10 border border-brand-lilac/20 flex-shrink-0">
+                                                    <div className="relative h-10 w-10 rounded-full overflow-hidden bg-warm-cream/10 border border-warm-cream/20 flex-shrink-0">
                                                         {customer.avatarUrl ? (
                                                             <Image
                                                                 src={customer.avatarUrl}
@@ -187,14 +187,14 @@ export default function CustomersContent({ customers }: CustomersContentProps) {
                                                                 className="object-cover"
                                                             />
                                                         ) : (
-                                                            <div className="w-full h-full flex items-center justify-center text-brand-purple font-serif font-bold">
+                                                            <div className="w-full h-full flex items-center justify-center text-brand-green font-serif font-bold">
                                                                 {(customer.fullName || customer.email || "?")[0].toUpperCase()}
                                                             </div>
                                                         )}
                                                     </div>
                                                     <div>
-                                                        <p className="font-medium text-brand-dark">{customer.fullName || "Unnamed User"}</p>
-                                                        <p className="text-xs text-brand-dark/50">{customer.email}</p>
+                                                        <p className="font-medium text-warm-cream">{customer.fullName || "Unnamed User"}</p>
+                                                        <p className="text-xs text-warm-cream/50">{customer.email}</p>
                                                     </div>
                                                 </div>
                                             </td>
@@ -205,7 +205,7 @@ export default function CustomersContent({ customers }: CustomersContentProps) {
                                                         Admin
                                                     </span>
                                                 ) : (
-                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700 border border-emerald-200">
+                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-400 border border-emerald-500/20">
                                                         <User size={10} />
                                                         Customer
                                                     </span>
@@ -213,26 +213,26 @@ export default function CustomersContent({ customers }: CustomersContentProps) {
                                             </td>
                                             <td className="py-4">
                                                 <div className="flex items-center gap-2">
-                                                    <ShoppingBag size={14} className="text-brand-dark/30" />
-                                                    <span className="text-brand-dark/80">{customer.orderCount}</span>
+                                                    <ShoppingBag size={14} className="text-warm-cream/30" />
+                                                    <span className="text-warm-cream/80">{customer.orderCount}</span>
                                                 </div>
                                             </td>
                                             <td className="py-4">
-                                                <span className="font-medium text-brand-dark">
+                                                <span className="font-medium text-warm-cream">
                                                     {formatCurrency(customer.totalSpent)}
                                                 </span>
                                             </td>
-                                            <td className="py-4 text-brand-dark/60 text-sm">
+                                            <td className="py-4 text-warm-cream/60 text-sm">
                                                 {new Date(customer.createdAt).toLocaleDateString(undefined, {
                                                     month: 'short', day: 'numeric', year: 'numeric'
                                                 })}
                                             </td>
                                             <td className="py-4 pr-4 text-right">
                                                 <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <button className="p-2 hover:bg-brand-lilac/10 rounded-lg text-brand-dark/60 hover:text-brand-purple transition-colors" title="Email Customer">
+                                                    <button className="p-2 hover:bg-warm-cream/10 rounded-lg text-warm-cream/60 hover:text-brand-green transition-colors" title="Email Customer">
                                                         <Mail size={16} />
                                                     </button>
-                                                    <button className="p-2 hover:bg-brand-lilac/10 rounded-lg text-brand-dark/60 hover:text-brand-purple transition-colors" title="View Details">
+                                                    <button className="p-2 hover:bg-warm-cream/10 rounded-lg text-warm-cream/60 hover:text-brand-green transition-colors" title="View Details">
                                                         <MoreVertical size={16} />
                                                     </button>
                                                 </div>
@@ -249,7 +249,7 @@ export default function CustomersContent({ customers }: CustomersContentProps) {
                 <div className="md:hidden flex flex-col gap-4">
                     <AnimatePresence>
                         {filteredCustomers.length === 0 ? (
-                            <div className="py-12 text-center text-brand-dark/40 bg-white/50 rounded-xl border border-brand-lilac/10">
+                            <div className="py-12 text-center text-warm-cream/40 bg-white/50 rounded-xl border border-warm-cream/10">
                                 No customers found matching your filters.
                             </div>
                         ) : (
@@ -259,22 +259,22 @@ export default function CustomersContent({ customers }: CustomersContentProps) {
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0 }}
-                                    className="bg-white rounded-xl border border-brand-lilac/20 p-4 shadow-sm"
+                                    className="bg-white/[0.04] rounded-xl border border-warm-cream/20 p-4 shadow-sm"
                                 >
-                                    <div className="flex items-center justify-between border-b border-brand-lilac/10 pb-3 mb-3">
+                                    <div className="flex items-center justify-between border-b border-warm-cream/10 pb-3 mb-3">
                                         <div className="flex items-center gap-3">
-                                            <div className="relative h-10 w-10 rounded-full overflow-hidden bg-brand-lilac/10 border border-brand-lilac/20 flex-shrink-0">
+                                            <div className="relative h-10 w-10 rounded-full overflow-hidden bg-warm-cream/10 border border-warm-cream/20 flex-shrink-0">
                                                 {customer.avatarUrl ? (
                                                     <Image src={customer.avatarUrl} alt={customer.fullName} fill className="object-cover" />
                                                 ) : (
-                                                    <div className="w-full h-full flex items-center justify-center text-brand-purple font-serif font-bold">
+                                                    <div className="w-full h-full flex items-center justify-center text-brand-green font-serif font-bold">
                                                         {(customer.fullName || customer.email || "?")[0].toUpperCase()}
                                                     </div>
                                                 )}
                                             </div>
                                             <div>
-                                                <p className="font-medium text-brand-dark leading-tight">{customer.fullName || "Unnamed User"}</p>
-                                                <p className="text-xs text-brand-dark/50">{customer.email}</p>
+                                                <p className="font-medium text-warm-cream leading-tight">{customer.fullName || "Unnamed User"}</p>
+                                                <p className="text-xs text-warm-cream/50">{customer.email}</p>
                                             </div>
                                         </div>
                                         <div>
@@ -284,7 +284,7 @@ export default function CustomersContent({ customers }: CustomersContentProps) {
                                                     Admin
                                                 </span>
                                             ) : (
-                                                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-100 text-emerald-700 border border-emerald-200">
+                                                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-100 text-emerald-400 border border-emerald-500/20">
                                                     <User size={10} />
                                                     Customer
                                                 </span>
@@ -293,31 +293,31 @@ export default function CustomersContent({ customers }: CustomersContentProps) {
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-3 text-sm">
-                                        <div className="bg-brand-lilac/5 rounded-lg p-2.5 border border-brand-lilac/10">
-                                            <p className="text-[10px] uppercase text-brand-dark/40 mb-1">Total Spent</p>
-                                            <p className="font-medium text-brand-dark">{formatCurrency(customer.totalSpent)}</p>
+                                        <div className="bg-warm-cream/5 rounded-lg p-2.5 border border-warm-cream/10">
+                                            <p className="text-[10px] uppercase text-warm-cream/40 mb-1">Total Spent</p>
+                                            <p className="font-medium text-warm-cream">{formatCurrency(customer.totalSpent)}</p>
                                         </div>
-                                        <div className="bg-brand-lilac/5 rounded-lg p-2.5 border border-brand-lilac/10">
-                                            <p className="text-[10px] uppercase text-brand-dark/40 mb-1">Orders</p>
-                                            <p className="font-medium text-brand-dark flex flex-row items-center gap-1">
-                                                <ShoppingBag size={12} className="text-brand-dark/40" />
+                                        <div className="bg-warm-cream/5 rounded-lg p-2.5 border border-warm-cream/10">
+                                            <p className="text-[10px] uppercase text-warm-cream/40 mb-1">Orders</p>
+                                            <p className="font-medium text-warm-cream flex flex-row items-center gap-1">
+                                                <ShoppingBag size={12} className="text-warm-cream/40" />
                                                 <span>{customer.orderCount}</span>
                                             </p>
                                         </div>
-                                        <div className="bg-brand-lilac/5 rounded-lg p-2.5 border border-brand-lilac/10 col-span-2 flex justify-between items-center">
+                                        <div className="bg-warm-cream/5 rounded-lg p-2.5 border border-warm-cream/10 col-span-2 flex justify-between items-center">
                                             <div>
-                                                <p className="text-[10px] uppercase text-brand-dark/40 mb-0.5">Joined</p>
-                                                <p className="text-xs text-brand-dark/70 font-medium">
+                                                <p className="text-[10px] uppercase text-warm-cream/40 mb-0.5">Joined</p>
+                                                <p className="text-xs text-warm-cream/70 font-medium">
                                                     {new Date(customer.createdAt).toLocaleDateString(undefined, {
                                                         month: 'short', day: 'numeric', year: 'numeric'
                                                     })}
                                                 </p>
                                             </div>
                                             <div className="flex items-center gap-1 shrink-0">
-                                                <button className="p-1.5 hover:bg-white rounded-md text-brand-dark/60 hover:text-brand-purple transition-colors border border-transparent hover:border-brand-lilac/20 shadow-sm" title="Email Customer">
+                                                <button className="p-1.5 hover:bg-white/[0.04] rounded-md text-warm-cream/60 hover:text-brand-green transition-colors border border-transparent hover:border-warm-cream/20 shadow-sm" title="Email Customer">
                                                     <Mail size={14} />
                                                 </button>
-                                                <button className="p-1.5 hover:bg-white rounded-md text-brand-dark/60 hover:text-brand-purple transition-colors border border-transparent hover:border-brand-lilac/20 shadow-sm" title="View Details">
+                                                <button className="p-1.5 hover:bg-white/[0.04] rounded-md text-warm-cream/60 hover:text-brand-green transition-colors border border-transparent hover:border-warm-cream/20 shadow-sm" title="View Details">
                                                     <MoreVertical size={14} />
                                                 </button>
                                             </div>
@@ -330,11 +330,11 @@ export default function CustomersContent({ customers }: CustomersContentProps) {
                 </div>
 
                 {/* Pagination (Visual Only for now) */}
-                <div className="flex items-center justify-between mt-6 pt-6 border-t border-brand-lilac/10 text-sm text-brand-dark/50">
+                <div className="flex items-center justify-between mt-6 pt-6 border-t border-warm-cream/10 text-sm text-warm-cream/50">
                     <p>Showing 1 to {Math.min(filteredCustomers.length, 10)} of {filteredCustomers.length} results</p>
                     <div className="flex gap-2">
-                        <button disabled className="px-3 py-1 rounded-md border border-brand-lilac/20 opacity-50 cursor-not-allowed">Previous</button>
-                        <button disabled className="px-3 py-1 rounded-md border border-brand-lilac/20 opacity-50 cursor-not-allowed">Next</button>
+                        <button disabled className="px-3 py-1 rounded-md border border-warm-cream/20 opacity-50 cursor-not-allowed">Previous</button>
+                        <button disabled className="px-3 py-1 rounded-md border border-warm-cream/20 opacity-50 cursor-not-allowed">Next</button>
                     </div>
                 </div>
             </div>
@@ -346,22 +346,22 @@ function KpiCard({ label, value, icon: Icon, trend, subtext }: { label: string, 
     return (
         <div className="glass-card p-5 relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity group-hover:scale-110 duration-500">
-                <Icon size={48} className="text-brand-purple" />
+                <Icon size={48} className="text-brand-green" />
             </div>
             <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-brand-purple/10 flex items-center justify-center text-brand-purple">
+                <div className="w-10 h-10 rounded-xl bg-brand-green/10 flex items-center justify-center text-brand-green">
                     <Icon size={20} />
                 </div>
                 {trend && (
-                    <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                    <span className="text-xs font-medium text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
                         {trend}
                     </span>
                 )}
             </div>
             <div>
-                <p className="text-brand-dark/50 text-sm font-medium mb-1">{label}</p>
-                <h3 className="text-2xl font-serif text-brand-dark">{value}</h3>
-                {subtext && <p className="text-xs text-brand-dark/40 mt-1">{subtext}</p>}
+                <p className="text-warm-cream/50 text-sm font-medium mb-1">{label}</p>
+                <h3 className="text-2xl font-serif text-warm-cream">{value}</h3>
+                {subtext && <p className="text-xs text-warm-cream/40 mt-1">{subtext}</p>}
             </div>
         </div>
     );
