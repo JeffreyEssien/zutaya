@@ -119,7 +119,7 @@ Still TODO
 
   1. ~~Section 6.3 — Order ID Format~~ — DONE. Orders use ZY-YYYYMMDD-XXXX format.
   2. ~~Section 6.4 — New Checkout Fields~~ — DONE. prep_instructions, delivery date/slot (DeliveryScheduler wired), packaging_fee all in CheckoutForm. queries.ts persists all fields.
-  3. Section 6.5 — Coupon Usage Increment: increment_coupon_usage is never called after order placement.
+  3. ~~Section 6.5 — Coupon Usage Increment~~ — DONE. `createOrder` in queries.ts increments coupon `usage_count` after order insert (best-effort).
   4. Section 7.1 — Delivery Fee: OrderDetailPanel has no editable delivery_fee field for admin to enter Uber fee post-dispatch.
   5. ~~Section 7.2 — Delivery Availability API~~ — DONE. GET /api/delivery/availability returns slot availability. increment_delivery_capacity called on order placement.
   6. Section 9.4 — Recipes CMS: No /admin/recipes route, no /api/recipes, no recipe pages. Migration 006 exists but no app code. Homepage missing "Recipe Spotlight" section

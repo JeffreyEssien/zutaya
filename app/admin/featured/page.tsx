@@ -273,12 +273,19 @@ export default function FeaturedPage() {
             </div>
 
             {/* Hero Mode Toggle */}
-            <div className="bg-white/[0.04] rounded-2xl border border-warm-cream/15 p-5 shadow-sm">
+            <div className={`rounded-2xl border-2 p-5 shadow-sm transition-all ${heroDisplay.useFeaturedSlides ? "bg-brand-green/[0.08] border-brand-green/30" : "bg-white/[0.04] border-warm-cream/15"}`}>
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <Zap size={18} className="text-amber-500" />
+                        <div className={`p-2 rounded-lg transition-colors ${heroDisplay.useFeaturedSlides ? "bg-brand-green/20" : "bg-amber-500/10"}`}>
+                            <Zap size={18} className={heroDisplay.useFeaturedSlides ? "text-brand-green" : "text-amber-500"} />
+                        </div>
                         <div>
-                            <h3 className="text-sm font-semibold text-warm-cream">Use Featured Slides in Hero</h3>
+                            <div className="flex items-center gap-2">
+                                <h3 className="text-sm font-semibold text-warm-cream">Use Featured Slides in Hero</h3>
+                                <span className={`text-[9px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full ${heroDisplay.useFeaturedSlides ? "bg-brand-green/20 text-brand-green" : "bg-warm-cream/10 text-warm-cream/40"}`}>
+                                    {heroDisplay.useFeaturedSlides ? "Active" : "Off"}
+                                </span>
+                            </div>
                             <p className="text-xs text-warm-cream/40 mt-0.5">When enabled, the hero slideshow uses your curated slides instead of raw gallery media</p>
                         </div>
                     </div>
@@ -288,9 +295,9 @@ export default function FeaturedPage() {
                             mode: prev.useFeaturedSlides ? prev.mode : "slideshow",
                             useFeaturedSlides: !prev.useFeaturedSlides,
                         }))}
-                        className={`relative w-12 h-6 rounded-full transition-colors cursor-pointer ${heroDisplay.useFeaturedSlides ? "bg-brand-green" : "bg-brand-dark/15"}`}
+                        className={`relative w-12 h-6 rounded-full transition-colors cursor-pointer ${heroDisplay.useFeaturedSlides ? "bg-brand-green" : "bg-warm-cream/20"}`}
                     >
-                        <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white/[0.04] shadow transition-all ${heroDisplay.useFeaturedSlides ? "left-[26px]" : "left-0.5"}`} />
+                        <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-md transition-all ${heroDisplay.useFeaturedSlides ? "left-[26px]" : "left-0.5"}`} />
                     </button>
                 </div>
 
@@ -342,7 +349,7 @@ export default function FeaturedPage() {
                 </button>
 
                 {addMenuOpen && (
-                    <div className="absolute top-full left-0 mt-2 w-72 bg-white/[0.04] rounded-xl shadow-2xl border border-warm-cream/15 overflow-hidden z-30">
+                    <div className="absolute top-full left-0 mt-2 w-72 bg-deep-espresso rounded-xl shadow-2xl border border-warm-cream/15 overflow-hidden z-30">
                         <button
                             onClick={() => { setProductSearchOpen(true); setAddMenuOpen(false); }}
                             className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-brand-green/5 transition-colors cursor-pointer text-left"
@@ -653,7 +660,7 @@ export default function FeaturedPage() {
             {/* Product Search Modal */}
             {productSearchOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-                    <div className="bg-white/[0.04] rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] overflow-hidden flex flex-col">
+                    <div className="bg-deep-espresso rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] overflow-hidden flex flex-col border border-warm-cream/15">
                         <div className="px-5 py-4 border-b border-warm-cream/10 flex items-center justify-between">
                             <h3 className="text-sm font-semibold text-warm-cream">Select Product</h3>
                             <button onClick={() => { setProductSearchOpen(false); setProductSearch(""); }} className="p-1 hover:bg-warm-cream/10 rounded-lg cursor-pointer">
@@ -874,7 +881,7 @@ function SlidePreviewModal({
                         <button
                             key={i}
                             onClick={() => onIndexChange(i)}
-                            className={`w-2 h-2 rounded-full transition-all cursor-pointer ${i === index ? "bg-white/[0.04] w-6" : "bg-white/30 hover:bg-white/50"}`}
+                            className={`w-2 h-2 rounded-full transition-all cursor-pointer ${i === index ? "bg-white w-6" : "bg-white/30 hover:bg-white/50"}`}
                         />
                     ))}
                     <span className="text-[10px] text-white/50 ml-2">{index + 1}/{slides.length}</span>

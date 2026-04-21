@@ -10,7 +10,7 @@ import {
     Globe, Phone, MessageCircle, MapPin, Type, Megaphone,
     Instagram, Twitter, Music2, Facebook, BookOpen, Plus, Trash2,
     FileText, PackageCheck, Image as ImageIcon, Share2, Store, Save,
-    Monitor, Play, Film, X,
+    Monitor, Play, Film, X, Zap,
 } from "lucide-react";
 import { logAction } from "@/lib/auditClient";
 import { TEXT_GROUPS } from "@/lib/textDefaults";
@@ -36,7 +36,7 @@ export default function SiteSettingsForm() {
     const [aboutStats, setAboutStats] = useState<{ value: string; label: string }[]>([]);
     const [customTexts, setCustomTexts] = useState<Record<string, string>>({});
     const [activeTab, setActiveTab] = useState<TabId>("general");
-    const [heroDisplay, setHeroDisplay] = useState<HeroDisplayConfig>({ mode: "single", mediaIds: [], slideshowInterval: 5 });
+    const [heroDisplay, setHeroDisplay] = useState<HeroDisplayConfig>({ mode: "single", mediaIds: [], slideshowInterval: 5, useFeaturedSlides: false });
     const [heroMediaItems, setHeroMediaItems] = useState<MediaItem[]>([]);
     const [pickerOpen, setPickerOpen] = useState(false);
 
@@ -102,7 +102,7 @@ export default function SiteSettingsForm() {
         e.preventDefault();
         setSaving(true);
         try {
-            const payload = { ...settings, aboutStats: JSON.stringify(aboutStats), customTexts, heroDisplayConfig: heroDisplay };
+            const payload = { ...settings, aboutStats: JSON.stringify(aboutStats), customTexts, heroDisplayConfig: { ...heroDisplay } };
             await updateSiteSettings(payload);
             await revalidateShop();
             logAction("update", "settings", undefined, "Updated site settings");
@@ -242,6 +242,15 @@ export default function SiteSettingsForm() {
 
                         {/* Hero Display Mode */}
                         <Card title="Hero Display Panel" description="Configure the right-side visual panel on the hero section" icon={Monitor}>
+                            {heroDisplay.useFeaturedSlides && (
+                                <div className="mb-4 flex items-center gap-3 p-3 rounded-lg bg-brand-green/10 border border-brand-green/20">
+                                    <Zap size={16} className="text-brand-green flex-shrink-0" />
+                                    <p className="text-xs text-brand-green">
+                                        <span className="font-semibold">Featured Slides are active.</span>{" "}
+                                        The hero is using curated slides from the <a href="/admin/featured" className="underline">Featured page</a>. The display mode below is overridden.
+                                    </p>
+                                </div>
+                            )}
                             <Field label="Display Mode">
                                 <div className="grid grid-cols-3 gap-3">
                                     {([
