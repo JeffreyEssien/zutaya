@@ -7,6 +7,8 @@ interface DeliverySchedulerProps {
     onSelect: (deliveryDate: string, deliverySlot: "morning" | "afternoon" | "evening") => void;
     selectedDate?: string;
     selectedSlot?: "morning" | "afternoon" | "evening";
+    cutoffHour?: number;
+    cutoffLabel?: string;
 }
 
 interface SlotAvailability {
@@ -21,11 +23,11 @@ const SLOT_LABELS: Record<string, { label: string; time: string }> = {
     evening:   { label: "Evening",   time: "4pm – 7pm" },
 };
 
-function getNextSevenDays(): { date: string; label: string; dayName: string }[] {
+function getNextSevenDays(startOffset = 1): { date: string; label: string; dayName: string }[] {
     const days: { date: string; label: string; dayName: string }[] = [];
     const today = new Date();
 
-    for (let i = 1; i <= 7; i++) {
+    for (let i = startOffset; i <= startOffset + 6; i++) {
         const d = new Date(today);
         d.setDate(today.getDate() + i);
         const iso = d.toISOString().slice(0, 10);
@@ -37,8 +39,9 @@ function getNextSevenDays(): { date: string; label: string; dayName: string }[] 
     return days;
 }
 
-export default function DeliveryScheduler({ onSelect, selectedDate, selectedSlot }: DeliverySchedulerProps) {
-    const [dates] = useState(getNextSevenDays);
+export default function DeliveryScheduler({ onSelect, selectedDate, selectedSlot, cutoffHour = 12, cutoffLabel }: DeliverySchedulerProps) {
+    const cutoffPassed = new Date().getHours() >= cutoffHour;
+    const [dates] = useState(() => getNextSevenDays(cutoffPassed ? 2 : 1));
     const [pickedDate, setPickedDate] = useState(selectedDate || "");
     const [pickedSlot, setPickedSlot] = useState<"morning" | "afternoon" | "evening" | "">(selectedSlot || "");
     const [availability, setAvailability] = useState<SlotAvailability | null>(null);
@@ -72,6 +75,11 @@ export default function DeliveryScheduler({ onSelect, selectedDate, selectedSlot
 
     return (
         <div className="space-y-5">
+            {cutoffPassed && cutoffLabel && (
+                <div className="px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs">
+                    {cutoffLabel}
+                </div>
+            )}
             {/* Date Picker */}
             <div>
                 <div className="flex items-center gap-2 mb-3">

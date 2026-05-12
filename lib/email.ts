@@ -10,6 +10,13 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+export async function sendEmail({ to, subject, html }: { to: string; subject: string; html: string }): Promise<void> {
+  await transporter.sendMail({
+    from: `"${SITE_NAME}" <${process.env.SMTP_EMAIL || SITE_EMAIL}>`,
+    to, subject, html,
+  });
+}
+
 function formatItemsHtml(order: Order): string {
   return order.items
     .map(

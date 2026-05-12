@@ -6,25 +6,39 @@ import {
     getInventoryLogs,
     getInventoryItems
 } from "@/lib/queries";
+import { getServicesDashboardData } from "@/lib/servicesQueries";
 import { calculateAnalytics } from "@/lib/analytics";
 import AnalyticsDashboard from "@/components/modules/AnalyticsDashboard";
+import ServicesDashboardCards from "@/components/modules/ServicesDashboardCards";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboard() {
     try {
-        const [products, orders, customers, coupons, inventoryLogs, inventoryItems] = await Promise.all([
+        const [products, orders, customers, coupons, inventoryLogs, inventoryItems, services] = await Promise.all([
             getProducts().catch(() => []),
             getOrders().catch(() => []),
             getCustomers().catch(() => []),
             getCoupons().catch(() => []),
             getInventoryLogs().catch(() => []),
             getInventoryItems().catch(() => []),
+            getServicesDashboardData().catch(() => ({ bookings: [], pendingBookings: 0, upcomingBookings: 0, activeMarinades: 0, activeProcessingOptions: 0 })),
         ]);
 
         const analyticsData = calculateAnalytics(orders, products, customers, coupons, inventoryLogs, inventoryItems);
 
-        return <AnalyticsDashboard data={analyticsData} />;
+        return (
+            <div className="space-y-8">
+                <ServicesDashboardCards
+                    pendingBookings={services.pendingBookings}
+                    upcomingBookings={services.upcomingBookings}
+                    activeMarinades={services.activeMarinades}
+                    activeProcessingOptions={services.activeProcessingOptions}
+                    recentBookings={services.bookings}
+                />
+                <AnalyticsDashboard data={analyticsData} />
+            </div>
+        );
     } catch (err) {
         console.error("Admin dashboard error:", err);
         return (

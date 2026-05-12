@@ -98,6 +98,14 @@ export interface Product {
     prepOptions?: PrepOption[];
     minWeightKg?: number | null;
     relatedRecipeIds?: string[];
+    // Mode-morphing imagery
+    imageCooked?: string;
+    imageEvent?: string;
+    // Meat passport / traceability
+    originFarm?: string;
+    originBreed?: string;
+    originHangingHours?: number;
+    originHalalCertified?: boolean;
 }
 
 export interface Category {
@@ -116,6 +124,8 @@ export interface CartItem {
     bundleId?: string;
     bundleDiscount?: number; // percent
     bundleName?: string;
+    completionMode?: CompletionMode;
+    processing?: CartItemProcessing;
 }
 
 export interface Recipe {
@@ -172,6 +182,9 @@ export interface Order {
     requestedDeliveryDate?: string;
     requestedDeliverySlot?: "morning" | "afternoon" | "evening";
     subscriptionId?: string;
+    completionMode?: CompletionMode;
+    kitchenReadyAt?: string;
+    serviceBookingId?: string;
 }
 
 export interface SiteSettings {
@@ -220,6 +233,16 @@ export interface SiteSettings {
     featuredSlides?: FeaturedSlide[];
     // All editable texts as JSON
     customTexts?: Record<string, string>;
+    // Services
+    deliveryCutoffHour?: number;
+    deliveryCutoffLabel?: string;
+    kitchenEnabled?: boolean;
+    kitchenHeroImage?: string;
+    kitchenTagline?: string;
+    kitchenLeadMinutes?: number;
+    eventsEnabled?: boolean;
+    eventsTagline?: string;
+    butcherProfiles?: ButcherProfile[];
 }
 
 export interface Coupon {
@@ -325,5 +348,123 @@ export interface NewsletterCampaign {
     sentAt?: string | null;
     recipientCount: number;
     createdAt: string;
+}
+
+// ===== Services: Processing / Kitchen / Events =====
+
+export type CompletionMode = "cook_myself" | "event";
+
+export interface Marinade {
+    id: string;
+    name: string;
+    description?: string;
+    imageUrl?: string;
+    extraFee: number;
+    cureHours: number;
+    isActive: boolean;
+    sortOrder: number;
+    createdAt: string;
+}
+
+export interface ProcessingOption {
+    id: string;
+    label: string;
+    description?: string;
+    icon?: string;
+    extraFee: number;
+    extendsShelfLife: boolean;
+    isActive: boolean;
+    sortOrder: number;
+    createdAt: string;
+}
+
+export interface EventOccasion {
+    id: string;
+    name: string;
+    description?: string;
+    icon?: string;
+    typicalHeadcountMin?: number;
+    typicalHeadcountMax?: number;
+    isActive: boolean;
+    sortOrder: number;
+}
+
+export interface EventAnimal {
+    id: string;
+    name: string;
+    description?: string;
+    imageUrl?: string;
+    basePrice: number;
+    feedsAdults: number;
+    typicalWeightKg?: number;
+    isActive: boolean;
+    sortOrder: number;
+}
+
+export interface EventServiceTier {
+    id: string;
+    name: string;
+    description?: string;
+    priceModifier: number;
+    pricePerHead: number;
+    includes: string[];
+    isActive: boolean;
+    sortOrder: number;
+}
+
+export interface AnimalSelection {
+    animalId: string;
+    animalName: string;
+    quantity: number;
+    unitPrice: number;
+}
+
+export interface ServiceBooking {
+    id: string;
+    bookingCode: string;
+    customerName: string;
+    customerEmail: string;
+    customerPhone: string;
+    occasionId?: string;
+    occasionLabel?: string;
+    headcount: number;
+    eventDate: string;
+    eventTime?: string;
+    address: string;
+    city?: string;
+    state?: string;
+    locationNotes?: string;
+    animalSelections: AnimalSelection[];
+    serviceTierId?: string;
+    serviceTierLabel?: string;
+    addOns: { label: string; price: number }[];
+    estimatedTotal?: number;
+    quotedTotal?: number;
+    depositAmount?: number;
+    depositPaid: boolean;
+    status: "inquiry" | "quoted" | "deposit_pending" | "confirmed" | "in_progress" | "complete" | "cancelled";
+    adminNotes?: string;
+    customerNotes?: string;
+    leftoverKg?: number;
+    convertedToOrderId?: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface ButcherProfile {
+    id: string;
+    name: string;
+    role: string;
+    bio?: string;
+    imageUrl?: string;
+    specialties?: string[];
+}
+
+export interface CartItemProcessing {
+    portionGrams?: number;
+    processingOptionIds?: string[];
+    marinadeId?: string;
+    vacuumSealed?: boolean;
+    notes?: string;
 }
 

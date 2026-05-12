@@ -2,22 +2,30 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import type { Product, PrepOption } from "@/types";
+import type { Product, PrepOption, Marinade, ProcessingOption, CartItemProcessing, CompletionMode } from "@/types";
 import { formatCurrency } from "@/lib/formatCurrency";
 import { useCartStore } from "@/lib/cartStore";
 import Button from "@/components/ui/Button";
 import StockIndicator from "@/components/ui/StockIndicator";
 import { StorageBadge } from "@/components/ui/StorageBadge";
 import PrepOptionsSelector from "@/components/modules/PrepOptionsSelector";
+import EatModeSelector from "@/components/modules/EatModeSelector";
+import ProcessingConfigurator from "@/components/modules/ProcessingConfigurator";
+import MeatPassport from "@/components/modules/MeatPassport";
 import { ShoppingBag, Truck, Shield, RotateCcw, Check, ChevronDown, ChevronRight, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { WHATSAPP_NUMBER } from "@/lib/constants";
 
 interface ProductDetailsProps {
     product: Product;
+    marinades?: Marinade[];
+    processingOptions?: ProcessingOption[];
+    eventsEnabled?: boolean;
+    mode?: CompletionMode;
+    onModeChange?: (m: CompletionMode) => void;
 }
 
-export default function ProductDetails({ product }: ProductDetailsProps) {
+export default function ProductDetails({ product, marinades = [], processingOptions = [], eventsEnabled = true, mode, onModeChange }: ProductDetailsProps) {
     const { addItem, open } = useCartStore();
     const [selectedVariant, setSelectedVariant] = useState<Product["variants"][0] | undefined>(
         product.variants && product.variants.length > 0 ? product.variants[0] : undefined
@@ -25,6 +33,11 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
     const [addedFeedback, setAddedFeedback] = useState(false);
     const [activeTab, setActiveTab] = useState<"description" | "details">("description");
     const [selectedPrepOptions, setSelectedPrepOptions] = useState<PrepOption[]>([]);
+    const [internalMode, setInternalMode] = useState<CompletionMode>("cook_myself");
+    const completionMode = mode ?? internalMode;
+    const setCompletionMode = onModeChange ?? setInternalMode;
+    const [processing, setProcessing] = useState<CartItemProcessing>({});
+    const [processingFee, setProcessingFee] = useState(0);
 
     const currentPrice = selectedVariant?.price || product.price;
     const currentStock = selectedVariant?.stock !== undefined ? selectedVariant.stock : product.stock;
@@ -37,7 +50,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
         : product.priceUnit === "whole" ? "" : "";
 
     const handleAdd = () => {
-        addItem(product, selectedVariant, selectedPrepOptions);
+        addItem(product, selectedVariant, selectedPrepOptions, processing);
         open();
         setAddedFeedback(true);
         setTimeout(() => setAddedFeedback(false), 2000);
@@ -159,6 +172,13 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                 <StockIndicator stock={currentStock} />
             </div>
 
+            {/* How will you eat it? */}
+            <EatModeSelector
+                selected={completionMode}
+                onSelect={setCompletionMode}
+                eventsEnabled={eventsEnabled}
+            />
+
             {/* Prep Options */}
             {product.prepOptions && product.prepOptions.length > 0 && (
                 <div className="mb-6">
@@ -170,27 +190,47 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                 </div>
             )}
 
-            {/* Add to Cart Button */}
-            <Button
-                size="lg"
-                onClick={handleAdd}
-                disabled={currentStock === 0}
-                className="w-full sm:w-auto luxury-button"
-            >
-                <span className="flex items-center justify-center gap-2">
-                    {addedFeedback ? (
-                        <>
-                            <Check size={18} />
-                            Added to Cart!
-                        </>
-                    ) : (
-                        <>
-                            <ShoppingBag size={18} />
-                            {currentStock === 0 ? "Sold Out" : "Add to Cart"}
-                        </>
-                    )}
-                </span>
-            </Button>
+            {/* Processing Configurator */}
+            <ProcessingConfigurator
+                marinades={marinades}
+                processingOptions={processingOptions}
+                pricePerKg={product.priceUnit === "per_kg" ? currentPrice : undefined}
+                onChange={(cfg, fee) => { setProcessing(cfg); setProcessingFee(fee); }}
+            />
+
+            {processingFee > 0 && (
+                <div className="mb-4 text-xs text-warm-cream/60">
+                    Processing add-ons: <span className="text-brand-green font-semibold">+{formatCurrency(processingFee)}</span>
+                </div>
+            )}
+
+            {/* Mode-aware CTA */}
+            {completionMode === "event" ? (
+                <Link href="/events" className="luxury-button w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-emerald-600 text-white font-semibold hover:bg-emerald-600/90 transition-all">
+                    <ChevronRight size={18} /> Plan an event with this
+                </Link>
+            ) : (
+                <Button
+                    size="lg"
+                    onClick={handleAdd}
+                    disabled={currentStock === 0}
+                    className="w-full sm:w-auto luxury-button"
+                >
+                    <span className="flex items-center justify-center gap-2">
+                        {addedFeedback ? (
+                            <>
+                                <Check size={18} />
+                                Added to Cart!
+                            </>
+                        ) : (
+                            <>
+                                <ShoppingBag size={18} />
+                                {currentStock === 0 ? "Sold Out" : "Add to Cart"}
+                            </>
+                        )}
+                    </span>
+                </Button>
+            )}
 
             {/* Ask About This on WhatsApp */}
             <button
@@ -205,6 +245,8 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                 <MessageCircle size={16} fill="#25D366" strokeWidth={0} />
                 Ask About This on WhatsApp
             </button>
+
+            <MeatPassport product={product} />
 
             {/* Trust badges */}
             <div className="mt-8 grid grid-cols-3 gap-2.5">

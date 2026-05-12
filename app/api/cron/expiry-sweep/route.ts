@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getLowStockInventory, insertCronLog } from "@/lib/queries";
-import { sendLowStockAlertEmail } from "@/lib/email";
+import { logCronEvent } from "@/lib/adminAuth";
 
 const CRON_SECRET = process.env.CRON_SECRET;
 
@@ -17,28 +17,32 @@ export async function GET(request: Request) {
 
         if (lowStock.length === 0) {
             await insertCronLog({ job_name: "expiry_sweep", status: "skipped", details: "All inventory above threshold" });
+            await logCronEvent({ jobName: "expiry_sweep", status: "skipped", details: "All inventory above threshold" });
             return NextResponse.json({ flagged: 0, message: "Inventory levels healthy" });
         }
 
-        const alertItems = lowStock.map((i) => ({
-            name: i.name,
-            sku: i.sku,
-            stock: i.stock,
-            reorderLevel: i.reorderLevel,
-        }));
-
-        await sendLowStockAlertEmail(alertItems);
+        const outOfStock = lowStock.filter((i) => i.stock === 0).length;
+        const summary = lowStock
+            .map((i) => `${i.name} (SKU ${i.sku}): ${i.stock}/${i.reorderLevel}`)
+            .join("; ");
+        const headline = `${lowStock.length} items flagged (${outOfStock} out of stock)`;
 
         await insertCronLog({
             job_name: "expiry_sweep",
             status: "success",
-            details: `${lowStock.length} items flagged (${lowStock.filter(i => i.stock === 0).length} out of stock)`,
+            details: headline,
             items_processed: lowStock.length,
         });
+        await logCronEvent({
+            jobName: "expiry_sweep",
+            status: "success",
+            details: `${headline}: ${summary}`,
+        });
 
-        return NextResponse.json({ flagged: lowStock.length, outOfStock: lowStock.filter(i => i.stock === 0).length });
+        return NextResponse.json({ flagged: lowStock.length, outOfStock });
     } catch (err: any) {
         await insertCronLog({ job_name: "expiry_sweep", status: "error", details: err?.message });
+        await logCronEvent({ jobName: "expiry_sweep", status: "error", details: err?.message || "unknown error" });
         return NextResponse.json({ error: err?.message }, { status: 500 });
     }
 }

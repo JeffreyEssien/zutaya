@@ -8,7 +8,7 @@ import {
     Shield, RefreshCw, Search, LogIn, LogOut, Edit3, Trash2,
     Plus, Package, CreditCard, Eye, User, Clock, ChevronDown,
     ChevronRight, Download, Calendar, Activity, AlertTriangle,
-    Settings, X, ArrowUpDown,
+    Settings, X, ArrowUpDown, Timer,
 } from "lucide-react";
 
 interface AuditLog {
@@ -37,6 +37,7 @@ const ACTION_CONFIG: Record<string, { icon: typeof Shield; color: string; bg: st
     payment_update: { icon: CreditCard, color: "text-teal-600", bg: "bg-teal-50", border: "border-teal-200", label: "Payment Updated" },
     view: { icon: Eye, color: "text-warm-cream/40", bg: "bg-warm-cream/[0.03]", border: "border-warm-cream/10", label: "Viewed" },
     settings: { icon: Settings, color: "text-indigo-600", bg: "bg-indigo-50", border: "border-indigo-200", label: "Settings" },
+    cron: { icon: Timer, color: "text-cyan-600", bg: "bg-cyan-50", border: "border-cyan-200", label: "Cron Job" },
 };
 
 function getActionConfig(action: string) {

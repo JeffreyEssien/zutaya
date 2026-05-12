@@ -56,6 +56,7 @@ export default function CheckoutForm({ onComplete, onShippingChange, onPackaging
 
     // ── Packaging settings from admin ──
     const [packagingConfig, setPackagingConfig] = useState({ fee: 500, label: "Premium Packaging", description: "Insulated gift-ready packaging with ice packs for extended freshness" });
+    const [settings, setSettings] = useState<SiteSettings | null>(null);
 
     useEffect(() => {
         fetchDeliveryPricingFromDB().then((result) => {
@@ -64,6 +65,7 @@ export default function CheckoutForm({ onComplete, onShippingChange, onPackaging
         });
         getSiteSettings().then((s) => {
             if (s) {
+                setSettings(s);
                 setPackagingConfig({
                     fee: s.packagingFee ?? 500,
                     label: s.packagingLabel || "Premium Packaging",
@@ -362,6 +364,8 @@ export default function CheckoutForm({ onComplete, onShippingChange, onPackaging
                         }}
                         selectedDate={requestedDeliveryDate}
                         selectedSlot={requestedDeliverySlot || undefined}
+                        cutoffHour={settings?.deliveryCutoffHour ?? 12}
+                        cutoffLabel={settings?.deliveryCutoffLabel}
                     />
                     {!requestedDeliveryDate && (
                         <p className="text-[11px] text-warm-cream/35 mt-3 flex items-center gap-1.5">

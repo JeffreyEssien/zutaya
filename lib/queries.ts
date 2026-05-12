@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { getSupabaseClient, getSupabaseServiceClient } from "@/lib/supabase";
 import type { Product, Category, Order, SiteSettings, Coupon, Profile, InventoryLog, Page, InventoryItem, BundleRule, Subscription, NewsletterSubscriber, NewsletterCampaign } from "@/types";
 
@@ -78,6 +79,12 @@ function toProduct(row: DbProduct): Product {
         prepOptions: typeof row.prep_options === "string" ? JSON.parse(row.prep_options) : row.prep_options || [],
         minWeightKg: row.min_weight_kg,
         relatedRecipeIds: row.related_recipe_ids || [],
+        imageCooked: (row as any).image_cooked || undefined,
+        imageEvent: (row as any).image_event || undefined,
+        originFarm: (row as any).origin_farm || undefined,
+        originBreed: (row as any).origin_breed || undefined,
+        originHangingHours: (row as any).origin_hanging_hours ?? undefined,
+        originHalalCertified: (row as any).origin_halal_certified ?? true,
     };
 }
 
@@ -430,6 +437,7 @@ export async function createOrder(order: Order): Promise<void> {
             console.warn("Coupon usage_count update failed:", e);
         }
     }
+
 }
 
 export async function updatePaymentInfo(
@@ -465,6 +473,12 @@ export interface CreateProductInput {
     storageType?: string;
     prepOptions?: any[];
     minWeightKg?: number | null;
+    imageCooked?: string;
+    imageEvent?: string;
+    originFarm?: string;
+    originBreed?: string;
+    originHangingHours?: number;
+    originHalalCertified?: boolean;
 }
 
 export async function createProduct(input: CreateProductInput): Promise<void> {
@@ -507,6 +521,12 @@ export async function createProduct(input: CreateProductInput): Promise<void> {
     if (input.storageType) insertData.storage_type = input.storageType;
     if (input.prepOptions) insertData.prep_options = input.prepOptions;
     if (input.minWeightKg !== undefined) insertData.min_weight_kg = input.minWeightKg;
+    if (input.imageCooked !== undefined) insertData.image_cooked = input.imageCooked;
+    if (input.imageEvent !== undefined) insertData.image_event = input.imageEvent;
+    if (input.originFarm !== undefined) insertData.origin_farm = input.originFarm;
+    if (input.originBreed !== undefined) insertData.origin_breed = input.originBreed;
+    if (input.originHangingHours !== undefined) insertData.origin_hanging_hours = input.originHangingHours;
+    if (input.originHalalCertified !== undefined) insertData.origin_halal_certified = input.originHalalCertified;
 
     const { error } = await supabase.from("products").insert(insertData);
     if (error) throw error;
@@ -549,6 +569,12 @@ export async function updateProduct(id: string, input: CreateProductInput): Prom
     if (input.storageType !== undefined) updateData.storage_type = input.storageType;
     if (input.prepOptions !== undefined) updateData.prep_options = input.prepOptions;
     if (input.minWeightKg !== undefined) updateData.min_weight_kg = input.minWeightKg;
+    if (input.imageCooked !== undefined) updateData.image_cooked = input.imageCooked;
+    if (input.imageEvent !== undefined) updateData.image_event = input.imageEvent;
+    if (input.originFarm !== undefined) updateData.origin_farm = input.originFarm;
+    if (input.originBreed !== undefined) updateData.origin_breed = input.originBreed;
+    if (input.originHangingHours !== undefined) updateData.origin_hanging_hours = input.originHangingHours;
+    if (input.originHalalCertified !== undefined) updateData.origin_halal_certified = input.originHalalCertified;
 
     const { error } = await supabase
         .from("products")
@@ -578,7 +604,8 @@ export async function deleteProduct(id: string): Promise<void> {
     if (error) throw error;
 }
 
-export async function getSiteSettings(): Promise<SiteSettings | null> {
+export const getSiteSettings = cache(async (): Promise<SiteSettings | null> => _getSiteSettings());
+async function _getSiteSettings(): Promise<SiteSettings | null> {
     const supabase = getSupabaseClient();
     if (!supabase) return null;
 
@@ -640,6 +667,17 @@ export async function getSiteSettings(): Promise<SiteSettings | null> {
             ? (typeof data.featured_slides === "string" ? JSON.parse(data.featured_slides) : data.featured_slides)
             : [],
         customTexts: data.custom_texts || {},
+        deliveryCutoffHour: data.delivery_cutoff_hour ?? 12,
+        deliveryCutoffLabel: data.delivery_cutoff_label || "Orders placed after 12:00 PM ship the next day",
+        kitchenEnabled: data.kitchen_enabled ?? true,
+        kitchenHeroImage: data.kitchen_hero_image || undefined,
+        kitchenTagline: data.kitchen_tagline || "Fired up daily. Delivered hot.",
+        kitchenLeadMinutes: data.kitchen_lead_minutes ?? 90,
+        eventsEnabled: data.events_enabled ?? true,
+        eventsTagline: data.events_tagline || "From slaughter to plate, on-site.",
+        butcherProfiles: data.butcher_profiles
+            ? (typeof data.butcher_profiles === "string" ? JSON.parse(data.butcher_profiles) : data.butcher_profiles)
+            : [],
     };
 }
 
@@ -688,6 +726,15 @@ export async function updateSiteSettings(settings: Partial<SiteSettings>): Promi
     if (settings.heroDisplayConfig !== undefined) dbSettings.hero_display_config = settings.heroDisplayConfig;
     if (settings.featuredSlides !== undefined) dbSettings.featured_slides = settings.featuredSlides;
     if (settings.customTexts !== undefined) dbSettings.custom_texts = settings.customTexts;
+    if (settings.deliveryCutoffHour !== undefined) dbSettings.delivery_cutoff_hour = settings.deliveryCutoffHour;
+    if (settings.deliveryCutoffLabel !== undefined) dbSettings.delivery_cutoff_label = settings.deliveryCutoffLabel;
+    if (settings.kitchenEnabled !== undefined) dbSettings.kitchen_enabled = settings.kitchenEnabled;
+    if (settings.kitchenHeroImage !== undefined) dbSettings.kitchen_hero_image = settings.kitchenHeroImage;
+    if (settings.kitchenTagline !== undefined) dbSettings.kitchen_tagline = settings.kitchenTagline;
+    if (settings.kitchenLeadMinutes !== undefined) dbSettings.kitchen_lead_minutes = settings.kitchenLeadMinutes;
+    if (settings.eventsEnabled !== undefined) dbSettings.events_enabled = settings.eventsEnabled;
+    if (settings.eventsTagline !== undefined) dbSettings.events_tagline = settings.eventsTagline;
+    if (settings.butcherProfiles !== undefined) dbSettings.butcher_profiles = settings.butcherProfiles;
 
     // init if not exists, otherwise update
     const { error } = await supabase

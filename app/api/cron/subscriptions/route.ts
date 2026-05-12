@@ -5,7 +5,7 @@ import {
     createOrder,
     insertCronLog,
 } from "@/lib/queries";
-import { sendSubscriptionRenewalEmail } from "@/lib/email";
+import { logCronEvent } from "@/lib/adminAuth";
 import type { Order } from "@/types";
 
 const CRON_SECRET = process.env.CRON_SECRET;
@@ -24,11 +24,13 @@ export async function GET(request: Request) {
 
         if (subs.length === 0) {
             await insertCronLog({ job_name: "subscription_renewals", status: "skipped", details: "No subscriptions due today" });
+            await logCronEvent({ jobName: "subscription_renewals", status: "skipped", details: "No subscriptions due today" });
             return NextResponse.json({ processed: 0, message: "No subscriptions due" });
         }
 
         let processed = 0;
         const errors: string[] = [];
+        const processedSummaries: string[] = [];
 
         for (const sub of subs) {
             try {
@@ -60,36 +62,44 @@ export async function GET(request: Request) {
                 // Advance the next order date
                 await advanceSubscriptionNextDate(sub.id, sub.frequency);
 
-                // Compute new next date for the email
                 const nextDate = new Date();
                 if (sub.frequency === "weekly") nextDate.setDate(nextDate.getDate() + 7);
                 else if (sub.frequency === "biweekly") nextDate.setDate(nextDate.getDate() + 14);
                 else nextDate.setMonth(nextDate.getMonth() + 1);
 
-                await sendSubscriptionRenewalEmail(
-                    sub.customerEmail,
-                    sub.customerName,
-                    orderId,
-                    sub.items,
-                    nextDate.toISOString()
+                processedSummaries.push(
+                    `${sub.id} → ${sub.customerName} (${sub.customerEmail}), order ${orderId}, next ${nextDate.toISOString().slice(0, 10)}`
                 );
-
                 processed++;
             } catch (err: any) {
                 errors.push(`${sub.id}: ${err?.message || "unknown error"}`);
             }
         }
 
+        const status = errors.length ? "error" : "success";
+        const headline = `${processed}/${subs.length} subscriptions renewed`;
+        const fullDetails = [
+            headline,
+            processedSummaries.length ? `Renewed: ${processedSummaries.join("; ")}` : "",
+            errors.length ? `Errors: ${errors.join("; ")}` : "",
+        ].filter(Boolean).join(" | ");
+
         await insertCronLog({
             job_name: "subscription_renewals",
-            status: errors.length ? "error" : "success",
-            details: errors.length ? errors.join("; ") : `${processed} subscriptions renewed`,
+            status,
+            details: errors.length ? errors.join("; ") : headline,
             items_processed: processed,
+        });
+        await logCronEvent({
+            jobName: "subscription_renewals",
+            status,
+            details: fullDetails,
         });
 
         return NextResponse.json({ processed, errors: errors.length, total: subs.length });
     } catch (err: any) {
         await insertCronLog({ job_name: "subscription_renewals", status: "error", details: err?.message });
+        await logCronEvent({ jobName: "subscription_renewals", status: "error", details: err?.message || "unknown error" });
         return NextResponse.json({ error: err?.message }, { status: 500 });
     }
 }

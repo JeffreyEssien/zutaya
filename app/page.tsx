@@ -6,6 +6,8 @@ import ShopByCategory from "@/components/modules/ShopByCategory";
 import HomeCta from "@/components/modules/HomeCta";
 import AboutSnippet from "@/components/modules/AboutSnippet";
 import Footer from "@/components/modules/Footer";
+import ServicesPillar from "@/components/modules/ServicesPillar";
+import MeetTheButchers from "@/components/modules/MeetTheButchers";
 import { getNewProducts, getCategories, getSiteSettings, getMediaByIds, getProductsByIds } from "@/lib/queries";
 import { SettingsProvider } from "@/lib/SettingsProvider";
 
@@ -56,8 +58,10 @@ export default async function Home() {
       <main>
         <Hero customTexts={ct} settings={settings} heroMedia={heroMedia} featuredSlides={featuredSlides} />
         <PromiseBar customTexts={ct} />
+        <ServicesPillar eventsEnabled={settings?.eventsEnabled !== false} />
         <NewArrivals products={newProducts} customTexts={ct} />
         <ShopByCategory categories={categories} customTexts={ct} />
+        <MeetTheButchers profiles={settings?.butcherProfiles || []} />
         <HomeCta customTexts={ct} />
         <AboutSnippet customTexts={ct} />
       </main>

@@ -13,9 +13,9 @@ export const INSTAGRAM_HANDLE = "@zuutaya";
 export const NAV_LINKS = [
     { label: "Home", href: "/" },
     { label: "Shop", href: "/shop" },
+    { label: "Events", href: "/events" },
     { label: "Bundles", href: "/bundles" },
     { label: "Track Order", href: "/track" },
-    { label: "About", href: "/#about" },
 ] as const;
 
 export const ADMIN_NAV_LINKS = [
@@ -31,6 +31,10 @@ export const ADMIN_NAV_LINKS = [
     { label: "Newsletter", href: "/admin/newsletter", icon: "mail" },
     { label: "Subscriptions", href: "/admin/subscriptions", icon: "refresh" },
     { label: "Bundles", href: "/admin/bundles", icon: "gift" },
+    { label: "Processing", href: "/admin/processing", icon: "package" },
+    { label: "Events", href: "/admin/events", icon: "star" },
+    { label: "Bookings", href: "/admin/bookings", icon: "clipboard" },
+    { label: "Services Config", href: "/admin/services-config", icon: "cog" },
     { label: "Featured", href: "/admin/featured", icon: "star" },
     { label: "Gallery", href: "/admin/gallery", icon: "image" },
     { label: "Categories", href: "/admin/categories", icon: "tag" },

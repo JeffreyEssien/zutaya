@@ -145,6 +145,29 @@ export async function logAdminAction(params: {
 }
 
 /**
+ * Log a cron job event to the audit trail (no admin user; system-originated).
+ */
+export async function logCronEvent(params: {
+    jobName: string;
+    status: "success" | "skipped" | "error";
+    details: string;
+}): Promise<void> {
+    const supabase = getSupabaseServiceClient();
+    if (!supabase) return;
+
+    await supabase.from("admin_audit_logs").insert({
+        admin_id: null,
+        admin_email: "system@cron",
+        admin_name: "Cron Job",
+        action: "cron",
+        entity_type: params.jobName,
+        entity_id: null,
+        details: `[${params.status.toUpperCase()}] ${params.details}`,
+        ip_address: null,
+    });
+}
+
+/**
  * Get audit logs.
  */
 export async function getAuditLogs(limit = 200): Promise<any[]> {

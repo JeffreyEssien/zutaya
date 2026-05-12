@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { CartItem, Product, PrepOption } from "@/types";
+import type { CartItem, Product, PrepOption, CartItemProcessing } from "@/types";
 import { validateCoupon } from "@/lib/queries";
 
 interface BundleEntry {
@@ -19,7 +19,7 @@ interface CartStore {
     open: () => void;
     close: () => void;
     toggle: () => void;
-    addItem: (product: Product, variant?: CartItem["variant"], selectedPrepOptions?: PrepOption[]) => void;
+    addItem: (product: Product, variant?: CartItem["variant"], selectedPrepOptions?: PrepOption[], processing?: CartItemProcessing, completionMode?: CartItem["completionMode"]) => void;
     addBundleToCart: (products: Product[], entries: BundleEntry[], discountPercent: number, bundleName: string) => void;
     removeItem: (productId: string, variantName?: string, bundleId?: string) => void;
     updateQuantity: (productId: string, variantName: string | undefined, quantity: number, bundleId?: string) => void;
@@ -44,11 +44,12 @@ export const useCartStore = create<CartStore>()(
             close: () => set({ isOpen: false }),
             toggle: () => set((s) => ({ isOpen: !s.isOpen })),
 
-            addItem: (product, variant, selectedPrepOptions) => {
+            addItem: (product, variant, selectedPrepOptions, processing, completionMode) => {
                 set((state) => {
-                    // Only merge with non-bundle items of the same product
+                    const hasProcessing = processing && Object.keys(processing).length > 0;
+                    // Only merge with non-bundle items of the same product without custom processing
                     const existingItem = state.items.find(
-                        (item) => item.product.id === product.id && item.variant?.name === variant?.name && !item.bundleId
+                        (item) => item.product.id === product.id && item.variant?.name === variant?.name && !item.bundleId && !item.processing && !hasProcessing
                     );
 
                     const availableStock = (variant?.stock !== undefined) ? variant.stock : product.stock;
@@ -67,7 +68,7 @@ export const useCartStore = create<CartStore>()(
 
                     if (1 > availableStock) return {};
 
-                    return { items: [...state.items, { product, variant, quantity: 1, selectedPrepOptions: selectedPrepOptions || undefined }] };
+                    return { items: [...state.items, { product, variant, quantity: 1, selectedPrepOptions: selectedPrepOptions || undefined, processing: hasProcessing ? processing : undefined, completionMode: completionMode || "cook_myself" }] };
                 });
             },
 
