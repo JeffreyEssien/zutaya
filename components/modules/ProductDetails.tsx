@@ -11,7 +11,6 @@ import { StorageBadge } from "@/components/ui/StorageBadge";
 import PrepOptionsSelector from "@/components/modules/PrepOptionsSelector";
 import EatModeSelector from "@/components/modules/EatModeSelector";
 import ProcessingConfigurator from "@/components/modules/ProcessingConfigurator";
-import MeatPassport from "@/components/modules/MeatPassport";
 import { ShoppingBag, Truck, Shield, RotateCcw, Check, ChevronDown, ChevronRight, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { WHATSAPP_NUMBER } from "@/lib/constants";
@@ -245,8 +244,6 @@ export default function ProductDetails({ product, marinades = [], processingOpti
                 <MessageCircle size={16} fill="#25D366" strokeWidth={0} />
                 Ask About This on WhatsApp
             </button>
-
-            <MeatPassport product={product} />
 
             {/* Trust badges */}
             <div className="mt-8 grid grid-cols-3 gap-2.5">

@@ -45,10 +45,6 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
         minWeightKg: initialData?.minWeightKg?.toString() || "",
         imageCooked: initialData?.imageCooked || "",
         imageEvent: initialData?.imageEvent || "",
-        originFarm: initialData?.originFarm || "",
-        originBreed: initialData?.originBreed || "",
-        originHangingHours: initialData?.originHangingHours?.toString() || "",
-        originHalalCertified: initialData?.originHalalCertified !== false,
     });
 
     const [prepOptions, setPrepOptions] = useState<PrepOption[]>(
@@ -154,10 +150,6 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                     minWeightKg: form.minWeightKg ? parseFloat(form.minWeightKg) : null,
                     imageCooked: form.imageCooked || undefined,
                     imageEvent: form.imageEvent || undefined,
-                    originFarm: form.originFarm || undefined,
-                    originBreed: form.originBreed || undefined,
-                    originHangingHours: form.originHangingHours ? parseInt(form.originHangingHours) : undefined,
-                    originHalalCertified: form.originHalalCertified,
                 });
                 logAction("update", "product", initialData.id, `Updated product: ${form.title}`);
                 await revalidateShop();
@@ -204,10 +196,6 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                     minWeightKg: form.minWeightKg ? parseFloat(form.minWeightKg) : null,
                     imageCooked: form.imageCooked || undefined,
                     imageEvent: form.imageEvent || undefined,
-                    originFarm: form.originFarm || undefined,
-                    originBreed: form.originBreed || undefined,
-                    originHangingHours: form.originHangingHours ? parseInt(form.originHangingHours) : undefined,
-                    originHalalCertified: form.originHalalCertified,
                 });
                 logAction("create", "product", undefined, `Created product: ${form.title}`);
                 await revalidateShop();
@@ -363,18 +351,6 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                         <div className="grid sm:grid-cols-2 gap-3">
                             <InputField label="Cooked image URL" name="imageCooked" value={form.imageCooked} onChange={handleChange} />
                             <InputField label="Event-mode image URL" name="imageEvent" value={form.imageEvent} onChange={handleChange} />
-                        </div>
-                    </div>
-
-                    <div className="mt-6 pt-4 border-t border-warm-cream/10">
-                        <p className="text-xs uppercase tracking-wider text-brand-green mb-3">Meat Passport (origin)</p>
-                        <div className="grid sm:grid-cols-2 gap-3">
-                            <InputField label="Origin farm" name="originFarm" value={form.originFarm} onChange={handleChange} />
-                            <InputField label="Breed" name="originBreed" value={form.originBreed} onChange={handleChange} />
-                            <InputField label="Hung (hours)" name="originHangingHours" type="number" value={form.originHangingHours} onChange={handleChange} />
-                            <label className="flex items-center gap-2 text-sm text-warm-cream/80 mt-6">
-                                <input type="checkbox" name="originHalalCertified" checked={form.originHalalCertified} onChange={(e) => setForm((f: any) => ({ ...f, originHalalCertified: e.target.checked }))} /> Halal certified
-                            </label>
                         </div>
                     </div>
 

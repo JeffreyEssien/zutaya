@@ -101,11 +101,6 @@ export interface Product {
     // Mode-morphing imagery
     imageCooked?: string;
     imageEvent?: string;
-    // Meat passport / traceability
-    originFarm?: string;
-    originBreed?: string;
-    originHangingHours?: number;
-    originHalalCertified?: boolean;
 }
 
 export interface Category {

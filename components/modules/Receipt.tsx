@@ -103,7 +103,7 @@ function CustomerSection({ name, email, address }: {
     );
 }
 
-function ItemsTable({ items }: { items: { product: { id?: string; name: string; price: number; originFarm?: string; originBreed?: string; originHangingHours?: number }; variant?: { name?: string; price?: number }; quantity: number; selectedPrepOptions?: { id: string; label: string; extraFee: number }[]; bundleId?: string }[] }) {
+function ItemsTable({ items }: { items: { product: { id?: string; name: string; price: number }; variant?: { name?: string; price?: number }; quantity: number; selectedPrepOptions?: { id: string; label: string; extraFee: number }[]; bundleId?: string }[] }) {
     return (
         <div>
             <Label>Items</Label>
@@ -129,12 +129,6 @@ function ItemsTable({ items }: { items: { product: { id?: string; name: string; 
                                     {item.selectedPrepOptions && item.selectedPrepOptions.length > 0 && (
                                         <span className="block text-[10px] text-amber-400 font-normal mt-0.5">
                                             Prep: {item.selectedPrepOptions.map(p => p.label).join(", ")}
-                                        </span>
-                                    )}
-                                    {(item.product.originFarm || item.product.originBreed) && (
-                                        <span className="block text-[10px] text-emerald-400 font-normal mt-0.5">
-                                            🛂 {[item.product.originFarm, item.product.originBreed].filter(Boolean).join(" · ")}
-                                            {item.product.originHangingHours ? ` · ${item.product.originHangingHours}h hung` : ""}
                                         </span>
                                     )}
                                 </td>

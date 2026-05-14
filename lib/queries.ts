@@ -81,10 +81,6 @@ function toProduct(row: DbProduct): Product {
         relatedRecipeIds: row.related_recipe_ids || [],
         imageCooked: (row as any).image_cooked || undefined,
         imageEvent: (row as any).image_event || undefined,
-        originFarm: (row as any).origin_farm || undefined,
-        originBreed: (row as any).origin_breed || undefined,
-        originHangingHours: (row as any).origin_hanging_hours ?? undefined,
-        originHalalCertified: (row as any).origin_halal_certified ?? true,
     };
 }
 
@@ -475,10 +471,6 @@ export interface CreateProductInput {
     minWeightKg?: number | null;
     imageCooked?: string;
     imageEvent?: string;
-    originFarm?: string;
-    originBreed?: string;
-    originHangingHours?: number;
-    originHalalCertified?: boolean;
 }
 
 export async function createProduct(input: CreateProductInput): Promise<void> {
@@ -523,10 +515,6 @@ export async function createProduct(input: CreateProductInput): Promise<void> {
     if (input.minWeightKg !== undefined) insertData.min_weight_kg = input.minWeightKg;
     if (input.imageCooked !== undefined) insertData.image_cooked = input.imageCooked;
     if (input.imageEvent !== undefined) insertData.image_event = input.imageEvent;
-    if (input.originFarm !== undefined) insertData.origin_farm = input.originFarm;
-    if (input.originBreed !== undefined) insertData.origin_breed = input.originBreed;
-    if (input.originHangingHours !== undefined) insertData.origin_hanging_hours = input.originHangingHours;
-    if (input.originHalalCertified !== undefined) insertData.origin_halal_certified = input.originHalalCertified;
 
     const { error } = await supabase.from("products").insert(insertData);
     if (error) throw error;
@@ -571,10 +559,6 @@ export async function updateProduct(id: string, input: CreateProductInput): Prom
     if (input.minWeightKg !== undefined) updateData.min_weight_kg = input.minWeightKg;
     if (input.imageCooked !== undefined) updateData.image_cooked = input.imageCooked;
     if (input.imageEvent !== undefined) updateData.image_event = input.imageEvent;
-    if (input.originFarm !== undefined) updateData.origin_farm = input.originFarm;
-    if (input.originBreed !== undefined) updateData.origin_breed = input.originBreed;
-    if (input.originHangingHours !== undefined) updateData.origin_hanging_hours = input.originHangingHours;
-    if (input.originHalalCertified !== undefined) updateData.origin_halal_certified = input.originHalalCertified;
 
     const { error } = await supabase
         .from("products")
