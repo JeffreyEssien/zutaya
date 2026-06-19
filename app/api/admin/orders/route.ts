@@ -1,17 +1,17 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { createOrder } from "@/lib/queries";
+import { getCurrentAdmin, logAdminAction } from "@/lib/adminAuth";
 import type { Order } from "@/types";
 
 export async function POST(request: Request) {
     try {
-        // Verify admin session
-        const cookieStore = await cookies();
-        const session = cookieStore.get("admin_session")?.value;
-        const secret = process.env.ADMIN_SESSION_SECRET;
-        if (!secret) return NextResponse.json({ error: "Server misconfigured" }, { status: 500 });
-
-        if (session !== secret) {
+        // Verify admin session against admin_sessions (the canonical scheme).
+        // NOTE: this previously compared the session cookie to ADMIN_SESSION_SECRET,
+        // but the cookie holds a random session TOKEN, not that secret — so the old
+        // check could never pass for a real admin. getCurrentAdmin() is the same
+        // validation used by every other protected admin route.
+        const admin = await getCurrentAdmin();
+        if (!admin) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
@@ -28,9 +28,15 @@ export async function POST(request: Request) {
         // Insert into Supabase (uses the same createOrder as checkout — minus stock deduction handled inside)
         await createOrder(order);
 
-        console.log(`\n🛍️ ADMIN ORDER CREATED: ${order.id}`);
-        console.log(`   Customer: ${order.customerName} (${order.email})`);
-        console.log(`   Total: ₦${order.total.toLocaleString()}`);
+        await logAdminAction({
+            adminId: admin.id,
+            adminEmail: admin.email,
+            adminName: admin.name,
+            action: "create_order",
+            entityType: "order",
+            entityId: order.id,
+            details: `Manual order created — total ₦${order.total.toLocaleString()}`,
+        });
 
         return NextResponse.json({ success: true, orderId: order.id });
     } catch (err: any) {

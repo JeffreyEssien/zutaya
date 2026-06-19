@@ -1,8 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { upsertProcessingOption, deleteProcessingOption } from "@/lib/servicesQueries";
+import { getCurrentAdmin } from "@/lib/adminAuth";
 
 export async function POST(req: NextRequest) {
     try {
+        const admin = await getCurrentAdmin();
+        if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         const body = await req.json();
         if (!body.label) return NextResponse.json({ error: "Label required" }, { status: 400 });
         await upsertProcessingOption({
@@ -22,6 +25,8 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+    const admin = await getCurrentAdmin();
+    if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const id = req.nextUrl.searchParams.get("id");
     if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
     await deleteProcessingOption(id);

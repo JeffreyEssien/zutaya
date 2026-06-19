@@ -1,8 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { upsertEventAnimal, deleteEventAnimal } from "@/lib/servicesQueries";
+import { getCurrentAdmin } from "@/lib/adminAuth";
 
 export async function POST(req: NextRequest) {
     try {
+        const admin = await getCurrentAdmin();
+        if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         const b = await req.json();
         if (!b.name || b.basePrice == null || !b.feedsAdults) return NextResponse.json({ error: "Name, basePrice, feedsAdults required" }, { status: 400 });
         await upsertEventAnimal({
@@ -16,6 +19,8 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+    const admin = await getCurrentAdmin();
+    if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const id = req.nextUrl.searchParams.get("id");
     if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
     await deleteEventAnimal(id);

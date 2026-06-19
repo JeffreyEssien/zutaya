@@ -12,6 +12,10 @@ import { Plus } from "lucide-react";
 import { ORDER_STATUSES } from "@/lib/constants";
 import { logAction } from "@/lib/auditClient";
 
+function prettyStatus(s: string): string {
+    return s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 const statusVariant: Record<Order["status"], "warning" | "info" | "success"> = {
     pending: "warning",
     processing: "info",
@@ -194,7 +198,7 @@ function OrderCard({ order, onStatusChange, onSelect, isSelected }: {
                     <p className="text-sm font-medium text-warm-cream truncate">{order.customerName}</p>
                     <p className="text-xs text-warm-cream/50 truncate">{order.email}</p>
                 </div>
-                <Badge variant={statusVariant[order.status]}>{order.status}</Badge>
+                <Badge variant={statusVariant[order.status]}>{prettyStatus(order.status)}</Badge>
             </div>
             <div className="flex items-center justify-between text-xs">
                 <span className="font-mono text-warm-cream/40">{order.id}</span>
@@ -209,7 +213,7 @@ function OrderCard({ order, onStatusChange, onSelect, isSelected }: {
                         className="text-xs border border-warm-cream/20 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brand-green/30 bg-[#1e1e1e]"
                     >
                         {getAllowedStatuses(order.status).map((s) => (
-                            <option key={s} value={s}>{s}</option>
+                            <option key={s} value={s} className="bg-[#1e1e1e] text-warm-cream">{prettyStatus(s)}</option>
                         ))}
                     </select>
                 </div>
@@ -251,7 +255,7 @@ function OrderTable({ orders, onStatusChange, onSelect, selectedId }: {
                                 </td>
                                 <td className="px-4 py-3 text-warm-cream/70">{formatCurrency(o.total)}</td>
                                 <td className="px-4 py-3">
-                                    <Badge variant={statusVariant[o.status]}>{o.status}</Badge>
+                                    <Badge variant={statusVariant[o.status]}>{prettyStatus(o.status)}</Badge>
                                 </td>
                                 <td className="px-4 py-3 text-warm-cream/50 text-xs">
                                     {new Date(o.createdAt).toLocaleDateString()}
@@ -260,10 +264,10 @@ function OrderTable({ orders, onStatusChange, onSelect, selectedId }: {
                                     <select
                                         value={o.status}
                                         onChange={(e) => onStatusChange(o.id, e.target.value as Order["status"])}
-                                        className="text-xs border border-warm-cream/20 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brand-green/30"
+                                        className="text-xs border border-warm-cream/20 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brand-green/30 bg-[#1e1e1e] text-warm-cream cursor-pointer"
                                     >
                                         {getAllowedStatuses(o.status).map((s) => (
-                                            <option key={s} value={s}>{s}</option>
+                                            <option key={s} value={s} className="bg-[#1e1e1e] text-warm-cream">{prettyStatus(s)}</option>
                                         ))}
                                     </select>
                                 </td>

@@ -1,19 +1,20 @@
 "use client";
 
-import Image from "next/image";
+import SafeImage from "@/components/ui/SafeImage";
 import { motion } from "framer-motion";
 import { useCartStore } from "@/lib/cartStore";
 import { formatCurrency } from "@/lib/formatCurrency";
 import CouponInput from "@/components/modules/CouponInput";
-import { Package, MapPin } from "lucide-react";
+import { Package, MapPin, ShieldCheck } from "lucide-react";
 
 interface CheckoutSummaryProps {
     shippingFee: number;
     packagingFee?: number;
+    processingFee?: number;
 }
 
-export default function CheckoutSummary({ shippingFee, packagingFee = 0 }: CheckoutSummaryProps) {
-    const { items, subtotal, discount, couponCode, bundleDiscountTotal, total: cartTotal } = useCartStore();
+export default function CheckoutSummary({ shippingFee, packagingFee = 0, processingFee = 0 }: CheckoutSummaryProps) {
+    const { items, subtotal, discount, couponCode, bundleDiscountTotal } = useCartStore();
 
     const sub = subtotal();
     const shipping = shippingFee;
@@ -25,7 +26,8 @@ export default function CheckoutSummary({ shippingFee, packagingFee = 0 }: Check
         }
         return sum;
     }, 0);
-    const total = Math.max(0, sub - bundleDisc - couponDisc) + shipping + packagingFee + prepFee;
+    const baseTotal = Math.max(0, sub - bundleDisc - couponDisc) + shipping + packagingFee + prepFee;
+    const total = baseTotal + processingFee;
 
     return (
         <motion.div
@@ -49,7 +51,7 @@ export default function CheckoutSummary({ shippingFee, packagingFee = 0 }: Check
                         className="flex gap-3"
                     >
                         <div className="relative h-14 w-12 rounded-lg overflow-hidden bg-warm-cream/5 shrink-0 border border-warm-cream/10">
-                            <Image src={item.product.images[0]} alt={item.product.name} fill sizes="48px" className="object-cover" />
+                            <SafeImage src={item.product.images?.[0]} alt={item.product.name} fill sizes="48px" className="object-cover" />
                             <span className="absolute -top-1 -right-1 w-4 h-4 bg-brand-dark text-white text-[8px] font-bold rounded-full flex items-center justify-center">
                                 {item.quantity}
                             </span>
@@ -110,6 +112,15 @@ export default function CheckoutSummary({ shippingFee, packagingFee = 0 }: Check
                     <div className="flex justify-between text-sm text-warm-cream/50">
                         <span>Prep Fee</span>
                         <span className="font-medium text-warm-cream/70">{formatCurrency(prepFee)}</span>
+                    </div>
+                )}
+                {processingFee > 0 && (
+                    <div className="flex justify-between text-sm text-warm-cream/50">
+                        <span className="flex items-center gap-1.5">
+                            <ShieldCheck size={12} className="text-warm-cream/30" />
+                            Processing Fee
+                        </span>
+                        <span className="font-medium text-warm-cream/70">{formatCurrency(processingFee)}</span>
                     </div>
                 )}
             </div>

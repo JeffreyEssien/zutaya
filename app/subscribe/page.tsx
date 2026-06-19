@@ -2,12 +2,28 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Script from "next/script";
 import type { Product } from "@/types";
 import { SITE_NAME } from "@/lib/constants";
 import {
     RefreshCw, Plus, Minus, X, Check, ArrowRight, Package,
-    Calendar, CreditCard, MapPin, User, ShoppingBag, Sparkles,
+    Calendar, CreditCard, MapPin, User, ShoppingBag, Sparkles, ShieldCheck,
 } from "lucide-react";
+
+declare global {
+    interface Window {
+        PaystackPop?: new () => {
+            resumeTransaction: (
+                accessCode: string,
+                hooks?: {
+                    onSuccess?: (tx: { reference: string }) => void;
+                    onCancel?: () => void;
+                    onError?: (err: { message?: string }) => void;
+                },
+            ) => void;
+        };
+    }
+}
 
 interface SubItemRow {
     productId: string;
@@ -35,7 +51,6 @@ export default function SubscribePage() {
         customerName: "",
         phone: "",
         frequency: "weekly" as "weekly" | "biweekly" | "monthly",
-        paymentMethod: "bank_transfer",
         address: "",
         city: "",
         state: "",
@@ -84,32 +99,68 @@ export default function SubscribePage() {
         if (items.length === 0) return;
         setSubmitting(true);
 
-        const res = await fetch("/api/subscriptions", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                customerEmail: form.customerEmail,
-                customerName: form.customerName,
-                phone: form.phone || undefined,
-                items: items.map((i) => ({
-                    productId: i.productId,
-                    productName: i.productName,
-                    quantity: i.quantity,
-                    price: i.price,
-                })),
-                frequency: form.frequency,
-                deliveryAddress: {
-                    address: form.address,
-                    city: form.city,
-                    state: form.state,
-                },
-                deliveryZone: "Lagos",
-                paymentMethod: form.paymentMethod,
-            }),
-        });
+        try {
+            const res = await fetch("/api/paystack/subscription/start", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    customerEmail: form.customerEmail,
+                    customerName: form.customerName,
+                    phone: form.phone || undefined,
+                    items: items.map((i) => ({
+                        productId: i.productId,
+                        productName: i.productName,
+                        quantity: i.quantity,
+                        price: i.price,
+                    })),
+                    frequency: form.frequency,
+                    deliveryAddress: {
+                        firstName: form.customerName.split(" ")[0] || "",
+                        lastName: form.customerName.split(" ").slice(1).join(" ") || "",
+                        email: form.customerEmail,
+                        phone: form.phone || "",
+                        address: form.address,
+                        city: form.city,
+                        state: form.state,
+                        zip: "",
+                        country: "Nigeria",
+                    },
+                    deliveryZone: "Lagos",
+                }),
+            });
+            const data = await res.json();
 
-        if (res.ok) setSuccess(true);
-        setSubmitting(false);
+            if (!res.ok || !data.success) {
+                alert(data.error || "Failed to start subscription");
+                setSubmitting(false);
+                return;
+            }
+
+            if (!window.PaystackPop) {
+                alert("Payment SDK failed to load. Please refresh and try again.");
+                setSubmitting(false);
+                return;
+            }
+
+            const popup = new window.PaystackPop();
+            popup.resumeTransaction(data.accessCode, {
+                onSuccess: (tx) => {
+                    window.location.href = `/checkout/verify?reference=${encodeURIComponent(tx.reference)}`;
+                },
+                onCancel: () => {
+                    alert("Payment cancelled. Your subscription is reserved — return to complete it.");
+                    setSubmitting(false);
+                },
+                onError: (err) => {
+                    alert(`Payment error: ${err.message ?? "unknown"}`);
+                    setSubmitting(false);
+                },
+            });
+        } catch (err) {
+            console.error("Subscribe error:", err);
+            alert("Something went wrong. Please try again.");
+            setSubmitting(false);
+        }
     };
 
     const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
@@ -190,6 +241,7 @@ export default function SubscribePage() {
 
     return (
         <div className="min-h-screen bg-brand-black">
+            <Script src="https://js.paystack.co/v2/inline.js" strategy="afterInteractive" />
             {/* Hero Header */}
             <div className="relative overflow-hidden bg-gradient-to-br from-brand-green via-brand-green/90 to-brand-black text-warm-cream">
                 <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgba(253,246,236,0.5) 0.5px, transparent 0)", backgroundSize: "24px 24px" }} />
@@ -507,44 +559,19 @@ export default function SubscribePage() {
                                         </div>
                                     </div>
 
-                                    {/* Payment Method */}
-                                    <div className="bg-gradient-to-br from-[#1e1e1e] to-[#252525] rounded-xl p-6 border border-warm-cream/[0.06]">
+                                    {/* Payment — Paystack only */}
+                                    <div className="bg-gradient-to-br from-[#1e1e1e] to-[#252525] rounded-xl p-6 border border-brand-green/20">
                                         <label className="block text-xs font-semibold text-warm-cream/40 uppercase tracking-wider mb-3">
-                                            Payment Method
+                                            Payment
                                         </label>
-                                        <div className="grid grid-cols-2 gap-3">
-                                            <button
-                                                type="button"
-                                                onClick={() => setForm((p) => ({ ...p, paymentMethod: "bank_transfer" }))}
-                                                className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${
-                                                    form.paymentMethod === "bank_transfer"
-                                                        ? "border-brand-green bg-brand-green/5"
-                                                        : "border-warm-cream/[0.08] hover:border-warm-cream/40"
-                                                }`}
-                                            >
-                                                <CreditCard size={20} className={form.paymentMethod === "bank_transfer" ? "text-brand-green" : "text-warm-cream/40"} />
-                                                <div className="text-left">
-                                                    <p className="text-sm font-semibold text-warm-cream">Bank Transfer</p>
-                                                    <p className="text-xs text-warm-cream/40">Pay via bank</p>
-                                                </div>
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => setForm((p) => ({ ...p, paymentMethod: "whatsapp" }))}
-                                                className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${
-                                                    form.paymentMethod === "whatsapp"
-                                                        ? "border-brand-green bg-brand-green/5"
-                                                        : "border-warm-cream/[0.08] hover:border-warm-cream/40"
-                                                }`}
-                                            >
-                                                <svg viewBox="0 0 24 24" className={`w-5 h-5 ${form.paymentMethod === "whatsapp" ? "text-brand-green" : "text-warm-cream/40"}`} fill="currentColor">
-                                                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
-                                                </svg>
-                                                <div className="text-left">
-                                                    <p className="text-sm font-semibold text-warm-cream">WhatsApp</p>
-                                                    <p className="text-xs text-warm-cream/40">Pay via chat</p>
-                                                </div>
-                                            </button>
+                                        <div className="flex items-center gap-3">
+                                            <span className="w-10 h-10 rounded-full bg-brand-green/10 flex items-center justify-center">
+                                                <ShieldCheck size={18} className="text-brand-green" />
+                                            </span>
+                                            <div>
+                                                <p className="text-sm font-semibold text-warm-cream">Pay with Paystack</p>
+                                                <p className="text-[11px] text-warm-cream/50">Card, Bank Transfer, USSD, QR. Future cycles auto-charge to your saved method.</p>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -627,7 +654,7 @@ export default function SubscribePage() {
                                                 </span>
                                                 <span className="text-warm-cream/40">
                                                     <CreditCard size={14} className="inline mr-1" />
-                                                    {form.paymentMethod === "bank_transfer" ? "Bank Transfer" : "WhatsApp"}
+                                                    Paystack
                                                 </span>
                                             </div>
                                         </div>

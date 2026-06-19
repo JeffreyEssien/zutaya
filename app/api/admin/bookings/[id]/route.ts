@@ -3,9 +3,12 @@ import { updateServiceBooking, getServiceBookingByCode } from "@/lib/servicesQue
 import { getSupabaseServiceClient } from "@/lib/supabase";
 import { sendEmail } from "@/lib/email";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
+import { getCurrentAdmin } from "@/lib/adminAuth";
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
+        const admin = await getCurrentAdmin();
+        if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         const { id } = await params;
         const b = await req.json();
 

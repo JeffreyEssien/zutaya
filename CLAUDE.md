@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-ZúTa Ya is a premium meat delivery e-commerce platform serving Lagos and interstate Nigeria. Built with Next.js 16 (App Router), Supabase (Postgres), and deployed on Vercel. Rebranded from XELLÉ.
+ZúTa Ya is a premium meat delivery + butchery services platform serving Lagos. Beyond e-commerce, it now includes Kitchen (grill house menu), Outdoor Butchery / Events (bookings), and Owambe event planning. Built with Next.js 16 (App Router), Supabase (Postgres), deployed on Vercel. Rebranded from XELLÉ.
 
 **Agent Instructions Doc:** Full implementation spec lives in `/ZutaYa_Agent_Instructions.docx` (16 sections). Extract with `textutil -convert txt -stdout ZutaYa_Agent_Instructions.docx`.
 
@@ -14,126 +14,151 @@ ZúTa Ya is a premium meat delivery e-commerce platform serving Lagos and inters
 - `npm run build` — Production build (also serves as the lint/type check gate)
 - `npx @biomejs/biome check .` — Lint and format check
 - `npx @biomejs/biome check --write .` — Auto-fix lint/format issues
-- `npx tsx scripts/seed.ts` — Seed database with sample data (10 tables)
+- `npx tsx scripts/seed.ts` — Seed database with sample data
 
 There are no test scripts configured.
 
 ## Architecture
 
-### Tech Stack
-- **Framework:** Next.js 16 with App Router, React 19, React Compiler (babel plugin)
-- **Database:** Supabase (Postgres) via `@supabase/supabase-js` — singleton client in `lib/supabase.ts`
-- **State:** Zustand stores with `persist` middleware (`lib/cartStore.ts`, `lib/orderStore.ts`, `lib/notificationStore.ts`)
-- **Styling:** Tailwind CSS v4 with custom brand colors in `tailwind.config.ts` (brand-red, warm-cream, deep-espresso, charcoal, forest-green, gold-accent)
-- **Rich text:** TipTap editor for CMS pages and recipes
-- **Charts:** Recharts for admin analytics
-- **Email:** Nodemailer (`lib/email.ts`)
-- **Animations:** Framer Motion
-- **Linter/Formatter:** Biome (spaces, double quotes, 100-char line width)
+### Tech Stack (exact versions, package.json)
+- **Framework:** Next.js 16.2.1 (App Router, React Compiler babel plugin)
+- **React:** 19.2.3
+- **Database:** Supabase 2.95.3 (`@supabase/supabase-js`) — singleton in `lib/supabase.ts`
+- **State:** Zustand 5.0.11 with `persist` (`lib/cartStore.ts`, `lib/orderStore.ts`, `lib/notificationStore.ts`)
+- **Styling:** Tailwind CSS v4 (`@tailwindcss/postcss`) — brand-red, warm-cream, deep-espresso, charcoal, forest-green, gold-accent in `tailwind.config.ts`
+- **Rich text:** TipTap 3.19.0 (extension-link, pm, react, starter-kit)
+- **Charts:** Recharts 3.7.0
+- **Email:** Nodemailer 8.0.1 (`lib/email.ts`)
+- **Animations:** Framer Motion 12.34.0
+- **Auth:** bcryptjs 3.0.3 for admin password hashing
+- **PDF:** jspdf 4.2.1 + jspdf-autotable 5.0.7 (reports/receipts)
+- **Toasts:** sonner 2.0.7
+- **Linter/Formatter:** Biome 2.4.0 (spaces, double quotes, 100-char line width)
 
 ### Code Layout
 - `app/` — Next.js App Router pages and API routes
-  - `app/admin/` — Admin dashboard (products, orders, customers, analytics, CMS, inventory, coupons, delivery zones, newsletter, subscriptions, bundles, settings)
-  - `app/api/` — API routes (orders, search, subscriptions, newsletter, bundles, categories, admin endpoints)
+  - `app/admin/` (25 routes): analytics, audit, bookings, bundles, categories, coupons, cron, customers, delivery, events, featured, gallery, inventory, login, newsletter, orders, pages, processing, products, services-config, settings, subscriptions
+  - `app/api/` (17 routes): admin, abandoned-cart, bookings, bundles, categories, cron, delivery, media, newsletter, orders, products, search, settings, subscriptions, upload
   - `app/[slug]/` — Dynamic CMS pages
-  - `app/shop/`, `app/checkout/`, `app/track/`, `app/subscribe/`, `app/bundles/` — Customer-facing pages
-  - `app/newsletter/unsubscribe/` — Newsletter unsubscribe confirmation page
-- `components/modules/` — Feature-specific components (CheckoutForm, AdminOrdersContent, FilterSidebar, etc.)
-- `components/ui/` — Reusable primitives (Button, Badge, StorageBadge, Skeletons, etc.)
-- `lib/` — Shared logic
-  - `queries.ts` — All Supabase queries with `Db*` → app type mappers (`toProduct`, `toOrder`, etc.)
-  - `deliveryPricing.ts` — Lagos zone and interstate delivery fee engine with fuzzy area matching
-  - `constants.ts` — Site config, nav links, bank transfer details, order statuses
-  - `cartStore.ts` — Zustand cart with coupon support
-  - `orderQueue.ts` — Postgres advisory lock-based order serialization
-  - `textDefaults.ts` — Editable text system: `TEXT_GROUPS` with defaults + `getText()` helper
-- `types/index.ts` — All shared TypeScript interfaces (Product, Order, CartItem, Subscription, NewsletterSubscriber, etc.)
-- `supabase/` — Database schema (`schema.sql`) and migrations (001-013)
-- `scripts/seed.ts` — Database seeder for 10 tables
-- `proxy.ts` — Admin auth middleware (cookie-based session with `ADMIN_SESSION_SECRET`)
+  - `app/shop/`, `app/checkout/`, `app/track/`, `app/subscribe/`, `app/bundles/` — Customer-facing
+  - `app/newsletter/unsubscribe/` — Token-based unsubscribe page
+- `components/modules/` — 62 feature components (CheckoutForm, AdminOrdersContent, OrderDetailPanel, OwambeWizard, EatModeSelector, ServicesPillar, MeetTheButchers, ProcessingConfigurator, BookingsAdmin, EventsAdmin, AuditLogView, MediaPicker, NotificationBell, DeliveryScheduler, etc.)
+- `components/ui/` — 8 primitives (Badge, Button, ScrollProgress, Skeletons, StockIndicator, StorageBadge, ToastProvider, WhatsAppFloat)
+- `lib/` (18 files) — `queries.ts`, `email.ts`, `cartStore.ts`, `orderStore.ts`, `notificationStore.ts`, `orderQueue.ts`, `textDefaults.ts`, `adminAuth.ts`, `deliveryPricing.ts`, `constants.ts`, `formatCurrency.ts`, `supabase.ts`
+- `types/index.ts` — All shared TS interfaces
+- `supabase/migrations/` — 32 files (001-022 plus extras)
+- `scripts/seed.ts` — DB seeder
+- `proxy.ts` — Admin auth middleware (session token + `ADMIN_SESSION_SECRET`)
 
 ### Key Patterns
-- **Data access:** `lib/queries.ts` is the single data access layer. DB rows use `snake_case`; app types use `camelCase`. Mapper functions (`toProduct`, `toOrder`) handle conversion.
-- **JSONB safety:** `variants` and `prepOptions` fields may arrive as strings from DB. Mappers use `typeof === "string" ? JSON.parse() : value || []` pattern. Components also guard with `Array.isArray()`.
-- **Admin auth:** Password-based login sets a session cookie checked by `proxy.ts` middleware. Protected by `ADMIN_PASSWORD` and `ADMIN_SESSION_SECRET` env vars.
-- **Currency:** Nigerian Naira (NGN). Formatting via `lib/formatCurrency.ts`.
-- **Order statuses:** `pending → processing → packed → out_for_delivery → delivered` (defined in `lib/constants.ts`).
-- **Order queue:** Postgres advisory locks serialize concurrent checkouts. `lib/orderQueue.ts` wraps order processing; `order_queue` table tracks status. Migration 013.
-- **Payment methods:** WhatsApp and bank transfer (no online payment gateway).
-- **Delivery pricing:** Lagos-only zones (area-based flat fees). Hardcoded fallback data with DB-backed overrides. No interstate delivery.
-- **Admin Notifications:** Real-time polling (30s) for new orders and pending payments. NotificationBell component with sound alerts. API at `/api/admin/notifications`.
-- **Editable texts:** `site_settings.custom_texts` JSONB column stores overrides. `lib/textDefaults.ts` defines groups/defaults. `getText(customTexts, key)` returns override or default.
-- **Newsletter:** Footer signup → welcome email. Admin campaign CRUD + batch send. Token-based unsubscribe.
-- **Subscriptions:** Multi-step signup at `/subscribe`. Admin at `/admin/subscriptions`. Frequencies: weekly/biweekly/monthly.
-- **Bundles:** Full bundle builder at `/bundles` with search, filters, quantity controls, sticky summary, progress bar. Per-product prep option selection flows through cart → checkout → order → receipt → admin → email. Admin rules at `/admin/bundles`.
-- **Cart:** Per-bundle discount system (`bundleId`/`bundleDiscount`/`bundleName` on CartItem). `bundleDiscountTotal()` calculates per-group. Coupon stacks on top of bundle discounts.
-- **Email templates** (`lib/email.ts`): order receipt, payment approved, shipped, delivered, review request, abandoned cart, newsletter welcome, campaign send, subscription confirmed. All item lists include variant + prep options.
-- **OrderDetailPanel:** Redesigned with gradient header, icon-based card sections, bundle grouping, prep options per item, copy-to-clipboard (structured text of full order details), WhatsApp status messaging, contextual actions.
-- **Admin Settings:** Tabbed layout (General, Storefront, Business, Checkout, Texts). Packaging fee/label/description admin-editable from Checkout tab.
-- **Admin Sidebar:** Independent scrolling from main content. Mobile drawer with `overflow-y-auto`.
+- **Data access:** `lib/queries.ts` is the single data layer. DB `snake_case` → app `camelCase` via mappers (`toProduct`, `toOrder`).
+- **JSONB safety:** `variants` and `prepOptions` may arrive as strings. Mappers use `typeof === "string" ? JSON.parse() : value || []`. Components also guard with `Array.isArray()`.
+- **Admin auth:** Bcryptjs password hashing via `lib/adminAuth.ts`. `admin_users` table (roles: admin/super_admin), `admin_sessions` with 7-day token expiry. `proxy.ts` middleware validates session token cookies. `logAdminAction()` + `logCronEvent()` write to `admin_audit_logs`.
+- **Currency:** Nigerian Naira (NGN) via `lib/formatCurrency.ts`.
+- **Order statuses:** `pending → processing → packed → out_for_delivery → delivered`. API enforces sequential transitions.
+- **Order ID format:** `ZY-YYYYMMDD-XXXX` (generated in CheckoutForm).
+- **Order queue:** Postgres advisory locks serialize concurrent checkouts. `order_queue` table tracks status. Migration 013.
+- **Payment:** WhatsApp + bank transfer only. No online gateway. (Providus DVA planned, not yet implemented.)
+- **Delivery pricing:** Lagos-only zones (area-based flat fees) in `lib/deliveryPricing.ts`. Hardcoded fallback with DB overrides. No interstate.
+- **Delivery scheduler:** `DeliveryScheduler.tsx` wired in CheckoutForm. Capacity slots via `increment_delivery_capacity` RPC. `GET /api/delivery/availability` returns slot availability.
+- **Notifications:** NotificationBell polls every 30s for new orders, pending payments, expiring stock, low stock. Sound alerts. API at `/api/admin/notifications`.
+- **Editable texts:** `site_settings.custom_texts` JSONB. `lib/textDefaults.ts` defines 9 TEXT_GROUPS. `getText(customTexts, key)` returns override or default. SiteSettingsForm renders grouped editor. Hero, PromiseBar, NewArrivals, ShopByCategory, HomeCta, AboutSnippet, Footer all consume via getText().
+- **Announcement bar:** Header renders top banner. Admin controls enabled/text/color from settings.
+- **Newsletter:** Footer signup → welcome email. Admin campaign CRUD + batch send. Token unsubscribe.
+- **Subscriptions:** Multi-step at `/subscribe`. Admin at `/admin/subscriptions`. Weekly/biweekly/monthly.
+- **Bundles:** Full builder at `/bundles` (search, filters, qty, sticky summary, progress). Per-product prep flows cart → checkout → order → receipt → admin → email. Admin rules at `/admin/bundles`.
+- **Cart:** Per-bundle discount (`bundleId`/`bundleDiscount`/`bundleName` on CartItem). `bundleDiscountTotal()` per group. Coupons stack on top.
+- **Coupons:** `createOrder` increments `usage_count` post-insert (best-effort).
+- **Email templates** (`lib/email.ts`): order receipt, payment approved, shipped, delivered, review request, abandoned cart, newsletter welcome, campaign send, subscription confirmed, renewal, delivery reminder, low stock alert. Items include variant + prep options.
+- **OrderDetailPanel:** Gradient header, icon-based cards, bundle grouping, prep options per item, copy-to-clipboard, WhatsApp status messaging, contextual actions. Delivery fee currently read-only.
+- **Admin Settings:** Tabbed (General, Storefront, Business, Checkout, Texts). Packaging fee/label admin-editable.
+- **Cron jobs:** Three Vercel Cron endpoints — `/api/cron/subscriptions` (renewals), `/api/cron/delivery-reminders`, `/api/cron/expiry-sweep`. Admin dashboard at `/admin/cron` with manual trigger + execution history. `cron_logs` table.
+- **Featured Slides:** Admin at `/admin/featured` — product/media/promo slides, drag-reorder, overlay editor, live preview, toggle active, duplicate. Hero renders with animated overlays when `useFeaturedSlides` is on. Server-resolved in `page.tsx`.
+- **Services Infrastructure** (migration 020): Kitchen grill house menu, processing options, marinades, outdoor butchery/events bookings, Owambe event planning. Tables: `marinades`, `processing_options`, `kitchen_menu_items`, `service_bookings`, `events`, `occasions`. Admin under `/admin/{services-config,processing,bookings,events}`. Components: `OwambeWizard`, `EatModeSelector`, `ServicesPillar`, `ServicesDashboardCards`, `MeetTheButchers`.
+- **Gallery/Media:** `/admin/gallery` with `MediaPicker`. `/api/media` + `/api/upload`. `media_gallery` table (migration 018).
+- **Audit:** `/admin/audit` (`AuditLogView`) tracks admin actions + cron events via `admin_audit_logs`.
+- **Analytics:** Meat & Delivery tab with Total Kg Sold, Expiring Stock KPIs. Charts: Kg Sold by Category (bar), Gross Margin (line), Delivery Zone Breakdown (pie + table).
+- **Meat Passport removed:** Migration 022 dropped `origin_farm`, `origin_breed`, `origin_hanging_hours`, `origin_halal_certified`, `passport_data`.
 
 ### Environment Variables
 - `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` — Supabase connection
-- `ADMIN_PASSWORD` / `ADMIN_SESSION_SECRET` — Admin authentication
-- `NEXT_PUBLIC_SITE_URL` — Public site URL (defaults to vercel app)
-- `SMTP_EMAIL` / `SMTP_PASSWORD` — Gmail SMTP for transactional emails
+- `SUPABASE_SERVICE_ROLE_KEY` — Service role for admin operations
+- `ADMIN_SESSION_SECRET` — Session token signing
+- `ADMIN_PASSWORD_HASH` — Bcrypt hash for default admin (also stored in `admin_users` table)
+- `NEXT_PUBLIC_SITE_URL` — Public site URL
+- `SMTP_EMAIL` / `SMTP_PASSWORD` — Gmail SMTP
 
 ## Implementation Status (vs Agent Instructions Doc)
 
 ### Done
-- **Section 4 (Rebrand):** Colors, fonts, brand tokens applied. XELLÉ references removed.
-- **Section 5 (Product meat fields):** storageType, priceUnit, cutType, prepOptions, variants — all with JSONB safety. StorageBadge component.
-- **Section 6 (Order pipeline):** 5-stage statuses, email triggers at each stage, order queue with advisory locks for concurrent safety.
-- **Section 7 (Delivery):** Lagos-only zones in `lib/deliveryPricing.ts`. Interstate removed entirely.
-- **Section 8 (Email):** 9+ email templates in `lib/email.ts`. Rebranded.
-- **Section 9 (Features):** Newsletter (signup, campaigns, unsubscribe), bundles (full builder UI + admin), subscriptions (multi-step + admin).
-- **Section 10 (Admin):** Dashboard with products, orders, customers, analytics, CMS, inventory, coupons, delivery zones, newsletter, subscriptions, bundles, settings.
-- **Section 11 (Notifications):** NotificationBell with polling, sound alerts, new order + pending payment detection.
-- **Section 13 (Storefront):** Homepage (Hero, PromiseBar, NewArrivals, HomeCta, AboutSnippet, Footer), shop with filters/active chips, product detail, checkout with queue waiting room.
-- **Section 14:** Stockpile removed entirely. Interstate removed — Lagos only.
-- **Migrations 001-013, 018-019** created.
-- **About page** admin-editable (promise text, quote, stats).
+- **Section 3:** Bcryptjs admin auth + session tokens (7-day expiry), `admin_users` table with roles, audit log via `admin_audit_logs`.
+- **Section 4 (Rebrand):** Brand tokens applied; XELLÉ removed.
+- **Section 5 (Meat fields):** storageType, priceUnit, cutType, prepOptions, variants — JSONB-safe. StorageBadge.
+- **Section 6 (Order pipeline):** 5-stage statuses, sequential transitions, email triggers, advisory-lock queue, ZY-YYYYMMDD-XXXX IDs, coupon usage increment.
+- **Section 6.4:** prep_instructions, delivery date/slot, packaging_fee all in CheckoutForm + persisted in queries.ts.
+- **Section 7 (Delivery):** Lagos-only zones. DeliveryScheduler wired. `/api/delivery/availability`. `increment_delivery_capacity` called at order placement.
+- **Section 8 (Email):** 12+ templates rebranded.
+- **Section 9 (Features):** Newsletter (signup, campaigns, unsubscribe), Bundles (builder + admin), Subscriptions (multi-step + admin).
+- **Section 10 (Admin):** 25-route dashboard. Tabbed settings, audit, gallery, services configurators. OrderDetailPanel redesigned.
+- **Section 10.5/10.6:** Meat KPIs + analytics charts in Meat & Delivery tab.
+- **Section 11 (Notifications):** NotificationBell with polling, sound, new order + pending payment + expiringStock + lowStock data.
+- **Section 12 (Cron):** Three Vercel Cron endpoints + admin dashboard + `cron_logs`.
+- **Section 13 (Storefront):** Homepage (Announcement Bar, Hero w/ featured slides, PromiseBar, NewArrivals, ShopByCategory, HomeCta, AboutSnippet, MeetTheButchers, ServicesPillar, Footer). Shop, product detail, checkout with queue waiting room.
+- **Section 14:** Stockpile + interstate removed. RLS policies migration 014_rls_policies.sql in place.
+- **Featured Slides:** Full admin curation at `/admin/featured`.
+- **Custom Texts Wiring:** TEXT_GROUPS + getText() consumed across homepage components. Grouped editor in SiteSettingsForm.
+- **Services Infrastructure:** Kitchen, Processing, Bookings, Events, Owambe wizard (migration 020).
+- **Gallery/Media management** (migration 018).
+- **Audit trail system.**
+- **About page** admin-editable.
 - **DB seeded** via `scripts/seed.ts`.
-- **Featured Slides:** Admin at `/admin/featured` — curate hero slideshow with product/media/promo slides, drag-to-reorder, overlay text/position/style editor, live preview modal, toggle active/inactive, duplicate. Hero renders featured slides with animated overlays when `useFeaturedSlides` is enabled. Data resolved server-side in page.tsx.
 
-### Remaining (from Agent Instructions Doc)
-- **Section 3:** Bcrypt admin auth with rate limiting (currently plain password comparison).
-- **Section 7.3:** DeliveryScheduler with capacity slots (`components/modules/DeliveryScheduler.tsx` exists but not wired).
-- **Section 6.2:** ~~Sequential order status validation~~ — DONE. API enforces one-step-at-a-time transitions. Admin UI only shows valid next statuses.
-- **Section 6.4:** ~~New checkout fields~~ — DONE. prep_instructions, delivery date/slot (DeliveryScheduler wired), packaging_fee in CheckoutForm.
-- **Section 9.4:** Recipes CMS (not started).
-- **Section 12:** ~~Cron jobs~~ — DONE. Three Vercel Cron jobs: subscription renewals (7am), delivery reminders (9am), inventory sweep (6am). Admin dashboard at `/admin/cron` with manual trigger + execution history. `cron_logs` table tracks all runs. Email templates for renewal, delivery reminder, and low stock alert.
-- **Section 14 (migration):** RLS policy tightening (migration 014).
-- **Section 15:** Pre-launch testing checklist items.
-- **Custom texts wiring:** `lib/textDefaults.ts` has TEXT_GROUPS and `getText()` but admin settings form doesn't render grouped editor yet, and components don't call `getText()` yet.
+### Remaining
+- **Section 1.2 — Startup Guard:** `lib/supabase.ts` lacks explicit guards for `ADMIN_SESSION_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_PASSWORD_HASH`. (proxy.ts checks service role only.)
+- **Section 3 — Rate limiting:** Admin login bcrypt is in place but no rate limiter on `/api/admin/login`.
+- **Section 7.1 — Editable Delivery Fee:** OrderDetailPanel needs admin-editable `delivery_fee` field to enter actual Uber fee post-dispatch.
+- **Section 9.4 — Recipes CMS:** Not started. No `/admin/recipes`, no `/api/recipes`, no recipe pages. Migration 006 exists but unused.
+- **Section 13.1 — Recipe Spotlight on homepage:** Not started (depends on Recipes CMS).
+- **Section 15 — Pre-launch testing:** No automated tests; checklist unverified.
+- **Providus DVA payment integration:** Awaiting credentials/docs; no code yet.
+- **Paystack payment integration (IMPLEMENTED — 2026-06-18):**
+  - Inline Popup V2 (`js.paystack.co/v2/inline.js`), NGN, channels: card/bank/ussd/qr/bank_transfer
+  - **Replaces** WhatsApp + bank transfer entirely on customer checkout (`CheckoutForm.tsx`) and subscribe (`/subscribe`)
+  - Admin refunds (full + partial) from OrderDetailPanel via `POST /api/paystack/refund` → Paystack `/refund`
+  - Subscription cancellation via `POST /api/paystack/subscription/disable`
+  - First-cycle subscription charge via `POST /api/paystack/subscription/start` → popup → webhook stores authorization_code → cron auto-renews via `charge_authorization` (handles native intervals + custom biweekly)
+  - Transaction fees split 50/50: customer pays half as "Processing Fee" line (visible in cart/receipt/admin/email). Fee math in `lib/paystack.ts`: `paystackFeeKobo()` + `customerProcessingFeeKobo()` with fixed-point iteration.
+  - Migration 023: `customers`, `payments` (full ledger every attempt), `payment_events` (forensic event log), `subscription_plans`. Subscriptions extended with `paystack_*` codes. Orders carry `paystack_reference` + `processing_fee`. Trigger keeps `customers.total_spent_kobo` etc. in sync.
+  - Idempotent paid transition: `UPDATE payments SET status='paid' WHERE reference=$1 AND status<>'paid'` — verify + webhook race safely.
+  - Reference format: `ZY-YYYYMMDD-XXXX-aN` (N = attempt counter via `nextAttemptForOrder`) — prevents Paystack "Duplicate Transaction Reference."
+  - Webhook (HMAC SHA512 verify of raw body) handles: `charge.success`, `charge.failed`, `subscription.create`, `subscription.disable`, `subscription.not_renew`, `refund.processed`, `refund.failed`. Every event logged to `payment_events`.
+  - Env vars required: `PAYSTACK_PUBLIC_KEY`, `PAYSTACK_SECRET_KEY`.
+  - Webhook URL to set in Paystack dashboard: `${NEXT_PUBLIC_SITE_URL}/api/paystack/webhook`.
+  - Legacy `payment_method` / `payment_status` columns kept for historical orders; new orders default to `paystack`.
+  - Files: `lib/paystack.ts`, `lib/payments.ts`, `lib/paymentFulfillment.ts`, `app/api/paystack/{initialize,verify,webhook,refund,resume,subscription/start,subscription/disable}/route.ts`, `app/api/admin/payments/{route.ts,reverify/route.ts}`, `app/api/cron/paystack-reconcile/route.ts`, `app/checkout/{verify,resume}/page.tsx`, migrations `023_paystack_payments.sql` + `024_payment_recovery.sql`.
+  - Pending: end-to-end sandbox test (test card `5060 6666 6666 6666 666`, OTP `123456`), admin Plans CRUD UI.
+
+- **Payment recovery (IMPLEMENTED — 2026-06-19):**
+  - **Reconciliation cron** `/api/cron/paystack-reconcile` runs every 15 min (Vercel). Sweeps payments stuck in `pending` for >15 min. Calls Paystack `/transaction/verify` for each. Outcomes: success → mark paid + run fulfillment; failed → mark failed + restore stock; abandoned (or pending >24 h) → mark abandoned + restore stock + send resume email.
+  - **Stock restoration**: `restoreStockForOrder()` in `lib/queries.ts` + SQL RPCs `restore_variant_stock` / `restore_stock` (migration 024) — inverse of the deduct RPCs. Logged to `inventory_logs` with `*_payment_failed` reason. `payments.stock_restored_at` prevents double-restoration.
+  - **Admin re-verify**: `POST /api/admin/payments/reverify` (admin-gated) + per-row "refresh" button in `OrderDetailPanel` Payment Ledger card. For "I was charged but order says pending" support cases.
+  - **Resume payment flow**: `payments.resume_token` (32-byte random, unique), `sendResumePaymentEmail()`, `/checkout/resume?token=...`, `POST /api/paystack/resume`. The resume endpoint **first** re-verifies the original reference — if it actually succeeded, mark paid + fulfill (no popup). Otherwise create a fresh attempt (N+1) with a new reference and return access_code for the popup. Email is sent at-most-once per payment by the reconcile cron (gated by `resume_email_sent_at`).
+  - **Shared fulfillment module**: `lib/paymentFulfillment.ts` (`runPostPaidFulfillment`, `runPostFailedCleanup`) — single source of truth used by verify, webhook, resume, reverify, and reconcile cron. Guarantees identical side-effects on every code path.
+  - Edge cases handled: webhook delayed + verify race; user closes browser mid-payment; network drops between Paystack and our server; double-fulfillment; double-stock-restore; customer was charged but no DB record (reverify); abandoned cart with leaked stock; subscription first-charge captures `authorization_code` for cron renewals.
+
+- **Payment hardening pass (2026-06-19):** 8 audit fixes.
+  1. **Double-refund race on underpayment** — `handleUnderpayment` now CLAIMS the payment atomically via `markPaymentFailed` (pending→failed) BEFORE refunding, so only one of verify/webhook/cron issues the refund. Refund-fail leaves row `failed` + loud `action_required: manual_refund` log (no re-open → no double refund).
+  2/3. **Reconcile status coverage** — added `PaystackTxnStatus` open union in `lib/paystack.ts`; reconcile treats `reversed` as terminal-failed; in-flight (`pending/ongoing/processing/queued`) left to settle.
+  2. **Faster stock release** — reconcile cron `*/5` (was `*/15`), `STALE_AFTER_MIN=10` (was 15). Abandoned-card stock frees in ~10–15 min.
+  4. **Config guard** — `validatePaymentEnv()` in `lib/paystack.ts`, called at top of `/initialize` (503 before any order/stock if PAYSTACK keys or `NEXT_PUBLIC_SITE_URL` missing/malformed; blocks live key + localhost callback).
+  5. **CRON_SECRET enforced** — `paystack-reconcile` fails closed (401) if secret unset in production.
+  6. **Fee parity** — CheckoutForm fee math now mirrors server KOBO math exactly (was naira → ≤₦ drift in "You'll be charged").
+  7. **`orderDraftRef`** → `useRef` (was render-local `let`).
+  8. **Double-submit guard** — `if (loading) return` in `handleSubmit`.
+  - Verified: `tsc --noEmit` clean, `npm run build` passes. (Biome shows repo-wide pre-existing 2-space/4-space + import-sort noise — not from this pass.)
 
 ## RULES
 - When done with a task, very short and brief summary
 - Each feature should be done thoroughly, well featured and all features must be working, no skeletons
 - Use as little tokens as possible
 - Always save context to this file to help you know where you are at all times
-
-Still TODO
-
-  High Priority (Core Features)
-
-  1. ~~Section 6.3 — Order ID Format~~ — DONE. Orders use ZY-YYYYMMDD-XXXX format.
-  2. ~~Section 6.4 — New Checkout Fields~~ — DONE. prep_instructions, delivery date/slot (DeliveryScheduler wired), packaging_fee all in CheckoutForm. queries.ts persists all fields.
-  3. ~~Section 6.5 — Coupon Usage Increment~~ — DONE. `createOrder` in queries.ts increments coupon `usage_count` after order insert (best-effort).
-  4. Section 7.1 — Delivery Fee: OrderDetailPanel has no editable delivery_fee field for admin to enter Uber fee post-dispatch.
-  5. ~~Section 7.2 — Delivery Availability API~~ — DONE. GET /api/delivery/availability returns slot availability. increment_delivery_capacity called on order placement.
-  6. Section 9.4 — Recipes CMS: No /admin/recipes route, no /api/recipes, no recipe pages. Migration 006 exists but no app code. Homepage missing "Recipe Spotlight" section
-  (#7 in section order).
-  7. ~~Section 10.2 — OrderDetailPanel Additions~~ — DONE. Delivery date/slot, prep instructions, packaging/prep fee line items, per-item prep options, bundle grouping, copy-to-clipboard. Delivery fee is read-only (admin sets defaults from delivery panel).
-  8. ~~Section 10.5 — Dashboard Meat Metrics~~ — DONE. "Total Kg Sold", "Expiring Stock" KPI cards in new Meat & Delivery tab.
-  9. ~~Section 10.6 — Analytics Meat Charts~~ — DONE. "Kg Sold by Category" bar chart, "Gross Margin" line chart, "Delivery Zone Breakdown" pie chart + zone performance table.
-  10. ~~Section 11.1 — Notifications~~ — DONE. expiringStock + lowStock data points added to notification polling and NotificationBell.
-
-  Medium Priority
-
-  11. Section 1.2 — Startup Guard: No server-side env var guard in lib/supabase.ts (missing ADMIN_SESSION_SECRET, SUPABASE_SERVICE_ROLE_KEY, ADMIN_PASSWORD_HASH check).
-  12. Section 13.1 — Homepage Sections: Missing Announcement Bar (#1) and Recipe Spotlight (#7).
-  13. Section 14 — RLS Policies: Migration file 014_rls_policies.sql exists but needs verification it's complete.
-  14. Section 15 — Pre-launch Testing: No automated tests or verified checklist.
-  15. ~~Custom Texts Wiring~~ — DONE. Admin settings form renders grouped TEXT_GROUPS editor. Hero, PromiseBar, NewArrivals, ShopByCategory, HomeCta, AboutSnippet, Footer all use getText().
-

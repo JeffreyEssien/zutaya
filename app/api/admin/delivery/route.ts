@@ -4,7 +4,11 @@ import {
     createDeliveryZone, updateDeliveryZone, deleteDeliveryZone,
     createDeliveryLocation, updateDeliveryLocation, deleteDeliveryLocation,
 } from "@/lib/queries";
+import { getCurrentAdmin } from "@/lib/adminAuth";
 
+// GET is intentionally PUBLIC: the customer checkout (lib/deliveryPricing.ts →
+// fetchDeliveryPricingFromDB) reads zone fees here. It returns only delivery
+// pricing (no PII). Mutations below are admin-gated.
 export async function GET() {
     try {
         const zones = await getDeliveryZones();
@@ -16,6 +20,10 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
     try {
+        const admin = await getCurrentAdmin();
+        if (!admin) {
+            return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+        }
         const body = await req.json();
         const { action } = body;
 

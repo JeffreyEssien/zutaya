@@ -162,9 +162,11 @@ export interface Order {
     notes?: string;
     couponCode?: string;
     discountTotal?: number;
-    paymentMethod?: "whatsapp" | "bank_transfer";
+    paymentMethod?: "paystack" | "whatsapp" | "bank_transfer"; // legacy values kept for historical orders
     senderName?: string;
-    paymentStatus?: "awaiting_payment" | "payment_submitted" | "payment_confirmed";
+    paymentStatus?: "awaiting_payment" | "payment_submitted" | "payment_confirmed" | "failed" | "refunded" | "partially_refunded";
+    paystackReference?: string;
+    processingFee?: number;
     // Delivery details
     deliveryZone?: string;
     deliveryType?: "doorstep" | "hub_pickup";

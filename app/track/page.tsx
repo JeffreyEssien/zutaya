@@ -34,8 +34,10 @@ interface TrackedOrder {
     };
     couponCode?: string;
     discountTotal?: number;
-    paymentMethod?: "whatsapp" | "bank_transfer";
-    paymentStatus?: "awaiting_payment" | "payment_submitted" | "payment_confirmed";
+    paymentMethod?: "paystack" | "whatsapp" | "bank_transfer";
+    paymentStatus?: "awaiting_payment" | "payment_submitted" | "payment_confirmed" | "failed" | "refunded" | "partially_refunded";
+    paystackReference?: string;
+    processingFee?: number;
 }
 
 function TrackContent() {
@@ -356,24 +358,56 @@ function TrackContent() {
                                             <CreditCard size={16} className="text-brand-green" />
                                             Payment
                                         </h2>
-                                        <div className="text-sm text-warm-cream/60 space-y-2">
-                                            <div className="flex justify-between">
-                                                <span className="text-warm-cream/40">Method</span>
-                                                <span className="font-medium text-warm-cream capitalize">
-                                                    {order.paymentMethod === "bank_transfer" ? "Bank Transfer" : order.paymentMethod === "whatsapp" ? "WhatsApp" : "—"}
-                                                </span>
-                                            </div>
-                                            {order.paymentMethod === "bank_transfer" && order.paymentStatus && (
-                                                <div className="flex justify-between">
-                                                    <span className="text-warm-cream/40">Status</span>
-                                                    <span className={`font-medium capitalize ${order.paymentStatus === "payment_confirmed" ? "text-emerald-600" :
-                                                            order.paymentStatus === "payment_submitted" ? "text-blue-600" : "text-amber-600"
-                                                        }`}>
-                                                        {order.paymentStatus.replace(/_/g, " ")}
-                                                    </span>
+                                        {(() => {
+                                            const methodLabel =
+                                                order.paymentMethod === "paystack" ? "Paystack" :
+                                                order.paymentMethod === "bank_transfer" ? "Bank Transfer" :
+                                                order.paymentMethod === "whatsapp" ? "WhatsApp" :
+                                                "—";
+                                            const statusMap: Record<string, { label: string; color: string; bg: string }> = {
+                                                payment_confirmed:    { label: "Paid",                color: "text-emerald-300", bg: "bg-emerald-500/15 border-emerald-500/25" },
+                                                payment_submitted:    { label: "Awaiting Approval",  color: "text-blue-300",    bg: "bg-blue-500/15 border-blue-500/25" },
+                                                awaiting_payment:     { label: "Awaiting Payment",   color: "text-amber-300",   bg: "bg-amber-500/15 border-amber-500/25" },
+                                                failed:               { label: "Failed",             color: "text-red-300",     bg: "bg-red-500/15 border-red-500/25" },
+                                                refunded:             { label: "Refunded",           color: "text-purple-300",  bg: "bg-purple-500/15 border-purple-500/25" },
+                                                partially_refunded:   { label: "Partially Refunded", color: "text-purple-300",  bg: "bg-purple-500/15 border-purple-500/25" },
+                                            };
+                                            const status = order.paymentStatus ? statusMap[order.paymentStatus] : null;
+                                            const isPaid = order.paymentStatus === "payment_confirmed";
+
+                                            return (
+                                                <div className="space-y-3">
+                                                    {status && (
+                                                        <div className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border ${status.bg}`}>
+                                                            <span className={`w-1.5 h-1.5 rounded-full ${isPaid ? "bg-emerald-400 animate-pulse" : status.color.replace("text-", "bg-")}`} />
+                                                            <span className={`text-xs font-semibold uppercase tracking-wider ${status.color}`}>
+                                                                {status.label}
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                    <div className="space-y-2 text-sm">
+                                                        <div className="flex justify-between gap-3">
+                                                            <span className="text-warm-cream/45">Method</span>
+                                                            <span className="font-medium text-warm-cream text-right">{methodLabel}</span>
+                                                        </div>
+                                                        {order.paystackReference && (
+                                                            <div className="flex justify-between gap-3">
+                                                                <span className="text-warm-cream/45 shrink-0">Reference</span>
+                                                                <span className="font-mono text-[11px] text-warm-cream/75 truncate text-right" title={order.paystackReference}>
+                                                                    {order.paystackReference}
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                        {order.processingFee != null && order.processingFee > 0 && (
+                                                            <div className="flex justify-between gap-3">
+                                                                <span className="text-warm-cream/45">Processing Fee</span>
+                                                                <span className="text-warm-cream/65">₦{order.processingFee.toLocaleString()}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                            )}
-                                        </div>
+                                            );
+                                        })()}
                                     </div>
 
                                     {/* Continue Shopping */}

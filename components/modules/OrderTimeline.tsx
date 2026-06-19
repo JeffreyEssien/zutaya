@@ -5,8 +5,8 @@ import { Package, CreditCard as ProcessingIcon, BoxIcon, Truck, CheckCircle2, Cl
 
 interface OrderTimelineProps {
     status: "pending" | "processing" | "packed" | "out_for_delivery" | "delivered";
-    paymentMethod?: "whatsapp" | "bank_transfer";
-    paymentStatus?: "awaiting_payment" | "payment_submitted" | "payment_confirmed";
+    paymentMethod?: "paystack" | "whatsapp" | "bank_transfer";
+    paymentStatus?: "awaiting_payment" | "payment_submitted" | "payment_confirmed" | "failed" | "refunded" | "partially_refunded";
     createdAt: string;
 }
 

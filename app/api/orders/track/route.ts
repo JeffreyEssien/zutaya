@@ -49,6 +49,8 @@ export async function POST(request: Request) {
             discountTotal: order.discountTotal,
             paymentMethod: order.paymentMethod,
             paymentStatus: order.paymentStatus,
+            paystackReference: order.paystackReference,
+            processingFee: order.processingFee,
         };
 
         return NextResponse.json({ success: true, order: sanitized });

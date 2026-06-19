@@ -1,21 +1,28 @@
 import { NextResponse } from "next/server";
 import { authenticateAdmin, logAdminAction } from "@/lib/adminAuth";
+import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
 
-const attempts = new Map<string, { count: number; reset: number }>();
+// Brute-force throttle. Backed by the `rate_limits` table (Supabase) so it
+// survives Vercel cold starts — the previous in-memory Map reset on every cold
+// start and was effectively no protection. 8 attempts per IP per 15 minutes
+// leaves room for an admin who fat-fingers their password a few times while
+// still stopping credential-stuffing. Fails OPEN if the DB is unreachable.
+const LOGIN_MAX_ATTEMPTS = 8;
+const LOGIN_WINDOW_SECONDS = 15 * 60;
 
 export async function POST(request: Request) {
     try {
-        const ip = request.headers.get("x-forwarded-for") ?? "unknown";
-        const now = Date.now();
-        const entry = attempts.get(ip);
-
-        if (entry && now < entry.reset && entry.count >= 5) {
-            return NextResponse.json({ error: "Too many attempts. Try again in 15 minutes." }, { status: 429 });
-        }
-        if (!entry || now >= entry.reset) {
-            attempts.set(ip, { count: 1, reset: now + 15 * 60 * 1000 });
-        } else {
-            entry.count++;
+        const ip = getClientIp(request);
+        const limit = await checkRateLimit({
+            key: `login:ip:${ip}`,
+            limit: LOGIN_MAX_ATTEMPTS,
+            windowSeconds: LOGIN_WINDOW_SECONDS,
+        });
+        if (!limit.allowed) {
+            return NextResponse.json(
+                { error: "Too many attempts. Try again in 15 minutes." },
+                { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } },
+            );
         }
 
         const { email, password } = await request.json();
@@ -29,9 +36,6 @@ export async function POST(request: Request) {
         if (!result) {
             return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
         }
-
-        // Reset rate limit on success
-        attempts.delete(ip);
 
         // Log the login
         await logAdminAction({

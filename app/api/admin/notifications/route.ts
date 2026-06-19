@@ -1,10 +1,17 @@
 import { NextResponse } from "next/server";
 import { getRecentOrders, getPendingPaymentOrders, getOrderCount, getExpiringInventory, getLowStockInventory } from "@/lib/queries";
+import { getCurrentAdmin } from "@/lib/adminAuth";
 
 // This endpoint returns recent orders for the notification polling system.
 // Uses DB-level filtering for efficiency instead of fetching all orders.
+// Admin-only — it exposes customer names, totals, and payment statuses (PII).
 export async function GET(request: Request) {
     try {
+        const admin = await getCurrentAdmin();
+        if (!admin) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         const { searchParams } = new URL(request.url);
         const since = searchParams.get("since"); // ISO timestamp
 

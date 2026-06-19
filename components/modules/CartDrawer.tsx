@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Image from "next/image";
+import SafeImage from "@/components/ui/SafeImage";
 import Link from "next/link";
 import { useCartStore } from "@/lib/cartStore";
 import { formatCurrency } from "@/lib/formatCurrency";
@@ -210,7 +210,7 @@ function CartItemRow({ item, compact }: { item: CartItem; compact?: boolean }) {
             className={`flex gap-3 ${compact ? "p-1.5" : "p-3 rounded-xl bg-[#222] border border-warm-cream/8 shadow-sm hover:shadow-md transition-shadow"}`}
         >
             <div className={`relative rounded-lg overflow-hidden bg-warm-cream/5 shrink-0 ${compact ? "h-14 w-11" : "h-20 w-16"}`}>
-                <Image src={item.variant?.image || item.product.images[0]} alt={item.product.name} fill className="object-cover" sizes="64px" />
+                <SafeImage src={item.variant?.image || item.product.images?.[0]} alt={item.product.name} fill className="object-cover" sizes="64px" />
             </div>
             <div className="flex-1 min-w-0 flex flex-col justify-between">
                 <div>

@@ -41,13 +41,62 @@ function formatItemsHtml(order: Order): string {
     .join("");
 }
 
+// ── Helpers for the order confirmation email ──
+
+function formatDeliveryWindow(order: Order): { title: string; subtitle: string; eta: string } {
+  // Scheduled delivery (customer picked a date)
+  if (order.requestedDeliveryDate) {
+    const d = new Date(order.requestedDeliveryDate);
+    const dateLong = d.toLocaleDateString("en-NG", { weekday: "long", month: "long", day: "numeric" });
+    const slotLabel: Record<string, string> = {
+      morning: "Morning (8 AM – 12 PM)",
+      afternoon: "Afternoon (12 PM – 4 PM)",
+      evening: "Evening (4 PM – 7 PM)",
+    };
+    const slot = order.requestedDeliverySlot ? slotLabel[order.requestedDeliverySlot] : null;
+    return {
+      title: "Scheduled Delivery",
+      subtitle: slot ? `${dateLong} · ${slot}` : dateLong,
+      eta: dateLong,
+    };
+  }
+
+  // Estimated next-day if ordered before noon, else day-after-next
+  const placedAt = new Date(order.createdAt);
+  const cutoff = new Date(placedAt);
+  cutoff.setHours(12, 0, 0, 0);
+  const daysOffset = placedAt < cutoff ? 1 : 2;
+  const eta = new Date(placedAt);
+  eta.setDate(eta.getDate() + daysOffset);
+  const etaLong = eta.toLocaleDateString("en-NG", { weekday: "long", month: "long", day: "numeric" });
+  return {
+    title: "Estimated Delivery",
+    subtitle: `Arrives by ${etaLong}`,
+    eta: etaLong,
+  };
+}
+
+function pipelineStepHtml(active: boolean, label: string, sub: string): string {
+  const dotColor = active ? "#C0392B" : "#e5e7eb";
+  const labelColor = active ? "#1a1a2e" : "#aaa";
+  return `
+    <td align="center" style="vertical-align:top;padding:0 4px;width:25%;">
+      <div style="width:14px;height:14px;border-radius:50%;background:${dotColor};margin:0 auto 8px;"></div>
+      <p style="font-size:11px;font-weight:600;color:${labelColor};margin:0 0 2px 0;line-height:1.2;">${label}</p>
+      <p style="font-size:10px;color:#aaa;margin:0;line-height:1.2;">${sub}</p>
+    </td>`;
+}
+
 function buildReceiptHtml(order: Order): string {
   const a = order.shippingAddress;
-  const date = new Date(order.createdAt).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  const firstName = a.firstName || order.customerName.split(" ")[0];
+  const placedAt = new Date(order.createdAt);
+  const placedDate = placedAt.toLocaleDateString("en-NG", { year: "numeric", month: "long", day: "numeric" });
+  const placedTime = placedAt.toLocaleTimeString("en-NG", { hour: "2-digit", minute: "2-digit" });
+  const window = formatDeliveryWindow(order);
+  const isPaid = order.paymentStatus === "payment_confirmed";
+  const itemCount = order.items.reduce((n, i) => n + i.quantity, 0);
+  const trackUrl = `${SITE_URL.replace(/\/$/, "")}/track?id=${order.id}`;
 
   return `
 <!DOCTYPE html>
@@ -55,115 +104,200 @@ function buildReceiptHtml(order: Order): string {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your ${SITE_NAME} Order is Confirmed</title>
 </head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f8f7fa;">
-  <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-    
-    <!-- Header -->
-    <div style="background:#1A1A1A;border-bottom:4px solid #C0392B; border-radius: 16px 16px 0 0; padding: 32px; text-align: center;">
-      <h1 style="color: white; font-size: 28px; letter-spacing: 4px; margin: 0 0 4px 0;">${SITE_NAME}</h1>
-      <p style="font-family:Arial,sans-serif;font-size:12px;color:#C8955A;margin-top:4px;">Order Receipt</p>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f4f1ec;color:#1a1a1a;">
+  <div style="max-width:620px;margin:0 auto;padding:24px 16px;">
+
+    <!-- ── HEADER ── -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-radius:18px 18px 0 0;overflow:hidden;">
+      <tr>
+        <td style="background:linear-gradient(135deg,#1A1A1A 0%,#2d1810 100%);border-bottom:4px solid #C0392B;padding:36px 28px;text-align:center;">
+          <h1 style="color:#fff;font-size:30px;letter-spacing:5px;margin:0;font-weight:700;">${SITE_NAME.toUpperCase()}</h1>
+          <p style="font-size:11px;color:#C8955A;margin:6px 0 0 0;letter-spacing:2px;text-transform:uppercase;">Premium Meat · Lagos</p>
+        </td>
+      </tr>
+    </table>
+
+    <!-- ── BIG CONFIRMATION ── -->
+    <div style="background:#fff;padding:36px 28px 24px;border-left:1px solid #ece6dc;border-right:1px solid #ece6dc;text-align:center;">
+      <div style="display:inline-block;width:64px;height:64px;background:#fef2ec;border-radius:50%;text-align:center;line-height:64px;font-size:30px;margin-bottom:16px;">🥩</div>
+      <h2 style="font-size:26px;color:#1a1a1a;margin:0 0 6px 0;font-weight:700;">Order Confirmed${isPaid ? "" : ", payment pending"}!</h2>
+      <p style="font-size:15px;color:#666;margin:0 0 22px 0;line-height:1.55;">
+        Thank you, <strong style="color:#1a1a1a;">${firstName}</strong>. Your premium cuts are being readied with care.
+      </p>
+
+      <!-- Order ID badge -->
+      <div style="display:inline-block;background:#f4f1ec;padding:8px 16px;border-radius:24px;font-family:'SF Mono',Menlo,monospace;font-size:13px;color:#1a1a1a;font-weight:600;letter-spacing:0.5px;">
+        ${order.id}
+      </div>
+      <p style="font-size:11px;color:#999;margin:8px 0 0 0;">Placed ${placedDate} at ${placedTime}</p>
     </div>
 
-    <!-- Order Info -->
-    <div style="background: white; padding: 32px; border-left: 1px solid #f3f0f7; border-right: 1px solid #f3f0f7;">
-      
-      <!-- Greeting -->
-      <p style="font-size: 16px; color: #1a1a2e; margin: 0 0 4px 0;">Hi ${a.firstName},</p>
-      <p style="font-size: 14px; color: #888; margin: 0 0 24px 0;">Thank you for your order! Here's your receipt.</p>
+    <!-- ── WHAT HAPPENS NEXT TIMELINE ── -->
+    <div style="background:#fff;padding:8px 24px 28px;border-left:1px solid #ece6dc;border-right:1px solid #ece6dc;">
+      <p style="font-size:10px;color:#999;text-transform:uppercase;letter-spacing:2px;font-weight:600;margin:24px 0 16px 0;text-align:center;">What Happens Next</p>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          ${pipelineStepHtml(true, "Confirmed", "You are here")}
+          ${pipelineStepHtml(false, "Preparing", "Butchers at work")}
+          ${pipelineStepHtml(false, "Packed", "Chilled & sealed")}
+          ${pipelineStepHtml(false, "Delivered", window.eta)}
+        </tr>
+      </table>
+    </div>
 
-      <!-- Order ID & Date -->
-      <div style="display: flex; justify-content: space-between; margin-bottom: 24px;">
-        <div>
-          <p style="font-size: 10px; color: #aaa; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 4px 0;">Order</p>
-          <p style="font-size: 13px; font-family: monospace; color: #1a1a2e; background: #f8f7fa; padding: 4px 10px; border-radius: 20px; display: inline-block; margin: 0;">${order.id}</p>
-        </div>
-        <div style="text-align: right;">
-          <p style="font-size: 10px; color: #aaa; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 4px 0;">Date</p>
-          <p style="font-size: 13px; color: #666; margin: 0;">${date}</p>
-        </div>
+    <!-- ── DELIVERY ETA HERO CARD ── -->
+    <div style="background:#fff;padding:0 24px 24px;border-left:1px solid #ece6dc;border-right:1px solid #ece6dc;">
+      <div style="background:linear-gradient(135deg,#0a3d2e 0%,#1a5d44 100%);border-radius:14px;padding:22px 24px;color:#fff;">
+        <p style="font-size:10px;color:#9bd4b8;text-transform:uppercase;letter-spacing:2px;font-weight:600;margin:0 0 6px 0;">📅 ${window.title}</p>
+        <p style="font-size:20px;color:#fff;margin:0 0 4px 0;font-weight:700;">${window.subtitle}</p>
+        <p style="font-size:12px;color:#9bd4b8;margin:8px 0 0 0;line-height:1.5;">
+          Our cold-chain logistics keep your cuts at peak freshness from our butchery to your door.
+        </p>
       </div>
+    </div>
 
-      <!-- Items Table -->
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
+    <!-- ── DELIVERY ADDRESS ── -->
+    <div style="background:#fff;padding:0 24px 24px;border-left:1px solid #ece6dc;border-right:1px solid #ece6dc;">
+      <p style="font-size:10px;color:#999;text-transform:uppercase;letter-spacing:2px;font-weight:600;margin:0 0 10px 0;">Delivering To</p>
+      <div style="background:#f9f6f0;border:1px solid #ece6dc;border-radius:12px;padding:18px 20px;">
+        <p style="font-size:15px;color:#1a1a1a;margin:0 0 4px 0;font-weight:600;">${order.customerName}</p>
+        <p style="font-size:13px;color:#555;margin:0 0 2px 0;line-height:1.55;">${a.address}</p>
+        <p style="font-size:13px;color:#555;margin:0 0 2px 0;line-height:1.55;">${a.city}${a.state ? `, ${a.state}` : ""} ${a.zip || ""}</p>
+        <p style="font-size:13px;color:#555;margin:0;">📞 ${order.phone}</p>
+        ${order.deliveryZone ? `
+        <div style="margin-top:12px;padding-top:12px;border-top:1px dashed #d6cdbe;">
+          <span style="display:inline-block;font-size:11px;color:#C0392B;background:#fef2ec;padding:4px 10px;border-radius:12px;font-weight:600;">📍 ${order.deliveryZone}</span>
+          <span style="display:inline-block;font-size:11px;color:#555;margin-left:8px;">${order.deliveryType === "hub_pickup" ? "Hub Pickup" : "Doorstep Delivery"}</span>
+        </div>` : ""}
+        ${order.deliveryDiscount && order.deliveryDiscount.percent > 0 ? `
+        <p style="font-size:11px;color:#10b981;margin:8px 0 0 0;font-weight:600;">🎉 ${order.deliveryDiscount.percent}% delivery discount applied${order.deliveryDiscount.label ? ` (${order.deliveryDiscount.label})` : ""}</p>` : ""}
+      </div>
+    </div>
+
+    ${order.prepInstructions ? `
+    <!-- ── PREP INSTRUCTIONS CONFIRMATION ── -->
+    <div style="background:#fff;padding:0 24px 24px;border-left:1px solid #ece6dc;border-right:1px solid #ece6dc;">
+      <p style="font-size:10px;color:#999;text-transform:uppercase;letter-spacing:2px;font-weight:600;margin:0 0 10px 0;">Your Prep Instructions</p>
+      <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:16px 18px;">
+        <p style="font-size:13px;color:#92400e;margin:0;line-height:1.6;">"${order.prepInstructions}"</p>
+        <p style="font-size:11px;color:#a16207;margin:8px 0 0 0;font-weight:500;">✓ Our butchers will follow these instructions exactly.</p>
+      </div>
+    </div>` : ""}
+
+    <!-- ── ORDER ITEMS ── -->
+    <div style="background:#fff;padding:0 24px 24px;border-left:1px solid #ece6dc;border-right:1px solid #ece6dc;">
+      <p style="font-size:10px;color:#999;text-transform:uppercase;letter-spacing:2px;font-weight:600;margin:0 0 12px 0;">Your Order · ${itemCount} item${itemCount === 1 ? "" : "s"}</p>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
         <thead>
-          <tr style="border-bottom: 2px solid #f3f0f7;">
-            <th style="text-align: left; padding: 8px 0; font-size: 10px; color: #aaa; text-transform: uppercase; letter-spacing: 1.5px;">Product</th>
-            <th style="text-align: center; padding: 8px 0; font-size: 10px; color: #aaa; text-transform: uppercase; letter-spacing: 1.5px;">Qty</th>
-            <th style="text-align: right; padding: 8px 0; font-size: 10px; color: #aaa; text-transform: uppercase; letter-spacing: 1.5px;">Price</th>
-            <th style="text-align: right; padding: 8px 0; font-size: 10px; color: #aaa; text-transform: uppercase; letter-spacing: 1.5px;">Total</th>
+          <tr style="border-bottom:2px solid #ece6dc;">
+            <th style="text-align:left;padding:10px 0;font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;">Item</th>
+            <th style="text-align:center;padding:10px 0;font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;">Qty</th>
+            <th style="text-align:right;padding:10px 0;font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;">Total</th>
           </tr>
         </thead>
         <tbody>
-          ${formatItemsHtml(order)}
+          ${order.items.map(i => {
+            const unitPrice = i.variant?.price ?? i.product.price;
+            const lineTotal = unitPrice * i.quantity;
+            return `
+            <tr>
+              <td style="padding:14px 0;border-bottom:1px solid #f4f1ec;font-size:14px;color:#1a1a1a;vertical-align:top;">
+                <strong style="font-weight:600;">${i.product.name}</strong>
+                ${i.variant ? `<br><span style="font-size:12px;color:#888;">${i.variant.name}</span>` : ""}
+                ${i.selectedPrepOptions && i.selectedPrepOptions.length > 0 ? `<br><span style="font-size:11px;color:#C0392B;">🔪 ${i.selectedPrepOptions.map(p => p.label).join(", ")}</span>` : ""}
+                ${i.bundleName ? `<br><span style="font-size:11px;color:#10b981;font-weight:600;">📦 ${i.bundleName}</span>` : ""}
+              </td>
+              <td style="padding:14px 0;border-bottom:1px solid #f4f1ec;text-align:center;font-size:13px;color:#555;vertical-align:top;">×${i.quantity}</td>
+              <td style="padding:14px 0;border-bottom:1px solid #f4f1ec;text-align:right;font-size:14px;color:#1a1a1a;font-weight:600;vertical-align:top;">₦${lineTotal.toLocaleString()}</td>
+            </tr>`;
+          }).join("")}
         </tbody>
       </table>
-
-      <!-- Totals -->
-      <div style="border-top: 1px solid #f3f0f7; padding-top: 16px;">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-          <span style="font-size: 14px; color: #888;">Subtotal</span>
-          <span style="font-size: 14px; color: #666;">₦${order.subtotal.toLocaleString()}</span>
-        </div>
-        ${order.discountTotal ? `
-        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-          <span style="font-size: 14px; color: #10b981;">Discount${order.couponCode ? ` (${order.couponCode})` : ""}</span>
-          <span style="font-size: 14px; color: #10b981;">-₦${order.discountTotal.toLocaleString()}</span>
-        </div>` : ""}
-        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-          <span style="font-size: 14px; color: #888;">Delivery Fee</span>
-          <span style="font-size: 14px; color: #666;">${(order.deliveryFee ?? order.shipping) === 0 ? "Free" : `₦${(order.deliveryFee ?? order.shipping).toLocaleString()}`}</span>
-        </div>
-        ${order.packagingFee ? `
-        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-          <span style="font-size: 14px; color: #888;">Premium Packaging</span>
-          <span style="font-size: 14px; color: #666;">₦${order.packagingFee.toLocaleString()}</span>
-        </div>` : ""}
-        ${order.prepFee ? `
-        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-          <span style="font-size: 14px; color: #888;">Prep Fee</span>
-          <span style="font-size: 14px; color: #666;">₦${order.prepFee.toLocaleString()}</span>
-        </div>` : ""}
-        <div style="border-top: 1px solid #f3f0f7; padding-top: 12px; display: flex; justify-content: space-between;">
-          <span style="font-size: 16px; font-weight: 700; color: #1a1a2e;">Total</span>
-          <span style="font-size: 20px; font-weight: 700; color: #1a1a2e;">₦${order.total.toLocaleString()}</span>
-        </div>
-      </div>
-      ${order.prepInstructions ? `
-      <div style="margin-top: 12px; padding: 12px 16px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px;">
-        <p style="font-size: 11px; color: #92400e; margin: 0 0 4px 0; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Prep Instructions</p>
-        <p style="font-size: 13px; color: #a16207; margin: 0;">${order.prepInstructions}</p>
-      </div>` : ""}
-
-      <!-- Shipping Address -->
-      <div style="margin-top: 24px; padding: 20px; background: #f8f7fa; border-radius: 12px;">
-        <p style="font-size: 10px; color: #aaa; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 8px 0;">Shipping To</p>
-        <p style="font-size: 14px; color: #1a1a2e; margin: 0 0 2px 0; font-weight: 500;">${order.customerName}</p>
-        <p style="font-size: 13px; color: #666; margin: 0 0 2px 0;">${a.address}</p>
-        <p style="font-size: 13px; color: #666; margin: 0 0 2px 0;">${a.city}, ${a.state} ${a.zip}</p>
-        <p style="font-size: 13px; color: #666; margin: 0;">Nigeria</p>
-        ${order.deliveryZone ? `<p style="font-size: 12px; color: #C0392B; margin: 8px 0 0 0; font-weight: 500;">📍 Zone: ${order.deliveryZone} &bull; ${order.deliveryType === 'hub_pickup' ? 'Hub Pickup' : 'Doorstep Delivery'}</p>` : ''}
-        ${order.deliveryDiscount ? `<p style="font-size: 11px; color: #10b981; margin: 4px 0 0 0;">🎉 ${order.deliveryDiscount.percent}% delivery discount applied${order.deliveryDiscount.label ? ` (${order.deliveryDiscount.label})` : ''}</p>` : ''}
-      </div>
-
-      ${order.paymentMethod === "bank_transfer" ? `
-      <!-- Payment Notice -->
-      <div style="margin-top: 16px; padding: 16px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px;">
-        <p style="font-size: 13px; color: #92400e; margin: 0; font-weight: 500;">⏳ Payment Pending</p>
-        <p style="font-size: 12px; color: #a16207; margin: 4px 0 0 0;">Please complete your bank transfer to process this order.</p>
-      </div>` : ""}
     </div>
 
-    <!-- Footer -->
-    <div style="background: #f8f7fa; border-radius: 0 0 16px 16px; padding: 24px; text-align: center; border: 1px solid #f3f0f7; border-top: none;">
-      <a href="${SITE_URL}/track?id=${order.id}" style="display: inline-block; background:#1A1A1A;border-bottom:4px solid #C0392B; color: white; text-decoration: none; font-size: 13px; font-weight: 600; padding: 10px 24px; border-radius: 25px; margin-bottom: 12px;">📦 Track Your Order →</a>
+    <!-- ── BILL SUMMARY ── -->
+    <div style="background:#fff;padding:0 24px 24px;border-left:1px solid #ece6dc;border-right:1px solid #ece6dc;">
+      <div style="background:#f9f6f0;border-radius:12px;padding:18px 20px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+          <tr><td style="padding:4px 0;font-size:13px;color:#666;">Subtotal</td>
+              <td style="padding:4px 0;font-size:13px;color:#1a1a1a;text-align:right;">₦${order.subtotal.toLocaleString()}</td></tr>
+          ${order.discountTotal ? `<tr><td style="padding:4px 0;font-size:13px;color:#10b981;">Discount${order.couponCode ? ` (${order.couponCode})` : ""}</td>
+              <td style="padding:4px 0;font-size:13px;color:#10b981;text-align:right;">-₦${order.discountTotal.toLocaleString()}</td></tr>` : ""}
+          <tr><td style="padding:4px 0;font-size:13px;color:#666;">Delivery</td>
+              <td style="padding:4px 0;font-size:13px;color:#1a1a1a;text-align:right;">${(order.deliveryFee ?? order.shipping) === 0 ? "Free" : `₦${(order.deliveryFee ?? order.shipping).toLocaleString()}`}</td></tr>
+          ${order.packagingFee ? `<tr><td style="padding:4px 0;font-size:13px;color:#666;">Premium Packaging</td>
+              <td style="padding:4px 0;font-size:13px;color:#1a1a1a;text-align:right;">₦${order.packagingFee.toLocaleString()}</td></tr>` : ""}
+          ${order.prepFee ? `<tr><td style="padding:4px 0;font-size:13px;color:#666;">Prep Fee</td>
+              <td style="padding:4px 0;font-size:13px;color:#1a1a1a;text-align:right;">₦${order.prepFee.toLocaleString()}</td></tr>` : ""}
+          ${order.processingFee ? `<tr><td style="padding:4px 0;font-size:13px;color:#666;">Processing Fee</td>
+              <td style="padding:4px 0;font-size:13px;color:#1a1a1a;text-align:right;">₦${order.processingFee.toLocaleString()}</td></tr>` : ""}
+          <tr><td colspan="2" style="padding:10px 0 0 0;"><div style="border-top:2px solid #ece6dc;"></div></td></tr>
+          <tr>
+            <td style="padding:10px 0 0 0;font-size:16px;color:#1a1a1a;font-weight:700;">Total ${isPaid ? "Paid" : "Due"}</td>
+            <td style="padding:10px 0 0 0;font-size:22px;color:#C0392B;text-align:right;font-weight:700;">₦${order.total.toLocaleString()}</td>
+          </tr>
+        </table>
+      </div>
+
+      ${isPaid ? `
+      <div style="margin-top:14px;background:#ecfdf5;border:1px solid #6ee7b7;border-radius:10px;padding:12px 16px;text-align:center;">
+        <p style="font-size:13px;color:#047857;margin:0;font-weight:600;">✅ Payment received via Paystack</p>
+        ${order.paystackReference ? `<p style="font-size:11px;color:#065f46;margin:4px 0 0 0;font-family:'SF Mono',Menlo,monospace;">Ref: ${order.paystackReference}</p>` : ""}
+      </div>` : `
+      <div style="margin-top:14px;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 16px;text-align:center;">
+        <p style="font-size:13px;color:#92400e;margin:0;font-weight:600;">⏳ Awaiting payment confirmation</p>
+        <p style="font-size:11px;color:#a16207;margin:4px 0 0 0;">If you've paid, we'll detect it shortly. Otherwise, click the link in your previous email to retry.</p>
+      </div>`}
+    </div>
+
+    <!-- ── CTA BUTTONS ── -->
+    <div style="background:#fff;padding:0 24px 28px;border-left:1px solid #ece6dc;border-right:1px solid #ece6dc;text-align:center;">
+      <a href="${trackUrl}" style="display:inline-block;background:#1A1A1A;border-bottom:4px solid #C0392B;color:#fff;text-decoration:none;font-size:14px;font-weight:600;padding:14px 32px;border-radius:28px;margin:4px;">
+        📦 Track My Order
+      </a>
       <br>
-      <a href="https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi! I have a question about my order.")}" style="display: inline-block; background: #25D366; color: white; text-decoration: none; font-size: 12px; font-weight: 600; padding: 8px 20px; border-radius: 20px; margin-bottom: 12px;">💬 Chat with us on WhatsApp</a>
-      <p style="font-size: 12px; color: #aaa; margin: 0 0 4px 0;">
-        We'll send you tracking info once your order ships.
+      <a href="https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hi! I have a question about my order ${order.id}.`)}" style="display:inline-block;background:#25D366;color:#fff;text-decoration:none;font-size:13px;font-weight:600;padding:11px 26px;border-radius:24px;margin:6px 4px 0;">
+        💬 Question? Chat on WhatsApp
+      </a>
+    </div>
+
+    <!-- ── TRUST FOOTER ── -->
+    <div style="background:#fff;padding:0 24px 28px;border-left:1px solid #ece6dc;border-right:1px solid #ece6dc;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #ece6dc;padding-top:20px;">
+        <tr>
+          <td align="center" style="width:33%;padding:14px 6px;vertical-align:top;">
+            <div style="font-size:22px;line-height:1;margin-bottom:6px;">❄️</div>
+            <p style="font-size:11px;color:#555;font-weight:600;margin:0 0 2px 0;">Cold-Chain Sealed</p>
+            <p style="font-size:10px;color:#999;margin:0;line-height:1.4;">From butcher to door, never broken.</p>
+          </td>
+          <td align="center" style="width:33%;padding:14px 6px;vertical-align:top;">
+            <div style="font-size:22px;line-height:1;margin-bottom:6px;">🌿</div>
+            <p style="font-size:11px;color:#555;font-weight:600;margin:0 0 2px 0;">Halal Certified</p>
+            <p style="font-size:10px;color:#999;margin:0;line-height:1.4;">Ethically sourced, master-butchered.</p>
+          </td>
+          <td align="center" style="width:33%;padding:14px 6px;vertical-align:top;">
+            <div style="font-size:22px;line-height:1;margin-bottom:6px;">⏱️</div>
+            <p style="font-size:11px;color:#555;font-weight:600;margin:0 0 2px 0;">Lagos On-Time</p>
+            <p style="font-size:10px;color:#999;margin:0;line-height:1.4;">Scheduled deliveries, every time.</p>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- ── BOTTOM FOOTER ── -->
+    <div style="background:#1A1A1A;border-radius:0 0 18px 18px;padding:24px 28px;text-align:center;color:#fff;">
+      <p style="font-size:13px;color:#C8955A;margin:0 0 6px 0;font-weight:600;letter-spacing:1px;">FROM OUR BUTCHERY TO YOUR TABLE</p>
+      <p style="font-size:11px;color:#888;margin:0 0 14px 0;line-height:1.6;">
+        Questions, changes, or feedback? Reply to this email or message us on WhatsApp — we read every one.
       </p>
-      <p style="font-size: 12px; color: #ccc; margin: 0;">
-        With love, The ${SITE_NAME} Team
+      <p style="font-size:11px;color:#666;margin:14px 0 0 0;">
+        ${SITE_NAME} · Premium Meat Delivery · Lagos<br>
+        <a href="${SITE_URL}" style="color:#C8955A;text-decoration:none;">${SITE_URL.replace(/^https?:\/\//, "").replace(/\/$/, "")}</a>
+      </p>
+      <p style="font-size:10px;color:#444;margin:12px 0 0 0;">
+        You're receiving this because you placed an order with us. We never share your details.
       </p>
     </div>
 
@@ -174,9 +308,9 @@ function buildReceiptHtml(order: Order): string {
 
 function buildAdminNotificationHtml(order: Order): string {
   const a = order.shippingAddress;
-  const paymentInfo = order.paymentMethod === "bank_transfer"
-    ? `<p style="color: #2563eb; font-weight: 600;">💳 Payment Method: Bank Transfer (Awaiting Payment)</p>`
-    : `<p style="color: #16a34a; font-weight: 600;">💬 Payment Method: WhatsApp</p>`;
+  const paymentInfo = order.paymentStatus === "payment_confirmed"
+    ? `<p style="color: #16a34a; font-weight: 600;">✅ Paid via Paystack${order.paystackReference ? ` · Ref <span style="font-family:monospace;">${order.paystackReference}</span>` : ""}</p>`
+    : `<p style="color: #d97706; font-weight: 600;">⏳ Payment pending (Paystack)${order.paystackReference ? ` · Ref <span style="font-family:monospace;">${order.paystackReference}</span>` : ""}</p>`;
 
   return `
 <!DOCTYPE html>
@@ -207,6 +341,7 @@ function buildAdminNotificationHtml(order: Order): string {
       <p><strong>Delivery Fee:</strong> ${(order.deliveryFee ?? order.shipping) === 0 ? 'Free' : `₦${(order.deliveryFee ?? order.shipping).toLocaleString()}`}</p>
       ${order.packagingFee ? `<p><strong>Premium Packaging:</strong> ₦${order.packagingFee.toLocaleString()}</p>` : ''}
       ${order.prepFee ? `<p><strong>Prep Fee:</strong> ₦${order.prepFee.toLocaleString()}</p>` : ''}
+      ${order.processingFee ? `<p><strong>Processing Fee:</strong> ₦${order.processingFee.toLocaleString()}</p>` : ''}
       ${order.prepInstructions ? `<p style="color: #92400e;"><strong>Prep Instructions:</strong> ${order.prepInstructions}</p>` : ''}
       ${order.requestedDeliveryDate ? `<p><strong>Preferred Delivery:</strong> ${order.requestedDeliveryDate}${order.requestedDeliverySlot ? ` (${order.requestedDeliverySlot})` : ''}</p>` : ''}
       <p style="font-size: 18px;"><strong>Total: ₦${order.total.toLocaleString()}</strong></p>
@@ -246,7 +381,7 @@ export async function sendOrderEmails(order: Order): Promise<void> {
   }
 }
 
-// ── Payment Approved Email ──
+// ── Payment Approved Email (legacy — kept for historical bank-transfer orders) ──
 export async function sendPaymentApprovedEmail(order: Order): Promise<void> {
   if (!process.env.SMTP_PASSWORD) return;
 
@@ -272,9 +407,256 @@ export async function sendPaymentApprovedEmail(order: Order): Promise<void> {
       subject: `✅ Payment Confirmed — ${order.id} | ${SITE_NAME}`,
       html,
     });
-    console.log(`✅ Payment approved email sent to ${order.email}`);
   } catch (error) {
     console.error("❌ Payment approved email failed:", error);
+  }
+}
+
+// ── Refund Processed Email ──
+export async function sendRefundProcessedEmail(
+  order: Order,
+  amountNaira: number,
+  isFullRefund: boolean,
+): Promise<void> {
+  if (!process.env.SMTP_PASSWORD) return;
+  const firstName = order.shippingAddress?.firstName || order.customerName.split(" ")[0];
+
+  const html = buildStatusEmailHtml({
+    firstName,
+    orderId: order.id,
+    total: order.total,
+    emoji: "💸",
+    title: isFullRefund ? "Refund Processed" : "Partial Refund Processed",
+    accentColor: "#8b5cf6",
+    accentBg: "#f5f3ff",
+    message: `We've processed a${isFullRefund ? " full" : " partial"} refund of ₦${amountNaira.toLocaleString()} via Paystack. Funds will arrive in your account within 10 business days.`,
+    statusLabel: isFullRefund ? "Refunded" : "Partially Refunded",
+    nextStep: "If you have any questions about this refund, just reply to this email.",
+  });
+
+  try {
+    await transporter.sendMail({
+      from: `"${SITE_NAME}" <${process.env.SMTP_EMAIL || SITE_EMAIL}>`,
+      to: order.email,
+      subject: `💸 ${isFullRefund ? "Refund" : "Partial Refund"} Processed — ${order.id}`,
+      html,
+    });
+  } catch (error) {
+    console.error("❌ Refund email failed:", error);
+  }
+}
+
+// ── Underpayment Email (customer paid less than expected; we auto-refunded) ──
+export async function sendUnderpaymentEmail(
+  order: Order,
+  paidNaira: number,
+  expectedNaira: number,
+  resumeUrl: string | null,
+): Promise<void> {
+  if (!process.env.SMTP_PASSWORD) return;
+  const firstName = order.shippingAddress?.firstName || order.customerName.split(" ")[0];
+  const shortNaira = expectedNaira - paidNaira;
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f8f7fa;">
+  <div style="max-width:600px;margin:0 auto;padding:20px;">
+    <div style="background:#1A1A1A;border-bottom:4px solid #C0392B;border-radius:16px 16px 0 0;padding:32px;text-align:center;">
+      <h1 style="color:white;font-size:28px;letter-spacing:4px;margin:0;">${SITE_NAME}</h1>
+      <p style="color:#C8955A;margin-top:4px;font-size:12px;">Payment Issue</p>
+    </div>
+    <div style="background:white;padding:32px;border:1px solid #f3f0f7;">
+      <p style="font-size:16px;color:#1a1a2e;margin:0 0 4px 0;">Hi ${firstName},</p>
+      <p style="font-size:14px;color:#666;margin:0 0 20px 0;line-height:1.6;">
+        We received your payment for order <strong style="font-family:monospace;color:#1a1a2e;">${order.id}</strong>, but the amount was short of the total. To keep things simple, we've automatically refunded what you paid — your card will see ₦${paidNaira.toLocaleString()} back within 10 business days.
+      </p>
+
+      <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:16px;margin:20px 0;">
+        <table role="presentation" width="100%">
+          <tr><td style="font-size:13px;color:#92400e;padding:4px 0;">You paid</td>
+              <td style="font-size:13px;color:#92400e;padding:4px 0;text-align:right;font-weight:600;">₦${paidNaira.toLocaleString()}</td></tr>
+          <tr><td style="font-size:13px;color:#92400e;padding:4px 0;">Order total</td>
+              <td style="font-size:13px;color:#92400e;padding:4px 0;text-align:right;font-weight:600;">₦${expectedNaira.toLocaleString()}</td></tr>
+          <tr><td colspan="2" style="border-top:1px solid #fde68a;padding-top:6px;"></td></tr>
+          <tr><td style="font-size:14px;color:#92400e;padding:4px 0;font-weight:700;">Shortfall (refunded)</td>
+              <td style="font-size:14px;color:#92400e;padding:4px 0;text-align:right;font-weight:700;">₦${shortNaira.toLocaleString()}</td></tr>
+        </table>
+      </div>
+
+      <p style="font-size:14px;color:#1a1a2e;margin:16px 0;">
+        Your order is on hold until full payment is received. If you'd like to complete the order, click below to pay the full amount.
+      </p>
+
+      ${resumeUrl ? `
+      <div style="text-align:center;margin:24px 0;">
+        <a href="${resumeUrl}" style="display:inline-block;background:#1A1A1A;border-bottom:4px solid #C0392B;color:white;text-decoration:none;font-size:14px;font-weight:600;padding:14px 32px;border-radius:25px;">
+          Complete Payment →
+        </a>
+      </div>` : ""}
+
+      <p style="font-size:12px;color:#888;text-align:center;margin-top:24px;">
+        Questions? Reply to this email or message us on WhatsApp.
+      </p>
+    </div>
+    <div style="background:#f8f7fa;border-radius:0 0 16px 16px;padding:18px;text-align:center;border:1px solid #f3f0f7;border-top:none;">
+      <p style="font-size:11px;color:#aaa;margin:0;">From the ${SITE_NAME} team — we're here to help.</p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+  try {
+    await transporter.sendMail({
+      from: `"${SITE_NAME}" <${process.env.SMTP_EMAIL || SITE_EMAIL}>`,
+      to: order.email,
+      subject: `Payment short — refunded · Order ${order.id}`,
+      html,
+    });
+  } catch (error) {
+    console.error("❌ Underpayment email failed:", error);
+  }
+}
+
+// ── Dispute Alert (admin) — fired when Paystack opens a chargeback dispute ──
+export async function sendDisputeAlertEmail(args: {
+  reference: string;
+  orderId: string | null;
+  customerEmail: string;
+  amountNaira: number;
+  category: string;
+  reason: string | null;
+  dueAt: string | null;
+  paystackDisputeId: number;
+}): Promise<void> {
+  if (!process.env.SMTP_PASSWORD) return;
+  const due = args.dueAt ? new Date(args.dueAt).toLocaleString("en-NG", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "Not specified";
+  const detailUrl = args.orderId
+    ? `${SITE_URL.replace(/\/$/, "")}/admin/payments/${encodeURIComponent(args.reference)}`
+    : `${SITE_URL.replace(/\/$/, "")}/admin/disputes`;
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<body style="margin:0;padding:20px;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#fef2f2;">
+  <div style="max-width:560px;margin:0 auto;background:white;border:2px solid #dc2626;border-radius:14px;overflow:hidden;">
+    <div style="background:#dc2626;padding:20px 24px;color:white;">
+      <p style="margin:0;font-size:11px;text-transform:uppercase;letter-spacing:2px;font-weight:700;opacity:0.85;">🚨 Urgent · Action Required</p>
+      <h2 style="margin:6px 0 0;font-size:20px;font-weight:700;">Chargeback Dispute Opened</h2>
+    </div>
+    <div style="padding:24px;font-size:14px;color:#1a1a2e;line-height:1.6;">
+      <p style="margin:0 0 16px 0;">A customer has filed a dispute with their bank. You need to respond before the deadline or the chargeback is automatically lost.</p>
+
+      <table role="presentation" width="100%" style="font-size:13px;">
+        <tr><td style="color:#666;padding:6px 0;width:35%;">Order</td>
+            <td style="padding:6px 0;font-family:monospace;font-weight:600;">${args.orderId || "—"}</td></tr>
+        <tr><td style="color:#666;padding:6px 0;">Payment ref</td>
+            <td style="padding:6px 0;font-family:monospace;font-size:11px;">${args.reference}</td></tr>
+        <tr><td style="color:#666;padding:6px 0;">Customer</td>
+            <td style="padding:6px 0;">${args.customerEmail}</td></tr>
+        <tr><td style="color:#666;padding:6px 0;">Amount disputed</td>
+            <td style="padding:6px 0;font-weight:700;">₦${args.amountNaira.toLocaleString()}</td></tr>
+        <tr><td style="color:#666;padding:6px 0;">Category</td>
+            <td style="padding:6px 0;">${args.category}</td></tr>
+        ${args.reason ? `<tr><td style="color:#666;padding:6px 0;">Reason</td><td style="padding:6px 0;">${args.reason}</td></tr>` : ""}
+        <tr><td style="color:#666;padding:6px 0;">Paystack Dispute ID</td>
+            <td style="padding:6px 0;font-family:monospace;">${args.paystackDisputeId}</td></tr>
+        <tr><td style="color:#dc2626;padding:6px 0;font-weight:600;">Deadline</td>
+            <td style="padding:6px 0;color:#dc2626;font-weight:700;">${due}</td></tr>
+      </table>
+
+      <div style="text-align:center;margin:24px 0 8px;">
+        <a href="${detailUrl}" style="display:inline-block;background:#dc2626;color:white;text-decoration:none;font-size:14px;font-weight:600;padding:12px 28px;border-radius:24px;">
+          Review in Admin
+        </a>
+        <br>
+        <a href="https://dashboard.paystack.com/#/disputes" style="display:inline-block;margin-top:10px;color:#666;text-decoration:underline;font-size:12px;">
+          Open Paystack Dashboard →
+        </a>
+      </div>
+
+      <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:14px 16px;margin-top:20px;">
+        <p style="font-size:11px;color:#7f1d1d;margin:0;line-height:1.6;">
+          <strong>Next step:</strong> Upload evidence (proof of delivery, customer comms, receipts) in the Paystack dashboard before the deadline. If you don't respond, the funds are automatically debited from your settlement.
+        </p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+
+  try {
+    await transporter.sendMail({
+      from: `"${SITE_NAME} Alerts" <${process.env.SMTP_EMAIL || SITE_EMAIL}>`,
+      to: SITE_EMAIL,
+      subject: `🚨 Chargeback opened — ₦${args.amountNaira.toLocaleString()} · ${args.orderId || args.reference}`,
+      html,
+    });
+  } catch (error) {
+    console.error("❌ Dispute alert email failed:", error);
+  }
+}
+
+// ── Resume Payment Email (sent by reconcile cron for abandoned/pending checkouts) ──
+export async function sendResumePaymentEmail(
+  order: Order,
+  resumeToken: string,
+  amountNaira: number,
+): Promise<void> {
+  if (!process.env.SMTP_PASSWORD) return;
+  const firstName = order.shippingAddress?.firstName || order.customerName.split(" ")[0];
+  const resumeUrl = `${SITE_URL.replace(/\/$/, "")}/checkout/resume?token=${encodeURIComponent(resumeToken)}`;
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f8f7fa;">
+  <div style="max-width:600px;margin:0 auto;padding:20px;">
+    <div style="background:#1A1A1A;border-bottom:4px solid #C0392B;border-radius:16px 16px 0 0;padding:32px;text-align:center;">
+      <h1 style="color:white;font-size:28px;letter-spacing:4px;margin:0;">${SITE_NAME}</h1>
+      <p style="color:#C8955A;margin-top:4px;font-size:12px;">Your order is waiting for you</p>
+    </div>
+    <div style="background:white;padding:32px;border:1px solid #f3f0f7;">
+      <p style="font-size:16px;color:#1a1a2e;margin:0 0 4px 0;">Hi ${firstName},</p>
+      <p style="font-size:14px;color:#666;margin:0 0 20px 0;line-height:1.55;">
+        We noticed your order <strong style="font-family:monospace;color:#1a1a2e;">${order.id}</strong> didn't complete payment. Your cuts are still reserved for you — finish checkout in one click below.
+      </p>
+
+      <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:16px;margin:20px 0;">
+        <p style="margin:0;font-size:13px;color:#92400e;font-weight:600;">Amount due: ₦${amountNaira.toLocaleString()}</p>
+        <p style="margin:6px 0 0 0;font-size:12px;color:#a16207;">Secure payment via Paystack — card, bank transfer, USSD, QR.</p>
+      </div>
+
+      <div style="text-align:center;margin:28px 0;">
+        <a href="${resumeUrl}" style="display:inline-block;background:#1A1A1A;border-bottom:4px solid #C0392B;color:white;text-decoration:none;font-size:14px;font-weight:600;padding:14px 32px;border-radius:25px;">
+          Complete Your Payment →
+        </a>
+      </div>
+
+      <p style="font-size:11px;color:#aaa;margin:16px 0 0 0;text-align:center;">
+        If you've already paid, just click the link — we'll detect it and confirm your order.
+      </p>
+    </div>
+    <div style="background:#f8f7fa;border-radius:0 0 16px 16px;padding:18px;text-align:center;border:1px solid #f3f0f7;border-top:none;">
+      <p style="font-size:11px;color:#aaa;margin:0;">
+        This link is unique to your order and will expire when payment is complete.
+      </p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+  try {
+    await transporter.sendMail({
+      from: `"${SITE_NAME}" <${process.env.SMTP_EMAIL || SITE_EMAIL}>`,
+      to: order.email,
+      subject: `Complete your ${SITE_NAME} order — ${order.id}`,
+      html,
+    });
+  } catch (error) {
+    console.error("❌ Resume payment email failed:", error);
   }
 }
 

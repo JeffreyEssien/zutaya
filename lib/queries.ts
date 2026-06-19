@@ -45,6 +45,8 @@ interface DbOrder {
     payment_method?: string;
     sender_name?: string;
     payment_status?: string;
+    paystack_reference?: string;
+    processing_fee?: number;
     delivery_zone?: string;
     delivery_type?: string;
     delivery_discount?: { percent: number; label: string | null };
@@ -103,6 +105,8 @@ function toOrder(row: DbOrder): Order {
         paymentMethod: (row.payment_method as Order["paymentMethod"]) || undefined,
         senderName: row.sender_name || undefined,
         paymentStatus: (row.payment_status as Order["paymentStatus"]) || undefined,
+        paystackReference: row.paystack_reference || undefined,
+        processingFee: row.processing_fee ? Number(row.processing_fee) : undefined,
         deliveryZone: row.delivery_zone || undefined,
         deliveryType: (row.delivery_type as Order["deliveryType"]) || undefined,
         deliveryDiscount: row.delivery_discount || undefined,
@@ -331,55 +335,27 @@ export async function getOrderById(id: string): Promise<Order | null> {
     return toOrder(data as DbOrder);
 }
 
+/**
+ * Atomic order creation. Stock deduction + order insert + coupon increment
+ * all run in a single Postgres transaction via `create_order_atomic` RPC
+ * (migration 025). If ANY step fails, the whole thing rolls back — no
+ * leaked stock, no orphan order rows. Per-product FOR UPDATE row locks
+ * also act as a natural queue: two orders for different products run in
+ * parallel; two for the same product wait microseconds.
+ */
 export async function createOrder(order: Order): Promise<void> {
-    const supabase = getSupabaseClient();
+    const supabase = getSupabaseServiceClient() ?? getSupabaseClient();
     if (!supabase) throw new Error("Database not available");
 
-    // Deduct stock atomically via RPC (prevents race conditions)
-    for (const item of order.items) {
-        if (item.variant) {
-            // Deduct from variant stock inside the products JSONB array
-            const { error: rpcError } = await supabase.rpc("deduct_variant_stock", {
-                p_product_id: item.product.id,
-                p_variant_name: item.variant.name,
-                p_quantity: item.quantity,
-            });
+    const items = order.items.map((item) => ({
+        product_id: item.product.id,
+        product_name: item.product.name,
+        quantity: item.quantity,
+        variant_name: item.variant?.name ?? null,
+        inventory_item_id: item.product.inventoryId ?? null,
+    }));
 
-            if (rpcError) {
-                throw new Error(rpcError.message || `Variant stock deduction failed for ${item.product.name} - ${item.variant.name}`);
-            }
-
-            // Log inventory change for the variant
-            const { error: logError } = await supabase.from("inventory_logs").insert({
-                product_id: item.product.id,
-                change_amount: -item.quantity,
-                reason: `order_variant_${item.variant.name}`
-            });
-            if (logError) console.warn("Inventory log failed (variant):", logError.message);
-
-        } else if (item.product.inventoryId) {
-            // Deduct from main inventory item stock (for non-variant products)
-            const { error: rpcError } = await supabase.rpc("deduct_stock", {
-                p_inventory_id: item.product.inventoryId,
-                p_quantity: item.quantity,
-            });
-
-            if (rpcError) {
-                throw new Error(rpcError.message || `Stock deduction failed for ${item.product.name}`);
-            }
-
-            // Log the inventory change (best-effort, ignore failures)
-            const { error: logError } = await supabase.from("inventory_logs").insert({
-                product_id: item.product.id,
-                change_amount: -item.quantity,
-                reason: 'order_main'
-            });
-            if (logError) console.warn("Inventory log failed:", logError.message);
-        }
-    }
-
-    // Insert Order with proper coupon columns (no JSON hack)
-    const insertData: any = {
+    const orderPayload = {
         id: order.id,
         customer_name: order.customerName,
         email: order.email,
@@ -390,50 +366,111 @@ export async function createOrder(order: Order): Promise<void> {
         total: order.total,
         status: order.status,
         shipping_address: order.shippingAddress,
-        notes: order.notes || null,
-        coupon_code: order.couponCode || null,
-        discount_total: order.discountTotal || 0,
-        created_at: new Date().toISOString()
+        notes: order.notes ?? null,
+        coupon_code: order.couponCode ?? null,
+        discount_total: order.discountTotal ?? 0,
+        payment_method: order.paymentMethod ?? null,
+        sender_name: order.senderName ?? null,
+        payment_status: order.paymentStatus ?? null,
+        paystack_reference: order.paystackReference ?? null,
+        processing_fee: order.processingFee ?? 0,
+        delivery_zone: order.deliveryZone ?? null,
+        delivery_type: order.deliveryType ?? null,
+        delivery_discount: order.deliveryDiscount ?? null,
+        delivery_fee: order.deliveryFee ?? 0,
+        packaging_fee: order.packagingFee ?? 0,
+        prep_fee: order.prepFee ?? 0,
+        prep_instructions: order.prepInstructions ?? null,
+        requested_delivery_date: order.requestedDeliveryDate ?? null,
+        requested_delivery_slot: order.requestedDeliverySlot ?? null,
+        subscription_id: order.subscriptionId ?? null,
+        created_at: new Date().toISOString(),
     };
 
-    // Add payment fields only if they have values (avoids errors if columns don't exist yet)
-    if (order.paymentMethod) insertData.payment_method = order.paymentMethod;
-    if (order.paymentStatus) insertData.payment_status = order.paymentStatus;
-    if (order.senderName) insertData.sender_name = order.senderName;
-    if (order.deliveryZone) insertData.delivery_zone = order.deliveryZone;
-    if (order.deliveryType) insertData.delivery_type = order.deliveryType;
-    if (order.deliveryDiscount) insertData.delivery_discount = order.deliveryDiscount;
-    if (order.deliveryFee != null) insertData.delivery_fee = order.deliveryFee;
-    if (order.packagingFee != null) insertData.packaging_fee = order.packagingFee;
-    if (order.prepFee != null) insertData.prep_fee = order.prepFee;
-    if (order.prepInstructions) insertData.prep_instructions = order.prepInstructions;
-    if (order.requestedDeliveryDate) insertData.requested_delivery_date = order.requestedDeliveryDate;
-    if (order.requestedDeliverySlot) insertData.requested_delivery_slot = order.requestedDeliverySlot;
-    if (order.subscriptionId) insertData.subscription_id = order.subscriptionId;
+    const { error } = await supabase.rpc("create_order_atomic", {
+        p_order: orderPayload,
+        p_items: items,
+    });
+    if (error) {
+        // Surface a clean message — strip Postgres prefix noise
+        throw new Error(error.message.replace(/^.*?:\s*/, ""));
+    }
+}
 
-    const { error } = await supabase.from("orders").insert(insertData);
+/**
+ * Atomically restore stock for every item in an order. Mirror of the
+ * create path — runs as a single transaction so partial restores can't
+ * happen. Best-effort: errors are returned, not thrown, so callers can
+ * still proceed with order-status cleanup.
+ */
+export async function restoreStockForOrderAtomic(order: Order): Promise<{ restored: number; error?: string }> {
+    const supabase = getSupabaseServiceClient() ?? getSupabaseClient();
+    if (!supabase) return { restored: 0, error: "Database not available" };
 
-    if (error) throw error;
+    const items = order.items.map((item) => ({
+        product_id: item.product.id,
+        quantity: item.quantity,
+        variant_name: item.variant?.name ?? null,
+        inventory_item_id: item.product.inventoryId ?? null,
+    }));
 
-    // Increment coupon usage count if applicable (best-effort, don't fail the order)
-    if (order.couponCode) {
+    const { data, error } = await supabase.rpc("restore_stock_for_order_atomic", { p_items: items });
+    if (error) return { restored: 0, error: error.message };
+    return { restored: (data as { restored?: number } | null)?.restored ?? 0 };
+}
+
+/**
+ * Restore stock for an order that was created but never paid for.
+ * Mirror of createOrder's deduction step. Best-effort per item — one
+ * bad item won't block the rest.
+ */
+export async function restoreStockForOrder(order: Order): Promise<{ restored: number; errors: string[] }> {
+    const supabase = getSupabaseServiceClient();
+    if (!supabase) return { restored: 0, errors: ["Database not available"] };
+
+    let restored = 0;
+    const errors: string[] = [];
+
+    for (const item of order.items) {
         try {
-            const { data: couponData } = await supabase
-                .from("coupons")
-                .select("usage_count")
-                .eq("code", order.couponCode.toUpperCase())
-                .single();
-            if (couponData) {
-                await supabase
-                    .from("coupons")
-                    .update({ usage_count: (couponData.usage_count || 0) + 1 })
-                    .eq("code", order.couponCode.toUpperCase());
+            if (item.variant) {
+                const { error } = await supabase.rpc("restore_variant_stock", {
+                    p_product_id: item.product.id,
+                    p_variant_name: item.variant.name,
+                    p_quantity: item.quantity,
+                });
+                if (error) {
+                    errors.push(`${item.product.name} [${item.variant.name}]: ${error.message}`);
+                    continue;
+                }
+                await supabase.from("inventory_logs").insert({
+                    product_id: item.product.id,
+                    change_amount: item.quantity,
+                    reason: `restore_variant_${item.variant.name}_payment_failed`,
+                });
+                restored++;
+            } else if (item.product.inventoryId) {
+                const { error } = await supabase.rpc("restore_stock", {
+                    p_inventory_id: item.product.inventoryId,
+                    p_quantity: item.quantity,
+                });
+                if (error) {
+                    errors.push(`${item.product.name}: ${error.message}`);
+                    continue;
+                }
+                await supabase.from("inventory_logs").insert({
+                    product_id: item.product.id,
+                    change_amount: item.quantity,
+                    reason: "restore_main_payment_failed",
+                });
+                restored++;
             }
-        } catch (e) {
-            console.warn("Coupon usage_count update failed:", e);
+        } catch (err) {
+            errors.push(`${item.product.name}: ${err instanceof Error ? err.message : String(err)}`);
         }
     }
 
+    return { restored, errors };
 }
 
 export async function updatePaymentInfo(

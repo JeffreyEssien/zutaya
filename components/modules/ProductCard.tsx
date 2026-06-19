@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import SafeImage from "@/components/ui/SafeImage";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { formatCurrency } from "@/lib/formatCurrency";
@@ -52,8 +52,8 @@ export default function ProductCard({ product }: ProductCardProps) {
                 <Link href={`/product/${product.slug}`} className="block">
                     {/* Image */}
                     <div className="relative aspect-[3/4] overflow-hidden bg-[#2a2a2a]">
-                        {product.images[0] ? (
-                            <Image
+                        {product.images?.[0] ? (
+                            <SafeImage
                                 src={product.images[0]}
                                 alt={product.name}
                                 fill
@@ -67,8 +67,8 @@ export default function ProductCard({ product }: ProductCardProps) {
                         )}
 
                         {/* Second image on hover */}
-                        {product.images[1] && (
-                            <Image
+                        {product.images?.[1] && (
+                            <SafeImage
                                 src={product.images[1]}
                                 alt={`${product.name} hover`}
                                 fill

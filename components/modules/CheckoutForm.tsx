@@ -3,7 +3,6 @@
 import Button from "@/components/ui/Button";
 import { useCartStore } from "@/lib/cartStore";
 import { useOrderStore } from "@/lib/orderStore";
-import { WHATSAPP_NUMBER } from "@/lib/constants";
 import {
     LAGOS_ZONES as HARDCODED_LAGOS_ZONES,
     LAGOS_TERMS,
@@ -16,16 +15,18 @@ import type { ShippingAddress, Order, SiteSettings } from "@/types";
 import { getSiteSettings } from "@/lib/queries";
 import DeliveryScheduler from "@/components/modules/DeliveryScheduler";
 import {
-    MessageCircle, Clock, Lock, Truck, Building2,
-    ChevronDown, Package, Tag, UtensilsCrossed, CalendarCheck,
+    Lock, Truck, Building2, ChevronDown, Package, Tag, UtensilsCrossed,
+    CalendarCheck, ShieldCheck, CreditCard,
 } from "lucide-react";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import Script from "next/script";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { toast } from "sonner";
 
 interface CheckoutFormProps {
-    onComplete: (orderInfo?: { orderId: string; total: number; paymentMethod: "whatsapp" | "bank_transfer" }) => void;
+    onComplete: (orderInfo: { orderId: string; total: number }) => void;
     onShippingChange: (fee: number) => void;
     onPackagingChange: (fee: number) => void;
+    onProcessingFeeChange?: (fee: number) => void;
 }
 
 const emptyAddress: ShippingAddress = {
@@ -42,20 +43,67 @@ function generateOrderId(): string {
     return `ZY-${y}${m}${d}-${seq}`;
 }
 
-export default function CheckoutForm({ onComplete, onShippingChange, onPackagingChange }: CheckoutFormProps) {
+/**
+ * Fee math — an EXACT mirror of lib/paystack.ts (`paystackFeeKobo` +
+ * `customerProcessingFeeKobo`). Must compute in KOBO, not naira, or rounding
+ * diverges from the server (ceil(naira*100*0.015) ≠ ceil(naira*0.015)*100) and
+ * the "You'll be charged" line disagrees with the real charge. Server value is
+ * always authoritative; this just keeps the preview honest.
+ */
+function paystackFeeKobo(grossKobo: number): number {
+    if (grossKobo <= 250_000) return 0; // ≤ ₦2500 waived
+    const raw = Math.ceil(grossKobo * 0.015) + 10_000; // 1.5% + ₦100
+    return Math.min(raw, 200_000); // cap at ₦2000
+}
+/** Returns the customer-borne processing fee in NAIRA (mirrors server kobo math). */
+function customerProcessingFee(baseNaira: number): number {
+    const baseKobo = Math.round(baseNaira * 100);
+    let customerKobo = 0;
+    for (let i = 0; i < 3; i++) {
+        customerKobo = Math.ceil(paystackFeeKobo(baseKobo + customerKobo) / 2);
+    }
+    return customerKobo / 100;
+}
+
+declare global {
+    interface Window {
+        PaystackPop?: new () => {
+            resumeTransaction: (
+                accessCode: string,
+                hooks?: {
+                    onSuccess?: (tx: { reference: string }) => void;
+                    onCancel?: () => void;
+                    onError?: (err: { message?: string }) => void;
+                },
+            ) => void;
+        };
+    }
+}
+
+export default function CheckoutForm({
+    onComplete,
+    onShippingChange,
+    onPackagingChange,
+    onProcessingFeeChange,
+}: CheckoutFormProps) {
     const [form, setForm] = useState<ShippingAddress>(emptyAddress);
     const [loading, setLoading] = useState(false);
-    const [queueStatus, setQueueStatus] = useState<"idle" | "queued" | "processing">("idle");
+    // Stash the in-flight order draft so the Paystack onSuccess closure can save
+    // it client-side. A ref (not a render-local `let`) so a re-render between
+    // submit and onSuccess can't drop it.
+    const orderDraftRef = useRef<Partial<Order>>({});
+    const [stage, setStage] = useState<"idle" | "creating" | "awaiting_payment">("idle");
     const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
     const { items, subtotal, clearCart, couponCode, discount, removeCoupon, bundleDiscountTotal } = useCartStore();
     const { addOrder } = useOrderStore();
 
-    // ── DB pricing state ──
     const [dbPricing, setDbPricing] = useState<DbPricingResult | null>(null);
-    const [pricingLoaded, setPricingLoaded] = useState(false);
-
-    // ── Packaging settings from admin ──
-    const [packagingConfig, setPackagingConfig] = useState({ fee: 500, label: "Premium Packaging", description: "Insulated gift-ready packaging with ice packs for extended freshness" });
+    const [_pricingLoaded, setPricingLoaded] = useState(false);
+    const [packagingConfig, setPackagingConfig] = useState({
+        fee: 500,
+        label: "Premium Packaging",
+        description: "Insulated gift-ready packaging with ice packs for extended freshness",
+    });
     const [settings, setSettings] = useState<SiteSettings | null>(null);
 
     useEffect(() => {
@@ -81,17 +129,13 @@ export default function CheckoutForm({ onComplete, onShippingChange, onPackaging
     const lagosAreaIndex = useMemo(() => {
         const map = new Map<string, LagosZoneInfo>();
         for (const zone of lagosZones) {
-            for (const area of zone.areas) {
-                map.set(area.toLowerCase(), zone);
-            }
+            for (const area of zone.areas) map.set(area.toLowerCase(), zone);
         }
         return map;
     }, [lagosZones]);
 
-    // ── Delivery state ──
     const [selectedLagosArea, setSelectedLagosArea] = useState("");
     const [deliveryFee, setDeliveryFee] = useState(0);
-    const [paymentMethod, setPaymentMethod] = useState<"whatsapp" | "manual">("whatsapp");
     const [prepInstructions, setPrepInstructions] = useState("");
     const [requestedDeliveryDate, setRequestedDeliveryDate] = useState("");
     const [requestedDeliverySlot, setRequestedDeliverySlot] = useState<"morning" | "afternoon" | "evening" | "">("");
@@ -99,7 +143,7 @@ export default function CheckoutForm({ onComplete, onShippingChange, onPackaging
 
     const currentLagosZone: LagosZoneInfo | null = useMemo(
         () => (selectedLagosArea ? lagosAreaIndex.get(selectedLagosArea.toLowerCase()) ?? null : null),
-        [selectedLagosArea, lagosAreaIndex]
+        [selectedLagosArea, lagosAreaIndex],
     );
 
     const activeDiscount = useMemo(() => {
@@ -107,7 +151,6 @@ export default function CheckoutForm({ onComplete, onShippingChange, onPackaging
         return dbPricing.discounts.get(currentLagosZone.label) ?? null;
     }, [dbPricing, currentLagosZone]);
 
-    // ── Fee computation ──
     const computeFee = useCallback((): number => {
         let rawFee = currentLagosZone?.fee ?? 0;
         if (activeDiscount && activeDiscount.percent > 0) {
@@ -124,7 +167,29 @@ export default function CheckoutForm({ onComplete, onShippingChange, onPackaging
 
     useEffect(() => {
         onPackagingChange(addPackaging ? packagingConfig.fee : 0);
-    }, [addPackaging, onPackagingChange]);
+    }, [addPackaging, onPackagingChange, packagingConfig.fee]);
+
+    // ── Compute base + processing fee for live cart display ──
+    const baseTotal = useMemo(() => {
+        const sub = subtotal();
+        const bundleDisc = bundleDiscountTotal();
+        const couponDisc = discount > 0 ? (sub - bundleDisc) * (discount / 100) : 0;
+        const totalDiscount = bundleDisc + couponDisc;
+        const packFee = addPackaging ? packagingConfig.fee : 0;
+        const prepFee = items.reduce((sum, item) => {
+            if (item.selectedPrepOptions && item.selectedPrepOptions.length > 0) {
+                return sum + item.selectedPrepOptions.reduce((s, o) => s + o.extraFee, 0) * item.quantity;
+            }
+            return sum;
+        }, 0);
+        return Math.max(0, sub - totalDiscount) + deliveryFee + packFee + prepFee;
+    }, [subtotal, bundleDiscountTotal, discount, addPackaging, packagingConfig.fee, items, deliveryFee]);
+
+    const processingFee = useMemo(() => customerProcessingFee(baseTotal), [baseTotal]);
+
+    useEffect(() => {
+        onProcessingFeeChange?.(processingFee);
+    }, [processingFee, onProcessingFeeChange]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -143,11 +208,44 @@ export default function CheckoutForm({ onComplete, onShippingChange, onPackaging
         return Object.keys(e).length === 0;
     };
 
-    // ── Submit ──
+    const openPaystackPopup = (accessCode: string, orderId: string, total: number) => {
+        if (!window.PaystackPop) {
+            toast.error("Payment SDK didn't load. Please refresh the page and try again.");
+            setLoading(false);
+            setStage("idle");
+            return;
+        }
+        const popup = new window.PaystackPop();
+        popup.resumeTransaction(accessCode, {
+            onSuccess: (tx) => {
+                addOrder({
+                    ...orderDraftRef.current,
+                    id: orderId,
+                    total,
+                } as Order);
+                clearCart();
+                removeCoupon();
+                window.location.href = `/checkout/verify?reference=${encodeURIComponent(tx.reference)}`;
+            },
+            onCancel: () => {
+                toast("Payment cancelled. Your order is reserved for 15 minutes — try again to complete it.");
+                setLoading(false);
+                setStage("idle");
+            },
+            onError: (err) => {
+                toast.error(`Payment error: ${err.message ?? "unknown"}`);
+                setLoading(false);
+                setStage("idle");
+            },
+        });
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (loading) return; // guard against double-submit (Enter key / rapid clicks)
         if (!validate()) return;
         setLoading(true);
+        setStage("creating");
 
         const sub = subtotal();
         const ship = deliveryFee;
@@ -155,24 +253,25 @@ export default function CheckoutForm({ onComplete, onShippingChange, onPackaging
         const bundleDisc = bundleDiscountTotal();
         const couponDisc = discount > 0 ? (sub - bundleDisc) * (discount / 100) : 0;
         const totalDiscount = bundleDisc + couponDisc;
-        const prepFee = items.reduce((sum, item) => {
-            if (item.selectedPrepOptions && item.selectedPrepOptions.length > 0) {
-                return sum + item.selectedPrepOptions.reduce((s, o) => s + o.extraFee, 0) * item.quantity;
+        const prepFee = items.reduce((s, item) => {
+            if (item.selectedPrepOptions?.length) {
+                return s + item.selectedPrepOptions.reduce((acc, o) => acc + o.extraFee, 0) * item.quantity;
             }
-            return sum;
+            return s;
         }, 0);
 
-        const locationDesc = `${selectedLagosArea}, Lagos (${currentLagosZone?.label})`;
+        const baseOrderTotal = Math.max(0, sub - totalDiscount) + ship + packFee + prepFee;
+        const orderId = generateOrderId();
 
         const order: Order = {
-            id: generateOrderId(),
+            id: orderId,
             customerName: `${form.firstName} ${form.lastName}`,
-            email: form.email,
+            email: form.email.trim().toLowerCase(),
             phone: form.phone,
             items: [...items],
             subtotal: sub,
             shipping: ship,
-            total: Math.max(0, sub - totalDiscount) + ship + packFee + prepFee,
+            total: baseOrderTotal, // server will add processing fee + persist new total
             status: "pending",
             createdAt: new Date().toISOString(),
             shippingAddress: {
@@ -183,11 +282,10 @@ export default function CheckoutForm({ onComplete, onShippingChange, onPackaging
             },
             couponCode: couponCode || undefined,
             discountTotal: totalDiscount > 0 ? totalDiscount : undefined,
-            paymentMethod: paymentMethod === "whatsapp" ? "whatsapp" : "bank_transfer",
-            paymentStatus: paymentMethod === "manual" ? "awaiting_payment" : undefined,
             deliveryZone: currentLagosZone?.label,
             deliveryType: "doorstep",
-            deliveryDiscount: activeDiscount && activeDiscount.percent > 0 ? activeDiscount : undefined,
+            deliveryDiscount:
+                activeDiscount && activeDiscount.percent > 0 ? activeDiscount : undefined,
             deliveryFee: ship,
             packagingFee: packFee > 0 ? packFee : undefined,
             prepFee: prepFee > 0 ? prepFee : undefined,
@@ -196,275 +294,244 @@ export default function CheckoutForm({ onComplete, onShippingChange, onPackaging
             requestedDeliverySlot: requestedDeliverySlot || undefined,
         };
 
-        try {
-            setQueueStatus("queued");
+        orderDraftRef.current = order;
 
-            const res = await fetch("/api/orders", {
+        try {
+            const res = await fetch("/api/paystack/initialize", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(order),
             });
-
-            setQueueStatus("processing");
             const data = await res.json();
 
             if (!res.ok || !data.success) {
-                console.error("Order failed:", data);
-                const errMsg = data.error || "Failed to place order. Please try again.";
-                if (errMsg.toLowerCase().includes("insufficient stock")) {
-                    toast.error("Out of Stock", { description: errMsg, duration: 6000 });
-                } else {
-                    toast.error(errMsg, { duration: 5000 });
-                }
+                const errMsg = data.error || "Failed to start checkout. Please try again.";
+                toast.error(errMsg.toLowerCase().includes("stock") ? "Out of Stock" : errMsg, {
+                    description: errMsg.toLowerCase().includes("stock") ? errMsg : undefined,
+                    duration: 6000,
+                });
                 setLoading(false);
-                setQueueStatus("idle");
+                setStage("idle");
                 return;
             }
 
-            addOrder(order);
-            clearCart();
-            removeCoupon();
-            setLoading(false);
-
-            if (paymentMethod === "whatsapp") {
-                const message = encodeURIComponent(
-                    `*New Order: ${order.id}*\n\n` +
-                    `*Customer:* ${order.customerName}\n` +
-                    `*Email:* ${order.email}\n` +
-                    `*Phone:* ${order.phone}\n\n` +
-                    `*Delivery To:* ${locationDesc}\n` +
-                    `*Address:* ${form.address}\n\n` +
-                    `*Items:*\n` +
-                    order.items.map(i => `  • ${i.quantity}x ${i.product.name} (${i.variant?.name || 'Default'})`).join('\n') +
-                    `\n\n*Subtotal:* ₦${sub.toLocaleString()}` +
-                    (totalDiscount > 0 ? `\n*Discount:* -₦${totalDiscount.toLocaleString()}${bundleDisc > 0 ? ' (incl. bundle)' : ''}` : '') +
-                    (packFee > 0 ? `\n*Packaging Fee:* ₦${packFee.toLocaleString()}` : '') +
-                    (prepFee > 0 ? `\n*Prep Fee:* ₦${prepFee.toLocaleString()}` : '') +
-                    `\n*Delivery Fee:* ₦${ship.toLocaleString()}` +
-                    (activeDiscount ? `\n*Delivery Discount:* ${activeDiscount.percent}% off${activeDiscount.label ? ` (${activeDiscount.label})` : ''}` : '') +
-                    `\n*Total:* ₦${order.total.toLocaleString()}` +
-                    (requestedDeliveryDate ? `\n\n*Preferred Delivery:* ${requestedDeliveryDate}${requestedDeliverySlot ? ` (${requestedDeliverySlot})` : ''}` : '') +
-                    (prepInstructions.trim() ? `\n*Prep Instructions:* ${prepInstructions.trim()}` : '') +
-                    `\n\nI would like to pay for this order.`
-                );
-                window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`;
-            } else {
-                onComplete({ orderId: order.id, total: order.total, paymentMethod: "bank_transfer" });
-            }
+            setStage("awaiting_payment");
+            openPaystackPopup(data.accessCode, data.orderId, data.totalCharged);
+            // Surface the final-final total in the parent so a Receipt could pick it up:
+            onComplete({ orderId: data.orderId, total: data.totalCharged });
         } catch (err) {
-            console.error("Order submission error:", err);
+            console.error("Checkout error:", err);
             toast.error("Something went wrong. Please check your connection and try again.");
             setLoading(false);
-            setQueueStatus("idle");
+            setStage("idle");
         }
     };
 
-    // ═══════════════════════════════════════════════════════════════
-    //  RENDER
-    // ═══════════════════════════════════════════════════════════════
-
-    if (queueStatus !== "idle" && loading) {
+    if (stage !== "idle" && loading) {
         return (
             <div className="flex flex-col items-center justify-center py-20 text-center">
                 <div className="relative mb-6">
                     <div className="w-16 h-16 rounded-full border-4 border-warm-cream/20 border-t-brand-red animate-spin" />
                     <div className="absolute inset-0 flex items-center justify-center">
-                        <Package size={20} className="text-brand-red" />
+                        {stage === "creating" ? (
+                            <Package size={20} className="text-brand-red" />
+                        ) : (
+                            <CreditCard size={20} className="text-brand-red" />
+                        )}
                     </div>
                 </div>
                 <h2 className="font-serif text-xl text-warm-cream mb-2">
-                    {queueStatus === "queued" ? "You're in the Queue" : "Processing Your Order"}
+                    {stage === "creating" ? "Reserving Your Order" : "Opening Secure Checkout"}
                 </h2>
                 <p className="text-sm text-warm-cream/50 max-w-xs leading-relaxed">
-                    {queueStatus === "queued"
-                        ? "We're preparing to process your order. Please hold tight — this only takes a moment."
-                        : "Confirming stock and finalising your order. Almost there..."}
+                    {stage === "creating"
+                        ? "Confirming stock and locking in your selection — almost there."
+                        : "Paystack is loading. Don't close this tab — the secure payment window will appear in a moment."}
                 </p>
-                <div className="flex items-center gap-3 mt-6">
-                    <span className={`w-2.5 h-2.5 rounded-full ${queueStatus === "queued" ? "bg-amber-400 animate-pulse" : "bg-green-500"}`} />
-                    <span className="text-xs text-warm-cream/40 uppercase tracking-wider font-medium">
-                        {queueStatus === "queued" ? "Queued" : "Processing"}
-                    </span>
-                </div>
             </div>
         );
     }
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-8">
-            {/* ── Step 1: Contact ── */}
-            <div>
-                <SectionTitle step={1}>Contact Information</SectionTitle>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-5">
-                    <FloatingField label="First Name" name="firstName" value={form.firstName} error={errors.firstName} onChange={handleChange} />
-                    <FloatingField label="Last Name" name="lastName" value={form.lastName} error={errors.lastName} onChange={handleChange} />
+        <>
+            <Script src="https://js.paystack.co/v2/inline.js" strategy="afterInteractive" />
+
+            <form onSubmit={handleSubmit} className="space-y-8">
+                {/* Step 1: Contact */}
+                <div>
+                    <SectionTitle step={1}>Contact Information</SectionTitle>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-5">
+                        <FloatingField label="First Name" name="firstName" value={form.firstName} error={errors.firstName} onChange={handleChange} />
+                        <FloatingField label="Last Name" name="lastName" value={form.lastName} error={errors.lastName} onChange={handleChange} />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                        <FloatingField label="Email" name="email" type="email" value={form.email} error={errors.email} onChange={handleChange} />
+                        <FloatingField label="Phone" name="phone" type="tel" value={form.phone} error={errors.phone} onChange={handleChange} />
+                    </div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-                    <FloatingField label="Email" name="email" type="email" value={form.email} error={errors.email} onChange={handleChange} />
-                    <FloatingField label="Phone" name="phone" type="tel" value={form.phone} error={errors.phone} onChange={handleChange} />
-                </div>
-            </div>
 
-            {/* ── Step 2: Delivery ── */}
-            <div>
-                <SectionTitle step={2}>Delivery Details (Lagos Only)</SectionTitle>
-                <div className="mt-5 space-y-4">
-                    <FloatingField label="Street Address" name="address" value={form.address} error={errors.address} onChange={handleChange} />
-
-                    {/* Lagos Area Selector */}
-                    <SelectField
-                        icon={<Building2 size={16} />}
-                        value={selectedLagosArea}
-                        placeholder="Select your area in Lagos"
-                        error={errors.lagosArea}
-                        onChange={(val) => {
-                            setSelectedLagosArea(val);
-                            setErrors((prev) => ({ ...prev, lagosArea: undefined }));
-                        }}
-                    >
-                        {lagosZones.map((zone) => (
-                            <optgroup key={zone.key} label={`${zone.label} — ₦${zone.fee.toLocaleString()}`}>
-                                {zone.areas.map((area) => (
-                                    <option key={area} value={area}>{area}</option>
-                                ))}
-                            </optgroup>
-                        ))}
-                    </SelectField>
-
-                    {/* Lagos zone result */}
-                    {currentLagosZone && (
-                        <DeliveryResultCard
-                            icon={<Truck size={16} />}
-                            title={currentLagosZone.label}
-                            fee={deliveryFee}
-                            originalFee={activeDiscount ? currentLagosZone.fee : undefined}
-                            discount={activeDiscount}
+                {/* Step 2: Delivery */}
+                <div>
+                    <SectionTitle step={2}>Delivery Details (Lagos Only)</SectionTitle>
+                    <div className="mt-5 space-y-4">
+                        <FloatingField label="Street Address" name="address" value={form.address} error={errors.address} onChange={handleChange} />
+                        <SelectField
+                            icon={<Building2 size={16} />}
+                            value={selectedLagosArea}
+                            placeholder="Select your area in Lagos"
+                            error={errors.lagosArea}
+                            onChange={(val) => {
+                                setSelectedLagosArea(val);
+                                setErrors((prev) => ({ ...prev, lagosArea: undefined }));
+                            }}
                         >
-                            <ul className="space-y-1.5">
-                                {LAGOS_TERMS.map((term, i) => (
-                                    <li key={i} className="flex items-start gap-2 text-[11px] text-warm-cream/45 leading-relaxed">
-                                        <span className="mt-1 w-1 h-1 rounded-full bg-warm-cream/20 shrink-0" />
-                                        {term}
-                                    </li>
-                                ))}
-                            </ul>
-                        </DeliveryResultCard>
-                    )}
-                </div>
-            </div>
+                            {lagosZones.map((zone) => (
+                                <optgroup key={zone.key} label={`${zone.label} — ₦${zone.fee.toLocaleString()}`}>
+                                    {zone.areas.map((area) => (
+                                        <option key={area} value={area}>{area}</option>
+                                    ))}
+                                </optgroup>
+                            ))}
+                        </SelectField>
 
-            {/* ── Step 3: Delivery Schedule ── */}
-            <div>
-                <SectionTitle step={3}>Preferred Delivery Date</SectionTitle>
-                <div className="mt-5">
-                    <DeliveryScheduler
-                        onSelect={(date, slot) => {
-                            setRequestedDeliveryDate(date);
-                            setRequestedDeliverySlot(slot);
-                        }}
-                        selectedDate={requestedDeliveryDate}
-                        selectedSlot={requestedDeliverySlot || undefined}
-                        cutoffHour={settings?.deliveryCutoffHour ?? 12}
-                        cutoffLabel={settings?.deliveryCutoffLabel}
-                    />
-                    {!requestedDeliveryDate && (
-                        <p className="text-[11px] text-warm-cream/35 mt-3 flex items-center gap-1.5">
-                            <CalendarCheck size={12} />
-                            Optional — select a preferred date and time slot for delivery
-                        </p>
-                    )}
+                        {currentLagosZone && (
+                            <DeliveryResultCard
+                                icon={<Truck size={16} />}
+                                title={currentLagosZone.label}
+                                fee={deliveryFee}
+                                originalFee={activeDiscount ? currentLagosZone.fee : undefined}
+                                discount={activeDiscount}
+                            >
+                                <ul className="space-y-1.5">
+                                    {LAGOS_TERMS.map((term, i) => (
+                                        <li key={i} className="flex items-start gap-2 text-[11px] text-warm-cream/45 leading-relaxed">
+                                            <span className="mt-1 w-1 h-1 rounded-full bg-warm-cream/20 shrink-0" />
+                                            {term}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </DeliveryResultCard>
+                        )}
+                    </div>
                 </div>
-            </div>
 
-            {/* ── Step 4: Prep & Packaging ── */}
-            <div>
-                <SectionTitle step={4}>Preparation Preferences</SectionTitle>
-                <div className="mt-5 space-y-4">
-                    {/* Prep Instructions */}
-                    <div className="relative">
-                        <textarea
-                            value={prepInstructions}
-                            onChange={(e) => setPrepInstructions(e.target.value)}
-                            placeholder="Any special preparation instructions? e.g. 'Debone the chicken', 'Cut into thin strips', 'Season with suya spice'..."
-                            rows={3}
-                            maxLength={500}
-                            className="w-full border border-warm-cream/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green/40 transition-all bg-[#222] placeholder:text-warm-cream/25 resize-none"
+                {/* Step 3: Schedule */}
+                <div>
+                    <SectionTitle step={3}>Preferred Delivery Date</SectionTitle>
+                    <div className="mt-5">
+                        <DeliveryScheduler
+                            onSelect={(date, slot) => {
+                                setRequestedDeliveryDate(date);
+                                setRequestedDeliverySlot(slot);
+                            }}
+                            selectedDate={requestedDeliveryDate}
+                            selectedSlot={requestedDeliverySlot || undefined}
+                            cutoffHour={settings?.deliveryCutoffHour ?? 12}
+                            cutoffLabel={settings?.deliveryCutoffLabel}
                         />
-                        <div className="flex items-center justify-between mt-1.5 px-1">
-                            <div className="flex items-center gap-1.5 text-warm-cream/30">
-                                <UtensilsCrossed size={11} />
-                                <span className="text-[10px]">Optional</span>
+                        {!requestedDeliveryDate && (
+                            <p className="text-[11px] text-warm-cream/35 mt-3 flex items-center gap-1.5">
+                                <CalendarCheck size={12} />
+                                Optional — select a preferred date and time slot for delivery
+                            </p>
+                        )}
+                    </div>
+                </div>
+
+                {/* Step 4: Prep & Packaging */}
+                <div>
+                    <SectionTitle step={4}>Preparation Preferences</SectionTitle>
+                    <div className="mt-5 space-y-4">
+                        <div className="relative">
+                            <textarea
+                                value={prepInstructions}
+                                onChange={(e) => setPrepInstructions(e.target.value)}
+                                placeholder="Any special preparation instructions? e.g. 'Debone the chicken', 'Cut into thin strips', 'Season with suya spice'..."
+                                rows={3}
+                                maxLength={500}
+                                className="w-full border border-warm-cream/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green/40 transition-all bg-[#222] placeholder:text-warm-cream/25 resize-none"
+                            />
+                            <div className="flex items-center justify-between mt-1.5 px-1">
+                                <div className="flex items-center gap-1.5 text-warm-cream/30">
+                                    <UtensilsCrossed size={11} />
+                                    <span className="text-[10px]">Optional</span>
+                                </div>
+                                <span className="text-[10px] text-warm-cream/25">{prepInstructions.length}/500</span>
                             </div>
-                            <span className="text-[10px] text-warm-cream/25">{prepInstructions.length}/500</span>
+                        </div>
+
+                        <label className={`flex items-start gap-4 p-4 border rounded-xl cursor-pointer transition-all duration-300 ${addPackaging ? "border-brand-green bg-brand-green/[0.04] shadow-sm shadow-brand-green/5" : "border-warm-cream/8 hover:border-brand-green/30"}`}>
+                            <input
+                                type="checkbox"
+                                checked={addPackaging}
+                                onChange={(e) => setAddPackaging(e.target.checked)}
+                                className="mt-1 accent-brand-green"
+                            />
+                            <div className="flex-1">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <Package size={16} className="text-brand-green" />
+                                        <span className="font-medium text-warm-cream text-sm">{packagingConfig.label}</span>
+                                    </div>
+                                    <span className="text-sm font-semibold text-warm-cream">₦{packagingConfig.fee.toLocaleString()}</span>
+                                </div>
+                                <span className="block text-xs text-warm-cream/45 mt-1">{packagingConfig.description}</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                {/* Step 5: Payment summary (replaces method picker) */}
+                <div>
+                    <SectionTitle step={5}>Secure Payment</SectionTitle>
+                    <div className="mt-5 rounded-xl border border-brand-green/20 bg-brand-green/[0.04] p-5 space-y-3">
+                        <div className="flex items-center gap-3">
+                            <span className="w-10 h-10 rounded-full bg-brand-green/10 flex items-center justify-center">
+                                <ShieldCheck size={18} className="text-brand-green" />
+                            </span>
+                            <div>
+                                <p className="text-sm font-medium text-warm-cream">Pay with Paystack</p>
+                                <p className="text-[11px] text-warm-cream/50">
+                                    Card, Bank Transfer, USSD, QR — all secured by Paystack.
+                                </p>
+                            </div>
+                        </div>
+                        <div className="text-[11px] text-warm-cream/50 border-t border-warm-cream/10 pt-3 space-y-1">
+                            <div className="flex justify-between">
+                                <span>Order total</span>
+                                <span className="text-warm-cream">₦{baseTotal.toLocaleString()}</span>
+                            </div>
+                            {processingFee > 0 && (
+                                <div className="flex justify-between">
+                                    <span>Processing fee</span>
+                                    <span className="text-warm-cream">₦{processingFee.toLocaleString()}</span>
+                                </div>
+                            )}
+                            <div className="flex justify-between font-semibold pt-1 border-t border-warm-cream/10 mt-2">
+                                <span className="text-warm-cream">You'll be charged</span>
+                                <span className="text-brand-green">₦{(baseTotal + processingFee).toLocaleString()}</span>
+                            </div>
                         </div>
                     </div>
-
-                    {/* Packaging Fee */}
-                    <label className={`flex items-start gap-4 p-4 border rounded-xl cursor-pointer transition-all duration-300 ${addPackaging ? "border-brand-green bg-brand-green/[0.04] shadow-sm shadow-brand-green/5" : "border-warm-cream/8 hover:border-brand-green/30"}`}>
-                        <input
-                            type="checkbox"
-                            checked={addPackaging}
-                            onChange={(e) => setAddPackaging(e.target.checked)}
-                            className="mt-1 accent-brand-green"
-                        />
-                        <div className="flex-1">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <Package size={16} className="text-brand-green" />
-                                    <span className="font-medium text-warm-cream text-sm">{packagingConfig.label}</span>
-                                </div>
-                                <span className="text-sm font-semibold text-warm-cream">₦{packagingConfig.fee.toLocaleString()}</span>
-                            </div>
-                            <span className="block text-xs text-warm-cream/45 mt-1">{packagingConfig.description}</span>
-                        </div>
-                    </label>
                 </div>
-            </div>
 
-            {/* ── Step 5: Payment ── */}
-            <div>
-                <SectionTitle step={5}>Payment Method</SectionTitle>
-                <div className="space-y-3 mt-5">
-                    <label className={`flex items-start gap-4 p-4 border rounded-xl cursor-pointer transition-all duration-300 ${paymentMethod === 'whatsapp' ? 'border-brand-green bg-brand-green/[0.04] shadow-sm shadow-brand-green/5' : 'border-warm-cream/8 hover:border-brand-green/30'}`}>
-                        <input type="radio" name="payment" value="whatsapp" checked={paymentMethod === 'whatsapp'} onChange={() => setPaymentMethod('whatsapp')} className="mt-1 accent-brand-green" />
-                        <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                                <MessageCircle size={16} className="text-brand-green" />
-                                <span className="font-medium text-warm-cream text-sm">Pay on WhatsApp</span>
-                            </div>
-                            <span className="block text-xs text-warm-cream/45 mt-1">Chat with us to complete your payment. Fast & secure.</span>
-                        </div>
-                    </label>
-
-                    <label className={`flex items-start gap-4 p-4 border rounded-xl cursor-pointer transition-all duration-300 ${paymentMethod === 'manual' ? 'border-brand-green bg-brand-green/[0.04] shadow-sm shadow-brand-green/5' : 'border-warm-cream/8 hover:border-brand-green/30'}`}>
-                        <input type="radio" name="payment" value="manual" checked={paymentMethod === 'manual'} onChange={() => setPaymentMethod('manual')} className="mt-1 accent-brand-green" />
-                        <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                                <Clock size={16} className="text-brand-green" />
-                                <span className="font-medium text-warm-cream text-sm">Wait for Admin Confirmation</span>
-                            </div>
-                            <span className="block text-xs text-warm-cream/45 mt-1">Place order now and wait for an admin to contact you for payment.</span>
-                        </div>
-                    </label>
+                <div className="flex items-center gap-2 text-[10px] text-warm-cream/30">
+                    <Lock size={10} />
+                    <span>Your information is encrypted and processed by Paystack — we never see your card details.</span>
                 </div>
-            </div>
 
-            {/* Security notice */}
-            <div className="flex items-center gap-2 text-[10px] text-warm-cream/30">
-                <Lock size={10} />
-                <span>Your information is protected and secure</span>
-            </div>
-
-            <Button type="submit" size="lg" className="w-full" loading={loading}>
-                {paymentMethod === 'whatsapp' ? "Place Order & Chat on WhatsApp" : "Place Order"}
-            </Button>
-        </form>
+                <Button type="submit" size="lg" className="w-full" loading={loading}>
+                    <span className="flex items-center justify-center gap-2">
+                        <CreditCard size={16} />
+                        Pay ₦{(baseTotal + processingFee).toLocaleString()} Securely
+                    </span>
+                </Button>
+            </form>
+        </>
     );
 }
 
-// ═══════════════════════════════════════════════════════════════════
-//  SUB-COMPONENTS
-// ═══════════════════════════════════════════════════════════════════
+// ───── subcomponents ─────
 
 function SectionTitle({ children, step }: { children: React.ReactNode; step: number }) {
     return (
