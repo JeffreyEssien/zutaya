@@ -1,4 +1,5 @@
-import { Order, Product, Profile, Coupon, InventoryLog, InventoryItem } from "@/types";
+import { Order, Product, Profile, Coupon, InventoryLog, InventoryItem, Subscription } from "@/types";
+import type { PaymentRow } from "@/lib/payments";
 
 export interface AnalyticsData {
     sales: {
@@ -81,6 +82,36 @@ export interface AnalyticsData {
         deliveryZoneBreakdown: { zone: string; orders: number; revenue: number }[];
         grossMarginTrend: { date: string; margin: number }[];
     };
+    // ⭐ Deep insights (2026-06-19) — derived from existing-but-unanalyzed data
+    retention: {
+        segments: { segment: string; customers: number; revenue: number; avgOrders: number }[];
+        repeatRevenueShare: number;       // % of revenue from customers with >1 order
+        medianDaysBetweenOrders: number;  // reorder cadence
+    };
+    basket: { pair: string; count: number; confidence: number }[];
+    paymentHealth: {
+        totalAttempts: number;
+        paidCount: number;
+        successRate: number;
+        abandonmentRate: number;
+        failedCount: number;
+        pendingCount: number;
+        avgMinutesToPay: number;
+        feesPctOfRevenue: number;
+        totalFees: number;
+        refundRate: number;
+        refundedAmount: number;
+    } | null;
+    subscriptions: {
+        activeCount: number;
+        pausedCount: number;
+        cancelledCount: number;
+        mrr: number;
+        arr: number;
+        avgSubValue: number;
+        churnRate: number;
+        byFrequency: { frequency: string; count: number; mrr: number }[];
+    } | null;
 }
 
 export function calculateAnalytics(
@@ -89,7 +120,9 @@ export function calculateAnalytics(
     customers: Profile[],
     coupons: Coupon[],
     inventoryLogs: InventoryLog[],
-    inventoryItems: InventoryItem[]
+    inventoryItems: InventoryItem[],
+    subscriptions: Subscription[] = [],
+    payments: PaymentRow[] = []
 ): AnalyticsData {
     const now = new Date();
     const oneDay = 24 * 60 * 60 * 1000;
@@ -489,6 +522,193 @@ export function calculateAnalytics(
             deliveryZoneBreakdown,
             grossMarginTrend,
         },
+        retention: computeRetention(orders),
+        basket: computeBasket(orders),
+        paymentHealth: computePaymentHealth(payments),
+        subscriptions: computeSubscriptionMetrics(subscriptions),
+    };
+}
+
+// ============================================================
+//  ⭐ Deep insight helpers
+// ============================================================
+
+/** RFM-style customer segmentation from order history (Recency / Frequency / Monetary). */
+function computeRetention(orders: Order[]): AnalyticsData["retention"] {
+    const now = Date.now();
+    const day = 86_400_000;
+    const byEmail = new Map<string, { count: number; revenue: number; last: number; dates: number[] }>();
+
+    orders.forEach((o) => {
+        const email = (o.email || "").toLowerCase();
+        if (!email) return;
+        const t = new Date(o.createdAt).getTime();
+        const cur = byEmail.get(email) || { count: 0, revenue: 0, last: 0, dates: [] };
+        cur.count += 1;
+        cur.revenue += o.total;
+        cur.last = Math.max(cur.last, t);
+        cur.dates.push(t);
+        byEmail.set(email, cur);
+    });
+
+    const segMap = new Map<string, { customers: number; revenue: number; orders: number }>();
+    const bump = (seg: string, revenue: number, ordersN: number) => {
+        const c = segMap.get(seg) || { customers: 0, revenue: 0, orders: 0 };
+        c.customers += 1;
+        c.revenue += revenue;
+        c.orders += ordersN;
+        segMap.set(seg, c);
+    };
+
+    let repeatRevenue = 0;
+    let totalRev = 0;
+    const gaps: number[] = [];
+
+    byEmail.forEach((c) => {
+        totalRev += c.revenue;
+        if (c.count > 1) repeatRevenue += c.revenue;
+
+        const sorted = [...c.dates].sort((a, b) => a - b);
+        for (let i = 1; i < sorted.length; i++) gaps.push((sorted[i] - sorted[i - 1]) / day);
+
+        const recencyDays = (now - c.last) / day;
+        let seg: string;
+        if (recencyDays > 90) seg = c.count > 1 ? "Lost" : "One-time (cold)";
+        else if (c.count >= 4 && recencyDays <= 30) seg = "Champions";
+        else if (c.count >= 2 && recencyDays <= 45) seg = "Loyal";
+        else if (c.count >= 2) seg = "At-risk";
+        else seg = "New";
+        bump(seg, c.revenue, c.count);
+    });
+
+    const SEG_ORDER = ["Champions", "Loyal", "New", "At-risk", "Lost", "One-time (cold)"];
+    const segments = Array.from(segMap.entries())
+        .map(([segment, d]) => ({
+            segment,
+            customers: d.customers,
+            revenue: d.revenue,
+            avgOrders: d.customers > 0 ? d.orders / d.customers : 0,
+        }))
+        .sort((a, b) => SEG_ORDER.indexOf(a.segment) - SEG_ORDER.indexOf(b.segment));
+
+    gaps.sort((a, b) => a - b);
+    const medianDaysBetweenOrders = gaps.length ? Math.round(gaps[Math.floor(gaps.length / 2)]) : 0;
+
+    return {
+        segments,
+        repeatRevenueShare: totalRev > 0 ? (repeatRevenue / totalRev) * 100 : 0,
+        medianDaysBetweenOrders,
+    };
+}
+
+/** Market-basket affinity: which product pairs are bought together most often. */
+function computeBasket(orders: Order[]): AnalyticsData["basket"] {
+    const pairCount = new Map<string, number>();
+    const itemCount = new Map<string, number>();
+    const nameById = new Map<string, string>();
+
+    orders.forEach((o) => {
+        const ids = Array.from(new Set(o.items.map((i) => i.product.id)));
+        o.items.forEach((i) => nameById.set(i.product.id, i.product.name));
+        ids.forEach((id) => itemCount.set(id, (itemCount.get(id) || 0) + 1));
+        for (let a = 0; a < ids.length; a++) {
+            for (let b = a + 1; b < ids.length; b++) {
+                const key = [ids[a], ids[b]].sort().join("|");
+                pairCount.set(key, (pairCount.get(key) || 0) + 1);
+            }
+        }
+    });
+
+    return Array.from(pairCount.entries())
+        .map(([key, count]) => {
+            const [a, b] = key.split("|");
+            const minItem = Math.min(itemCount.get(a) || 1, itemCount.get(b) || 1);
+            return {
+                pair: `${nameById.get(a) || "?"}  +  ${nameById.get(b) || "?"}`,
+                count,
+                confidence: minItem > 0 ? (count / minItem) * 100 : 0,
+            };
+        })
+        .filter((p) => p.count >= 2)
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 8);
+}
+
+/** Payment funnel health from the payments ledger (amounts in kobo → naira). */
+function computePaymentHealth(payments: PaymentRow[]): AnalyticsData["paymentHealth"] {
+    if (!payments || payments.length === 0) return null;
+
+    const total = payments.length;
+    const paid = payments.filter((p) => p.status === "paid" || p.status === "refunded" || p.status === "partially_refunded");
+    const paidCount = paid.length;
+    const failedCount = payments.filter((p) => p.status === "failed").length;
+    const abandonedCount = payments.filter((p) => p.status === "abandoned").length;
+    const pendingCount = payments.filter((p) => p.status === "pending").length;
+    const refunded = payments.filter((p) => p.status === "refunded" || p.status === "partially_refunded");
+
+    let sumMin = 0;
+    let n = 0;
+    paid.forEach((p) => {
+        if (p.paid_at && p.created_at) {
+            const dt = (new Date(p.paid_at).getTime() - new Date(p.created_at).getTime()) / 60_000;
+            if (dt >= 0 && dt < 60 * 24) {
+                sumMin += dt;
+                n++;
+            }
+        }
+    });
+
+    const grossKobo = paid.reduce((s, p) => s + (p.total_charged_kobo || 0), 0);
+    const feesKobo = paid.reduce((s, p) => s + (p.paystack_fees_kobo || 0), 0);
+    const refundedKobo = payments.reduce((s, p) => s + (p.refunded_amount_kobo || 0), 0);
+
+    return {
+        totalAttempts: total,
+        paidCount,
+        successRate: total > 0 ? (paidCount / total) * 100 : 0,
+        abandonmentRate: total > 0 ? (abandonedCount / total) * 100 : 0,
+        failedCount: failedCount + abandonedCount,
+        pendingCount,
+        avgMinutesToPay: n > 0 ? sumMin / n : 0,
+        feesPctOfRevenue: grossKobo > 0 ? (feesKobo / grossKobo) * 100 : 0,
+        totalFees: feesKobo / 100,
+        refundRate: paidCount > 0 ? (refunded.length / paidCount) * 100 : 0,
+        refundedAmount: refundedKobo / 100,
+    };
+}
+
+/** Recurring-revenue metrics from subscriptions, normalised to a monthly basis. */
+function computeSubscriptionMetrics(subs: Subscription[]): AnalyticsData["subscriptions"] {
+    if (!subs || subs.length === 0) return null;
+
+    const monthlyValue = (s: Subscription) => {
+        const per = s.items.reduce((sum, it) => sum + it.price * it.quantity, 0);
+        const mult = s.frequency === "weekly" ? 52 / 12 : s.frequency === "biweekly" ? 26 / 12 : 1;
+        return per * mult;
+    };
+
+    const active = subs.filter((s) => s.status === "active");
+    const paused = subs.filter((s) => s.status === "paused");
+    const cancelled = subs.filter((s) => s.status === "cancelled");
+    const mrr = active.reduce((s, sub) => s + monthlyValue(sub), 0);
+
+    const freqMap = new Map<string, { count: number; mrr: number }>();
+    active.forEach((s) => {
+        const c = freqMap.get(s.frequency) || { count: 0, mrr: 0 };
+        c.count += 1;
+        c.mrr += monthlyValue(s);
+        freqMap.set(s.frequency, c);
+    });
+
+    return {
+        activeCount: active.length,
+        pausedCount: paused.length,
+        cancelledCount: cancelled.length,
+        mrr,
+        arr: mrr * 12,
+        avgSubValue: active.length > 0 ? mrr / active.length : 0,
+        churnRate: subs.length > 0 ? (cancelled.length / subs.length) * 100 : 0,
+        byFrequency: Array.from(freqMap.entries()).map(([frequency, d]) => ({ frequency, count: d.count, mrr: d.mrr })),
     };
 }
 

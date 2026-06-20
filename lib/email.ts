@@ -267,17 +267,12 @@ function buildReceiptHtml(order: Order): string {
     <div style="background:#fff;padding:0 24px 28px;border-left:1px solid #ece6dc;border-right:1px solid #ece6dc;">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #ece6dc;padding-top:20px;">
         <tr>
-          <td align="center" style="width:33%;padding:14px 6px;vertical-align:top;">
+          <td align="center" style="width:50%;padding:14px 6px;vertical-align:top;">
             <div style="font-size:22px;line-height:1;margin-bottom:6px;">❄️</div>
             <p style="font-size:11px;color:#555;font-weight:600;margin:0 0 2px 0;">Cold-Chain Sealed</p>
             <p style="font-size:10px;color:#999;margin:0;line-height:1.4;">From butcher to door, never broken.</p>
           </td>
-          <td align="center" style="width:33%;padding:14px 6px;vertical-align:top;">
-            <div style="font-size:22px;line-height:1;margin-bottom:6px;">🌿</div>
-            <p style="font-size:11px;color:#555;font-weight:600;margin:0 0 2px 0;">Halal Certified</p>
-            <p style="font-size:10px;color:#999;margin:0;line-height:1.4;">Ethically sourced, master-butchered.</p>
-          </td>
-          <td align="center" style="width:33%;padding:14px 6px;vertical-align:top;">
+          <td align="center" style="width:50%;padding:14px 6px;vertical-align:top;">
             <div style="font-size:22px;line-height:1;margin-bottom:6px;">⏱️</div>
             <p style="font-size:11px;color:#555;font-weight:600;margin:0 0 2px 0;">Lagos On-Time</p>
             <p style="font-size:10px;color:#999;margin:0;line-height:1.4;">Scheduled deliveries, every time.</p>

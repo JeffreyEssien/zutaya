@@ -332,6 +332,20 @@ export async function getPaymentByReference(reference: string): Promise<PaymentR
     return (data as PaymentRow | null) ?? null;
 }
 
+/** Recent payments for analytics/dashboard (capped). Service-role; amounts in kobo. */
+export async function getPaymentsForAnalytics(sinceDays = 90, limit = 5000): Promise<PaymentRow[]> {
+    const supabase = getSupabaseServiceClient();
+    if (!supabase) return [];
+    const since = new Date(Date.now() - sinceDays * 24 * 60 * 60 * 1000).toISOString();
+    const { data } = await supabase
+        .from("payments")
+        .select("*")
+        .gte("created_at", since)
+        .order("created_at", { ascending: false })
+        .limit(limit);
+    return (data as PaymentRow[]) ?? [];
+}
+
 export async function getPaymentsForOrder(orderId: string): Promise<PaymentRow[]> {
     const supabase = getSupabaseServiceClient();
     if (!supabase) return [];

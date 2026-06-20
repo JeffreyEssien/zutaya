@@ -1,34 +1,42 @@
 import {
-    getProducts,
     getOrders,
     getCustomers,
-    getCoupons,
-    getInventoryLogs,
-    getInventoryItems
+    getInventoryItems,
+    getProducts,
 } from "@/lib/queries";
 import { getServicesDashboardData } from "@/lib/servicesQueries";
-import { calculateAnalytics } from "@/lib/analytics";
-import AnalyticsDashboard from "@/components/modules/AnalyticsDashboard";
+import { getPaymentsForAnalytics, listDisputes } from "@/lib/payments";
+import { calculateDashboard } from "@/lib/dashboard";
+import DashboardHome from "@/components/modules/DashboardHome";
 import ServicesDashboardCards from "@/components/modules/ServicesDashboardCards";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboard() {
     try {
-        const [products, orders, customers, coupons, inventoryLogs, inventoryItems, services] = await Promise.all([
-            getProducts().catch(() => []),
+        const [orders, customers, inventoryItems, products, services, payments, disputesRes] = await Promise.all([
             getOrders().catch(() => []),
             getCustomers().catch(() => []),
-            getCoupons().catch(() => []),
-            getInventoryLogs().catch(() => []),
             getInventoryItems().catch(() => []),
+            getProducts().catch(() => []),
             getServicesDashboardData().catch(() => ({ bookings: [], pendingBookings: 0, upcomingBookings: 0, activeMarinades: 0, activeProcessingOptions: 0 })),
+            getPaymentsForAnalytics(30).catch(() => []),
+            listDisputes({ status: "awaiting_evidence", limit: 100 }).catch(() => ({ disputes: [], total: 0 })),
         ]);
 
-        const analyticsData = calculateAnalytics(orders, products, customers, coupons, inventoryLogs, inventoryItems);
+        const dashboard = calculateDashboard({
+            orders,
+            customers,
+            inventoryItems,
+            products,
+            payments,
+            disputes: disputesRes.disputes,
+            pendingBookings: services.pendingBookings,
+        });
 
         return (
             <div className="space-y-8">
+                <DashboardHome data={dashboard} />
                 <ServicesDashboardCards
                     pendingBookings={services.pendingBookings}
                     upcomingBookings={services.upcomingBookings}
@@ -36,7 +44,6 @@ export default async function AdminDashboard() {
                     activeProcessingOptions={services.activeProcessingOptions}
                     recentBookings={services.bookings}
                 />
-                <AnalyticsDashboard data={analyticsData} />
             </div>
         );
     } catch (err) {

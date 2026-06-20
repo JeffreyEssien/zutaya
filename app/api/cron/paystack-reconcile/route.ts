@@ -35,9 +35,11 @@ export const runtime = "nodejs";
 const CRON_SECRET = process.env.CRON_SECRET;
 
 // Time thresholds
-// Cron runs every 5 min (vercel.json); 10-min staleness means abandoned-card
-// stock is released within ~10–15 min. Verifying a legitimately in-flight bank
-// transfer this early just returns `pending`, so we leave those alone.
+// Triggered by GitHub Actions ~every 15 min (.github/workflows/paystack-reconcile.yml)
+// with a once-daily Vercel cron as the floor (Hobby caps Vercel cron at daily).
+// 10-min staleness means abandoned-card stock is reclaimed on the next external
+// tick. Verifying a legitimately in-flight bank transfer this early just returns
+// `pending`, so we leave those alone.
 const STALE_AFTER_MIN = 10;
 const ABANDONED_AFTER_HOURS = 24;
 

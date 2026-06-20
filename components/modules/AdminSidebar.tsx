@@ -3,14 +3,24 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { ADMIN_NAV_LINKS, SITE_NAME } from "@/lib/constants";
+import { ADMIN_NAV_GROUPS, SITE_NAME } from "@/lib/constants";
 import { cn } from "@/lib/cn";
 import NotificationBell from "@/components/modules/NotificationBell";
 import {
     LayoutGrid, Package, ClipboardList, Tag, Users, BarChart3,
-    FileText, Box, Ticket, Settings, Truck, Mail, RefreshCw, Gift, Clock, LogOut, Shield, ImageIcon, Star
+    FileText, Box, Ticket, Settings, Truck, Mail, RefreshCw, Gift, Clock, LogOut, Shield, ImageIcon, Star,
+    CreditCard, AlertTriangle, ChevronDown
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+
+/** A link is active on its exact route OR on any nested route beneath it
+ *  (e.g. /admin/products/123 highlights Products). "/admin" is exact-only so
+ *  it doesn't match every page. */
+function isActiveLink(pathname: string, href: string): boolean {
+    if (pathname === href) return true;
+    if (href === "/admin") return false;
+    return pathname.startsWith(`${href}/`);
+}
 
 export default function AdminSidebar() {
     const pathname = usePathname();
@@ -112,28 +122,99 @@ export default function AdminSidebar() {
 
 function NavLinks({ pathname }: { pathname: string }) {
     return (
-        <ul className="space-y-1">
-            {ADMIN_NAV_LINKS.map((link) => {
-                const active = pathname === link.href;
-                return (
-                    <li key={link.href}>
-                        <Link
-                            href={link.href}
-                            className={cn(
-                                "flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors relative",
-                                active ? "bg-brand-green text-white" : "text-white/60 hover:text-white hover:bg-white/5",
-                            )}
-                        >
-                            {active && (
-                                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-white rounded-full" />
-                            )}
-                            <NavIcon name={link.icon} />
-                            {link.label}
-                        </Link>
-                    </li>
-                );
-            })}
-        </ul>
+        <div className="space-y-4">
+            {ADMIN_NAV_GROUPS.map((group) => (
+                <NavGroup key={group.heading} group={group} pathname={pathname} />
+            ))}
+        </div>
+    );
+}
+
+function NavGroup({
+    group,
+    pathname,
+}: {
+    group: (typeof ADMIN_NAV_GROUPS)[number];
+    pathname: string;
+}) {
+    const storageKey = `admin-nav-collapsed:${group.heading}`;
+    const containsActive = group.links.some((l) => isActiveLink(pathname, l.href));
+    const [collapsed, setCollapsed] = useState(false);
+
+    // Hydrate collapse state from localStorage after mount (avoids SSR mismatch).
+    // The group containing the current route always opens, regardless of saved state.
+    useEffect(() => {
+        if (containsActive) {
+            setCollapsed(false);
+            return;
+        }
+        try {
+            setCollapsed(localStorage.getItem(storageKey) === "1");
+        } catch {
+            /* localStorage unavailable — default expanded */
+        }
+    }, [containsActive, storageKey]);
+
+    const toggle = () => {
+        setCollapsed((prev) => {
+            const next = !prev;
+            try {
+                localStorage.setItem(storageKey, next ? "1" : "0");
+            } catch {
+                /* ignore */
+            }
+            return next;
+        });
+    };
+
+    const open = !collapsed;
+
+    return (
+        <div>
+            <button
+                type="button"
+                onClick={toggle}
+                className="group flex items-center justify-between w-full px-3 mb-1.5 cursor-pointer select-none"
+                aria-expanded={open}
+            >
+                <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/30 group-hover:text-white/55 transition-colors">
+                    {group.heading}
+                </span>
+                <ChevronDown
+                    size={12}
+                    className={cn(
+                        "text-white/20 group-hover:text-white/45 transition-transform duration-200",
+                        open ? "rotate-0" : "-rotate-90",
+                    )}
+                />
+            </button>
+            {open && (
+                <ul className="space-y-0.5">
+                    {group.links.map((link) => {
+                        const active = isActiveLink(pathname, link.href);
+                        return (
+                            <li key={link.href}>
+                                <Link
+                                    href={link.href}
+                                    className={cn(
+                                        "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors relative",
+                                        active
+                                            ? "bg-brand-green text-white"
+                                            : "text-white/60 hover:text-white hover:bg-white/5",
+                                    )}
+                                >
+                                    {active && (
+                                        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-white rounded-full" />
+                                    )}
+                                    <NavIcon name={link.icon} />
+                                    {link.label}
+                                </Link>
+                            </li>
+                        );
+                    })}
+                </ul>
+            )}
+        </div>
     );
 }
 
@@ -188,6 +269,8 @@ const ICON_MAP: Record<string, React.ElementType> = {
     image: ImageIcon,
     star: Star,
     cog: Settings,
+    creditcard: CreditCard,
+    alerttriangle: AlertTriangle,
 };
 
 function NavIcon({ name }: { name: string }) {

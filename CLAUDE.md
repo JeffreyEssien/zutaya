@@ -157,6 +157,18 @@ There are no test scripts configured.
   8. **Double-submit guard** — `if (loading) return` in `handleSubmit`.
   - Verified: `tsc --noEmit` clean, `npm run build` passes. (Biome shows repo-wide pre-existing 2-space/4-space + import-sort noise — not from this pass.)
 
+- **Admin nav grouping (2026-06-19):** Flat 24-link `ADMIN_NAV_LINKS` replaced by `ADMIN_NAV_GROUPS` (7 sections: Overview, Orders & Payments, Catalog, Operations, Events & Services, Marketing & Content, System) in `lib/constants.ts`. `ADMIN_NAV_LINKS` kept as a flat derived export. `AdminSidebar.tsx` renders collapsible sections (state persisted per-group in localStorage, active group auto-expands, parent-route highlighting via `isActiveLink`). Fixed missing `creditcard`/`alerttriangle` icons. UI-only — no routes/URLs changed.
+
+- **Dashboard / Analytics split + deep metrics (2026-06-19):**
+  - **Problem fixed:** `/admin` rendered the *entire* `AnalyticsDashboard` (same as `/admin/analytics`) → overwhelming. Now separated.
+  - **Dashboard** (`/admin`): new `lib/dashboard.ts` `calculateDashboard()` + `components/modules/DashboardHome.tsx`. Today-scoped & action-oriented: Tier-1 alert tiles (awaiting payment, failed payments today, disputes due ≤48h, expiring ≤3d w/ value at risk, new orders to confirm + oldest-waiting, deliveries due today, reorder now, unquoted bookings — each deep-links, hidden when 0, "All clear" fallback); Tier-2 pulse (revenue today vs same weekday last week, **pace-to-now** vs typical-by-this-hour, orders today vs 7d avg, new customers); Tier-3 today's delivery run + latest orders. `ServicesDashboardCards` kept below.
+  - **Analytics** (`/admin/analytics`): keeps full `AnalyticsDashboard`, now with a 7th tab **Payments & Subs** + RFM in Customers + basket affinity in Marketing.
+  - **⭐ New calcs in `lib/analytics.ts`** (extended `calculateAnalytics(... , subscriptions=[], payments=[])`): `retention` (RFM segments Champions/Loyal/New/At-risk/Lost, repeat-revenue share, median reorder cadence), `basket` (product co-occurrence pairs → bundle candidates), `paymentHealth` (success/abandonment/refund rates, Paystack fees %, avg time-to-pay — from `payments` ledger), `subscriptions` (MRR/ARR, churn, by-frequency — normalised to monthly). `paymentHealth`/`subscriptions` are null when no data.
+  - New query `getPaymentsForAnalytics(sinceDays, limit)` in `lib/payments.ts`. Both pages fetch payments(+subs) and pass through.
+  - **Caveat still open:** profit/COGS metrics read `item.costPrice` which is often 0 — snapshot costPrice into order line items at checkout before trusting margin numbers.
+
+- **Cron scheduling on Vercel Hobby (2026-06-20):** Hobby rejects any cron more frequent than once/day (count limit is 100, not the blocker). `paystack-reconcile` was `*/5` → failed deploy. Now `0 3 * * *` (daily floor); all 4 Vercel crons are daily. Frequent recovery moved to free **GitHub Actions** (`.github/workflows/paystack-reconcile.yml`, every ~15 min, `workflow_dispatch` enabled) which curls the `CRON_SECRET`-gated endpoint. Requires repo secrets `PRODUCTION_URL` + `CRON_SECRET`, and `CRON_SECRET` set in Vercel env (reconcile route fails closed in prod without it; the other 3 crons don't).
+
 ## RULES
 - When done with a task, very short and brief summary
 - Each feature should be done thoroughly, well featured and all features must be working, no skeletons

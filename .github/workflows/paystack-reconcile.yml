@@ -1,0 +1,41 @@
+name: Paystack reconcile
+
+# Vercel Hobby only allows once-per-day cron, but payment recovery wants to run
+# often (release stuck stock, recover paid-but-pending orders). This free
+# GitHub-hosted scheduler hits the reconcile endpoint every ~15 minutes.
+#
+# Setup (Repo → Settings → Secrets and variables → Actions → New repository secret):
+#   PRODUCTION_URL  e.g. https://zutaya.vercel.app   (no trailing slash)
+#   CRON_SECRET     same value as the CRON_SECRET env var in Vercel
+#
+# Notes:
+#  - GitHub schedules are best-effort; under load a tick can be delayed or skipped.
+#    That's fine — each run is idempotent and the daily Vercel cron is the floor.
+#  - The endpoint already enforces `Authorization: Bearer $CRON_SECRET`.
+#  - Trigger manually anytime via the "Run workflow" button (workflow_dispatch).
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch: {}
+
+# Don't pile up overlapping runs if one is slow.
+concurrency:
+  group: paystack-reconcile
+  cancel-in-progress: false
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger reconcile endpoint
+        run: |
+          if [ -z "${{ secrets.PRODUCTION_URL }}" ] || [ -z "${{ secrets.CRON_SECRET }}" ]; then
+            echo "::error::PRODUCTION_URL and/or CRON_SECRET repo secrets are not set."
+            exit 1
+          fi
+          curl -fsS -X GET \
+            "${{ secrets.PRODUCTION_URL }}/api/cron/paystack-reconcile" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            --max-time 120 \
+            --retry 2 --retry-delay 5

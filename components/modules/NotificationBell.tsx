@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
@@ -32,6 +32,118 @@ function getNotificationHref(notif: AdminNotification): string {
     }
 }
 
+// ────────────────────────────────────────────────────────────────────
+// Singleton poller — exactly ONE fetch loop no matter how many bells are
+// mounted. The sidebar renders a bell for BOTH the mobile top-bar and the
+// desktop sidebar; without this they'd each poll, doubling the load. Also
+// pauses while the browser tab is hidden. State lives at module scope and is
+// shared via the Zustand store (read with .getState() outside React).
+// ────────────────────────────────────────────────────────────────────
+const seenIds = new Set<string>();
+let lastPollAt = new Date().toISOString();
+let isInitialLoad = true;
+let subscriberCount = 0;
+let pollTimer: ReturnType<typeof setInterval> | null = null;
+
+async function runNotificationPoll() {
+    if (typeof document !== "undefined" && document.hidden) return; // skip background tabs
+    try {
+        const res = await fetch(`/api/admin/notifications?since=${encodeURIComponent(lastPollAt)}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const { addNotification } = useNotificationStore.getState();
+
+        for (const order of data.recentOrders || []) {
+            if (seenIds.has(order.id)) continue;
+            seenIds.add(order.id);
+            if (isInitialLoad) continue;
+            addNotification({
+                type: "new_order",
+                title: "New Order!",
+                message: `${order.customerName} placed an order for ${formatCurrency(order.total)}`,
+                orderId: order.id,
+                timestamp: order.createdAt,
+            });
+            playNotificationSound();
+        }
+
+        for (const payment of data.pendingPayments || []) {
+            const key = `payment-${payment.id}`;
+            if (seenIds.has(key)) continue;
+            seenIds.add(key);
+            if (isInitialLoad) continue;
+            addNotification({
+                type: "payment_submitted",
+                title: "Payment Awaiting Approval",
+                message: `${payment.customerName} submitted payment of ${formatCurrency(payment.total)}${payment.senderName ? ` from ${payment.senderName}` : ""}`,
+                orderId: payment.id,
+                timestamp: new Date().toISOString(),
+            });
+            playNotificationSound();
+        }
+
+        for (const item of data.expiringStock || []) {
+            const key = `expiring-${item.id}`;
+            if (seenIds.has(key)) continue;
+            seenIds.add(key);
+            if (isInitialLoad) continue;
+            const daysLeft = Math.ceil((new Date(item.expiryDate).getTime() - Date.now()) / 86400000);
+            addNotification({
+                type: "low_stock",
+                title: "Expiring Stock",
+                message: `${item.name} (${item.stock} units) expires in ${daysLeft <= 0 ? "today" : `${daysLeft} day${daysLeft !== 1 ? "s" : ""}`}`,
+                timestamp: new Date().toISOString(),
+            });
+            playNotificationSound();
+        }
+
+        for (const item of data.lowStock || []) {
+            const key = `lowstock-${item.id}`;
+            if (seenIds.has(key)) continue;
+            seenIds.add(key);
+            if (isInitialLoad) continue;
+            addNotification({
+                type: "low_stock",
+                title: "Low Stock Alert",
+                message: `${item.name} has only ${item.stock} units left (reorder level: ${item.reorderLevel})`,
+                timestamp: new Date().toISOString(),
+            });
+        }
+
+        isInitialLoad = false;
+        lastPollAt = new Date().toISOString();
+    } catch (err) {
+        console.warn("Notification poll failed:", err);
+    }
+}
+
+function onVisibilityChange() {
+    if (!document.hidden) runNotificationPoll(); // refresh immediately when tab refocuses
+}
+
+/** Reference-counted subscription to the singleton poller. */
+function useNotificationPoller() {
+    useEffect(() => {
+        subscriberCount++;
+        if (subscriberCount === 1) {
+            runNotificationPoll();
+            pollTimer = setInterval(runNotificationPoll, POLL_INTERVAL);
+            document.addEventListener("visibilitychange", onVisibilityChange);
+        }
+        return () => {
+            subscriberCount--;
+            if (subscriberCount <= 0) {
+                subscriberCount = 0;
+                if (pollTimer) {
+                    clearInterval(pollTimer);
+                    pollTimer = null;
+                }
+                document.removeEventListener("visibilitychange", onVisibilityChange);
+            }
+        };
+    }, []);
+}
+
 export default function NotificationBell() {
     const pathname = usePathname();
     const router = useRouter();
@@ -39,10 +151,7 @@ export default function NotificationBell() {
     const bellRef = useRef<HTMLButtonElement>(null);
     const panelRef = useRef<HTMLDivElement>(null);
     const [mounted, setMounted] = useState(false);
-    const { notifications, unreadCount, addNotification, markAllRead, markRead } = useNotificationStore();
-    const seenOrderIds = useRef<Set<string>>(new Set());
-    const lastPoll = useRef<string>(new Date().toISOString());
-    const initialLoad = useRef(true);
+    const { notifications, unreadCount, markAllRead, markRead } = useNotificationStore();
 
     useEffect(() => { setMounted(true); }, []);
 
@@ -64,85 +173,8 @@ export default function NotificationBell() {
         return () => document.removeEventListener("mousedown", handleClick);
     }, [isOpen]);
 
-    // Poll for new orders
-    const pollNotifications = useCallback(async () => {
-        try {
-            const res = await fetch(`/api/admin/notifications?since=${encodeURIComponent(lastPoll.current)}`);
-            if (!res.ok) return;
-            const data = await res.json();
-
-            for (const order of data.recentOrders || []) {
-                if (seenOrderIds.current.has(order.id)) continue;
-                seenOrderIds.current.add(order.id);
-                if (initialLoad.current) continue;
-
-                addNotification({
-                    type: "new_order",
-                    title: "New Order!",
-                    message: `${order.customerName} placed an order for ${formatCurrency(order.total)}`,
-                    orderId: order.id,
-                    timestamp: order.createdAt,
-                });
-                playNotificationSound();
-            }
-
-            for (const payment of data.pendingPayments || []) {
-                if (seenOrderIds.current.has(`payment-${payment.id}`)) continue;
-                seenOrderIds.current.add(`payment-${payment.id}`);
-                if (initialLoad.current) continue;
-
-                addNotification({
-                    type: "payment_submitted",
-                    title: "Payment Awaiting Approval",
-                    message: `${payment.customerName} submitted payment of ${formatCurrency(payment.total)}${payment.senderName ? ` from ${payment.senderName}` : ""}`,
-                    orderId: payment.id,
-                    timestamp: new Date().toISOString(),
-                });
-                playNotificationSound();
-            }
-
-            for (const item of data.expiringStock || []) {
-                const key = `expiring-${item.id}`;
-                if (seenOrderIds.current.has(key)) continue;
-                seenOrderIds.current.add(key);
-                if (initialLoad.current) continue;
-
-                const daysLeft = Math.ceil((new Date(item.expiryDate).getTime() - Date.now()) / 86400000);
-                addNotification({
-                    type: "low_stock",
-                    title: "Expiring Stock",
-                    message: `${item.name} (${item.stock} units) expires in ${daysLeft <= 0 ? "today" : `${daysLeft} day${daysLeft !== 1 ? "s" : ""}`}`,
-                    timestamp: new Date().toISOString(),
-                });
-                playNotificationSound();
-            }
-
-            for (const item of data.lowStock || []) {
-                const key = `lowstock-${item.id}`;
-                if (seenOrderIds.current.has(key)) continue;
-                seenOrderIds.current.add(key);
-                if (initialLoad.current) continue;
-
-                addNotification({
-                    type: "low_stock",
-                    title: "Low Stock Alert",
-                    message: `${item.name} has only ${item.stock} units left (reorder level: ${item.reorderLevel})`,
-                    timestamp: new Date().toISOString(),
-                });
-            }
-
-            initialLoad.current = false;
-            lastPoll.current = new Date().toISOString();
-        } catch (err) {
-            console.warn("Notification poll failed:", err);
-        }
-    }, [addNotification]);
-
-    useEffect(() => {
-        pollNotifications();
-        const interval = setInterval(pollNotifications, POLL_INTERVAL);
-        return () => clearInterval(interval);
-    }, [pollNotifications]);
+    // Subscribe to the shared singleton poller (one fetch loop for all bells).
+    useNotificationPoller();
 
     return (
         <>

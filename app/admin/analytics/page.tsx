@@ -4,8 +4,10 @@ import {
     getCustomers,
     getCoupons,
     getInventoryLogs,
-    getInventoryItems
+    getInventoryItems,
+    getSubscriptions,
 } from "@/lib/queries";
+import { getPaymentsForAnalytics } from "@/lib/payments";
 import { calculateAnalytics } from "@/lib/analytics";
 import AnalyticsDashboard from "@/components/modules/AnalyticsDashboard";
 
@@ -13,16 +15,18 @@ export const dynamic = "force-dynamic";
 
 export default async function AnalyticsPage() {
     try {
-        const [orders, products, customers, coupons, inventoryLogs, inventoryItems] = await Promise.all([
+        const [orders, products, customers, coupons, inventoryLogs, inventoryItems, subscriptions, payments] = await Promise.all([
             getOrders().catch(() => []),
             getProducts().catch(() => []),
             getCustomers().catch(() => []),
             getCoupons().catch(() => []),
             getInventoryLogs().catch(() => []),
             getInventoryItems().catch(() => []),
+            getSubscriptions().catch(() => []),
+            getPaymentsForAnalytics(90).catch(() => []),
         ]);
 
-        const data = calculateAnalytics(orders, products, customers, coupons, inventoryLogs, inventoryItems);
+        const data = calculateAnalytics(orders, products, customers, coupons, inventoryLogs, inventoryItems, subscriptions, payments);
 
         return <AnalyticsDashboard data={data} />;
     } catch (err) {

@@ -11,6 +11,7 @@ import {
     Users, UserPlus, Repeat, Gem, Ticket, Percent, Truck, Clock,
     Activity, Factory, Tag, RefreshCw, AlertTriangle, Zap, Layers, Target,
     Beef, Scale, MapPin, Thermometer,
+    CreditCard, Wallet, Network, ShieldCheck, RotateCcw, Crown,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/formatCurrency";
 import type { AnalyticsData } from "@/lib/analytics";
@@ -60,7 +61,7 @@ interface AnalyticsDashboardProps {
 }
 
 export default function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
-    const [activeTab, setActiveTab] = useState<"sales" | "meat" | "inventory" | "customers" | "marketing" | "operations">("sales");
+    const [activeTab, setActiveTab] = useState<"sales" | "meat" | "inventory" | "customers" | "marketing" | "operations" | "money">("sales");
 
     const tabs = [
         { id: "sales", label: "Sales & Profit", icon: DollarSign },
@@ -69,6 +70,7 @@ export default function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
         { id: "customers", label: "Customers", icon: Users },
         { id: "marketing", label: "Marketing", icon: Ticket },
         { id: "operations", label: "Operations", icon: Truck },
+        { id: "money", label: "Payments & Subs", icon: CreditCard },
     ] as const;
 
     return (
@@ -131,6 +133,7 @@ export default function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
                     {activeTab === "customers" && <CustomersView data={data} />}
                     {activeTab === "marketing" && <MarketingView data={data} />}
                     {activeTab === "operations" && <OperationsView data={data} />}
+                    {activeTab === "money" && <MoneyView data={data} />}
                 </motion.div>
             </AnimatePresence>
         </div>
@@ -567,6 +570,27 @@ function CustomersView({ data }: { data: AnalyticsData }) {
                     <FunnelViz data={data.conversionFunnel} total={data.conversionFunnel.pending + data.conversionFunnel.shipped + data.conversionFunnel.delivered} />
                 </div>
             </motion.div>
+
+            {/* RFM Segments */}
+            <motion.div variants={fadeUp} className="glass-card p-6">
+                <div className="flex items-start justify-between gap-4 flex-wrap">
+                    <h3 className="text-lg font-medium text-warm-cream flex items-center gap-2">
+                        <Crown size={18} className="text-amber-400" /> Customer Segments (RFM)
+                    </h3>
+                    <div className="flex gap-6 text-right">
+                        <div>
+                            <p className="text-[10px] uppercase tracking-wider text-warm-cream/40">Repeat revenue</p>
+                            <p className="text-sm font-bold text-warm-cream">{data.retention.repeatRevenueShare.toFixed(0)}%</p>
+                        </div>
+                        <div>
+                            <p className="text-[10px] uppercase tracking-wider text-warm-cream/40">Reorder cadence</p>
+                            <p className="text-sm font-bold text-warm-cream">{data.retention.medianDaysBetweenOrders > 0 ? `${data.retention.medianDaysBetweenOrders}d` : "—"}</p>
+                        </div>
+                    </div>
+                </div>
+                <p className="text-xs text-warm-cream/40 mb-4 mt-1">Recency · Frequency · Monetary — target each group differently</p>
+                <SegmentBars segments={data.retention.segments} />
+            </motion.div>
         </motion.div>
     );
 }
@@ -628,6 +652,35 @@ function MarketingView({ data }: { data: AnalyticsData }) {
                     )}
                 </div>
             </motion.div>
+
+            {/* Frequently bought together */}
+            <motion.div variants={fadeUp} className="glass-card p-6">
+                <h3 className="text-lg font-medium text-warm-cream mb-1 flex items-center gap-2">
+                    <Network size={18} className="text-brand-green" /> Frequently Bought Together
+                </h3>
+                <p className="text-xs text-warm-cream/40 mb-4">Pairs appearing in the most orders — ideal bundle candidates</p>
+                {data.basket.length > 0 ? (
+                    <ul className="space-y-2">
+                        {data.basket.map((b, i) => (
+                            <li key={i} className="flex items-center justify-between gap-3 bg-white/[0.03] border border-warm-cream/[0.06] rounded-lg px-4 py-3">
+                                <span className="text-sm text-warm-cream min-w-0">{b.pair}</span>
+                                <div className="flex items-center gap-5 shrink-0 text-right">
+                                    <div>
+                                        <p className="text-[10px] uppercase text-warm-cream/40">Orders</p>
+                                        <p className="text-sm font-medium text-warm-cream">{b.count}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] uppercase text-warm-cream/40">Attach</p>
+                                        <p className="text-sm font-medium text-brand-green">{b.confidence.toFixed(0)}%</p>
+                                    </div>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <p className="text-warm-cream/40 text-sm py-6 text-center">Not enough multi-item orders yet to find pairs.</p>
+                )}
+            </motion.div>
         </motion.div>
     );
 }
@@ -671,8 +724,124 @@ function OperationsView({ data }: { data: AnalyticsData }) {
 
 
 // ============================================================
+//  PAYMENTS & SUBSCRIPTIONS VIEW
+// ============================================================
+
+function MoneyView({ data }: { data: AnalyticsData }) {
+    const ph = data.paymentHealth;
+    const subs = data.subscriptions;
+
+    return (
+        <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-6">
+            {/* Payment health */}
+            {ph ? (
+                <>
+                    <motion.div variants={stagger} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <GlassKPI title="Payment Success" value={ph.successRate} format="percent" icon={ShieldCheck} accent={ph.successRate >= 85 ? "green" : "amber"} subtitle={`${ph.paidCount}/${ph.totalAttempts} attempts`} />
+                        <GlassKPI title="Abandonment" value={ph.abandonmentRate} format="percent" icon={AlertTriangle} accent={ph.abandonmentRate > 20 ? "red" : "purple"} subtitle={`${ph.failedCount} failed/abandoned`} />
+                        <GlassKPI title="Paystack Fees" value={ph.totalFees} format="currency" icon={Percent} accent="amber" subtitle={`${ph.feesPctOfRevenue.toFixed(1)}% of revenue`} />
+                        <GlassKPI title="Avg Time to Pay" value={ph.avgMinutesToPay} format="number" icon={Clock} subtitle="minutes" />
+                    </motion.div>
+                    <motion.div variants={fadeUp} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        <MiniGlassKPI label="Pending Now" value={ph.pendingCount.toString()} alert={ph.pendingCount > 0} />
+                        <MiniGlassKPI label="Refund Rate" value={`${ph.refundRate.toFixed(1)}%`} alert={ph.refundRate > 5} />
+                        <MiniGlassKPI label="Refunded" value={formatCurrency(ph.refundedAmount)} alert={ph.refundedAmount > 0} />
+                        <MiniGlassKPI label="Total Attempts" value={ph.totalAttempts.toString()} />
+                    </motion.div>
+                </>
+            ) : (
+                <div className="glass-card p-10 text-center text-warm-cream/40 text-sm">No payment data in the last 90 days.</div>
+            )}
+
+            {/* Subscriptions */}
+            <motion.div variants={fadeUp} className="glass-card p-6">
+                <h3 className="text-lg font-medium text-warm-cream mb-4 flex items-center gap-2">
+                    <RotateCcw size={18} className="text-brand-green" /> Subscriptions
+                </h3>
+                {subs ? (
+                    <div className="space-y-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <GlassKPI title="MRR" value={subs.mrr} format="currency" icon={Wallet} accent="green" subtitle="Monthly recurring" />
+                            <GlassKPI title="ARR" value={subs.arr} format="currency" icon={TrendingUp} subtitle="Annualised" />
+                            <GlassKPI title="Active Subs" value={subs.activeCount} format="number" icon={RefreshCw} subtitle={`${subs.pausedCount} paused`} />
+                            <GlassKPI title="Churn Rate" value={subs.churnRate} format="percent" icon={TrendingDown} accent={subs.churnRate > 10 ? "red" : "purple"} subtitle={`${subs.cancelledCount} cancelled`} />
+                        </div>
+                        {subs.byFrequency.length > 0 && (
+                            <div>
+                                <p className="text-xs text-warm-cream/40 uppercase tracking-wider mb-3">MRR by frequency</p>
+                                <div className="space-y-3">
+                                    {subs.byFrequency.map((f) => {
+                                        const pct = subs.mrr > 0 ? (f.mrr / subs.mrr) * 100 : 0;
+                                        return (
+                                            <div key={f.frequency}>
+                                                <div className="flex justify-between text-sm mb-1">
+                                                    <span className="capitalize text-warm-cream/70">{f.frequency} <span className="text-warm-cream/40">· {f.count}</span></span>
+                                                    <span className="font-medium text-warm-cream">{formatCurrency(f.mrr)}/mo</span>
+                                                </div>
+                                                <div className="h-2.5 bg-warm-cream/5 rounded-full overflow-hidden">
+                                                    <div className="h-full rounded-full bg-brand-green" style={{ width: `${pct}%` }} />
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+                        <p className="text-[11px] text-warm-cream/30">
+                            Avg subscription {formatCurrency(subs.avgSubValue)}/mo · MRR normalises weekly/biweekly plans to a monthly basis.
+                        </p>
+                    </div>
+                ) : (
+                    <p className="text-warm-cream/40 text-sm py-6 text-center">No subscriptions yet.</p>
+                )}
+            </motion.div>
+        </motion.div>
+    );
+}
+
+
+// ============================================================
 //  REUSABLE COMPONENTS
 // ============================================================
+
+const SEGMENT_TONE: Record<string, string> = {
+    Champions: "bg-emerald-400",
+    Loyal: "bg-brand-green",
+    New: "bg-blue-400",
+    "At-risk": "bg-amber-400",
+    Lost: "bg-red-400",
+    "One-time (cold)": "bg-warm-cream/30",
+};
+
+function SegmentBars({ segments }: { segments: AnalyticsData["retention"]["segments"] }) {
+    if (!segments.length) {
+        return <p className="text-warm-cream/40 text-sm text-center py-6">No customer data yet</p>;
+    }
+    const maxCust = Math.max(...segments.map((s) => s.customers), 1);
+    return (
+        <div className="space-y-3">
+            {segments.map((s) => (
+                <div key={s.segment}>
+                    <div className="flex justify-between text-sm mb-1">
+                        <span className="text-warm-cream/70">
+                            {s.segment}{" "}
+                            <span className="text-warm-cream/40">· {s.customers} {s.customers === 1 ? "customer" : "customers"} · {s.avgOrders.toFixed(1)} orders avg</span>
+                        </span>
+                        <span className="font-medium text-warm-cream">{formatCurrency(s.revenue)}</span>
+                    </div>
+                    <div className="h-2.5 bg-warm-cream/5 rounded-full overflow-hidden">
+                        <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${(s.customers / maxCust) * 100}%` }}
+                            transition={{ duration: 0.7, ease: "easeOut" }}
+                            className={`h-full rounded-full ${SEGMENT_TONE[s.segment] || "bg-brand-green"}`}
+                        />
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+}
 
 const ACCENT_MAP = {
     purple: { bg: "from-brand-green/10 to-brand-green/5", icon: "bg-brand-green/10 text-brand-green", ring: "ring-brand-green/20" },

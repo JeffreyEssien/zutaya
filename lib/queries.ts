@@ -355,12 +355,31 @@ export async function createOrder(order: Order): Promise<void> {
         inventory_item_id: item.product.inventoryId ?? null,
     }));
 
+    // Snapshot per-unit COST from inventory onto each line item at the moment of
+    // sale, so profit/COGS analytics stays accurate even after costs change later.
+    // Cost is only tracked on the linked inventory item; items without one get 0.
+    const invIds = Array.from(
+        new Set(order.items.map((i) => i.product.inventoryId).filter(Boolean)),
+    ) as string[];
+    const costByInv = new Map<string, number>();
+    if (invIds.length > 0) {
+        const { data: invRows } = await supabase
+            .from("inventory_items")
+            .select("id, cost_price")
+            .in("id", invIds);
+        for (const r of invRows ?? []) costByInv.set(r.id, Number(r.cost_price) || 0);
+    }
+    const enrichedItems = order.items.map((item) => ({
+        ...item,
+        costPrice: item.product.inventoryId ? (costByInv.get(item.product.inventoryId) ?? 0) : 0,
+    }));
+
     const orderPayload = {
         id: order.id,
         customer_name: order.customerName,
         email: order.email,
         phone: order.phone,
-        items: order.items,
+        items: enrichedItems,
         subtotal: order.subtotal,
         shipping: order.shipping,
         total: order.total,
