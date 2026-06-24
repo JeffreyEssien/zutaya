@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Build Your Meat Box",
+  title: "Build Your Meat Box — Party & Owambe Meat Packs in Lagos",
   description:
-    "Build a custom meat box from premium cuts and save with bundle pricing. Beef, chicken, goat, offal & more — delivered fresh across Lagos by Zúta Ya.",
+    "Build a custom meat box and save with bundle pricing — perfect for party meat, owambe and bulk freezer stocking. Beef, chicken, goat & assorted meat delivered fresh across Lagos by Zúta Ya.",
   alternates: { canonical: "/bundles" },
   openGraph: {
     title: "Build Your Meat Box | Zúta Ya",
     description:
-      "Build a custom meat box from premium cuts and save with bundle pricing. Delivered fresh across Lagos.",
+      "Custom meat boxes & party/owambe meat packs with bundle pricing. Delivered fresh across Lagos.",
     url: "/bundles",
     type: "website",
   },

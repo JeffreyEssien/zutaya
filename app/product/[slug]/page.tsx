@@ -1,10 +1,10 @@
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import type { Metadata } from "next";
 import Header from "@/components/modules/Header";
 import Footer from "@/components/modules/Footer";
 import ProductPageShell from "@/components/modules/ProductPageShell";
 import YouMayAlsoLike from "@/components/modules/YouMayAlsoLike";
-import { getProductBySlug, getProducts, getSiteSettings } from "@/lib/queries";
+import { getProductBySlug, getProducts, getSiteSettings, getProductRedirect } from "@/lib/queries";
 import { getMarinades, getProcessingOptions } from "@/lib/servicesQueries";
 import JsonLd from "@/components/JsonLd";
 import { productMetaDescription, productSchema, breadcrumbSchema } from "@/lib/seo";
@@ -50,7 +50,12 @@ export default async function ProductPage({ params }: Props) {
         getProcessingOptions(true),
         getSiteSettings(),
     ]);
-    if (!product) return notFound();
+    if (!product) {
+        // Deleted product? 301 to its recorded target (category/shop) to keep SEO equity.
+        const redirectTo = await getProductRedirect(slug);
+        if (redirectTo) permanentRedirect(redirectTo);
+        return notFound();
+    }
 
     return (
         <>

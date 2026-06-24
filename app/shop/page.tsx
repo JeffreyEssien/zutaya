@@ -10,14 +10,14 @@ import { SettingsProvider } from "@/lib/SettingsProvider";
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-    title: "Shop Premium Meat in Lagos",
+    title: "Buy Meat Online in Lagos — Beef, Chicken, Goat & Offal",
     description:
-        "Browse fresh, chilled & frozen cuts — beef, chicken, goat, offal and more. Order online for same-day delivery across Lagos with Zúta Ya.",
+        "Order chicken, beef, goat, turkey and assorted meat (shaki, ponmo, cow leg) online in Lagos. Fresh, chilled & frozen cuts with same-day delivery to Yaba, Igbobi, Lekki, Victoria Island & mainland Lagos.",
     alternates: { canonical: "/shop" },
     openGraph: {
-        title: "Shop Premium Meat in Lagos | Zúta Ya",
+        title: "Buy Meat Online in Lagos | Zúta Ya",
         description:
-            "Browse fresh, chilled & frozen cuts — beef, chicken, goat, offal and more. Same-day delivery across Lagos.",
+            "Order chicken, beef, goat & assorted meat online in Lagos. Same-day delivery to Yaba, Igbobi, Lekki, Victoria Island & mainland.",
         url: "/shop",
         type: "website",
     },
@@ -53,6 +53,15 @@ export default async function ShopPage() {
                 </div>
 
                 <div className="max-w-7xl mx-auto px-6 pt-8 pb-16">
+                    {/* SEO intro — keyword context for the product listing */}
+                    <p className="text-warm-cream/45 text-sm leading-relaxed max-w-3xl mb-8">
+                        Order premium meat online in Lagos and get it delivered to your door the same day.
+                        ZúTa Ya stocks fresh, chilled and frozen cuts — beef, chicken, goat, turkey, offal and
+                        assorted meat like shaki, ponmo and cow leg — all cold-chain packed and hygienically
+                        prepared. Whether it's a weeknight dinner, stocking the freezer, or party meat for an
+                        owambe, shop well-trimmed cuts at honest prices, with same-day delivery across Yaba,
+                        Igbobi, Lekki, Victoria Island and mainland Lagos.
+                    </p>
                     <Suspense>
                         <ShopContent products={products} categories={categories} />
                     </Suspense>

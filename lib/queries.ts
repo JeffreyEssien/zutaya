@@ -640,8 +640,45 @@ export async function deleteProduct(id: string): Promise<void> {
     const supabase = getSupabaseClient();
     if (!supabase) throw new Error("Database not available");
 
+    // Record a redirect for the product's URL so it keeps its SEO equity (301)
+    // instead of 404-ing after deletion. Best-effort — never blocks the delete.
+    try {
+        const { data: prod } = await supabase
+            .from("products")
+            .select("slug, category")
+            .eq("id", id)
+            .single();
+        if (prod?.slug) {
+            const target = prod.category
+                ? `/shop?category=${encodeURIComponent(prod.category as string)}`
+                : "/shop";
+            await supabase
+                .from("product_redirects")
+                .upsert({ old_slug: prod.slug, target_path: target }, { onConflict: "old_slug" });
+        }
+    } catch {
+        // product_redirects table may not exist yet — ignore.
+    }
+
     const { error } = await supabase.from("products").delete().eq("id", id);
     if (error) throw error;
+}
+
+/** Look up a 301 redirect target for a deleted product slug (null if none). */
+export async function getProductRedirect(slug: string): Promise<string | null> {
+    const supabase = getSupabaseClient();
+    if (!supabase) return null;
+    try {
+        const { data, error } = await supabase
+            .from("product_redirects")
+            .select("target_path")
+            .eq("old_slug", slug)
+            .maybeSingle();
+        if (error || !data) return null;
+        return data.target_path as string;
+    } catch {
+        return null;
+    }
 }
 
 export const getSiteSettings = cache(async (): Promise<SiteSettings | null> => _getSiteSettings());

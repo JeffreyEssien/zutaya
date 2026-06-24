@@ -117,7 +117,9 @@ export function localBusinessSchema() {
       addressRegion: "Lagos",
       addressCountry: "NG",
     },
-    areaServed: { "@type": "City", name: "Lagos" },
+    areaServed: ["Lagos", "Yaba", "Igbobi", "Lekki", "Victoria Island", "Lagos Mainland"].map(
+      (name) => ({ "@type": "City", name }),
+    ),
     openingHours: "Mo-Sa 08:00-18:00", // mirrors BUSINESS_HOURS: 8am–6pm Mon–Sat
     description: `${SITE_NAME} — ${BUSINESS_HOURS}. Premium fresh, chilled & frozen meat delivered across Lagos.`,
     sameAs,
