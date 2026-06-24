@@ -1,29 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Calendar, Clock } from "lucide-react";
 
 interface DeliverySchedulerProps {
-    onSelect: (deliveryDate: string, deliverySlot: "morning" | "afternoon" | "evening") => void;
+    onSelect: (deliveryDate: string) => void;
     selectedDate?: string;
-    selectedSlot?: "morning" | "afternoon" | "evening";
     cutoffHour?: number;
-    cutoffLabel?: string;
 }
 
-interface SlotAvailability {
-    morning: boolean;
-    afternoon: boolean;
-    evening: boolean;
-}
-
-const SLOT_LABELS: Record<string, { label: string; time: string }> = {
-    morning:   { label: "Morning",   time: "8am – 12pm" },
-    afternoon: { label: "Afternoon", time: "12pm – 4pm" },
-    evening:   { label: "Evening",   time: "4pm – 7pm" },
-};
-
-function getNextSevenDays(startOffset = 1): { date: string; label: string; dayName: string }[] {
+function getNextSevenDays(startOffset = 0): { date: string; label: string; dayName: string }[] {
     const days: { date: string; label: string; dayName: string }[] = [];
     const today = new Date();
 
@@ -39,47 +25,35 @@ function getNextSevenDays(startOffset = 1): { date: string; label: string; dayNa
     return days;
 }
 
-export default function DeliveryScheduler({ onSelect, selectedDate, selectedSlot, cutoffHour = 12, cutoffLabel }: DeliverySchedulerProps) {
+export default function DeliveryScheduler({ onSelect, selectedDate, cutoffHour = 12 }: DeliverySchedulerProps) {
+    // Past the daily 12pm cutoff, same-day delivery is no longer possible — the
+    // earliest selectable date becomes tomorrow.
     const cutoffPassed = new Date().getHours() >= cutoffHour;
-    const [dates] = useState(() => getNextSevenDays(cutoffPassed ? 2 : 1));
+    const [dates] = useState(() => getNextSevenDays(cutoffPassed ? 1 : 0));
     const [pickedDate, setPickedDate] = useState(selectedDate || "");
-    const [pickedSlot, setPickedSlot] = useState<"morning" | "afternoon" | "evening" | "">(selectedSlot || "");
-    const [availability, setAvailability] = useState<SlotAvailability | null>(null);
-    const [loadingSlots, setLoadingSlots] = useState(false);
 
-    useEffect(() => {
-        if (!pickedDate) {
-            setAvailability(null);
-            return;
-        }
-
-        setLoadingSlots(true);
-        setPickedSlot("");
-        fetch(`/api/delivery/availability?date=${pickedDate}`)
-            .then((res) => res.json())
-            .then((data: SlotAvailability) => {
-                setAvailability(data);
-            })
-            .catch(() => {
-                // If API doesn't exist yet, treat all as available
-                setAvailability({ morning: true, afternoon: true, evening: true });
-            })
-            .finally(() => setLoadingSlots(false));
-    }, [pickedDate]);
-
-    const handleSlotClick = (slot: "morning" | "afternoon" | "evening") => {
-        if (!availability?.[slot]) return;
-        setPickedSlot(slot);
-        onSelect(pickedDate, slot);
+    const handleDateClick = (date: string) => {
+        setPickedDate(date);
+        onSelect(date);
     };
 
     return (
-        <div className="space-y-5">
-            {cutoffPassed && cutoffLabel && (
-                <div className="px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs">
-                    {cutoffLabel}
-                </div>
-            )}
+        <div className="space-y-4">
+            {/* Cutoff notice — always shown so the 12pm rule is clear */}
+            <div className="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs leading-relaxed">
+                <Clock size={14} className="mt-0.5 shrink-0" />
+                {cutoffPassed ? (
+                    <span>
+                        It's past today's <strong>12pm cutoff</strong> — orders now are delivered from tomorrow.
+                    </span>
+                ) : (
+                    <span>
+                        Order before <strong>12pm</strong> for same-day delivery. Orders placed after 12pm are
+                        delivered the next day.
+                    </span>
+                )}
+            </div>
+
             {/* Date Picker */}
             <div>
                 <div className="flex items-center gap-2 mb-3">
@@ -91,7 +65,7 @@ export default function DeliveryScheduler({ onSelect, selectedDate, selectedSlot
                         <button
                             key={d.date}
                             type="button"
-                            onClick={() => setPickedDate(d.date)}
+                            onClick={() => handleDateClick(d.date)}
                             className={`flex flex-col items-center py-3 px-2 rounded-xl border text-center transition-all cursor-pointer ${
                                 pickedDate === d.date
                                     ? "border-brand-green bg-brand-green/5 text-warm-cream"
@@ -104,53 +78,6 @@ export default function DeliveryScheduler({ onSelect, selectedDate, selectedSlot
                     ))}
                 </div>
             </div>
-
-            {/* Slot Picker */}
-            {pickedDate && (
-                <div>
-                    <div className="flex items-center gap-2 mb-3">
-                        <Clock size={16} className="text-brand-green" />
-                        <h4 className="text-sm font-semibold text-warm-cream">Delivery Slot</h4>
-                    </div>
-
-                    {loadingSlots ? (
-                        <div className="flex gap-3">
-                            {[1, 2, 3].map((i) => (
-                                <div key={i} className="flex-1 h-20 rounded-xl shimmer-bg" />
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-3 gap-3">
-                            {(Object.keys(SLOT_LABELS) as Array<"morning" | "afternoon" | "evening">).map((slot) => {
-                                const isAvailable = availability?.[slot] ?? true;
-                                const isSelected = pickedSlot === slot;
-
-                                return (
-                                    <button
-                                        key={slot}
-                                        type="button"
-                                        onClick={() => handleSlotClick(slot)}
-                                        disabled={!isAvailable}
-                                        className={`flex flex-col items-center py-4 px-3 rounded-xl border text-center transition-all ${
-                                            !isAvailable
-                                                ? "border-warm-cream/[0.04] bg-warm-cream/[0.02] text-warm-cream/20 cursor-not-allowed"
-                                                : isSelected
-                                                  ? "border-brand-green bg-brand-green/5 text-warm-cream cursor-pointer"
-                                                  : "border-warm-cream/10 hover:border-warm-cream/20 text-warm-cream/40 cursor-pointer"
-                                        }`}
-                                    >
-                                        <span className="text-sm font-semibold">{SLOT_LABELS[slot].label}</span>
-                                        <span className="text-[11px] mt-1 opacity-70">{SLOT_LABELS[slot].time}</span>
-                                        {!isAvailable && (
-                                            <span className="text-[10px] mt-1 text-brand-green/50 font-medium">Full</span>
-                                        )}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    )}
-                </div>
-            )}
         </div>
     );
 }

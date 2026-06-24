@@ -138,7 +138,6 @@ export default function CheckoutForm({
     const [deliveryFee, setDeliveryFee] = useState(0);
     const [prepInstructions, setPrepInstructions] = useState("");
     const [requestedDeliveryDate, setRequestedDeliveryDate] = useState("");
-    const [requestedDeliverySlot, setRequestedDeliverySlot] = useState<"morning" | "afternoon" | "evening" | "">("");
     const [addPackaging, setAddPackaging] = useState(false);
 
     const currentLagosZone: LagosZoneInfo | null = useMemo(
@@ -291,7 +290,6 @@ export default function CheckoutForm({
             prepFee: prepFee > 0 ? prepFee : undefined,
             prepInstructions: prepInstructions.trim() || undefined,
             requestedDeliveryDate: requestedDeliveryDate || undefined,
-            requestedDeliverySlot: requestedDeliverySlot || undefined,
         };
 
         orderDraftRef.current = order;
@@ -420,19 +418,14 @@ export default function CheckoutForm({
                     <SectionTitle step={3}>Preferred Delivery Date</SectionTitle>
                     <div className="mt-5">
                         <DeliveryScheduler
-                            onSelect={(date, slot) => {
-                                setRequestedDeliveryDate(date);
-                                setRequestedDeliverySlot(slot);
-                            }}
+                            onSelect={(date) => setRequestedDeliveryDate(date)}
                             selectedDate={requestedDeliveryDate}
-                            selectedSlot={requestedDeliverySlot || undefined}
                             cutoffHour={settings?.deliveryCutoffHour ?? 12}
-                            cutoffLabel={settings?.deliveryCutoffLabel}
                         />
                         {!requestedDeliveryDate && (
                             <p className="text-[11px] text-warm-cream/35 mt-3 flex items-center gap-1.5">
                                 <CalendarCheck size={12} />
-                                Optional — select a preferred date and time slot for delivery
+                                Optional — select a preferred delivery date
                             </p>
                         )}
                     </div>

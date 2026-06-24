@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import type { Metadata } from "next";
 import Header from "@/components/modules/Header";
 import Footer from "@/components/modules/Footer";
 import { getProducts, getCategories, getSiteSettings } from "@/lib/queries";
@@ -7,6 +8,20 @@ import { getText } from "@/lib/textDefaults";
 import { SettingsProvider } from "@/lib/SettingsProvider";
 
 export const revalidate = 60;
+
+export const metadata: Metadata = {
+    title: "Shop Premium Meat in Lagos",
+    description:
+        "Browse fresh, chilled & frozen cuts — beef, chicken, goat, offal and more. Order online for same-day delivery across Lagos with Zúta Ya.",
+    alternates: { canonical: "/shop" },
+    openGraph: {
+        title: "Shop Premium Meat in Lagos | Zúta Ya",
+        description:
+            "Browse fresh, chilled & frozen cuts — beef, chicken, goat, offal and more. Same-day delivery across Lagos.",
+        url: "/shop",
+        type: "website",
+    },
+};
 
 export default async function ShopPage() {
     const [products, categories, settings] = await Promise.all([

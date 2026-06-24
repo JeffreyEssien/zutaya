@@ -40,6 +40,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "url and name are required" }, { status: 400 });
   }
 
+  // De-dupe: the same Cloudinary asset (e.g. a product image registered on
+  // upload) must not create duplicate gallery rows. Return the existing row.
+  if (publicId) {
+    const { data: existing } = await sb
+      .from("media")
+      .select("*")
+      .eq("public_id", publicId)
+      .maybeSingle();
+    if (existing) return NextResponse.json(existing);
+  }
+
   const { data, error } = await sb
     .from("media")
     .insert({

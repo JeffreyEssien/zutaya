@@ -1,0 +1,168 @@
+import {
+  SITE_NAME,
+  SITE_EMAIL,
+  WHATSAPP_NUMBER,
+  BUSINESS_HOURS,
+  INSTAGRAM_HANDLE,
+} from "@/lib/constants";
+import type { Product } from "@/types";
+import { formatCurrency } from "@/lib/formatCurrency";
+
+/** Canonical site origin (no trailing slash). Set NEXT_PUBLIC_SITE_URL in prod. */
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://zutaya.vercel.app").replace(
+  /\/+$/,
+  "",
+);
+
+/** Build an absolute URL from a path. */
+export function absoluteUrl(path = "/"): string {
+  return `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}`;
+}
+
+/** Strip HTML tags and collapse whitespace — for meta descriptions / schema. */
+export function stripHtml(html?: string | null): string {
+  if (!html) return "";
+  return html
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&[a-z]+;/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** Clamp a string to a max length on a word boundary (for meta descriptions). */
+export function truncate(text: string, max = 160): string {
+  const clean = text.trim();
+  if (clean.length <= max) return clean;
+  return `${clean.slice(0, max - 1).replace(/\s+\S*$/, "")}…`;
+}
+
+/**
+ * Transactional meta description for a product (PDP) — per the SEO playbook:
+ * leads with price, includes a delivery incentive and a clear CTA, ~110–160 chars.
+ */
+export function productMetaDescription(product: Product): string {
+  const unit =
+    product.priceUnit === "per_kg"
+      ? "/kg"
+      : product.priceUnit === "per_pack"
+        ? "/pack"
+        : product.priceUnit === "per_piece"
+          ? " each"
+          : "";
+  const price = `${formatCurrency(product.price)}${unit}`;
+  const cut = product.cutType ? `${product.cutType} ` : "";
+  return truncate(
+    `${product.name} — ${price}. Premium ${cut}${product.category}, cold-chain packed with same-day delivery across Lagos. Order online now.`,
+    160,
+  );
+}
+
+const phoneIntl = `+${WHATSAPP_NUMBER}`;
+const sameAs = [
+  `https://instagram.com/${INSTAGRAM_HANDLE.replace(/^@/, "")}`,
+  `https://wa.me/${WHATSAPP_NUMBER}`,
+];
+
+/** Organization schema — site-wide identity for Google Knowledge Graph. */
+export function organizationSchema() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: SITE_NAME,
+    url: SITE_URL,
+    logo: absoluteUrl("/zutayalogo.jpg"),
+    email: SITE_EMAIL,
+    telephone: phoneIntl,
+    sameAs,
+  };
+}
+
+/** WebSite schema with a Sitelinks search box pointing at /shop. */
+export function websiteSchema() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: SITE_NAME,
+    url: SITE_URL,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${SITE_URL}/shop?q={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
+    },
+  };
+}
+
+/**
+ * LocalBusiness schema — the Lagos map-pack signal.
+ * TODO: add a real streetAddress + geo (lat/lng) for full local rich results.
+ */
+export function localBusinessSchema() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "GroceryStore",
+    "@id": `${SITE_URL}/#localbusiness`,
+    name: SITE_NAME,
+    image: absoluteUrl("/og-image.jpg"),
+    url: SITE_URL,
+    telephone: phoneIntl,
+    email: SITE_EMAIL,
+    priceRange: "₦₦",
+    address: {
+      "@type": "PostalAddress",
+      // TODO: streetAddress: "<your shop street address>",
+      addressLocality: "Lagos",
+      addressRegion: "Lagos",
+      addressCountry: "NG",
+    },
+    areaServed: { "@type": "City", name: "Lagos" },
+    openingHours: "Mo-Sa 08:00-18:00", // mirrors BUSINESS_HOURS: 8am–6pm Mon–Sat
+    description: `${SITE_NAME} — ${BUSINESS_HOURS}. Premium fresh, chilled & frozen meat delivered across Lagos.`,
+    sameAs,
+  };
+}
+
+/** Product + Offer schema — unlocks price/availability rich snippets. */
+export function productSchema(product: Product) {
+  const url = absoluteUrl(`/product/${product.slug}`);
+  const images = (product.images || []).filter(Boolean);
+  return {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: productMetaDescription(product),
+    image: images.length ? images : [absoluteUrl("/og-image.jpg")],
+    sku: product.id,
+    category: product.category,
+    brand: { "@type": "Brand", name: SITE_NAME },
+    offers: {
+      "@type": "Offer",
+      url,
+      priceCurrency: "NGN",
+      price: product.price,
+      priceValidUntil: `${new Date().getFullYear() + 1}-12-31`,
+      availability:
+        product.stock > 0
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock",
+      itemCondition: "https://schema.org/NewCondition",
+      seller: { "@type": "Organization", name: SITE_NAME },
+    },
+  };
+}
+
+/** BreadcrumbList schema. Pass ordered { name, path } crumbs. */
+export function breadcrumbSchema(items: { name: string; path: string }[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: item.name,
+      item: absoluteUrl(item.path),
+    })),
+  };
+}

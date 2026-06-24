@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { Category } from "@/types";
 import { createCategory, updateCategory } from "@/lib/queries";
-import { uploadProductImage } from "@/lib/uploadImage";
+import { uploadProductImage, uploadImageFromUrl } from "@/lib/uploadImage";
 import Button from "@/components/ui/Button";
 import { toast } from "sonner";
 /* eslint-disable @next/next/no-img-element */
@@ -56,6 +56,27 @@ export default function CategoryForm({ initialData, onSuccess, onCancel }: Categ
 
     const handleImageUrl = (e: React.ChangeEvent<HTMLInputElement>) => {
         setForm((prev) => ({ ...prev, image: e.target.value }));
+    };
+
+    // When the admin finishes pasting a link, route it through Cloudinary so the
+    // stored URL is always on res.cloudinary.com (avoids next/image host errors).
+    const handleImageUrlBlur = async () => {
+        const val = form.image.trim();
+        if (!val || /res\.cloudinary\.com/.test(val)) return;
+        try {
+            new URL(val);
+        } catch {
+            return; // not a complete URL yet — leave it for the user to finish
+        }
+        const toastId = toast.loading("Importing image...");
+        try {
+            const url = await uploadImageFromUrl(val);
+            setForm((prev) => ({ ...prev, image: url }));
+            toast.success("Image imported", { id: toastId });
+        } catch (error) {
+            console.error(error);
+            toast.error("Couldn't import that image link", { id: toastId });
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -147,6 +168,7 @@ export default function CategoryForm({ initialData, onSuccess, onCancel }: Categ
                                     type="url"
                                     value={form.image}
                                     onChange={handleImageUrl}
+                                    onBlur={handleImageUrlBlur}
                                     placeholder="https://example.com/image.jpg"
                                     className="w-full px-4 py-2 bg-transparent border border-warm-cream/30 rounded-sm focus:outline-none focus:border-brand-green text-sm"
                                 />

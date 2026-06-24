@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import type { Product, InventoryItem, Category, PrepOption } from "@/types";
 import Button from "@/components/ui/Button";
-import { uploadProductImage } from "@/lib/uploadImage";
+import { uploadProductImage, uploadImageFromUrl } from "@/lib/uploadImage";
 import { createProduct, updateProduct, createInventoryItem, getInventoryItems, getCategories } from "@/lib/queries";
 import { revalidateShop } from "@/app/actions";
 import RichTextEditor from "@/components/modules/RichTextEditor";
@@ -96,7 +96,12 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
             setImages((prev) => [...prev, ...newFiles]);
             setUploading(true);
             try {
-                const uploadPromises = newFiles.map(file => uploadProductImage(file));
+                // Save each image to the gallery too, labelled with the product
+                // name (falls back to the file name if it isn't typed yet).
+                const productName = form.title?.trim();
+                const uploadPromises = newFiles.map(file =>
+                    uploadProductImage(file, "zutaya", { galleryName: productName || file.name }),
+                );
                 const urls = await Promise.all(uploadPromises);
                 setImageUrls((prev) => [...prev, ...urls]);
             } catch (error) {
@@ -108,15 +113,29 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
         }
     };
 
-    const handleAddImageUrl = () => {
+    const handleAddImageUrl = async () => {
         const trimmed = urlInput.trim();
         if (!trimmed) return;
         try {
             new URL(trimmed);
-            setImageUrls((prev) => [...prev, trimmed]);
-            setUrlInput("");
         } catch {
             toast.error("Please enter a valid URL");
+            return;
+        }
+        // Route the pasted link through Cloudinary so the stored URL is always
+        // on res.cloudinary.com (avoids next/image unconfigured-host errors).
+        setUploading(true);
+        try {
+            const cloudUrl = await uploadImageFromUrl(trimmed, "zutaya", {
+                galleryName: form.title?.trim() || "Product image",
+            });
+            setImageUrls((prev) => [...prev, cloudUrl]);
+            setUrlInput("");
+        } catch (error) {
+            console.error("Image import failed", error);
+            toast.error("Couldn't import that image. Check the link and try again.");
+        } finally {
+            setUploading(false);
         }
     };
 
@@ -539,7 +558,7 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                                 placeholder="https://example.com/image.jpg"
                                 className="flex-1 border border-warm-cream/20 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/30"
                             />
-                            <Button type="button" variant="outline" onClick={handleAddImageUrl}>
+                            <Button type="button" variant="outline" onClick={handleAddImageUrl} disabled={uploading}>
                                 Add
                             </Button>
                         </div>
