@@ -5,13 +5,12 @@ const nextConfig: NextConfig = {
   allowedDevOrigins: ['172.20.3.44'],
 
   images: {
-    // Serve images straight from their source CDNs (Cloudinary, Unsplash, Pexels)
-    // instead of proxying through Next's optimizer. The optimizer was fetching +
-    // AVIF-encoding large remote images on every request and timing out (500s)
-    // under the concurrency of an image grid. Sources are already CDN-optimized,
-    // so direct delivery is faster and can't fail. (Proper per-image optimization
-    // later = Cloudinary URL transforms, not the Next optimizer.)
-    unoptimized: true,
+    // Optimize at the source CDN's edge via a custom loader (Cloudinary
+    // f_auto/q_auto/w_, Unsplash/Pexels resize params) instead of Next's server
+    // optimizer, which 500'd under the concurrency of an image grid. No
+    // `/_next/image` proxy = fast, reliable, responsive images.
+    loader: "custom",
+    loaderFile: "./lib/imageLoader.ts",
     remotePatterns: [
       {
         protocol: "https",

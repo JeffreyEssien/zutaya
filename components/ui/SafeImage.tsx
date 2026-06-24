@@ -6,30 +6,13 @@ import { useState } from "react";
 const FALLBACK = "/placeholder-product.svg";
 
 /**
- * Hosts we run through Next's image optimizer. Everything else (arbitrary
- * pasted links, legacy Unsplash/Pexels seed URLs) renders `unoptimized` so it
- * bypasses the remotePatterns allowlist — otherwise next/image THROWS at render
- * for an unconfigured host and crashes the whole page (onError can't catch it).
- * New uploads route through Cloudinary, so they hit the optimized path.
- */
-function isOptimizableHost(src: string): boolean {
-    if (src.startsWith("/")) return true; // local asset
-    try {
-        const host = new URL(src).hostname;
-        return host.endsWith("res.cloudinary.com") || host.endsWith(".supabase.co");
-    } catch {
-        return false;
-    }
-}
-
-/**
  * Drop-in replacement for next/image that handles:
  *   - empty / undefined src
  *   - failed-to-load remote URLs (e.g. dead Unsplash links in seed data)
- *   - URLs from hosts not configured in next.config (renders them unoptimized
- *     instead of throwing)
  *
- * Always renders a placeholder instead of a broken image.
+ * Optimization is handled by the custom loader in `lib/imageLoader.ts` (Cloudinary
+ * edge transforms / Unsplash/Pexels params), so any host is safe — no optimizer,
+ * no remotePatterns crashes. The local SVG fallback is rendered `unoptimized`.
  */
 export default function SafeImage({
     src,
@@ -47,7 +30,7 @@ export default function SafeImage({
             onError={() => {
                 if (current !== FALLBACK) setCurrent(FALLBACK);
             }}
-            unoptimized={current === FALLBACK || !isOptimizableHost(current)}
+            unoptimized={current === FALLBACK}
         />
     );
 }
