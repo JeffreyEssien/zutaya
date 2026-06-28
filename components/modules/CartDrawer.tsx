@@ -11,10 +11,9 @@ import { X, Minus, Plus, Trash2, ShoppingBag, ArrowRight, Truck, Package } from 
 import type { CartItem } from "@/types";
 
 export default function CartDrawer() {
-    const { items, isOpen, close, subtotal, discount, couponCode, bundleDiscountTotal, total } = useCartStore();
+    const { items, isOpen, close, subtotal, discount, couponCode, total } = useCartStore();
     const sub = subtotal();
-    const bundleDisc = bundleDiscountTotal();
-    const couponDisc = discount > 0 ? (sub - bundleDisc) * (discount / 100) : 0;
+    const couponDisc = discount > 0 ? sub * (discount / 100) : 0;
 
     return (
         <AnimatePresence>
@@ -91,12 +90,6 @@ export default function CartDrawer() {
                                     <span>Subtotal</span>
                                     <span className="font-medium text-warm-cream">{formatCurrency(sub)}</span>
                                 </div>
-                                {bundleDisc > 0 && (
-                                    <div className="flex justify-between text-sm text-emerald-600">
-                                        <span>Bundle Discount</span>
-                                        <span className="font-medium">-{formatCurrency(bundleDisc)}</span>
-                                    </div>
-                                )}
                                 {couponDisc > 0 && (
                                     <div className="flex justify-between text-sm text-emerald-600">
                                         <span>Coupon ({couponCode})</span>
@@ -128,24 +121,29 @@ export default function CartDrawer() {
 }
 
 function CartItems() {
-    const { items, updateQuantity, removeItem } = useCartStore();
+    const { items, removePackage } = useCartStore();
 
-    // Group items: standalone items first, then bundle groups
-    const { standaloneItems, bundleGroups } = useMemo(() => {
+    // Group items: standalone items first, then Zútaya Package groups
+    const { standaloneItems, packageGroups } = useMemo(() => {
         const standalone: CartItem[] = [];
-        const bundles = new Map<string, { name: string; discount: number; items: CartItem[] }>();
+        const packages = new Map<string, { name: string; price: number; boxes: number; items: CartItem[] }>();
 
         for (const item of items) {
-            if (item.bundleId) {
-                if (!bundles.has(item.bundleId)) {
-                    bundles.set(item.bundleId, { name: item.bundleName || "Bundle", discount: item.bundleDiscount || 0, items: [] });
+            if (item.packageId) {
+                if (!packages.has(item.packageId)) {
+                    packages.set(item.packageId, {
+                        name: item.packageName || "Zútaya Package",
+                        price: item.packagePrice || 0,
+                        boxes: item.packageBoxes || 1,
+                        items: [],
+                    });
                 }
-                bundles.get(item.bundleId)!.items.push(item);
+                packages.get(item.packageId)!.items.push(item);
             } else {
                 standalone.push(item);
             }
         }
-        return { standaloneItems: standalone, bundleGroups: Array.from(bundles.entries()) };
+        return { standaloneItems: standalone, packageGroups: Array.from(packages.entries()) };
     }, [items]);
 
     return (
@@ -157,37 +155,45 @@ function CartItems() {
                 ))}
             </AnimatePresence>
 
-            {/* Bundle groups */}
-            {bundleGroups.map(([bundleId, group]) => (
+            {/* Zútaya Package groups */}
+            {packageGroups.map(([packageId, group]) => (
                 <motion.div
-                    key={bundleId}
+                    key={packageId}
                     layout
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
-                    className="rounded-xl border border-emerald-200 bg-emerald-50/30 overflow-hidden"
+                    className="rounded-xl border border-brand-green/30 bg-brand-green/[0.06] overflow-hidden"
                 >
-                    {/* Bundle header */}
-                    <div className="flex items-center justify-between px-3 py-2 bg-emerald-50 border-b border-emerald-100">
-                        <div className="flex items-center gap-2">
-                            <Package size={13} className="text-emerald-600" />
-                            <span className="text-xs font-semibold text-emerald-700">{group.name}</span>
-                            <span className="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full">
-                                {group.discount}% OFF
-                            </span>
+                    {/* Package header */}
+                    <div className="flex items-center justify-between px-3 py-2 bg-brand-green/10 border-b border-brand-green/15">
+                        <div className="flex items-center gap-2 min-w-0">
+                            <Package size={13} className="text-brand-green shrink-0" />
+                            <span className="text-xs font-semibold text-brand-green truncate">{group.name}</span>
+                            {group.boxes > 1 && (
+                                <span className="text-[10px] font-bold bg-brand-green/15 text-brand-green px-1.5 py-0.5 rounded-full shrink-0">
+                                    ×{group.boxes}
+                                </span>
+                            )}
                         </div>
-                        <button
-                            type="button"
-                            onClick={() => removeItem("", undefined, bundleId)}
-                            className="p-1 hover:bg-red-50 rounded-full transition-colors cursor-pointer group"
-                            title="Remove bundle"
-                        >
-                            <Trash2 size={12} className="text-emerald-400 group-hover:text-red-500 transition-colors" />
-                        </button>
+                        <div className="flex items-center gap-2 shrink-0">
+                            <span className="text-xs font-bold text-warm-cream">{formatCurrency(group.price * group.boxes)}</span>
+                            <button
+                                type="button"
+                                onClick={() => removePackage(packageId)}
+                                className="p-1 hover:bg-red-500/10 rounded-full transition-colors cursor-pointer group"
+                                title="Remove package"
+                            >
+                                <Trash2 size={12} className="text-brand-green/50 group-hover:text-red-500 transition-colors" />
+                            </button>
+                        </div>
                     </div>
-                    {/* Bundle items */}
-                    <div className="p-2 space-y-2">
-                        {group.items.map((item) => (
-                            <CartItemRow key={`${bundleId}-${item.product.id}-${item.variant?.name || "default"}`} item={item} compact />
+                    {/* Package contents (curated — fixed, no per-line editing) */}
+                    <div className="p-2.5 space-y-1.5">
+                        {group.items.map((item, idx) => (
+                            <div key={`${packageId}-${idx}`} className="flex items-center justify-between text-[11px] text-warm-cream/55">
+                                <span className="truncate">{item.product.name}{item.variant ? ` · ${item.variant.name}` : ""}</span>
+                                <span className="text-warm-cream/35 shrink-0 ml-2">×{item.quantity}</span>
+                            </div>
                         ))}
                     </div>
                 </motion.div>

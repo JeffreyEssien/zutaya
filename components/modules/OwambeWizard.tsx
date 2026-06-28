@@ -108,7 +108,7 @@ export default function OwambeWizard({ occasions, animals, tiers, tagline }: Pro
     return (
         <div className="max-w-4xl mx-auto px-6 py-10">
             <div className="mb-8 text-center">
-                <p className="text-[11px] uppercase tracking-[0.3em] text-brand-green mb-3 flex items-center justify-center gap-2"><Sparkles size={14} /> Plan My Owambe</p>
+                <p className="text-[11px] uppercase tracking-[0.3em] text-brand-green mb-3 flex items-center justify-center gap-2"><Sparkles size={14} /> Book Outdoor Butchery</p>
                 <h1 className="font-serif text-3xl md:text-5xl text-warm-cream mb-2">{tagline}</h1>
                 <p className="text-warm-cream/50 text-sm">Tell us about your event — we'll handle slaughter, cuts, grilling, the lot.</p>
             </div>

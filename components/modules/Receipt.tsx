@@ -103,7 +103,35 @@ function CustomerSection({ name, email, address }: {
     );
 }
 
-function ItemsTable({ items }: { items: { product: { id?: string; name: string; price: number }; variant?: { name?: string; price?: number }; quantity: number; selectedPrepOptions?: { id: string; label: string; extraFee: number }[]; bundleId?: string }[] }) {
+type ReceiptItem = {
+    product: { id?: string; name: string; price: number; images?: string[] };
+    variant?: { name?: string; price?: number };
+    quantity: number;
+    selectedPrepOptions?: { id: string; label: string; extraFee: number }[];
+    bundleId?: string;
+    packageId?: string;
+    packageName?: string;
+    packagePrice?: number;
+    packageBoxes?: number;
+};
+
+function ItemsTable({ items }: { items: ReceiptItem[] }) {
+    const standalone = items.filter((i) => !i.packageId);
+    const packageGroups = Array.from(
+        items.reduce((map, item) => {
+            if (!item.packageId) return map;
+            const g = map.get(item.packageId) || {
+                name: item.packageName || "Zútaya Package",
+                price: item.packagePrice || 0,
+                boxes: item.packageBoxes || 1,
+                lines: [] as string[],
+            };
+            g.lines.push(`${item.product.name}${item.variant?.name ? ` · ${item.variant.name}` : ""} ×${item.quantity}`);
+            map.set(item.packageId, g);
+            return map;
+        }, new Map<string, { name: string; price: number; boxes: number; lines: string[] }>()),
+    );
+
     return (
         <div>
             <Label>Items</Label>
@@ -117,10 +145,10 @@ function ItemsTable({ items }: { items: { product: { id?: string; name: string; 
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-brand-lilac/8">
-                    {items.map((item, idx) => {
+                    {standalone.map((item, idx) => {
                         const unitPrice = item.variant?.price || item.product.price;
                         return (
-                            <tr key={`${item.product.id}-${item.variant?.name ?? ""}-${item.bundleId ?? ""}-${idx}`}>
+                            <tr key={`${item.product.id}-${item.variant?.name ?? ""}-${idx}`}>
                                 <td className="py-3 text-warm-cream font-medium">
                                     {item.product.name}
                                     {item.variant?.name && (
@@ -138,6 +166,17 @@ function ItemsTable({ items }: { items: { product: { id?: string; name: string; 
                             </tr>
                         );
                     })}
+                    {packageGroups.map(([packageId, group]) => (
+                        <tr key={packageId}>
+                            <td className="py-3 text-warm-cream font-medium">
+                                📦 {group.name}
+                                <span className="block text-[10px] text-warm-cream/40 font-normal mt-0.5">{group.lines.join(", ")}</span>
+                            </td>
+                            <td className="py-3 text-center text-warm-cream/50">{group.boxes}</td>
+                            <td className="py-3 text-right text-warm-cream/50">{formatCurrency(group.price)}</td>
+                            <td className="py-3 text-right text-warm-cream font-semibold">{formatCurrency(group.price * group.boxes)}</td>
+                        </tr>
+                    ))}
                 </tbody>
             </table>
         </div>

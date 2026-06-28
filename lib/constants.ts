@@ -4,6 +4,9 @@ export const CURRENCY = "NGN";
 export const LOW_STOCK_THRESHOLD = 5;
 
 export const SITE_EMAIL = "zutayao@gmail.com";
+// Public-facing enquiries address shown in "Get in Touch". Kept separate from
+// SITE_EMAIL, which is also the SMTP sending/fallback address (Gmail-based).
+export const CONTACT_EMAIL = "enquiry@zutayang.com";
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://zutaya.vercel.app";
 
 export const BUSINESS_PHONE = "07042038491";
@@ -13,8 +16,8 @@ export const INSTAGRAM_HANDLE = "@zuutaya";
 export const NAV_LINKS = [
     { label: "Home", href: "/" },
     { label: "Shop", href: "/shop" },
-    { label: "Events", href: "/events" },
-    { label: "Bundles", href: "/bundles" },
+    { label: "Outdoor Butchery", href: "/events" },
+    { label: "Packages", href: "/bundles" },
     { label: "Track Order", href: "/track" },
 ] as const;
 
@@ -45,7 +48,7 @@ export const ADMIN_NAV_GROUPS = [
             { label: "Products", href: "/admin/products", icon: "package" },
             { label: "Categories", href: "/admin/categories", icon: "tag" },
             { label: "Inventory", href: "/admin/inventory", icon: "box" },
-            { label: "Bundles", href: "/admin/bundles", icon: "gift" },
+            { label: "Packages", href: "/admin/bundles", icon: "gift" },
         ],
     },
     {
@@ -59,7 +62,7 @@ export const ADMIN_NAV_GROUPS = [
     {
         heading: "Events & Services",
         links: [
-            { label: "Events", href: "/admin/events", icon: "star" },
+            { label: "Outdoor Butchery", href: "/admin/events", icon: "star" },
             { label: "Bookings", href: "/admin/bookings", icon: "clipboard" },
             { label: "Services Config", href: "/admin/services-config", icon: "cog" },
         ],

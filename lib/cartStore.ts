@@ -2,14 +2,8 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { CartItem, Product, PrepOption, CartItemProcessing } from "@/types";
+import type { CartItem, Product, PrepOption, CartItemProcessing, ZutayaPackage } from "@/types";
 import { validateCoupon } from "@/lib/queries";
-
-interface BundleEntry {
-    productId: string;
-    quantity: number;
-    prepOptions?: PrepOption[];
-}
 
 interface CartStore {
     items: CartItem[];
@@ -20,15 +14,15 @@ interface CartStore {
     close: () => void;
     toggle: () => void;
     addItem: (product: Product, variant?: CartItem["variant"], selectedPrepOptions?: PrepOption[], processing?: CartItemProcessing, completionMode?: CartItem["completionMode"]) => void;
-    addBundleToCart: (products: Product[], entries: BundleEntry[], discountPercent: number, bundleName: string) => void;
+    addPackageToCart: (pkg: ZutayaPackage, boxes?: number) => void;
     removeItem: (productId: string, variantName?: string, bundleId?: string) => void;
+    removePackage: (packageId: string) => void;
     updateQuantity: (productId: string, variantName: string | undefined, quantity: number, bundleId?: string) => void;
     clearCart: () => void;
     totalItems: () => number;
     applyCoupon: (code: string) => Promise<boolean>;
     removeCoupon: () => void;
     subtotal: () => number;
-    bundleDiscountTotal: () => number;
     total: () => number;
 }
 
@@ -47,9 +41,9 @@ export const useCartStore = create<CartStore>()(
             addItem: (product, variant, selectedPrepOptions, processing, completionMode) => {
                 set((state) => {
                     const hasProcessing = processing && Object.keys(processing).length > 0;
-                    // Only merge with non-bundle items of the same product without custom processing
+                    // Only merge with non-grouped items of the same product without custom processing
                     const existingItem = state.items.find(
-                        (item) => item.product.id === product.id && item.variant?.name === variant?.name && !item.bundleId && !item.processing && !hasProcessing
+                        (item) => item.product.id === product.id && item.variant?.name === variant?.name && !item.bundleId && !item.packageId && !item.processing && !hasProcessing
                     );
 
                     const availableStock = (variant?.stock !== undefined) ? variant.stock : product.stock;
@@ -72,45 +66,66 @@ export const useCartStore = create<CartStore>()(
                 });
             },
 
-            addBundleToCart: (products, entries, discountPercent, bundleName) => {
-                const bundleId = `bundle-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+            // Add a curated Zútaya Package as a grouped set of line items. Each line
+            // carries the real product id + variant/inventory so stock auto-deducts at
+            // checkout, while the group is charged the package's flat price.
+            addPackageToCart: (pkg, boxes = 1) => {
+                const qtyBoxes = Math.max(1, Math.floor(boxes));
+                const packageId = `pkg-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
                 set((state) => {
-                    const bundleItems: CartItem[] = entries
-                        .filter((e) => e.quantity > 0)
-                        .map((entry) => {
-                            const product = products.find((p) => p.id === entry.productId);
-                            if (!product) return null;
+                    const lines: CartItem[] = pkg.items
+                        .filter((it) => it.productId && it.quantity > 0)
+                        .map((it) => {
+                            // Minimal Product shape — only the fields the cart/order/stock path reads.
+                            const product = {
+                                id: it.productId as string,
+                                name: it.label || it.productName || "Package item",
+                                slug: it.productSlug || "",
+                                price: 0,
+                                images: it.productImage ? [it.productImage] : [],
+                                inventoryId: it.inventoryItemId || undefined,
+                                variants: [],
+                                stock: Number.MAX_SAFE_INTEGER,
+                                description: "",
+                                category: "",
+                                brand: "",
+                                isFeatured: false,
+                                isNew: false,
+                            } as unknown as Product;
                             return {
                                 product,
-                                quantity: entry.quantity,
-                                selectedPrepOptions: entry.prepOptions && entry.prepOptions.length > 0 ? entry.prepOptions : undefined,
-                                bundleId,
-                                bundleDiscount: discountPercent,
-                                bundleName,
+                                variant: it.variantName ? { name: it.variantName } : undefined,
+                                quantity: it.quantity * qtyBoxes,
+                                packageId,
+                                packageName: pkg.name,
+                                packagePrice: pkg.price,
+                                packageBoxes: qtyBoxes,
                             } as CartItem;
-                        })
-                        .filter(Boolean) as CartItem[];
-
-                    return { items: [...state.items, ...bundleItems] };
+                        });
+                    if (lines.length === 0) return {};
+                    return { items: [...state.items, ...lines] };
                 });
             },
 
             removeItem: (productId, variantName, bundleId) => {
                 set((state) => {
                     if (bundleId) {
-                        // Remove entire bundle group
                         return { items: state.items.filter((item) => item.bundleId !== bundleId) };
                     }
                     return {
-                        items: state.items.filter((item) => !(item.product.id === productId && item.variant?.name === variantName && !item.bundleId)),
+                        items: state.items.filter((item) => !(item.product.id === productId && item.variant?.name === variantName && !item.bundleId && !item.packageId)),
                     };
                 });
+            },
+
+            removePackage: (packageId) => {
+                set((state) => ({ items: state.items.filter((item) => item.packageId !== packageId) }));
             },
 
             updateQuantity: (productId, variantName, quantity, bundleId) => {
                 set((state) => ({
                     items: state.items.map((item) => {
-                        if (item.product.id === productId && item.variant?.name === variantName && item.bundleId === bundleId) {
+                        if (item.product.id === productId && item.variant?.name === variantName && item.bundleId === bundleId && !item.packageId) {
                             const stock = (item.variant && item.variant.stock !== undefined) ? item.variant.stock : item.product.stock;
                             const newQuantity = Math.min(Math.max(0, quantity), stock);
                             return { ...item, quantity: newQuantity };
@@ -139,39 +154,29 @@ export const useCartStore = create<CartStore>()(
 
             removeCoupon: () => set({ discount: 0, couponCode: null }),
 
+            // Standalone items priced per-line; each package group contributes its
+            // flat price once (price-per-box × boxes), not the sum of its lines.
             subtotal: () => {
                 const { items } = get();
-                return items.reduce((total, item) => {
-                    const price = item.variant?.price || item.product.price;
-                    return total + price * item.quantity;
-                }, 0);
-            },
-
-            bundleDiscountTotal: () => {
-                const { items } = get();
-                // Group items by bundleId and calculate per-bundle discounts
-                const bundleGroups = new Map<string, { subtotal: number; discount: number }>();
+                const seenPackages = new Set<string>();
+                let sum = 0;
                 for (const item of items) {
-                    if (item.bundleId && item.bundleDiscount) {
+                    if (item.packageId) {
+                        if (seenPackages.has(item.packageId)) continue;
+                        seenPackages.add(item.packageId);
+                        sum += (item.packagePrice || 0) * (item.packageBoxes || 1);
+                    } else {
                         const price = item.variant?.price || item.product.price;
-                        const itemTotal = price * item.quantity;
-                        const existing = bundleGroups.get(item.bundleId) || { subtotal: 0, discount: item.bundleDiscount };
-                        existing.subtotal += itemTotal;
-                        bundleGroups.set(item.bundleId, existing);
+                        sum += price * item.quantity;
                     }
                 }
-                let totalDiscount = 0;
-                for (const group of bundleGroups.values()) {
-                    totalDiscount += group.subtotal * (group.discount / 100);
-                }
-                return totalDiscount;
+                return sum;
             },
 
             total: () => {
                 const sub = get().subtotal();
-                const bundleDisc = get().bundleDiscountTotal();
-                const couponDisc = (sub - bundleDisc) * (get().discount / 100); // Coupon applies after bundle discounts
-                return Math.max(0, sub - bundleDisc - couponDisc);
+                const couponDisc = sub * (get().discount / 100);
+                return Math.max(0, sub - couponDisc);
             },
         }),
         {

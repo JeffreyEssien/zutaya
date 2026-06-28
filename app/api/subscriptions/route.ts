@@ -1,12 +1,12 @@
 import { createSubscription, getSubscriptions, updateSubscription } from "@/lib/queries";
-import { cookies } from "next/headers";
+import { getCurrentAdmin } from "@/lib/adminAuth";
 
+// The cookie holds a random session TOKEN validated against admin_sessions —
+// NOT ADMIN_SESSION_SECRET. The old `session === secret` check could never pass
+// for a real admin. getCurrentAdmin() is the canonical scheme (same as the
+// orders route). See also app/api/bundles/route.ts.
 async function isAdmin(): Promise<boolean> {
-    const secret = process.env.ADMIN_SESSION_SECRET;
-    if (!secret) return false;
-    const cookieStore = await cookies();
-    const session = cookieStore.get("admin_session")?.value;
-    return session === secret;
+    return (await getCurrentAdmin()) !== null;
 }
 
 export async function GET() {

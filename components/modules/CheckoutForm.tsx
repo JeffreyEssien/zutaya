@@ -94,7 +94,7 @@ export default function CheckoutForm({
     const orderDraftRef = useRef<Partial<Order>>({});
     const [stage, setStage] = useState<"idle" | "creating" | "awaiting_payment">("idle");
     const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
-    const { items, subtotal, clearCart, couponCode, discount, removeCoupon, bundleDiscountTotal } = useCartStore();
+    const { items, subtotal, clearCart, couponCode, discount, removeCoupon } = useCartStore();
     const { addOrder } = useOrderStore();
 
     const [dbPricing, setDbPricing] = useState<DbPricingResult | null>(null);
@@ -171,9 +171,7 @@ export default function CheckoutForm({
     // ── Compute base + processing fee for live cart display ──
     const baseTotal = useMemo(() => {
         const sub = subtotal();
-        const bundleDisc = bundleDiscountTotal();
-        const couponDisc = discount > 0 ? (sub - bundleDisc) * (discount / 100) : 0;
-        const totalDiscount = bundleDisc + couponDisc;
+        const couponDisc = discount > 0 ? sub * (discount / 100) : 0;
         const packFee = addPackaging ? packagingConfig.fee : 0;
         const prepFee = items.reduce((sum, item) => {
             if (item.selectedPrepOptions && item.selectedPrepOptions.length > 0) {
@@ -181,8 +179,8 @@ export default function CheckoutForm({
             }
             return sum;
         }, 0);
-        return Math.max(0, sub - totalDiscount) + deliveryFee + packFee + prepFee;
-    }, [subtotal, bundleDiscountTotal, discount, addPackaging, packagingConfig.fee, items, deliveryFee]);
+        return Math.max(0, sub - couponDisc) + deliveryFee + packFee + prepFee;
+    }, [subtotal, discount, addPackaging, packagingConfig.fee, items, deliveryFee]);
 
     const processingFee = useMemo(() => customerProcessingFee(baseTotal), [baseTotal]);
 
@@ -249,9 +247,8 @@ export default function CheckoutForm({
         const sub = subtotal();
         const ship = deliveryFee;
         const packFee = addPackaging ? packagingConfig.fee : 0;
-        const bundleDisc = bundleDiscountTotal();
-        const couponDisc = discount > 0 ? (sub - bundleDisc) * (discount / 100) : 0;
-        const totalDiscount = bundleDisc + couponDisc;
+        const couponDisc = discount > 0 ? sub * (discount / 100) : 0;
+        const totalDiscount = couponDisc;
         const prepFee = items.reduce((s, item) => {
             if (item.selectedPrepOptions?.length) {
                 return s + item.selectedPrepOptions.reduce((acc, o) => acc + o.extraFee, 0) * item.quantity;

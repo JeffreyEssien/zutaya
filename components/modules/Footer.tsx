@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { getSiteSettings } from "@/lib/queries";
 import type { SiteSettings } from "@/types";
 import { useSettings } from "@/lib/SettingsProvider";
-import { SITE_NAME, SITE_EMAIL, WHATSAPP_NUMBER } from "@/lib/constants";
+import { SITE_NAME, CONTACT_EMAIL, WHATSAPP_NUMBER } from "@/lib/constants";
 import { Instagram, Twitter, Music2, Facebook, Mail, ArrowUpRight, MessageCircle, Check, Loader2 } from "lucide-react";
 import { getText } from "@/lib/textDefaults";
 
@@ -109,13 +109,13 @@ export default function Footer({ customTexts }: { customTexts?: Record<string, s
                             Get in Touch
                         </h4>
                         <div className="space-y-5">
-                            <a href={`mailto:${SITE_EMAIL}`} className="inline-flex items-center gap-3 text-sm text-warm-cream/70 hover:text-brand-green transition-all duration-300 font-light group">
+                            <a href={`mailto:${CONTACT_EMAIL}`} className="inline-flex items-center gap-3 text-sm text-warm-cream/70 hover:text-brand-green transition-all duration-300 font-light group">
                                 <span className="p-2.5 rounded-full border border-warm-cream/10 group-hover:border-brand-green/30 group-hover:bg-brand-green/5 transition-all duration-300">
                                     <Mail size={14} strokeWidth={1.5} className="group-hover:text-brand-green text-warm-cream/50 transition-colors" />
                                 </span>
                                 <span className="relative overflow-hidden inline-flex">
-                                    <span className="inline-block transition-transform duration-[400ms] group-hover:-translate-y-full">{SITE_EMAIL}</span>
-                                    <span className="absolute top-0 left-0 inline-block translate-y-full transition-transform duration-[400ms] group-hover:translate-y-0 text-brand-green">{SITE_EMAIL}</span>
+                                    <span className="inline-block transition-transform duration-[400ms] group-hover:-translate-y-full">{CONTACT_EMAIL}</span>
+                                    <span className="absolute top-0 left-0 inline-block translate-y-full transition-transform duration-[400ms] group-hover:translate-y-0 text-brand-green">{CONTACT_EMAIL}</span>
                                 </span>
                             </a>
                             <a

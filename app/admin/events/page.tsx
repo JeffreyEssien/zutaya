@@ -10,8 +10,8 @@ export default async function AdminEventsPage() {
     return (
         <div className="space-y-8">
             <div>
-                <h1 className="font-serif text-2xl text-warm-cream">Outdoor Events</h1>
-                <p className="text-warm-cream/60 text-sm">Manage occasions, animals (with yield math), and service tiers used by the Plan My Owambe wizard.</p>
+                <h1 className="font-serif text-2xl text-warm-cream">Outdoor Butchery</h1>
+                <p className="text-warm-cream/60 text-sm">Manage occasions, animals (with yield math), and service tiers used by the on-site Outdoor Butchery booking wizard.</p>
             </div>
             <EventsAdmin initialOccasions={occasions} initialAnimals={animals} initialTiers={tiers} />
         </div>

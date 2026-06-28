@@ -117,8 +117,13 @@ export interface CartItem {
     quantity: number;
     selectedPrepOptions?: PrepOption[];
     bundleId?: string;
-    bundleDiscount?: number; // percent
+    bundleDiscount?: number; // percent (legacy — historical orders only)
     bundleName?: string;
+    // Zútaya Package grouping (curated box, flat price)
+    packageId?: string;
+    packageName?: string;
+    packagePrice?: number; // flat price of ONE box, shared across the group's lines
+    packageBoxes?: number; // number of boxes for this group
     completionMode?: CompletionMode;
     processing?: CartItemProcessing;
 }
@@ -292,16 +297,37 @@ export interface InventoryLog {
     createdAt: string;
 }
 
-export interface BundleRule {
+// Zútaya Packages — fixed, curated meat boxes with a flat price.
+export interface ZutayaPackageItem {
+    id?: string;
+    productId: string | null;
+    productName?: string;
+    variantName?: string | null;
+    inventoryItemId?: string | null;
+    quantity: number;
+    label?: string; // display override e.g. "1kg goatmeat"
+    sortOrder?: number;
+    // Enriched at read time from the linked product (storefront display)
+    productImage?: string;
+    productSlug?: string;
+    availableStock?: number; // current stock for this line's source (variant/inventory/product)
+    available?: boolean; // availableStock >= quantity (per single box)
+}
+
+export interface ZutayaPackage {
     id: string;
     name: string;
+    slug: string;
     description?: string;
-    minItems: number;
-    maxItems: number;
-    discountPercent: number;
-    allowedCategoryIds?: string[];
+    tagline?: string;
+    price: number; // flat price, Naira
+    imageUrl?: string;
     isActive: boolean;
+    sortOrder: number;
+    items: ZutayaPackageItem[];
+    available?: boolean; // false when any linked line is out of stock for one box
     createdAt: string;
+    updatedAt?: string;
 }
 
 export interface Subscription {

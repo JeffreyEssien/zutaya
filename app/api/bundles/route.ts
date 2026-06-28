@@ -1,46 +1,54 @@
-import { getBundleRules, createBundleRule, updateBundleRule, deleteBundleRule } from "@/lib/queries";
-import { cookies } from "next/headers";
+import {
+    getZutayaPackages,
+    createZutayaPackage,
+    updateZutayaPackage,
+    deleteZutayaPackage,
+} from "@/lib/queries";
+import { getCurrentAdmin } from "@/lib/adminAuth";
 
 async function isAdmin(): Promise<boolean> {
-    const secret = process.env.ADMIN_SESSION_SECRET;
-    if (!secret) return false;
-    const cookieStore = await cookies();
-    const session = cookieStore.get("admin_session")?.value;
-    return session === secret;
+    return (await getCurrentAdmin()) !== null;
 }
 
-export async function GET() {
-    const bundles = await getBundleRules(true);
-    return Response.json(bundles);
+export async function GET(req: Request) {
+    const { searchParams } = new URL(req.url);
+    // Public storefront passes ?active=1; admin omits it to see everything.
+    const activeOnly = searchParams.get("active") === "1";
+    const packages = await getZutayaPackages(activeOnly);
+    return Response.json(packages);
 }
 
 export async function POST(req: Request) {
-    if (!await isAdmin()) {
+    if (!(await isAdmin())) {
         return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await req.json();
-    const { name, description, minItems, maxItems, discountPercent, allowedCategoryIds, isActive } = body;
+    const { name, price, items } = body;
 
-    if (!name || minItems == null || maxItems == null || discountPercent == null) {
-        return Response.json({ error: "Missing required fields" }, { status: 400 });
+    if (!name || price == null) {
+        return Response.json({ error: "Name and price are required" }, { status: 400 });
+    }
+    if (!Array.isArray(items) || items.length === 0) {
+        return Response.json({ error: "A package needs at least one content line" }, { status: 400 });
     }
 
-    const id = await createBundleRule({
+    const id = await createZutayaPackage({
         name,
-        description,
-        minItems,
-        maxItems,
-        discountPercent,
-        allowedCategoryIds,
-        isActive,
+        description: body.description,
+        tagline: body.tagline,
+        price: Number(price),
+        imageUrl: body.imageUrl,
+        isActive: body.isActive,
+        sortOrder: body.sortOrder,
+        items,
     });
 
     return Response.json({ id });
 }
 
 export async function PUT(req: Request) {
-    if (!await isAdmin()) {
+    if (!(await isAdmin())) {
         return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -50,13 +58,14 @@ export async function PUT(req: Request) {
     if (!id) {
         return Response.json({ error: "Missing id" }, { status: 400 });
     }
+    if (updates.price != null) updates.price = Number(updates.price);
 
-    await updateBundleRule(id, updates);
+    await updateZutayaPackage(id, updates);
     return Response.json({ success: true });
 }
 
 export async function DELETE(req: Request) {
-    if (!await isAdmin()) {
+    if (!(await isAdmin())) {
         return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -67,6 +76,6 @@ export async function DELETE(req: Request) {
         return Response.json({ error: "Missing id" }, { status: 400 });
     }
 
-    await deleteBundleRule(id);
+    await deleteZutayaPackage(id);
     return Response.json({ success: true });
 }

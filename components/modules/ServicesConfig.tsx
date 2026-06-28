@@ -58,10 +58,10 @@ export default function ServicesConfig(p: Props) {
             <section className="bg-white/[0.04] rounded-xl border border-warm-cream/15 p-5 space-y-3">
                 <h2 className="font-serif text-lg text-warm-cream">Service toggles</h2>
                 <label className="flex items-center gap-2 text-sm text-warm-cream/80">
-                    <input type="checkbox" checked={events} onChange={(e) => setEvents(e.target.checked)} /> Events (Outdoor Butchery) enabled
+                    <input type="checkbox" checked={events} onChange={(e) => setEvents(e.target.checked)} /> Outdoor Butchery enabled
                 </label>
                 <div>
-                    <label className="text-xs text-warm-cream/60">Events tagline</label>
+                    <label className="text-xs text-warm-cream/60">Outdoor Butchery tagline</label>
                     <input value={tagline} onChange={(e) => setTagline(e.target.value)} className="w-full mt-1 bg-black/40 text-warm-cream text-sm px-3 py-2 rounded border border-warm-cream/10" />
                 </div>
             </section>

@@ -5,7 +5,7 @@ import {
   BUSINESS_HOURS,
   INSTAGRAM_HANDLE,
 } from "@/lib/constants";
-import type { Product } from "@/types";
+import type { Product, ZutayaPackage } from "@/types";
 import { formatCurrency } from "@/lib/formatCurrency";
 
 /** Canonical site origin (no trailing slash). Set NEXT_PUBLIC_SITE_URL in prod. */
@@ -149,6 +149,51 @@ export function productSchema(product: Product) {
         product.stock > 0
           ? "https://schema.org/InStock"
           : "https://schema.org/OutOfStock",
+      itemCondition: "https://schema.org/NewCondition",
+      seller: { "@type": "Organization", name: SITE_NAME },
+    },
+  };
+}
+
+/** Transactional meta description for a Zútaya Package (curated box). */
+export function packageMetaDescription(pkg: ZutayaPackage): string {
+  const contents = pkg.items
+    .map((i) => i.label || i.productName)
+    .filter(Boolean)
+    .slice(0, 6)
+    .join(", ");
+  return truncate(
+    `${pkg.name} — ${formatCurrency(pkg.price)}. Curated meat box${contents ? `: ${contents}` : ""}. Cold-chain packed, delivered fresh across Lagos. Order online now.`,
+    160,
+  );
+}
+
+/**
+ * Product + Offer schema for a Zútaya Package — unlocks price/availability
+ * rich snippets. Availability mirrors the live stock of the linked products.
+ */
+export function packageSchema(pkg: ZutayaPackage) {
+  const url = absoluteUrl(`/bundles#${pkg.slug}`);
+  const images = [pkg.imageUrl].filter(Boolean) as string[];
+  return {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: pkg.name,
+    description: packageMetaDescription(pkg),
+    image: images.length ? images : [absoluteUrl("/og-image.jpg")],
+    sku: pkg.id,
+    category: "Meat Package",
+    brand: { "@type": "Brand", name: SITE_NAME },
+    offers: {
+      "@type": "Offer",
+      url,
+      priceCurrency: "NGN",
+      price: pkg.price,
+      priceValidUntil: `${new Date().getFullYear() + 1}-12-31`,
+      availability:
+        pkg.available === false
+          ? "https://schema.org/OutOfStock"
+          : "https://schema.org/InStock",
       itemCondition: "https://schema.org/NewCondition",
       seller: { "@type": "Organization", name: SITE_NAME },
     },

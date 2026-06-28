@@ -306,11 +306,15 @@ export default function OrderDetailPanel({ order, onClose, onUpdate }: OrderDeta
     const packagingFee = order.packagingFee ?? 0;
     const prepFee = order.prepFee ?? 0;
 
-    // Group bundle items
+    // Group items by legacy bundle (historical) and Zútaya Package
     const bundleGroups: Record<string, typeof order.items> = {};
+    const packageGroups: Record<string, typeof order.items> = {};
     const standaloneItems: typeof order.items = [];
     for (const item of order.items) {
-        if (item.bundleId) {
+        if (item.packageId) {
+            if (!packageGroups[item.packageId]) packageGroups[item.packageId] = [];
+            packageGroups[item.packageId].push(item);
+        } else if (item.bundleId) {
             if (!bundleGroups[item.bundleId]) bundleGroups[item.bundleId] = [];
             bundleGroups[item.bundleId].push(item);
         } else {
@@ -553,7 +557,28 @@ export default function OrderDetailPanel({ order, onClose, onUpdate }: OrderDeta
                             {/* ═══ Order Items ═══ */}
                             <Card icon={<ShoppingBag size={14} />} title={`Items (${order.items.length})`}>
                                 <div className="space-y-0">
-                                    {/* Bundle groups */}
+                                    {/* Zútaya Package groups */}
+                                    {Object.entries(packageGroups).map(([packageId, items]) => {
+                                        const boxes = items[0].packageBoxes || 1;
+                                        const flat = (items[0].packagePrice || 0) * boxes;
+                                        return (
+                                            <div key={packageId} className="mb-3 last:mb-0">
+                                                <div className="flex items-center justify-between gap-2 mb-1.5">
+                                                    <span className="text-[10px] font-semibold uppercase tracking-wider text-brand-green bg-brand-green/10 px-2 py-0.5 rounded-full">
+                                                        📦 {items[0].packageName || "Zútaya Package"}{boxes > 1 ? ` ×${boxes}` : ""}
+                                                    </span>
+                                                    <span className="text-sm text-warm-cream font-semibold tabular-nums">{formatCurrency(flat)}</span>
+                                                </div>
+                                                <div className="border-l-2 border-brand-green/20 pl-3 space-y-1.5">
+                                                    {items.map((item, idx) => (
+                                                        <ItemRow key={`${packageId}-${idx}`} item={item} hidePrice />
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+
+                                    {/* Bundle groups (legacy historical orders) */}
                                     {Object.entries(bundleGroups).map(([bundleId, items]) => (
                                         <div key={bundleId} className="mb-3 last:mb-0">
                                             <div className="flex items-center gap-2 mb-1.5">
@@ -779,7 +804,7 @@ function BillRow({ label, value, highlight }: { label: string; value: string; hi
     );
 }
 
-function ItemRow({ item }: { item: Order["items"][number] }) {
+function ItemRow({ item, hidePrice }: { item: Order["items"][number]; hidePrice?: boolean }) {
     if (!item.product) return null;
     const unitPrice = item.variant?.price || item.product.price;
     return (
@@ -798,9 +823,11 @@ function ItemRow({ item }: { item: Order["items"][number] }) {
                     </p>
                 )}
             </div>
-            <span className="text-sm text-warm-cream font-semibold shrink-0 tabular-nums">
-                {formatCurrency(unitPrice * item.quantity)}
-            </span>
+            {!hidePrice && (
+                <span className="text-sm text-warm-cream font-semibold shrink-0 tabular-nums">
+                    {formatCurrency(unitPrice * item.quantity)}
+                </span>
+            )}
         </div>
     );
 }

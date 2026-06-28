@@ -92,12 +92,12 @@ export default function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
                         )}
                     </div>
                 </div>
-                <div className="flex space-x-1 bg-white/[0.04] backdrop-blur-sm p-1 rounded-xl border border-warm-cream/[0.08] shadow-sm">
+                <div className="flex flex-wrap gap-1 bg-white/[0.04] backdrop-blur-sm p-1 rounded-xl border border-warm-cream/[0.08] shadow-sm max-w-full">
                     {tabs.map(tab => (
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
-                            className={`relative px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 flex items-center gap-2 cursor-pointer ${activeTab === tab.id
+                            className={`relative px-3 lg:px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 flex items-center gap-2 cursor-pointer whitespace-nowrap ${activeTab === tab.id
                                 ? "text-brand-green"
                                 : "text-warm-cream/50 hover:text-warm-cream"
                                 }`}
@@ -173,7 +173,7 @@ function SalesView({ data }: { data: AnalyticsData }) {
             </motion.div>
 
             <motion.div variants={fadeUp} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 glass-card p-6">
+                <div className="lg:col-span-2 min-w-0 glass-card p-6">
                     <h3 className="text-lg font-medium text-warm-cream mb-6">Revenue Trend</h3>
                     <div className="h-[300px]">
                         <ResponsiveContainer width="100%" height="100%" minWidth={0}>
@@ -221,7 +221,7 @@ function SalesView({ data }: { data: AnalyticsData }) {
 
             {/* Category Performance + Top Selling */}
             <motion.div variants={fadeUp} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="glass-card p-6">
+                <div className="min-w-0 glass-card p-6">
                     <h3 className="text-lg font-medium text-warm-cream mb-4">Category Performance</h3>
                     {data.categoryPerformance.length > 0 ? (
                         <div className="h-[250px]">
@@ -245,7 +245,7 @@ function SalesView({ data }: { data: AnalyticsData }) {
                         <p className="text-warm-cream/40 text-sm py-10 text-center">No category data yet</p>
                     )}
                 </div>
-                <div className="glass-card p-6">
+                <div className="min-w-0 glass-card p-6">
                     <h3 className="text-lg font-medium text-warm-cream mb-4">Top Selling Products</h3>
                     {/* Desktop Table */}
                     <div className="hidden md:block overflow-x-auto">
@@ -326,7 +326,7 @@ function MeatDeliveryView({ data }: { data: AnalyticsData }) {
             {/* Charts Row */}
             <motion.div variants={fadeUp} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Kg Sold by Category */}
-                <div className="glass-card p-6">
+                <div className="min-w-0 glass-card p-6">
                     <h3 className="text-lg font-medium text-warm-cream mb-4">Kg Sold by Category</h3>
                     {m.kgByCategory.length > 0 ? (
                         <div className="h-[280px]">
@@ -352,7 +352,7 @@ function MeatDeliveryView({ data }: { data: AnalyticsData }) {
                 </div>
 
                 {/* Delivery Zone Breakdown */}
-                <div className="glass-card p-6">
+                <div className="min-w-0 glass-card p-6">
                     <h3 className="text-lg font-medium text-warm-cream mb-4">Delivery Zone Breakdown</h3>
                     {m.deliveryZoneBreakdown.length > 0 ? (
                         <div className="h-[280px]">
@@ -543,7 +543,7 @@ function CustomersView({ data }: { data: AnalyticsData }) {
             </motion.div>
 
             <motion.div variants={fadeUp} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="glass-card p-6">
+                <div className="min-w-0 glass-card p-6">
                     <h3 className="text-lg font-medium text-warm-cream mb-6">Guest vs Registered</h3>
                     <div className="h-[220px] flex items-center justify-center">
                         <ResponsiveContainer width="100%" height="100%" minWidth={0}>

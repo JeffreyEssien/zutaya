@@ -1,19 +1,19 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Build Your Meat Box — Party & Owambe Meat Packs in Lagos",
+  title: "Zútaya Packages — Curated Party & Owambe Meat Boxes in Lagos",
   description:
-    "Build a custom meat box and save with bundle pricing — perfect for party meat, owambe and bulk freezer stocking. Beef, chicken, goat & assorted meat delivered fresh across Lagos by Zúta Ya.",
+    "Shop ready-made Zútaya Packages — curated meat boxes at one flat price. Goat, beef, chicken, shaki, kidney and more, portioned and delivered fresh across Lagos by Zúta Ya.",
   alternates: { canonical: "/bundles" },
   openGraph: {
-    title: "Build Your Meat Box | Zúta Ya",
+    title: "Zútaya Packages | Zúta Ya",
     description:
-      "Custom meat boxes & party/owambe meat packs with bundle pricing. Delivered fresh across Lagos.",
+      "Curated meat boxes at a flat price — perfect for the family, parties and owambe. Delivered fresh across Lagos.",
     url: "/bundles",
     type: "website",
   },
 };
 
-export default function BundlesLayout({ children }: { children: React.ReactNode }) {
+export default function PackagesLayout({ children }: { children: React.ReactNode }) {
   return children;
 }

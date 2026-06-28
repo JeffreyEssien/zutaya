@@ -49,12 +49,12 @@ export const TEXT_GROUPS: TextGroup[] = [
         ],
     },
     {
-        label: "Bundle CTA Section",
+        label: "Packages CTA Section",
         keys: [
-            { key: "cta.eyebrow", label: "Eyebrow", default: "Save More" },
-            { key: "cta.heading", label: "Heading", default: "Build Your Own Box & Save Up to 20%" },
-            { key: "cta.desc", label: "Description", default: "Mix and match your favourite premium cuts into a custom bundle. The more you add, the more you save.", multiline: true },
-            { key: "cta.button1", label: "Primary Button", default: "Build Your Box" },
+            { key: "cta.eyebrow", label: "Eyebrow", default: "Ready in one tap" },
+            { key: "cta.heading", label: "Heading", default: "Shop Our Zútaya Packages" },
+            { key: "cta.desc", label: "Description", default: "Curated meat boxes at one flat price — goat, beef, chicken, shaki and more, portioned and ready for the family, parties and owambe.", multiline: true },
+            { key: "cta.button1", label: "Primary Button", default: "Shop Packages" },
             { key: "cta.button2", label: "Secondary Button", default: "Browse All Cuts" },
         ],
     },
@@ -79,10 +79,10 @@ export const TEXT_GROUPS: TextGroup[] = [
         ],
     },
     {
-        label: "Bundles Page",
+        label: "Packages Page",
         keys: [
-            { key: "bundles.heading", label: "Heading", default: "Build Your Box" },
-            { key: "bundles.desc", label: "Description", default: "Pick a bundle, choose your cuts, and save big. Mix and match your favourite premium meats." },
+            { key: "bundles.heading", label: "Heading", default: "Zútaya Packages" },
+            { key: "bundles.desc", label: "Description", default: "Curated meat boxes at one flat price. Pick a package, choose how many boxes, and we deliver it fresh." },
         ],
     },
     {

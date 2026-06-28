@@ -1,6 +1,6 @@
 import { cache } from "react";
 import { getSupabaseClient, getSupabaseServiceClient } from "@/lib/supabase";
-import type { Product, Category, Order, SiteSettings, Coupon, Profile, InventoryLog, Page, InventoryItem, BundleRule, Subscription, NewsletterSubscriber, NewsletterCampaign } from "@/types";
+import type { Product, Category, Order, SiteSettings, Coupon, Profile, InventoryLog, Page, InventoryItem, ZutayaPackage, ZutayaPackageItem, Subscription, NewsletterSubscriber, NewsletterCampaign } from "@/types";
 
 interface DbProduct {
     id: string;
@@ -1342,100 +1342,245 @@ export async function deleteDeliveryLocation(id: string): Promise<void> {
 }
 
 // ═══════════════════════════════════════
-// Bundle Rules Queries
+// Zútaya Packages Queries
 // ═══════════════════════════════════════
 
-function toBundleRule(row: any): BundleRule {
+function toPackageItem(row: any): ZutayaPackageItem {
     return {
         id: row.id,
-        name: row.name,
-        description: row.description || undefined,
-        minItems: row.min_items,
-        maxItems: row.max_items,
-        discountPercent: Number(row.discount_percent),
-        allowedCategoryIds: row.allowed_category_ids || undefined,
-        isActive: row.is_active,
-        createdAt: row.created_at,
+        productId: row.product_id,
+        productName: row.product_name || undefined,
+        variantName: row.variant_name || null,
+        inventoryItemId: row.inventory_item_id || null,
+        quantity: Number(row.quantity) || 1,
+        label: row.label || undefined,
+        sortOrder: row.sort_order ?? 0,
     };
 }
 
-export async function getBundleRules(activeOnly = false): Promise<BundleRule[]> {
+function toZutayaPackage(row: any): ZutayaPackage {
+    const items = (row.zutaya_package_items || row.items || [])
+        .map(toPackageItem)
+        .sort((a: ZutayaPackageItem, b: ZutayaPackageItem) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+    return {
+        id: row.id,
+        name: row.name,
+        slug: row.slug,
+        description: row.description || undefined,
+        tagline: row.tagline || undefined,
+        price: Number(row.price),
+        imageUrl: row.image_url || undefined,
+        isActive: row.is_active,
+        sortOrder: row.sort_order ?? 0,
+        items,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+    };
+}
+
+/**
+ * Enrich each package's content lines with current product image/slug/name and
+ * compute live availability. A line is available when its stock source — the
+ * named variant, else the linked inventory item, else the product's own stock —
+ * holds at least `quantity` units (for one box). A package is `available` only
+ * when every line is. Mirrors the deduction sources used by create_order_atomic.
+ */
+async function enrichPackageItems(packages: ZutayaPackage[]): Promise<ZutayaPackage[]> {
+    const supabase = getSupabaseClient();
+    if (!supabase) return packages;
+    const productIds = Array.from(
+        new Set(packages.flatMap((p) => p.items.map((i) => i.productId).filter(Boolean))),
+    ) as string[];
+    if (productIds.length === 0) {
+        for (const pkg of packages) pkg.available = pkg.items.length > 0;
+        return packages;
+    }
+
+    const { data } = await supabase
+        .from("products")
+        .select("id, name, slug, images, variants, stock, inventory_item_id")
+        .in("id", productIds);
+    const byId = new Map((data || []).map((p: any) => [p.id, p]));
+
+    // Fetch live inventory stock for non-variant lines that name an inventory item.
+    const invIds = Array.from(
+        new Set(packages.flatMap((p) => p.items.map((i) => i.inventoryItemId).filter(Boolean))),
+    ) as string[];
+    const invStock = new Map<string, number>();
+    if (invIds.length > 0) {
+        const { data: invRows } = await supabase
+            .from("inventory_items")
+            .select("id, stock")
+            .in("id", invIds);
+        for (const r of invRows || []) invStock.set(r.id, Number(r.stock) || 0);
+    }
+
+    for (const pkg of packages) {
+        let pkgAvailable = pkg.items.length > 0;
+        for (const item of pkg.items) {
+            const p = item.productId ? byId.get(item.productId) : null;
+            if (p) {
+                item.productName = item.productName || p.name;
+                item.productSlug = p.slug;
+                item.productImage = Array.isArray(p.images) ? p.images[0] : undefined;
+            }
+
+            // Resolve the stock source for this line.
+            let stock = 0;
+            if (p) {
+                if (item.variantName) {
+                    let variants: any[] = [];
+                    try {
+                        variants = typeof p.variants === "string" ? JSON.parse(p.variants) : p.variants || [];
+                    } catch {
+                        variants = [];
+                    }
+                    const v = Array.isArray(variants) ? variants.find((x: any) => x?.name === item.variantName) : null;
+                    // Variants don't always track their own stock — fall back to product stock.
+                    stock = v && v.stock != null ? Number(v.stock) : Number(p.stock) || 0;
+                } else if (item.inventoryItemId && invStock.has(item.inventoryItemId)) {
+                    stock = invStock.get(item.inventoryItemId) ?? 0;
+                } else {
+                    stock = Number(p.stock) || 0;
+                }
+            }
+            item.availableStock = stock;
+            item.available = stock >= (item.quantity || 1);
+            if (!item.available) pkgAvailable = false;
+        }
+        pkg.available = pkgAvailable;
+    }
+    return packages;
+}
+
+export async function getZutayaPackages(activeOnly = false): Promise<ZutayaPackage[]> {
     const supabase = getSupabaseClient();
     if (!supabase) return [];
 
-    let query = supabase.from("bundle_rules").select("*").order("created_at", { ascending: false });
+    let query = supabase
+        .from("zutaya_packages")
+        .select("*, zutaya_package_items(*)")
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: false });
     if (activeOnly) query = query.eq("is_active", true);
 
     const { data, error } = await query;
     if (error) return [];
-    return (data || []).map(toBundleRule);
+    return enrichPackageItems((data || []).map(toZutayaPackage));
 }
 
-export async function getBundleRuleById(id: string): Promise<BundleRule | null> {
+export async function getZutayaPackageBySlug(slug: string): Promise<ZutayaPackage | null> {
     const supabase = getSupabaseClient();
     if (!supabase) return null;
 
-    const { data, error } = await supabase.from("bundle_rules").select("*").eq("id", id).single();
+    const { data, error } = await supabase
+        .from("zutaya_packages")
+        .select("*, zutaya_package_items(*)")
+        .eq("slug", slug)
+        .single();
     if (error || !data) return null;
-    return toBundleRule(data);
+    const [enriched] = await enrichPackageItems([toZutayaPackage(data)]);
+    return enriched;
 }
 
-export async function createBundleRule(input: {
+function slugify(name: string): string {
+    return name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "")
+        .slice(0, 60);
+}
+
+interface PackageInput {
     name: string;
     description?: string;
-    minItems: number;
-    maxItems: number;
-    discountPercent: number;
-    allowedCategoryIds?: string[];
+    tagline?: string;
+    price: number;
+    imageUrl?: string;
     isActive?: boolean;
-}): Promise<string> {
-    const supabase = getSupabaseClient();
+    sortOrder?: number;
+    items: ZutayaPackageItem[];
+}
+
+async function writePackageItems(packageId: string, items: ZutayaPackageItem[]): Promise<void> {
+    const supabase = getSupabaseServiceClient() ?? getSupabaseClient();
+    if (!supabase) throw new Error("Database not available");
+    // Replace-all strategy: clear then insert. Simple and correct for curated lists.
+    await supabase.from("zutaya_package_items").delete().eq("package_id", packageId);
+    const rows = items
+        .filter((i) => i.productId)
+        .map((i, idx) => ({
+            package_id: packageId,
+            product_id: i.productId,
+            product_name: i.productName || null,
+            variant_name: i.variantName || null,
+            inventory_item_id: i.inventoryItemId || null,
+            quantity: Math.max(1, Number(i.quantity) || 1),
+            label: i.label || null,
+            sort_order: i.sortOrder ?? idx,
+        }));
+    if (rows.length > 0) {
+        const { error } = await supabase.from("zutaya_package_items").insert(rows);
+        if (error) throw error;
+    }
+}
+
+export async function createZutayaPackage(input: PackageInput): Promise<string> {
+    const supabase = getSupabaseServiceClient() ?? getSupabaseClient();
     if (!supabase) throw new Error("Database not available");
 
-    const { data, error } = await supabase.from("bundle_rules").insert({
-        name: input.name,
-        description: input.description || null,
-        min_items: input.minItems,
-        max_items: input.maxItems,
-        discount_percent: input.discountPercent,
-        allowed_category_ids: input.allowedCategoryIds || null,
-        is_active: input.isActive ?? true,
-    }).select("id").single();
+    let slug = slugify(input.name) || `package-${Date.now()}`;
+    // Guarantee uniqueness
+    const { data: existing } = await supabase.from("zutaya_packages").select("id").eq("slug", slug).maybeSingle();
+    if (existing) slug = `${slug}-${Date.now().toString(36).slice(-4)}`;
 
+    const { data, error } = await supabase
+        .from("zutaya_packages")
+        .insert({
+            name: input.name,
+            slug,
+            description: input.description || null,
+            tagline: input.tagline || null,
+            price: input.price,
+            image_url: input.imageUrl || null,
+            is_active: input.isActive ?? true,
+            sort_order: input.sortOrder ?? 0,
+        })
+        .select("id")
+        .single();
     if (error) throw error;
+
+    await writePackageItems(data.id, input.items || []);
     return data.id;
 }
 
-export async function updateBundleRule(id: string, input: {
-    name?: string;
-    description?: string;
-    minItems?: number;
-    maxItems?: number;
-    discountPercent?: number;
-    allowedCategoryIds?: string[] | null;
-    isActive?: boolean;
-}): Promise<void> {
-    const supabase = getSupabaseClient();
+export async function updateZutayaPackage(id: string, input: Partial<PackageInput>): Promise<void> {
+    const supabase = getSupabaseServiceClient() ?? getSupabaseClient();
     if (!supabase) throw new Error("Database not available");
 
     const db: any = {};
     if (input.name !== undefined) db.name = input.name;
-    if (input.description !== undefined) db.description = input.description;
-    if (input.minItems !== undefined) db.min_items = input.minItems;
-    if (input.maxItems !== undefined) db.max_items = input.maxItems;
-    if (input.discountPercent !== undefined) db.discount_percent = input.discountPercent;
-    if (input.allowedCategoryIds !== undefined) db.allowed_category_ids = input.allowedCategoryIds;
+    if (input.description !== undefined) db.description = input.description || null;
+    if (input.tagline !== undefined) db.tagline = input.tagline || null;
+    if (input.price !== undefined) db.price = input.price;
+    if (input.imageUrl !== undefined) db.image_url = input.imageUrl || null;
     if (input.isActive !== undefined) db.is_active = input.isActive;
+    if (input.sortOrder !== undefined) db.sort_order = input.sortOrder;
 
-    const { error } = await supabase.from("bundle_rules").update(db).eq("id", id);
-    if (error) throw error;
+    if (Object.keys(db).length > 0) {
+        const { error } = await supabase.from("zutaya_packages").update(db).eq("id", id);
+        if (error) throw error;
+    }
+    if (input.items !== undefined) {
+        await writePackageItems(id, input.items);
+    }
 }
 
-export async function deleteBundleRule(id: string): Promise<void> {
-    const supabase = getSupabaseClient();
+export async function deleteZutayaPackage(id: string): Promise<void> {
+    const supabase = getSupabaseServiceClient() ?? getSupabaseClient();
     if (!supabase) throw new Error("Database not available");
 
-    const { error } = await supabase.from("bundle_rules").delete().eq("id", id);
+    const { error } = await supabase.from("zutaya_packages").delete().eq("id", id);
     if (error) throw error;
 }
 

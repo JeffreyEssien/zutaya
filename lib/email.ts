@@ -2,11 +2,19 @@ import nodemailer from "nodemailer";
 import type { Order } from "@/types";
 import { SITE_NAME, SITE_EMAIL, WHATSAPP_NUMBER, SITE_URL } from "@/lib/constants";
 
+// SMTP transport — defaults to Zoho Mail (smtppro.zoho.com). Override host/port
+// via env to point elsewhere. Port 465 = implicit SSL; 587 = STARTTLS.
+const SMTP_HOST = process.env.SMTP_HOST || "smtppro.zoho.com";
+const SMTP_PORT = Number(process.env.SMTP_PORT || 465);
+const SMTP_USER = process.env.SMTP_EMAIL || SITE_EMAIL;
+
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: SMTP_HOST,
+  port: SMTP_PORT,
+  secure: SMTP_PORT === 465, // true for 465 (SSL), false for 587 (STARTTLS)
   auth: {
-    user: process.env.SMTP_EMAIL || SITE_EMAIL,
-    pass: process.env.SMTP_PASSWORD, // Gmail App Password
+    user: SMTP_USER,
+    pass: process.env.SMTP_PASSWORD, // Zoho app-specific password
   },
 });
 
@@ -198,7 +206,7 @@ function buildReceiptHtml(order: Order): string {
           </tr>
         </thead>
         <tbody>
-          ${order.items.map(i => {
+          ${order.items.filter(i => !i.packageId).map(i => {
             const unitPrice = i.variant?.price ?? i.product.price;
             const lineTotal = unitPrice * i.quantity;
             return `
@@ -207,12 +215,30 @@ function buildReceiptHtml(order: Order): string {
                 <strong style="font-weight:600;">${i.product.name}</strong>
                 ${i.variant ? `<br><span style="font-size:12px;color:#888;">${i.variant.name}</span>` : ""}
                 ${i.selectedPrepOptions && i.selectedPrepOptions.length > 0 ? `<br><span style="font-size:11px;color:#C0392B;">🔪 ${i.selectedPrepOptions.map(p => p.label).join(", ")}</span>` : ""}
-                ${i.bundleName ? `<br><span style="font-size:11px;color:#10b981;font-weight:600;">📦 ${i.bundleName}</span>` : ""}
               </td>
               <td style="padding:14px 0;border-bottom:1px solid #f4f1ec;text-align:center;font-size:13px;color:#555;vertical-align:top;">×${i.quantity}</td>
               <td style="padding:14px 0;border-bottom:1px solid #f4f1ec;text-align:right;font-size:14px;color:#1a1a1a;font-weight:600;vertical-align:top;">₦${lineTotal.toLocaleString()}</td>
             </tr>`;
           }).join("")}
+          ${(() => {
+            // Group Zútaya Package lines into one row each at the package flat price.
+            const groups = new Map<string, { name: string; price: number; boxes: number; lines: string[] }>();
+            for (const i of order.items) {
+              if (!i.packageId) continue;
+              const g = groups.get(i.packageId) || { name: i.packageName || "Zútaya Package", price: i.packagePrice || 0, boxes: i.packageBoxes || 1, lines: [] };
+              g.lines.push(`${i.product.name}${i.variant ? ` · ${i.variant.name}` : ""} ×${i.quantity}`);
+              groups.set(i.packageId, g);
+            }
+            return Array.from(groups.values()).map(g => `
+            <tr>
+              <td style="padding:14px 0;border-bottom:1px solid #f4f1ec;font-size:14px;color:#1a1a1a;vertical-align:top;">
+                <strong style="font-weight:600;">📦 ${g.name}</strong>
+                <br><span style="font-size:11px;color:#888;">${g.lines.join(", ")}</span>
+              </td>
+              <td style="padding:14px 0;border-bottom:1px solid #f4f1ec;text-align:center;font-size:13px;color:#555;vertical-align:top;">×${g.boxes}</td>
+              <td style="padding:14px 0;border-bottom:1px solid #f4f1ec;text-align:right;font-size:14px;color:#1a1a1a;font-weight:600;vertical-align:top;">₦${(g.price * g.boxes).toLocaleString()}</td>
+            </tr>`).join("");
+          })()}
         </tbody>
       </table>
     </div>

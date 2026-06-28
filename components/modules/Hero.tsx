@@ -178,7 +178,7 @@ export default function Hero({ customTexts, settings, heroMedia = [], featuredSl
                 className="group flex items-center gap-2 text-sm uppercase tracking-[0.18em] text-warm-cream/50 hover:text-brand-red transition-colors duration-300"
               >
                 <span className="relative">
-                  Build Your Box
+                  Shop Packages
                   <span className="absolute -bottom-0.5 left-0 w-full h-[1.5px] bg-brand-red origin-left scale-x-0 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-x-100" />
                 </span>
               </Link>

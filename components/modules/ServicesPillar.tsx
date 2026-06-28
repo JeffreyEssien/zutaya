@@ -13,7 +13,7 @@ interface Props {
 export default function ServicesPillar({ eventsEnabled = true, headline = "Two ways to eat with us", subhead = "Pick your moment, we handle the meat." }: Props) {
     const cards = [
         { key: "shop", title: "Cook it yourself", sub: "Premium cuts, processed your way", icon: ChefHat, href: "/shop", show: true },
-        { key: "events", title: "At your event", sub: "On-site butchery & chef service", icon: Calendar, href: "/events", show: eventsEnabled },
+        { key: "events", title: "Outdoor Butchery", sub: "On-site slaughter, butchery & chef service at your event", icon: Calendar, href: "/events", show: eventsEnabled },
     ].filter((c) => c.show);
 
     if (cards.length <= 1) return null;
