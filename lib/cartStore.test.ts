@@ -73,6 +73,47 @@ describe("standalone item pricing", () => {
   });
 });
 
+describe("weight-priced items (decimal quantities)", () => {
+  it("adds a chosen kg amount and prices it per kg", () => {
+    // ₦4,000/kg × 2.5kg = ₦10,000
+    useCartStore
+      .getState()
+      .addItem(
+        product({ price: 4_000, stock: 50, priceUnit: "per_kg" }),
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        2.5,
+      );
+    const items = useCartStore.getState().items;
+    expect(items[0].quantity).toBe(2.5);
+    expect(useCartStore.getState().subtotal()).toBe(10_000);
+  });
+
+  it("accumulates decimal weights on repeat adds", () => {
+    const p = product({ price: 4_000, stock: 50, priceUnit: "per_kg" });
+    useCartStore.getState().addItem(p, undefined, undefined, undefined, undefined, 1.5);
+    useCartStore.getState().addItem(p, undefined, undefined, undefined, undefined, 2);
+    expect(useCartStore.getState().items[0].quantity).toBe(3.5);
+    expect(useCartStore.getState().subtotal()).toBe(14_000);
+  });
+
+  it("refuses to add more weight than is in stock", () => {
+    useCartStore
+      .getState()
+      .addItem(
+        product({ price: 4_000, stock: 2, priceUnit: "per_kg" }),
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        2.5,
+      );
+    expect(useCartStore.getState().items).toHaveLength(0);
+  });
+});
+
 describe("package flat-price math (the core invariant)", () => {
   it("charges the flat package price ONCE, not the sum of its lines", () => {
     useCartStore.getState().addPackageToCart(pkg({ price: 45_000 }), 1);

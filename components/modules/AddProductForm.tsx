@@ -286,7 +286,7 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                         )}
 
                         <InputField
-                            label={`Selling Price (₦) ${mode === "existing" ? "(Managed in Inventory)" : ""}`}
+                            label={`Selling Price (₦${form.priceUnit === "per_kg" ? " / kg" : form.priceUnit === "per_pack" ? " / pack" : form.priceUnit === "per_piece" ? " / piece" : ""}) ${mode === "existing" ? "(Managed in Inventory)" : ""}`}
                             name="price"
                             type="number"
                             value={form.price}

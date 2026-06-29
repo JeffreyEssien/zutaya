@@ -99,11 +99,6 @@ export default function CheckoutForm({
 
     const [dbPricing, setDbPricing] = useState<DbPricingResult | null>(null);
     const [_pricingLoaded, setPricingLoaded] = useState(false);
-    const [packagingConfig, setPackagingConfig] = useState({
-        fee: 500,
-        label: "Premium Packaging",
-        description: "Insulated gift-ready packaging with ice packs for extended freshness",
-    });
     const [settings, setSettings] = useState<SiteSettings | null>(null);
 
     useEffect(() => {
@@ -114,11 +109,6 @@ export default function CheckoutForm({
         getSiteSettings().then((s) => {
             if (s) {
                 setSettings(s);
-                setPackagingConfig({
-                    fee: s.packagingFee ?? 500,
-                    label: s.packagingLabel || "Premium Packaging",
-                    description: s.packagingDescription || "Insulated gift-ready packaging with ice packs for extended freshness",
-                });
             }
         });
     }, []);
@@ -138,7 +128,6 @@ export default function CheckoutForm({
     const [deliveryFee, setDeliveryFee] = useState(0);
     const [prepInstructions, setPrepInstructions] = useState("");
     const [requestedDeliveryDate, setRequestedDeliveryDate] = useState("");
-    const [addPackaging, setAddPackaging] = useState(false);
 
     const currentLagosZone: LagosZoneInfo | null = useMemo(
         () => (selectedLagosArea ? lagosAreaIndex.get(selectedLagosArea.toLowerCase()) ?? null : null),
@@ -151,12 +140,16 @@ export default function CheckoutForm({
     }, [dbPricing, currentLagosZone]);
 
     const computeFee = useCallback((): number => {
-        let rawFee = currentLagosZone?.fee ?? 0;
+        // Per-area override wins over the zone default, when the admin set one.
+        const areaFee = selectedLagosArea
+            ? dbPricing?.areaFees?.get(selectedLagosArea.toLowerCase())
+            : undefined;
+        let rawFee = areaFee ?? currentLagosZone?.fee ?? 0;
         if (activeDiscount && activeDiscount.percent > 0) {
             rawFee = applyDiscount(rawFee, activeDiscount.percent);
         }
         return rawFee;
-    }, [currentLagosZone, activeDiscount]);
+    }, [currentLagosZone, activeDiscount, selectedLagosArea, dbPricing]);
 
     useEffect(() => {
         const fee = computeFee();
@@ -164,23 +157,23 @@ export default function CheckoutForm({
         onShippingChange(fee);
     }, [computeFee, onShippingChange]);
 
+    // Packaging is free and always included — no fee charged.
     useEffect(() => {
-        onPackagingChange(addPackaging ? packagingConfig.fee : 0);
-    }, [addPackaging, onPackagingChange, packagingConfig.fee]);
+        onPackagingChange(0);
+    }, [onPackagingChange]);
 
     // ── Compute base + processing fee for live cart display ──
     const baseTotal = useMemo(() => {
         const sub = subtotal();
         const couponDisc = discount > 0 ? sub * (discount / 100) : 0;
-        const packFee = addPackaging ? packagingConfig.fee : 0;
         const prepFee = items.reduce((sum, item) => {
             if (item.selectedPrepOptions && item.selectedPrepOptions.length > 0) {
                 return sum + item.selectedPrepOptions.reduce((s, o) => s + o.extraFee, 0) * item.quantity;
             }
             return sum;
         }, 0);
-        return Math.max(0, sub - couponDisc) + deliveryFee + packFee + prepFee;
-    }, [subtotal, discount, addPackaging, packagingConfig.fee, items, deliveryFee]);
+        return Math.max(0, sub - couponDisc) + deliveryFee + prepFee;
+    }, [subtotal, discount, items, deliveryFee]);
 
     const processingFee = useMemo(() => customerProcessingFee(baseTotal), [baseTotal]);
 
@@ -246,7 +239,6 @@ export default function CheckoutForm({
 
         const sub = subtotal();
         const ship = deliveryFee;
-        const packFee = addPackaging ? packagingConfig.fee : 0;
         const couponDisc = discount > 0 ? sub * (discount / 100) : 0;
         const totalDiscount = couponDisc;
         const prepFee = items.reduce((s, item) => {
@@ -256,7 +248,7 @@ export default function CheckoutForm({
             return s;
         }, 0);
 
-        const baseOrderTotal = Math.max(0, sub - totalDiscount) + ship + packFee + prepFee;
+        const baseOrderTotal = Math.max(0, sub - totalDiscount) + ship + prepFee;
         const orderId = generateOrderId();
 
         const order: Order = {
@@ -283,7 +275,6 @@ export default function CheckoutForm({
             deliveryDiscount:
                 activeDiscount && activeDiscount.percent > 0 ? activeDiscount : undefined,
             deliveryFee: ship,
-            packagingFee: packFee > 0 ? packFee : undefined,
             prepFee: prepFee > 0 ? prepFee : undefined,
             prepInstructions: prepInstructions.trim() || undefined,
             requestedDeliveryDate: requestedDeliveryDate || undefined,
@@ -450,24 +441,19 @@ export default function CheckoutForm({
                             </div>
                         </div>
 
-                        <label className={`flex items-start gap-4 p-4 border rounded-xl cursor-pointer transition-all duration-300 ${addPackaging ? "border-brand-green bg-brand-green/[0.04] shadow-sm shadow-brand-green/5" : "border-warm-cream/8 hover:border-brand-green/30"}`}>
-                            <input
-                                type="checkbox"
-                                checked={addPackaging}
-                                onChange={(e) => setAddPackaging(e.target.checked)}
-                                className="mt-1 accent-brand-green"
-                            />
+                        {/* Insulated packaging is included free on every order */}
+                        <div className="flex items-start gap-4 p-4 border border-brand-green/25 bg-brand-green/[0.04] rounded-xl">
+                            <Package size={16} className="text-brand-green mt-0.5 shrink-0" />
                             <div className="flex-1">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <Package size={16} className="text-brand-green" />
-                                        <span className="font-medium text-warm-cream text-sm">{packagingConfig.label}</span>
-                                    </div>
-                                    <span className="text-sm font-semibold text-warm-cream">₦{packagingConfig.fee.toLocaleString()}</span>
+                                <div className="flex items-center gap-2">
+                                    <span className="font-medium text-warm-cream text-sm">Insulated packaging included</span>
+                                    <span className="text-[10px] font-semibold uppercase tracking-wide text-brand-green bg-brand-green/10 px-2 py-0.5 rounded-full">Free</span>
                                 </div>
-                                <span className="block text-xs text-warm-cream/45 mt-1">{packagingConfig.description}</span>
+                                <span className="block text-xs text-warm-cream/45 mt-1">
+                                    Every order ships in insulated, gift-ready packaging with ice packs to keep your meat fresh in transit — at no extra cost.
+                                </span>
                             </div>
-                        </label>
+                        </div>
                     </div>
                 </div>
 

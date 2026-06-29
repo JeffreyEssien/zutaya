@@ -13,7 +13,7 @@ interface CartStore {
     open: () => void;
     close: () => void;
     toggle: () => void;
-    addItem: (product: Product, variant?: CartItem["variant"], selectedPrepOptions?: PrepOption[], processing?: CartItemProcessing, completionMode?: CartItem["completionMode"]) => void;
+    addItem: (product: Product, variant?: CartItem["variant"], selectedPrepOptions?: PrepOption[], processing?: CartItemProcessing, completionMode?: CartItem["completionMode"], quantity?: number) => void;
     addPackageToCart: (pkg: ZutayaPackage, boxes?: number) => void;
     removeItem: (productId: string, variantName?: string, bundleId?: string) => void;
     removePackage: (packageId: string) => void;
@@ -38,8 +38,11 @@ export const useCartStore = create<CartStore>()(
             close: () => set({ isOpen: false }),
             toggle: () => set((s) => ({ isOpen: !s.isOpen })),
 
-            addItem: (product, variant, selectedPrepOptions, processing, completionMode) => {
+            addItem: (product, variant, selectedPrepOptions, processing, completionMode, quantity = 1) => {
                 set((state) => {
+                    // Weight-priced products carry decimal kg quantities; everything
+                    // else is whole units. Never let a line drop below the amount asked.
+                    const addQty = quantity > 0 ? quantity : 1;
                     const hasProcessing = processing && Object.keys(processing).length > 0;
                     // Only merge with non-grouped items of the same product without custom processing
                     const existingItem = state.items.find(
@@ -49,7 +52,7 @@ export const useCartStore = create<CartStore>()(
                     const availableStock = (variant?.stock !== undefined) ? variant.stock : product.stock;
 
                     if (existingItem) {
-                        const newQuantity = existingItem.quantity + 1;
+                        const newQuantity = existingItem.quantity + addQty;
                         if (newQuantity > availableStock) return {};
                         return {
                             items: state.items.map((item) =>
@@ -60,9 +63,9 @@ export const useCartStore = create<CartStore>()(
                         };
                     }
 
-                    if (1 > availableStock) return {};
+                    if (addQty > availableStock) return {};
 
-                    return { items: [...state.items, { product, variant, quantity: 1, selectedPrepOptions: selectedPrepOptions || undefined, processing: hasProcessing ? processing : undefined, completionMode: completionMode || "cook_myself" }] };
+                    return { items: [...state.items, { product, variant, quantity: addQty, selectedPrepOptions: selectedPrepOptions || undefined, processing: hasProcessing ? processing : undefined, completionMode: completionMode || "cook_myself" }] };
                 });
             },
 

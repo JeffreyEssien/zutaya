@@ -62,7 +62,8 @@ export default function AdminCreateOrder({ onClose, onSuccess }: AdminCreateOrde
 
     // Delivery
     const [deliveryZone, setDeliveryZone] = useState("");
-    const [deliveryType, setDeliveryType] = useState<"doorstep" | "hub_pickup">("doorstep");
+    // Delivery only — pickup was removed. Kept as a constant for the order payload.
+    const deliveryType = "doorstep" as const;
 
     // Notes
     const [notes, setNotes] = useState("");
@@ -417,18 +418,9 @@ export default function AdminCreateOrder({ onClose, onSuccess }: AdminCreateOrde
                         <h3 className="text-sm font-semibold text-warm-cream flex items-center gap-2 mb-4">
                             <Truck size={14} className="text-brand-green" /> Delivery Details
                         </h3>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label className={labelClass}>Delivery Zone</label>
-                                <input className={inputClass} value={deliveryZone} onChange={(e) => setDeliveryZone(e.target.value)} placeholder="e.g. Lagos Mainland" />
-                            </div>
-                            <div>
-                                <label className={labelClass}>Delivery Type</label>
-                                <select className={inputClass} value={deliveryType} onChange={(e) => setDeliveryType(e.target.value as any)}>
-                                    <option value="doorstep">Doorstep Delivery</option>
-                                    <option value="hub_pickup">Hub Pickup</option>
-                                </select>
-                            </div>
+                        <div>
+                            <label className={labelClass}>Delivery Zone</label>
+                            <input className={inputClass} value={deliveryZone} onChange={(e) => setDeliveryZone(e.target.value)} placeholder="e.g. Lagos Mainland" />
                         </div>
                     </div>
 

@@ -144,6 +144,9 @@ export interface DbPricingResult {
     lagosZones: LagosZoneInfo[];
     /** Map of zone name → discount percent (0–100) */
     discounts: Map<string, { percent: number; label: string | null }>;
+    /** Map of area name (lowercased) → its own delivery fee, when set per-area.
+     *  Lets one area in a zone charge a different fee than the zone default. */
+    areaFees: Map<string, number>;
 }
 
 /**
@@ -159,6 +162,7 @@ export async function fetchDeliveryPricingFromDB(): Promise<DbPricingResult | nu
 
         const lagosZones: LagosZoneInfo[] = [];
         const discounts = new Map<string, { percent: number; label: string | null }>();
+        const areaFees = new Map<string, number>();
 
         for (const z of zones) {
             if (!z.is_active) continue;
@@ -168,18 +172,25 @@ export async function fetchDeliveryPricingFromDB(): Promise<DbPricingResult | nu
                 discounts.set(z.name, { percent: z.discount_percent, label: z.discount_label });
             }
 
+            const activeLocations = (z.locations || []).filter((l: any) => l.is_active);
+            // Per-area fee override: when a location has its own doorstep_fee, that
+            // area charges it instead of the zone's base fee.
+            for (const l of activeLocations) {
+                if (l.doorstep_fee != null && Number(l.doorstep_fee) > 0) {
+                    areaFees.set(String(l.name).toLowerCase(), Number(l.doorstep_fee));
+                }
+            }
+
             const key = z.name.toLowerCase().replace(/\s+/g, "_") as LagosZone;
             lagosZones.push({
                 key,
                 label: z.name,
                 fee: z.base_fee ?? 0,
-                areas: (z.locations || [])
-                    .filter((l: any) => l.is_active)
-                    .map((l: any) => l.name),
+                areas: activeLocations.map((l: any) => l.name),
             });
         }
 
-        return { lagosZones, discounts };
+        return { lagosZones, discounts, areaFees };
     } catch {
         return null;
     }

@@ -11,9 +11,9 @@ import { StorageBadge } from "@/components/ui/StorageBadge";
 import PrepOptionsSelector from "@/components/modules/PrepOptionsSelector";
 import EatModeSelector from "@/components/modules/EatModeSelector";
 import ProcessingConfigurator from "@/components/modules/ProcessingConfigurator";
-import { ShoppingBag, Truck, Shield, RotateCcw, Check, ChevronDown, ChevronRight, MessageCircle } from "lucide-react";
+import { ShoppingBag, Truck, Shield, RotateCcw, Check, ChevronDown, ChevronRight, MessageCircle, Minus, Plus } from "lucide-react";
 import Link from "next/link";
-import { WHATSAPP_NUMBER } from "@/lib/constants";
+import { WHATSAPP_NUMBER, CONTACT_EMAIL, ORDER_MIN_KG, ORDER_MAX_KG, ORDER_STEP_KG } from "@/lib/constants";
 
 interface ProductDetailsProps {
     product: Product;
@@ -43,13 +43,42 @@ export default function ProductDetails({ product, marinades = [], processingOpti
 
     const prepFee = selectedPrepOptions.reduce((sum, opt) => sum + opt.extraFee, 0);
 
+    // ── Quantity model ──
+    // Weight-priced products (per_kg) order in 0.5 kg steps from 1 kg up to the
+    // 50 kg cap; everything else orders in whole units. The orderable max is the
+    // smaller of available stock and (for weight) the 50 kg cap.
+    const isWeight = product.priceUnit === "per_kg";
+    const step = isWeight ? ORDER_STEP_KG : 1;
+    const minQty = isWeight ? ORDER_MIN_KG : 1;
+    const hardMax = isWeight ? ORDER_MAX_KG : Number.POSITIVE_INFINITY;
+    const maxQty = Math.min(currentStock, hardMax);
+    const unitWord = isWeight ? "kg"
+        : product.priceUnit === "per_piece" ? "pcs"
+        : product.priceUnit === "per_pack" ? "packs"
+        : "qty";
+
+    const [qty, setQty] = useState(minQty);
+    // Keep qty within bounds whenever the selected variant (hence stock) changes.
+    const clampedQty = Math.min(Math.max(qty, minQty), Math.max(maxQty, minQty));
+    const canOrder = currentStock >= minQty;
+    const atCap = isWeight && clampedQty >= ORDER_MAX_KG;
+
+    const adjustQty = (delta: number) => {
+        setQty((q) => {
+            const next = Math.round((Math.min(Math.max(q, minQty), maxQty) + delta) / step) * step;
+            return Math.min(Math.max(next, minQty), maxQty);
+        });
+    };
+
+    const lineSubtotal = currentPrice * clampedQty;
+
     const priceUnitLabel = product.priceUnit === "per_kg" ? "/ kg"
         : product.priceUnit === "per_pack" ? "/ pack"
         : product.priceUnit === "per_piece" ? "/ piece"
         : product.priceUnit === "whole" ? "" : "";
 
     const handleAdd = () => {
-        addItem(product, selectedVariant, selectedPrepOptions, processing);
+        addItem(product, selectedVariant, selectedPrepOptions, processing, completionMode, clampedQty);
         open();
         setAddedFeedback(true);
         setTimeout(() => setAddedFeedback(false), 2000);
@@ -170,6 +199,66 @@ export default function ProductDetails({ product, marinades = [], processingOpti
             <div className="mb-6">
                 <StockIndicator stock={currentStock} />
             </div>
+
+            {/* Quantity / Weight selector */}
+            {canOrder && completionMode !== "event" && (
+                <div className="mb-6">
+                    <label className="block text-[10px] font-semibold text-warm-cream/40 uppercase tracking-[0.2em] mb-3">
+                        {isWeight ? "Choose weight" : "Quantity"}
+                    </label>
+                    <div className="flex items-center gap-4 flex-wrap">
+                        <div className="flex items-center rounded-full border border-warm-cream/15 bg-warm-cream/5 overflow-hidden">
+                            <button
+                                type="button"
+                                onClick={() => adjustQty(-step)}
+                                disabled={clampedQty <= minQty}
+                                aria-label="Decrease"
+                                className="px-4 py-2.5 text-warm-cream/70 hover:text-warm-cream hover:bg-warm-cream/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                            >
+                                <Minus size={15} />
+                            </button>
+                            <div className="min-w-[88px] text-center font-serif text-lg text-warm-cream tabular-nums select-none">
+                                {clampedQty} <span className="text-sm text-warm-cream/40">{unitWord}</span>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => adjustQty(step)}
+                                disabled={clampedQty >= maxQty}
+                                aria-label="Increase"
+                                className="px-4 py-2.5 text-warm-cream/70 hover:text-warm-cream hover:bg-warm-cream/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                            >
+                                <Plus size={15} />
+                            </button>
+                        </div>
+                        <div className="text-sm text-warm-cream/50">
+                            Subtotal: <span className="font-serif text-lg text-warm-cream font-semibold">{formatCurrency(lineSubtotal)}</span>
+                        </div>
+                    </div>
+                    {isWeight && (
+                        <p className="text-[11px] text-warm-cream/35 mt-2">
+                            Sold in {ORDER_STEP_KG} kg steps, from {ORDER_MIN_KG} kg.
+                        </p>
+                    )}
+                    {atCap && (
+                        <p className="text-[11px] text-amber-600/90 mt-2">
+                            Need more than {ORDER_MAX_KG} kg? Reach the ZúTa Ya team on{" "}
+                            <a
+                                href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hi! I'd like to order more than ${ORDER_MAX_KG}kg of ${product.name}.`)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="underline font-medium hover:text-amber-700"
+                            >
+                                WhatsApp
+                            </a>{" "}
+                            or{" "}
+                            <a href={`mailto:${CONTACT_EMAIL}`} className="underline font-medium hover:text-amber-700">
+                                {CONTACT_EMAIL}
+                            </a>{" "}
+                            for a bulk quote.
+                        </p>
+                    )}
+                </div>
+            )}
 
             {/* How will you eat it? */}
             <EatModeSelector

@@ -319,7 +319,12 @@ export default function DeliveryManagement({ initialZones }: Props) {
                                                                             <>
                                                                                 <td className="py-2.5 px-3 font-medium text-warm-cream">{loc.name}</td>
                                                                                 <td className="py-2.5 px-3 text-right font-mono text-warm-cream/60">
-                                                                                    {zone.base_fee ? formatCurrency(zone.base_fee) : "—"}
+                                                                                    {loc.doorstep_fee != null
+                                                                                        ? formatCurrency(loc.doorstep_fee)
+                                                                                        : zone.base_fee ? formatCurrency(zone.base_fee) : "—"}
+                                                                                    {loc.doorstep_fee == null && zone.base_fee ? (
+                                                                                        <span className="ml-1 text-[9px] text-warm-cream/25 uppercase">zone</span>
+                                                                                    ) : null}
                                                                                 </td>
                                                                                 <td className="py-2.5 px-3 text-center">
                                                                                     <button onClick={() => handleToggleLoc(loc)} className="transition-colors">
@@ -379,7 +384,7 @@ export default function DeliveryManagement({ initialZones }: Props) {
                                                                             </div>
                                                                         </div>
                                                                         <div className="flex gap-2 text-xs">
-                                                                            <PriceChip label="Fee" value={zone.base_fee} />
+                                                                            <PriceChip label="Fee" value={loc.doorstep_fee ?? zone.base_fee} />
                                                                         </div>
                                                                     </>
                                                                 )}
@@ -677,12 +682,10 @@ function EditLocRow({ loc, isLagos, allowsHub, zoneFee, onSave, onCancel }: {
                         <input type="number" value={hubFee} onChange={e => setHubFee(e.target.value)} className="w-full px-2.5 py-1.5 border border-warm-cream/25 rounded-lg text-sm focus:outline-none focus:border-brand-green bg-[#1e1e1e]" />
                     </div>
                 )}
-                {!isLagos && (
-                    <div className="w-28">
-                        <label className="block text-[9px] text-warm-cream/30 mb-0.5 uppercase tracking-wider">Door (₦)</label>
-                        <input type="number" value={doorFee} onChange={e => setDoorFee(e.target.value)} className="w-full px-2.5 py-1.5 border border-warm-cream/25 rounded-lg text-sm focus:outline-none focus:border-brand-green bg-[#1e1e1e]" />
-                    </div>
-                )}
+                <div className="w-28">
+                    <label className="block text-[9px] text-warm-cream/30 mb-0.5 uppercase tracking-wider">{isLagos ? "Fee (₦)" : "Door (₦)"}</label>
+                    <input type="number" value={doorFee} onChange={e => setDoorFee(e.target.value)} placeholder={isLagos ? "zone fee" : ""} className="w-full px-2.5 py-1.5 border border-warm-cream/25 rounded-lg text-sm focus:outline-none focus:border-brand-green bg-[#1e1e1e]" />
+                </div>
                 <Button size="sm" onClick={save} loading={saving}><Save size={12} /></Button>
                 <Button size="sm" variant="ghost" onClick={onCancel}><X size={12} /></Button>
             </div>
@@ -727,7 +730,7 @@ function EditLocMobile({ loc, isLagos, allowsHub, zoneFee, onSave, onCancel }: {
             <InputField label="Name" value={name} onChange={setName} />
             <div className="grid grid-cols-2 gap-2">
                 {allowsHub && !isLagos && <InputField label="Hub Pickup (₦)" type="number" value={hubFee} onChange={setHubFee} />}
-                {!isLagos && <InputField label="Doorstep (₦)" type="number" value={doorFee} onChange={setDoorFee} />}
+                <InputField label={isLagos ? "Area Fee (₦)" : "Doorstep (₦)"} type="number" value={doorFee} onChange={setDoorFee} placeholder={isLagos ? "Blank = zone fee" : ""} />
             </div>
             <div className="flex justify-end gap-2">
                 <Button size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>
@@ -780,7 +783,13 @@ function AddLocationForm({ zoneId, isLagos, allowsHub, onCreated, onCancel }: {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <InputField label="Location Name" required value={name} onChange={setName} placeholder="e.g. Lekki Phase 1" />
                 {allowsHub && !isLagos && <InputField label="Hub Fee (₦)" type="number" value={hubFee} onChange={setHubFee} placeholder="4000" />}
-                {!isLagos && <InputField label="Doorstep Fee (₦)" type="number" value={doorFee} onChange={setDoorFee} placeholder="8000" />}
+                <InputField
+                    label={isLagos ? "Area Fee (₦, optional)" : "Doorstep Fee (₦)"}
+                    type="number"
+                    value={doorFee}
+                    onChange={setDoorFee}
+                    placeholder={isLagos ? "Blank = zone fee" : "8000"}
+                />
             </div>
             <div className="flex justify-end gap-2 mt-3">
                 <Button type="button" variant="ghost" size="sm" onClick={onCancel}>Cancel</Button>
@@ -800,19 +809,30 @@ function BulkAddLocations({ zoneId, onDone, onCancel }: {
 }) {
     const router = useRouter();
     const [text, setText] = useState("");
+    const [defaultFee, setDefaultFee] = useState("");
     const [loading, setLoading] = useState(false);
+
+    // Each line is "Area Name" or "Area Name = 5000" (an "=" or "," sets that
+    // area's own fee). Lines without a fee fall back to the default fee box,
+    // and a blank default means the area inherits the zone fee.
+    const parseLine = (line: string): { name: string; fee: number | null } => {
+        const m = line.match(/^(.*?)\s*[=,]\s*([\d.]+)\s*$/);
+        if (m) return { name: m[1].trim(), fee: Number(m[2]) || null };
+        const fallback = defaultFee ? Number(defaultFee) : null;
+        return { name: line.trim(), fee: fallback && fallback > 0 ? fallback : null };
+    };
 
     const submit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const names = text.split("\n").map(n => n.trim()).filter(Boolean);
-        if (names.length === 0) return;
+        const rows = text.split("\n").map(parseLine).filter(r => r.name);
+        if (rows.length === 0) return;
         setLoading(true);
         const created: DeliveryZoneWithLocations["locations"] = [];
         let failed = 0;
-        for (const name of names) {
+        for (const row of rows) {
             try {
-                const id = await createDeliveryLocation({ zoneId, name });
-                created.push({ id, zone_id: zoneId, name, hub_pickup_fee: null, doorstep_fee: null, is_active: true, created_at: new Date().toISOString() });
+                const id = await createDeliveryLocation({ zoneId, name: row.name, doorstepFee: row.fee });
+                created.push({ id, zone_id: zoneId, name: row.name, hub_pickup_fee: null, doorstep_fee: row.fee, is_active: true, created_at: new Date().toISOString() });
             } catch { failed++; }
         }
         if (failed > 0) toast.error(`${failed} location(s) failed to add`);
@@ -826,16 +846,28 @@ function BulkAddLocations({ zoneId, onDone, onCancel }: {
         <form onSubmit={submit} className="mb-4 p-3 bg-amber-50/30 rounded-lg border border-amber-200/30 border-dashed space-y-3">
             <div>
                 <label className="block text-[10px] text-warm-cream/40 mb-1 uppercase tracking-wider">
-                    Paste location names (one per line)
+                    Paste areas (one per line) — optionally set a fee with “= amount”
                 </label>
                 <textarea
                     value={text}
                     onChange={e => setText(e.target.value)}
                     rows={5}
-                    placeholder={"Lekki Phase 1\nIkoyi\nVictoria Island"}
+                    placeholder={"Lekki Phase 1 = 3500\nIkoyi = 4000\nVictoria Island"}
                     className="w-full px-3 py-2 border border-warm-cream/20 rounded-lg text-sm focus:outline-none focus:border-brand-green resize-y font-mono"
                 />
-                <p className="text-[10px] text-warm-cream/30 mt-1">{text.split("\n").filter(l => l.trim()).length} location(s) will be added</p>
+                <p className="text-[10px] text-warm-cream/30 mt-1">{text.split("\n").filter(l => l.trim()).length} area(s) will be added</p>
+            </div>
+            <div>
+                <label className="block text-[10px] text-warm-cream/40 mb-1 uppercase tracking-wider">
+                    Default fee for areas without one (₦, optional)
+                </label>
+                <input
+                    type="number"
+                    value={defaultFee}
+                    onChange={e => setDefaultFee(e.target.value)}
+                    placeholder="Blank = inherit the zone fee"
+                    className="w-full px-3 py-2 border border-warm-cream/20 rounded-lg text-sm focus:outline-none focus:border-brand-green bg-[#1e1e1e]"
+                />
             </div>
             <div className="flex justify-end gap-2">
                 <Button type="button" variant="ghost" size="sm" onClick={onCancel}>Cancel</Button>

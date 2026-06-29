@@ -27,7 +27,7 @@ export default function StockIndicator({ stock }: StockIndicatorProps) {
                         <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
                     </span>
                     <span className="text-amber-600 font-medium text-sm">
-                        Only {stock} left — order soon
+                        Low stock — selling fast
                     </span>
                 </div>
                 <div className="h-1 w-full max-w-[120px] bg-amber-100 rounded-full overflow-hidden">
