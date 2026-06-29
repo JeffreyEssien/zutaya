@@ -43,9 +43,7 @@ describe.skipIf(!hasTestDb)("single-winner payment transition invariant", () => 
     const ref = "ZY-20260629-9001-a1";
     await getPool().query("INSERT INTO test_payments (reference) VALUES ($1)", [ref]);
 
-    const claims = await Promise.all(
-      Array.from({ length: 20 }, () => claimPaid(ref)),
-    );
+    const claims = await Promise.all(Array.from({ length: 20 }, () => claimPaid(ref)));
 
     const winners = claims.filter(Boolean).length;
     expect(winners).toBe(1); // exactly one observer runs the side-effects
@@ -55,7 +53,9 @@ describe.skipIf(!hasTestDb)("single-winner payment transition invariant", () => 
 
   it("a second claim after the row is already paid loses (no double fulfillment)", async () => {
     const ref = "ZY-20260629-9002-a1";
-    await getPool().query("INSERT INTO test_payments (reference, status) VALUES ($1, 'paid')", [ref]);
+    await getPool().query("INSERT INTO test_payments (reference, status) VALUES ($1, 'paid')", [
+      ref,
+    ]);
     expect(await claimPaid(ref)).toBe(false);
   });
 });

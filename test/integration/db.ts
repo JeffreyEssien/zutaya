@@ -58,9 +58,7 @@ export async function seedProductWithVariant(opts: {
   stock: number;
 }): Promise<string> {
   const id = randomUUID();
-  const variants = JSON.stringify([
-    { name: opts.variantName, price: 1000, stock: opts.stock },
-  ]);
+  const variants = JSON.stringify([{ name: opts.variantName, price: 1000, stock: opts.stock }]);
   await getPool().query(
     "INSERT INTO products (id, name, variants, stock) VALUES ($1, $2, $3::jsonb, $4)",
     [id, opts.name ?? "Test Product", variants, opts.stock],
@@ -129,10 +127,9 @@ export async function createOrderAtomic(
 export async function restoreStockForOrderAtomic(
   items: Omit<OrderItemInput, "product_name">[],
 ): Promise<{ restored: number }> {
-  const res = await getPool().query(
-    "SELECT restore_stock_for_order_atomic($1::jsonb) AS r",
-    [JSON.stringify(items)],
-  );
+  const res = await getPool().query("SELECT restore_stock_for_order_atomic($1::jsonb) AS r", [
+    JSON.stringify(items),
+  ]);
   return res.rows[0].r as { restored: number };
 }
 

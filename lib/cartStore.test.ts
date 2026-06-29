@@ -117,8 +117,9 @@ describe("removePackage", () => {
   it("removes every line belonging to that package group", () => {
     const s = useCartStore.getState();
     s.addPackageToCart(pkg(), 1);
-    const packageId = useCartStore.getState().items[0].packageId!;
-    useCartStore.getState().removePackage(packageId);
+    const packageId = useCartStore.getState().items[0].packageId;
+    expect(packageId).toBeTruthy();
+    useCartStore.getState().removePackage(packageId as string);
     expect(useCartStore.getState().items).toHaveLength(0);
   });
 
@@ -126,8 +127,9 @@ describe("removePackage", () => {
     const s = useCartStore.getState();
     s.addItem(product({ price: 10_000 }));
     s.addPackageToCart(pkg(), 1);
-    const packageId = useCartStore.getState().items.find((i) => i.packageId)!.packageId!;
-    useCartStore.getState().removePackage(packageId);
+    const packageLine = useCartStore.getState().items.find((i) => i.packageId);
+    expect(packageLine?.packageId).toBeTruthy();
+    useCartStore.getState().removePackage(packageLine?.packageId as string);
     const left = useCartStore.getState().items;
     expect(left).toHaveLength(1);
     expect(left[0].packageId).toBeUndefined();
