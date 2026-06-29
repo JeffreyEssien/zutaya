@@ -16,6 +16,8 @@ export const hasTestDb = Boolean(process.env.TEST_DATABASE_URL);
 const ROOT = resolve(__dirname, "..", "..");
 const SCHEMA_SQL = resolve(__dirname, "schema.sql");
 const RPC_MIGRATION = resolve(ROOT, "supabase/migrations/025_atomic_orders_and_rate_limit.sql");
+// 029 widens stock/quantity to NUMERIC and re-creates the RPCs for weight-based orders.
+const RPC_MIGRATION_029 = resolve(ROOT, "supabase/migrations/029_weight_based_quantities.sql");
 
 let pool: Pool | null = null;
 
@@ -34,6 +36,7 @@ export async function bootstrap(): Promise<void> {
   const p = getPool();
   await p.query(readFileSync(SCHEMA_SQL, "utf8"));
   await p.query(readFileSync(RPC_MIGRATION, "utf8"));
+  await p.query(readFileSync(RPC_MIGRATION_029, "utf8"));
 }
 
 export async function closePool(): Promise<void> {

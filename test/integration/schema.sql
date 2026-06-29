@@ -19,7 +19,7 @@ CREATE TABLE products (
     id        UUID PRIMARY KEY,
     name      TEXT,
     variants  JSONB,
-    stock     INT DEFAULT 0
+    stock     NUMERIC DEFAULT 0   -- NUMERIC: supports weight-based (0.5 kg) stock
 );
 
 CREATE TABLE inventory_items (
