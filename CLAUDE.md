@@ -187,6 +187,17 @@ There are no test scripts configured.
   - **Low-stock copy:** `StockIndicator.tsx` "Only N left" → "Low stock — selling fast" (no leaked counts).
   - **Unit tests** added for decimal-weight cart behavior (now 40 unit tests). typecheck + build + 40 unit + 14 integration all green.
   - **Packages:** existing line editor (product→variant→qty→label, auto-deduct via `create_order_atomic`) now supports fractional kg quantities thanks to 029; no new package UI this pass — revisit if a per-line unit picker is wanted.
+  - **⚠️ KNOWN GAPS in weight-based ordering (audit 2026-06-29 — NOT yet fixed, prioritized):**
+    1. **[CRITICAL] CartDrawer qty stepper ignores kg model** — `CartDrawer.tsx:234/238` step `item.quantity ±1` (whole), min 0, and display `×{item.quantity}` (line 195) shows no "kg" unit. A 2.5kg line → +1 = 3.5kg; not 0.5 steps, no 1kg floor. Product page selector is 0.5-step but the cart isn't. Fix: kg-aware stepper (0.5 step, min = product min) + unit label; `updateQuantity` clamp to min not 0 for per_kg.
+    2. **[CRITICAL] Admin product form truncates fractional stock** — `AddProductForm.tsx:153` `parseInt(form.stock)` + variant stock `:486` `parseInt`. 50.5kg → 50. (InventoryContent adjust uses `Number()` — fine; inconsistent.) Fix: `parseFloat` + `step="0.5"` on stock inputs.
+    3. **[CRITICAL] Other stock RPCs still INT** — `restore_stock` + `restore_variant_stock` (024, used by non-atomic `restoreStockForOrder` fallback) and `017`/`20260316` variant fns declare `v_current_stock INT` / `::INT`. Fractional restores/deductions truncate on those paths. Fix: migration to NUMERIC-ify them too (mirror 029).
+    4. **[CRITICAL] Silent add-to-cart failure when stock < min** — `ProductDetails.tsx`: `canOrder=currentStock>=minQty` hides selector, but Add button only `disabled` when stock===0. Stock 0.5kg → button clickable, `addItem` refuses, no feedback. Fix: `disabled={!canOrder || ...}` + sold-out copy when stock<min.
+    5. **[IMPORTANT] Storefront ignores per-product `minWeightKg`** — selector hardcodes global `ORDER_MIN_KG`; should use `product.minWeightKg ?? ORDER_MIN_KG`.
+    6. **[IMPORTANT] 50kg cap is per-line not per-order** — customer can add 50kg goat + 50kg beef. Confirm intent (per-order total likely) and enforce at cart level if so.
+    7. **[IMPORTANT] Per-kg products WITH variants mis-cap** — selector treats variant unit-stock as kg. Nothing prevents per_kg+variants combo.
+    8. **[IMPORTANT] StockIndicator bar still leaks count** — text says "Low stock" but bar width = stock/threshold reveals proportion. Remove/soften bar for the "no leaked counts" goal.
+    9. **[MINOR] Packaging cleanup half-done** — admin Settings still has packaging_fee fields, `getSiteSettings` defaults 500, `AdminCreateOrder` packaging path unverified. `settings` state in CheckoutForm may now be unused.
+    10. **[MINOR] 029 is a table-rewrite (exclusive lock); if code deploys before migration runs, kg orders truncate silently. JS cart float drift possible (DB exact). bulk-add `Name=fee` parse breaks on names with comma+digits.**
 
 ## RULES
 - When done with a task, very short and brief summary
