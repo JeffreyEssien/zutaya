@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { useCartStore } from "@/lib/cartStore";
+import { cartQuantityBounds, useCartStore } from "@/lib/cartStore";
 import type { Product, ZutayaPackage } from "@/types";
 
 // Minimal Product factory — only the fields the cart math reads.
@@ -110,6 +110,86 @@ describe("weight-priced items (decimal quantities)", () => {
         undefined,
         2.5,
       );
+    expect(useCartStore.getState().items).toHaveLength(0);
+  });
+});
+
+describe("cartQuantityBounds", () => {
+  it("uses 0.5 kg steps and the product's min for weight items", () => {
+    const b = cartQuantityBounds({
+      product: product({ priceUnit: "per_kg", minWeightKg: 2, stock: 30 }),
+      variant: undefined,
+    });
+    expect(b).toMatchObject({ isWeight: true, step: 0.5, min: 2, max: 30, unit: "kg" });
+  });
+
+  it("caps the weight max at 50 kg even with more stock", () => {
+    const b = cartQuantityBounds({
+      product: product({ priceUnit: "per_kg", stock: 200 }),
+      variant: undefined,
+    });
+    expect(b.max).toBe(50);
+    expect(b.min).toBe(1); // falls back to global min when product min unset
+  });
+
+  it("uses whole steps and no unit for non-weight items", () => {
+    const b = cartQuantityBounds({ product: product({ stock: 8 }), variant: undefined });
+    expect(b).toMatchObject({ isWeight: false, step: 1, min: 1, max: 8, unit: "" });
+  });
+});
+
+describe("adjustItemQuantity (kg-aware stepper)", () => {
+  function addKg(over: Partial<Product>, qty: number) {
+    useCartStore
+      .getState()
+      .addItem(
+        product({ priceUnit: "per_kg", price: 4_000, stock: 50, ...over }),
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        qty,
+      );
+  }
+
+  it("steps a weight item up by 0.5 kg", () => {
+    addKg({}, 1);
+    useCartStore.getState().adjustItemQuantity("p1", undefined, 1);
+    expect(useCartStore.getState().items[0].quantity).toBe(1.5);
+  });
+
+  it("removes the line when stepping below the minimum", () => {
+    addKg({}, 1); // min is 1 kg
+    useCartStore.getState().adjustItemQuantity("p1", undefined, -1);
+    expect(useCartStore.getState().items).toHaveLength(0);
+  });
+
+  it("respects a product's own minWeightKg", () => {
+    addKg({ minWeightKg: 2 }, 2);
+    useCartStore.getState().adjustItemQuantity("p1", undefined, -1); // 1.5 < 2 → removed
+    expect(useCartStore.getState().items).toHaveLength(0);
+  });
+
+  it("caps at available stock", () => {
+    addKg({ stock: 2 }, 2);
+    useCartStore.getState().adjustItemQuantity("p1", undefined, 1);
+    expect(useCartStore.getState().items[0].quantity).toBe(2);
+  });
+
+  it("caps at the 50 kg max even with more stock", () => {
+    addKg({ stock: 100 }, 49.5);
+    useCartStore.getState().adjustItemQuantity("p1", undefined, 1);
+    useCartStore.getState().adjustItemQuantity("p1", undefined, 1);
+    expect(useCartStore.getState().items[0].quantity).toBe(50);
+  });
+
+  it("steps whole units and removes a unit item at 1", () => {
+    useCartStore
+      .getState()
+      .addItem(product({ price: 1_000, stock: 5 }), undefined, undefined, undefined, undefined, 2);
+    useCartStore.getState().adjustItemQuantity("p1", undefined, -1);
+    expect(useCartStore.getState().items[0].quantity).toBe(1);
+    useCartStore.getState().adjustItemQuantity("p1", undefined, -1);
     expect(useCartStore.getState().items).toHaveLength(0);
   });
 });

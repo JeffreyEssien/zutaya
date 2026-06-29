@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import SafeImage from "@/components/ui/SafeImage";
 import Link from "next/link";
-import { useCartStore } from "@/lib/cartStore";
+import { useCartStore, cartQuantityBounds } from "@/lib/cartStore";
 import { formatCurrency } from "@/lib/formatCurrency";
 import Button from "@/components/ui/Button";
 import { X, Minus, Plus, Trash2, ShoppingBag, ArrowRight, Truck, Package } from "lucide-react";
@@ -203,8 +203,11 @@ function CartItems() {
 }
 
 function CartItemRow({ item, compact }: { item: CartItem; compact?: boolean }) {
-    const { updateQuantity, removeItem } = useCartStore();
+    const { adjustItemQuantity, removeItem } = useCartStore();
     const price = item.variant?.price || item.product.price;
+    const { unit, max } = cartQuantityBounds(item);
+    const atMax = item.quantity >= max;
+    const qtyLabel = unit ? `${item.quantity} ${unit}` : `${item.quantity}`;
 
     return (
         <motion.div
@@ -231,11 +234,11 @@ function CartItemRow({ item, compact }: { item: CartItem; compact?: boolean }) {
                 </div>
                 <div className="flex items-center justify-between mt-1.5">
                     <div className="flex items-center bg-warm-cream/5 rounded-full overflow-hidden border border-warm-cream/5">
-                        <button type="button" onClick={() => updateQuantity(item.product.id, item.variant?.name, item.quantity - 1, item.bundleId)} className="w-7 h-7 flex items-center justify-center hover:bg-warm-cream/5 transition-colors cursor-pointer">
+                        <button type="button" onClick={() => adjustItemQuantity(item.product.id, item.variant?.name, -1, item.bundleId)} className="w-7 h-7 flex items-center justify-center hover:bg-warm-cream/5 transition-colors cursor-pointer" aria-label="Decrease quantity">
                             <Minus size={11} />
                         </button>
-                        <span className="text-xs font-semibold w-7 text-center">{item.quantity}</span>
-                        <button type="button" onClick={() => updateQuantity(item.product.id, item.variant?.name, item.quantity + 1, item.bundleId)} className="w-7 h-7 flex items-center justify-center hover:bg-warm-cream/5 transition-colors cursor-pointer">
+                        <span className="text-xs font-semibold min-w-[3.25rem] px-1 text-center tabular-nums">{qtyLabel}</span>
+                        <button type="button" onClick={() => adjustItemQuantity(item.product.id, item.variant?.name, 1, item.bundleId)} disabled={atMax} className="w-7 h-7 flex items-center justify-center hover:bg-warm-cream/5 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed" aria-label="Increase quantity">
                             <Plus size={11} />
                         </button>
                     </div>

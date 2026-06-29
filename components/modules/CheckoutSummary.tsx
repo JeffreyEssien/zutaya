@@ -2,7 +2,7 @@
 
 import SafeImage from "@/components/ui/SafeImage";
 import { motion } from "framer-motion";
-import { useCartStore } from "@/lib/cartStore";
+import { useCartStore, cartQuantityBounds } from "@/lib/cartStore";
 import { formatCurrency } from "@/lib/formatCurrency";
 import CouponInput from "@/components/modules/CouponInput";
 import { Package, MapPin, ShieldCheck } from "lucide-react";
@@ -77,6 +77,9 @@ export default function CheckoutSummary({ shippingFee, packagingFee = 0, process
                         <div className="flex-1 min-w-0">
                             <p className="text-sm text-warm-cream font-medium truncate">{item.product.name}</p>
                             {item.variant && <p className="text-[10px] text-warm-cream/35">{item.variant.name}</p>}
+                            <p className="text-[10px] text-warm-cream/45">
+                                {cartQuantityBounds(item).unit ? `${item.quantity} kg` : `Qty: ${item.quantity}`}
+                            </p>
                         </div>
                         <p className="text-sm text-warm-cream font-medium shrink-0">
                             {formatCurrency((item.variant?.price || item.product.price) * item.quantity)}
