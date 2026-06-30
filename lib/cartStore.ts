@@ -3,6 +3,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { ORDER_MAX_KG, ORDER_MIN_KG, ORDER_STEP_KG } from "@/lib/constants";
+import { isWeightLine } from "@/lib/quantity";
 import { validateCoupon } from "@/lib/queries";
 import type { CartItem, CartItemProcessing, PrepOption, Product, ZutayaPackage } from "@/types";
 
@@ -245,7 +246,25 @@ export const useCartStore = create<CartStore>()(
 
       clearCart: () => set({ items: [], discount: 0, couponCode: null }),
 
-      totalItems: () => get().items.reduce((s, i) => s + i.quantity, 0),
+      // Cart badge count = number of ITEMS, not summed quantity. A weight line
+      // (e.g. 2.5 kg) counts as 1 item (not "2.5"); unit lines count their qty;
+      // a package group counts its box count (once, not per content line).
+      totalItems: () => {
+        const seenPackages = new Set<string>();
+        let count = 0;
+        for (const i of get().items) {
+          if (i.packageId) {
+            if (seenPackages.has(i.packageId)) continue;
+            seenPackages.add(i.packageId);
+            count += i.packageBoxes || 1;
+          } else if (isWeightLine(i)) {
+            count += 1;
+          } else {
+            count += i.quantity;
+          }
+        }
+        return count;
+      },
 
       applyCoupon: async (code: string) => {
         try {

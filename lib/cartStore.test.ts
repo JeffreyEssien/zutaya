@@ -182,6 +182,35 @@ describe("totalWeightKg", () => {
   });
 });
 
+describe("totalItems (cart badge count)", () => {
+  it("counts a weight line as 1 item, not its kg", () => {
+    useCartStore
+      .getState()
+      .addItem(product({ priceUnit: "per_kg", price: 4_000, stock: 50 }), undefined, undefined, undefined, undefined, 2.5);
+    expect(useCartStore.getState().totalItems()).toBe(1);
+  });
+
+  it("counts unit lines by their quantity", () => {
+    const p = product({ price: 1_000, stock: 5 });
+    useCartStore.getState().addItem(p);
+    useCartStore.getState().addItem(p); // qty 2
+    expect(useCartStore.getState().totalItems()).toBe(2);
+  });
+
+  it("counts a package group by its box count, once", () => {
+    useCartStore.getState().addPackageToCart(pkg(), 2); // 3 content lines, 2 boxes
+    expect(useCartStore.getState().totalItems()).toBe(2);
+  });
+
+  it("mixes weight + unit + package correctly", () => {
+    const s = useCartStore.getState();
+    s.addItem(product({ id: "w", priceUnit: "per_kg", price: 4_000, stock: 50 }), undefined, undefined, undefined, undefined, 3.5); // 1
+    s.addItem(product({ id: "u", price: 1_000, stock: 9 }), undefined, undefined, undefined, undefined, 3); // 3
+    s.addPackageToCart(pkg({ id: "x" }), 1); // 1
+    expect(useCartStore.getState().totalItems()).toBe(5);
+  });
+});
+
 describe("adjustItemQuantity (kg-aware stepper)", () => {
   function addKg(over: Partial<Product>, qty: number) {
     useCartStore
