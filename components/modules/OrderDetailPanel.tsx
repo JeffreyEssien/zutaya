@@ -61,6 +61,8 @@ export default function OrderDetailPanel({ order, onClose, onUpdate }: OrderDeta
     const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
     const [copied, setCopied] = useState(false);
     const [payments, setPayments] = useState<PaymentRecord[]>([]);
+    const [paymentsLoading, setPaymentsLoading] = useState(true);
+    const [paymentsError, setPaymentsError] = useState(false);
     const [isRefunding, setIsRefunding] = useState(false);
     const [showRefundForm, setShowRefundForm] = useState(false);
     const [refundAmount, setRefundAmount] = useState<string>("");
@@ -68,8 +70,17 @@ export default function OrderDetailPanel({ order, onClose, onUpdate }: OrderDeta
     const [reverifying, setReverifying] = useState<string | null>(null);
 
     const refreshPayments = async () => {
-        const fresh = await fetch(`/api/admin/payments?orderId=${encodeURIComponent(order.id)}`).then((r) => r.json());
-        if (fresh.success) setPayments(fresh.payments ?? []);
+        setPaymentsLoading(true);
+        setPaymentsError(false);
+        try {
+            const fresh = await fetch(`/api/admin/payments?orderId=${encodeURIComponent(order.id)}`).then((r) => r.json());
+            if (fresh.success) setPayments(fresh.payments ?? []);
+            else setPaymentsError(true);
+        } catch {
+            setPaymentsError(true);
+        } finally {
+            setPaymentsLoading(false);
+        }
     };
 
     const handleReverify = async (reference: string) => {
@@ -101,12 +112,21 @@ export default function OrderDetailPanel({ order, onClose, onUpdate }: OrderDeta
 
     useEffect(() => {
         let active = true;
+        setPaymentsLoading(true);
+        setPaymentsError(false);
         fetch(`/api/admin/payments?orderId=${encodeURIComponent(order.id)}`)
             .then((r) => r.json())
             .then((data) => {
-                if (active && data.success) setPayments(data.payments ?? []);
+                if (!active) return;
+                if (data.success) setPayments(data.payments ?? []);
+                else setPaymentsError(true);
             })
-            .catch(() => {});
+            .catch(() => {
+                if (active) setPaymentsError(true);
+            })
+            .finally(() => {
+                if (active) setPaymentsLoading(false);
+            });
         return () => {
             active = false;
         };
@@ -641,8 +661,21 @@ export default function OrderDetailPanel({ order, onClose, onUpdate }: OrderDeta
                             </Card>
 
                             {/* ═══ Payment Ledger ═══ */}
-                            <Card icon={<CreditCard size={14} />} title={`Payment Ledger (${payments.length})`}>
-                                {payments.length === 0 ? (
+                            <Card icon={<CreditCard size={14} />} title={`Payment Ledger${paymentsLoading ? "" : ` (${payments.length})`}`}>
+                                {paymentsLoading ? (
+                                    <p className="text-[11px] text-warm-cream/35 italic">Loading payments…</p>
+                                ) : paymentsError ? (
+                                    <div className="flex items-center justify-between gap-2">
+                                        <p className="text-[11px] text-red-400 italic">Couldn't load payments.</p>
+                                        <button
+                                            type="button"
+                                            onClick={refreshPayments}
+                                            className="text-[11px] font-medium text-brand-green hover:underline shrink-0"
+                                        >
+                                            Retry
+                                        </button>
+                                    </div>
+                                ) : payments.length === 0 ? (
                                     <p className="text-[11px] text-warm-cream/35 italic">No payment attempts recorded.</p>
                                 ) : (
                                     <div className="space-y-2">
