@@ -316,6 +316,14 @@ export const useCartStore = create<CartStore>()(
     }),
     {
       name: "cart-storage",
+      // Persist only the cart contents — NOT `isOpen`. Persisting `isOpen` left
+      // the drawer (and its backdrop) open on every page load after an add,
+      // covering the page on mobile and blocking clicks at checkout.
+      partialize: (state) => ({
+        items: state.items,
+        discount: state.discount,
+        couponCode: state.couponCode,
+      }),
     },
   ),
 );
