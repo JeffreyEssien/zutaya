@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import type { Order } from "@/types";
 import { formatCurrency } from "@/lib/formatCurrency";
+import { formatLineQuantity } from "@/lib/quantity";
 import { updateOrderStatus, updateOrderNotes } from "@/lib/queries";
 import Button from "@/components/ui/Button";
 import { logAction } from "@/lib/auditClient";
@@ -202,7 +203,7 @@ export default function OrderDetailPanel({ order, onClose, onUpdate }: OrderDeta
             const price = item.variant?.price || item.product.price;
             let line = `  • ${item.product.name}`;
             if (item.variant?.name) line += ` (${item.variant.name})`;
-            line += ` × ${item.quantity} — ${formatCurrency(price * item.quantity)}`;
+            line += ` × ${formatLineQuantity(item)} — ${formatCurrency(price * item.quantity)}`;
             if (item.selectedPrepOptions && item.selectedPrepOptions.length > 0) {
                 line += `\n    Prep: ${item.selectedPrepOptions.map(p => p.label).join(", ")}`;
             }
@@ -812,7 +813,7 @@ function ItemRow({ item, hidePrice }: { item: Order["items"][number]; hidePrice?
             <div className="min-w-0">
                 <p className="text-sm text-warm-cream font-medium truncate">
                     {item.product.name}
-                    <span className="text-warm-cream/40 font-normal ml-1">×{item.quantity}</span>
+                    <span className="text-warm-cream/40 font-normal ml-1">×{formatLineQuantity(item)}</span>
                 </p>
                 {item.variant?.name && (
                     <p className="text-[11px] text-warm-cream/45 mt-0.5">{item.variant.name}</p>

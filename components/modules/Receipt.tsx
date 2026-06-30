@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { useOrderStore } from "@/lib/orderStore";
 import { formatCurrency } from "@/lib/formatCurrency";
+import { formatLineQuantity } from "@/lib/quantity";
 import { SITE_NAME } from "@/lib/constants";
 
 export default function Receipt() {
@@ -160,7 +161,7 @@ function ItemsTable({ items }: { items: ReceiptItem[] }) {
                                         </span>
                                     )}
                                 </td>
-                                <td className="py-3 text-center text-warm-cream/50">{item.quantity}</td>
+                                <td className="py-3 text-center text-warm-cream/50">{formatLineQuantity(item)}</td>
                                 <td className="py-3 text-right text-warm-cream/50">{formatCurrency(unitPrice)}</td>
                                 <td className="py-3 text-right text-warm-cream font-semibold">{formatCurrency(unitPrice * item.quantity)}</td>
                             </tr>

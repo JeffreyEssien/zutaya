@@ -7,7 +7,7 @@ import { useState } from "react";
 import { X, ShoppingBag, Check, ChevronLeft, ChevronRight } from "lucide-react";
 import type { Product } from "@/types";
 import { formatCurrency } from "@/lib/formatCurrency";
-import { useCartStore } from "@/lib/cartStore";
+import { useCartStore, cartQuantityBounds } from "@/lib/cartStore";
 import Button from "@/components/ui/Button";
 import StockIndicator from "@/components/ui/StockIndicator";
 import { toast } from "sonner";
@@ -28,9 +28,13 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
 
     const currentPrice = selectedVariant?.price || product.price;
     const currentStock = selectedVariant?.stock !== undefined ? selectedVariant.stock : product.stock;
+    const { min, max, isWeight } = cartQuantityBounds({ product, variant: selectedVariant });
+    const canOrder = currentStock > 0 && max >= min;
 
     const handleAdd = () => {
-        addItem(product, selectedVariant);
+        if (!canOrder) return;
+        // Quick-view adds the minimum (e.g. 1kg); exact weight is chosen on the PDP.
+        addItem(product, selectedVariant, undefined, undefined, undefined, min);
         setAdded(true);
         toast.success(`${product.name} added to cart`, {
             action: {
@@ -163,17 +167,22 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
                                 <Button
                                     size="lg"
                                     onClick={handleAdd}
-                                    disabled={currentStock === 0}
+                                    disabled={!canOrder}
                                     className="w-full"
                                 >
                                     <span className="flex items-center justify-center gap-2">
                                         {added ? (
                                             <><Check size={16} /> Added!</>
                                         ) : (
-                                            <><ShoppingBag size={16} /> {currentStock === 0 ? "Sold Out" : "Add to Cart"}</>
+                                            <><ShoppingBag size={16} /> {currentStock === 0 ? "Sold Out" : !canOrder ? "Currently Unavailable" : isWeight ? `Add ${min}kg to Cart` : "Add to Cart"}</>
                                         )}
                                     </span>
                                 </Button>
+                                {isWeight && canOrder && (
+                                    <p className="text-[11px] text-warm-cream/35 text-center">
+                                        Adds {min}kg — choose an exact weight on the product page.
+                                    </p>
+                                )}
                                 <Link href={`/product/${product.slug}`} onClick={onClose} className="block">
                                     <button className="w-full text-xs text-warm-cream/40 hover:text-brand-green transition-colors py-2 cursor-pointer">
                                         View Full Details →
