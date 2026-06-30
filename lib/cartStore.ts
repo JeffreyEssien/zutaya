@@ -10,7 +10,9 @@ import type { CartItem, CartItemProcessing, PrepOption, Product, ZutayaPackage }
 // weight items move in 0.5 kg steps from the product's min (or the global 1 kg)
 // up to the 50 kg cap or available stock; everything else is whole units.
 export function cartQuantityBounds(item: Pick<CartItem, "product" | "variant">) {
-  const isWeight = item.product.priceUnit === "per_kg";
+  // Weight mode only applies to a per_kg product with NO sized variant selected.
+  // A chosen variant (e.g. "500g pack") is a discrete unit, so it steps in 1s.
+  const isWeight = item.product.priceUnit === "per_kg" && !item.variant;
   const step = isWeight ? ORDER_STEP_KG : 1;
   const min = isWeight
     ? item.product.minWeightKg && item.product.minWeightKg > 0
@@ -59,6 +61,7 @@ interface CartStore {
   removeCoupon: () => void;
   subtotal: () => number;
   total: () => number;
+  totalWeightKg: () => number;
 }
 
 export const useCartStore = create<CartStore>()(
@@ -283,6 +286,14 @@ export const useCartStore = create<CartStore>()(
         const couponDisc = sub * (get().discount / 100);
         return Math.max(0, sub - couponDisc);
       },
+
+      // Total kilograms of weight-priced items in the cart (ignores unit items,
+      // sized variants and package lines). Used to enforce the per-order kg cap.
+      totalWeightKg: () =>
+        get().items.reduce((sum, i) => {
+          if (i.packageId || i.variant) return sum;
+          return i.product.priceUnit === "per_kg" ? sum + i.quantity : sum;
+        }, 0),
     }),
     {
       name: "cart-storage",

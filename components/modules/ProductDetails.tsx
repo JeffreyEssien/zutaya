@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Product, PrepOption, Marinade, ProcessingOption, CartItemProcessing, CompletionMode } from "@/types";
 import { formatCurrency } from "@/lib/formatCurrency";
-import { useCartStore } from "@/lib/cartStore";
+import { useCartStore, cartQuantityBounds } from "@/lib/cartStore";
 import Button from "@/components/ui/Button";
 import StockIndicator from "@/components/ui/StockIndicator";
 import { StorageBadge } from "@/components/ui/StorageBadge";
@@ -13,7 +13,7 @@ import EatModeSelector from "@/components/modules/EatModeSelector";
 import ProcessingConfigurator from "@/components/modules/ProcessingConfigurator";
 import { ShoppingBag, Truck, Shield, RotateCcw, Check, ChevronDown, ChevronRight, MessageCircle, Minus, Plus } from "lucide-react";
 import Link from "next/link";
-import { WHATSAPP_NUMBER, CONTACT_EMAIL, ORDER_MIN_KG, ORDER_MAX_KG, ORDER_STEP_KG } from "@/lib/constants";
+import { WHATSAPP_NUMBER, CONTACT_EMAIL, ORDER_MAX_KG } from "@/lib/constants";
 
 interface ProductDetailsProps {
     product: Product;
@@ -47,11 +47,10 @@ export default function ProductDetails({ product, marinades = [], processingOpti
     // Weight-priced products (per_kg) order in 0.5 kg steps from 1 kg up to the
     // 50 kg cap; everything else orders in whole units. The orderable max is the
     // smaller of available stock and (for weight) the 50 kg cap.
-    const isWeight = product.priceUnit === "per_kg";
-    const step = isWeight ? ORDER_STEP_KG : 1;
-    const minQty = isWeight ? ORDER_MIN_KG : 1;
-    const hardMax = isWeight ? ORDER_MAX_KG : Number.POSITIVE_INFINITY;
-    const maxQty = Math.min(currentStock, hardMax);
+    // Single source of truth for step/min/max/unit — shared with the cart so the
+    // product page and cart never disagree (honours product.minWeightKg, the
+    // 50kg cap, and treats a chosen variant as discrete units).
+    const { isWeight, step, min: minQty, max: maxQty } = cartQuantityBounds({ product, variant: selectedVariant });
     const unitWord = isWeight ? "kg"
         : product.priceUnit === "per_piece" ? "pcs"
         : product.priceUnit === "per_pack" ? "packs"
@@ -60,7 +59,8 @@ export default function ProductDetails({ product, marinades = [], processingOpti
     const [qty, setQty] = useState(minQty);
     // Keep qty within bounds whenever the selected variant (hence stock) changes.
     const clampedQty = Math.min(Math.max(qty, minQty), Math.max(maxQty, minQty));
-    const canOrder = currentStock >= minQty;
+    // Orderable only when there's at least the minimum in stock.
+    const canOrder = currentStock > 0 && maxQty >= minQty;
     const atCap = isWeight && clampedQty >= ORDER_MAX_KG;
 
     const adjustQty = (delta: number) => {
@@ -236,7 +236,7 @@ export default function ProductDetails({ product, marinades = [], processingOpti
                     </div>
                     {isWeight && (
                         <p className="text-[11px] text-warm-cream/35 mt-2">
-                            Sold in {ORDER_STEP_KG} kg steps, from {ORDER_MIN_KG} kg.
+                            Sold in {step} kg steps, from {minQty} kg.
                         </p>
                     )}
                     {atCap && (
@@ -301,7 +301,7 @@ export default function ProductDetails({ product, marinades = [], processingOpti
                 <Button
                     size="lg"
                     onClick={handleAdd}
-                    disabled={currentStock === 0}
+                    disabled={!canOrder}
                     className="w-full sm:w-auto luxury-button"
                 >
                     <span className="flex items-center justify-center gap-2">
@@ -313,7 +313,11 @@ export default function ProductDetails({ product, marinades = [], processingOpti
                         ) : (
                             <>
                                 <ShoppingBag size={18} />
-                                {currentStock === 0 ? "Sold Out" : "Add to Cart"}
+                                {currentStock === 0
+                                    ? "Sold Out"
+                                    : !canOrder
+                                        ? "Currently Unavailable"
+                                        : "Add to Cart"}
                             </>
                         )}
                     </span>

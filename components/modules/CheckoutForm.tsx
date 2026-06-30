@@ -13,6 +13,7 @@ import {
 } from "@/lib/deliveryPricing";
 import type { ShippingAddress, Order, SiteSettings } from "@/types";
 import { getSiteSettings } from "@/lib/queries";
+import { ORDER_MAX_KG, WHATSAPP_NUMBER, CONTACT_EMAIL } from "@/lib/constants";
 import DeliveryScheduler from "@/components/modules/DeliveryScheduler";
 import {
     Lock, Truck, Building2, ChevronDown, Package, Tag, UtensilsCrossed,
@@ -94,7 +95,11 @@ export default function CheckoutForm({
     const orderDraftRef = useRef<Partial<Order>>({});
     const [stage, setStage] = useState<"idle" | "creating" | "awaiting_payment">("idle");
     const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
-    const { items, subtotal, clearCart, couponCode, discount, removeCoupon } = useCartStore();
+    const { items, subtotal, clearCart, couponCode, discount, removeCoupon, totalWeightKg } = useCartStore();
+    // Per-order weight cap: above 50 kg of meat, route the customer to the team
+    // for a bulk quote rather than charging an order we can't fulfil online.
+    const orderWeightKg = totalWeightKg();
+    const overWeightCap = orderWeightKg > ORDER_MAX_KG;
     const { addOrder } = useOrderStore();
 
     const [dbPricing, setDbPricing] = useState<DbPricingResult | null>(null);
@@ -233,6 +238,10 @@ export default function CheckoutForm({
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (loading) return; // guard against double-submit (Enter key / rapid clicks)
+        if (overWeightCap) {
+            toast.error(`Orders over ${ORDER_MAX_KG}kg need a bulk quote — please reach the team on WhatsApp or ${CONTACT_EMAIL}.`);
+            return;
+        }
         if (!validate()) return;
         setLoading(true);
         setStage("creating");
@@ -496,7 +505,23 @@ export default function CheckoutForm({
                     <span>Your information is encrypted and processed by Paystack — we never see your card details.</span>
                 </div>
 
-                <Button type="submit" size="lg" className="w-full" loading={loading}>
+                {overWeightCap && (
+                    <div className="mb-3 p-3 rounded-xl border border-amber-500/30 bg-amber-500/[0.06] text-xs text-amber-700">
+                        Your order is <strong>{orderWeightKg}kg</strong> — above our {ORDER_MAX_KG}kg online limit. For a bulk quote, reach the ZúTa Ya team on{" "}
+                        <a
+                            href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hi! I'd like a bulk quote for a ${orderWeightKg}kg order.`)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline font-semibold"
+                        >
+                            WhatsApp
+                        </a>{" "}
+                        or{" "}
+                        <a href={`mailto:${CONTACT_EMAIL}`} className="underline font-semibold">{CONTACT_EMAIL}</a>.
+                    </div>
+                )}
+
+                <Button type="submit" size="lg" className="w-full" loading={loading} disabled={overWeightCap}>
                     <span className="flex items-center justify-center gap-2">
                         <CreditCard size={16} />
                         Pay ₦{(baseTotal + processingFee).toLocaleString()} Securely

@@ -136,6 +136,50 @@ describe("cartQuantityBounds", () => {
     const b = cartQuantityBounds({ product: product({ stock: 8 }), variant: undefined });
     expect(b).toMatchObject({ isWeight: false, step: 1, min: 1, max: 8, unit: "" });
   });
+
+  it("treats a per_kg product with a chosen variant as discrete units", () => {
+    const b = cartQuantityBounds({
+      product: product({ priceUnit: "per_kg", stock: 10 }),
+      variant: { name: "500g pack", stock: 8 },
+    });
+    expect(b).toMatchObject({ isWeight: false, step: 1, unit: "", max: 8 });
+  });
+});
+
+describe("totalWeightKg", () => {
+  it("sums only weight (per_kg, no-variant, non-package) lines", () => {
+    const s = useCartStore.getState();
+    s.addItem(
+      product({ id: "a", priceUnit: "per_kg", price: 4_000, stock: 50 }),
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      2.5,
+    );
+    s.addItem(
+      product({ id: "b", price: 1_000, stock: 5 }),
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      3,
+    ); // unit item
+    s.addItem(
+      product({ id: "c", priceUnit: "per_kg", price: 4_000, stock: 20 }),
+      { name: "500g", stock: 10 },
+      undefined,
+      undefined,
+      undefined,
+      2,
+    ); // variant
+    expect(useCartStore.getState().totalWeightKg()).toBe(2.5);
+  });
+
+  it("is zero with no weight items", () => {
+    useCartStore.getState().addItem(product({ price: 1_000, stock: 5 }));
+    expect(useCartStore.getState().totalWeightKg()).toBe(0);
+  });
 });
 
 describe("adjustItemQuantity (kg-aware stepper)", () => {
