@@ -16,6 +16,10 @@ export const hasTestDb = Boolean(process.env.TEST_DATABASE_URL);
 const ROOT = resolve(__dirname, "..", "..");
 const SCHEMA_SQL = resolve(__dirname, "schema.sql");
 const RPC_MIGRATION = resolve(ROOT, "supabase/migrations/025_atomic_orders_and_rate_limit.sql");
+// 029 widens stock/quantity to NUMERIC and re-creates the RPCs for weight-based orders.
+const RPC_MIGRATION_029 = resolve(ROOT, "supabase/migrations/029_weight_based_quantities.sql");
+// 030 NUMERIC-ifies the legacy non-atomic restore RPCs.
+const RPC_MIGRATION_030 = resolve(ROOT, "supabase/migrations/030_weight_stock_rpcs_numeric.sql");
 
 let pool: Pool | null = null;
 
@@ -34,6 +38,8 @@ export async function bootstrap(): Promise<void> {
   const p = getPool();
   await p.query(readFileSync(SCHEMA_SQL, "utf8"));
   await p.query(readFileSync(RPC_MIGRATION, "utf8"));
+  await p.query(readFileSync(RPC_MIGRATION_029, "utf8"));
+  await p.query(readFileSync(RPC_MIGRATION_030, "utf8"));
 }
 
 export async function closePool(): Promise<void> {
@@ -58,9 +64,7 @@ export async function seedProductWithVariant(opts: {
   stock: number;
 }): Promise<string> {
   const id = randomUUID();
-  const variants = JSON.stringify([
-    { name: opts.variantName, price: 1000, stock: opts.stock },
-  ]);
+  const variants = JSON.stringify([{ name: opts.variantName, price: 1000, stock: opts.stock }]);
   await getPool().query(
     "INSERT INTO products (id, name, variants, stock) VALUES ($1, $2, $3::jsonb, $4)",
     [id, opts.name ?? "Test Product", variants, opts.stock],
@@ -129,10 +133,9 @@ export async function createOrderAtomic(
 export async function restoreStockForOrderAtomic(
   items: Omit<OrderItemInput, "product_name">[],
 ): Promise<{ restored: number }> {
-  const res = await getPool().query(
-    "SELECT restore_stock_for_order_atomic($1::jsonb) AS r",
-    [JSON.stringify(items)],
-  );
+  const res = await getPool().query("SELECT restore_stock_for_order_atomic($1::jsonb) AS r", [
+    JSON.stringify(items),
+  ]);
   return res.rows[0].r as { restored: number };
 }
 

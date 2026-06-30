@@ -1,6 +1,7 @@
 import nodemailer from "nodemailer";
 import type { Order } from "@/types";
 import { SITE_NAME, SITE_EMAIL, WHATSAPP_NUMBER, SITE_URL } from "@/lib/constants";
+import { formatLineQuantity } from "@/lib/quantity";
 
 // SMTP transport — defaults to Zoho Mail (smtppro.zoho.com). Override host/port
 // via env to point elsewhere. Port 465 = implicit SSL; 587 = STARTTLS.
@@ -36,7 +37,7 @@ function formatItemsHtml(order: Order): string {
           ${i.selectedPrepOptions && i.selectedPrepOptions.length > 0 ? `<br><span style="font-size: 11px; color: #92400e;">Prep: ${i.selectedPrepOptions.map(p => p.label).join(", ")}</span>` : ""}
         </td>
         <td style="padding: 12px 0; border-bottom: 1px solid #f3f0f7; text-align: center; font-size: 14px; color: #666;">
-          ${i.quantity}
+          ${formatLineQuantity(i)}
         </td>
         <td style="padding: 12px 0; border-bottom: 1px solid #f3f0f7; text-align: right; font-size: 14px; color: #666;">
           ₦${(i.variant?.price || i.product.price).toLocaleString()}

@@ -3,6 +3,14 @@ export const SITE_DESCRIPTION = "Premium Meat Delivery · Lagos";
 export const CURRENCY = "NGN";
 export const LOW_STOCK_THRESHOLD = 5;
 
+// ── Order quantity limits ──
+// Weight-priced products (priceUnit === "per_kg") are sold in 0.5 kg steps,
+// from a 1 kg minimum up to a 50 kg per-order cap. Above the cap, customers are
+// directed to contact the team (WhatsApp / enquiry email) for a bulk quote.
+export const ORDER_MIN_KG = 1;
+export const ORDER_MAX_KG = 50;
+export const ORDER_STEP_KG = 0.5;
+
 export const SITE_EMAIL = "zutayao@gmail.com";
 // Public-facing enquiries address shown in "Get in Touch". Kept separate from
 // SITE_EMAIL, which is also the SMTP sending/fallback address (Gmail-based).

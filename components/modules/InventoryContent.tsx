@@ -194,7 +194,7 @@ export default function InventoryContent({ logs: initialLogs, inventory: initial
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium text-warm-cream/40 mb-1">Initial Stock</label>
-                                    <input required type="number" value={newItem.stock} onChange={e => setNewItem({ ...newItem, stock: e.target.value })} className="w-full px-3 py-2 border border-warm-cream/30 rounded focus:border-brand-green" />
+                                    <input required type="number" step="any" value={newItem.stock} onChange={e => setNewItem({ ...newItem, stock: e.target.value })} className="w-full px-3 py-2 border border-warm-cream/30 rounded focus:border-brand-green" />
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium text-warm-cream/40 mb-1">Reorder Level</label>
@@ -449,6 +449,7 @@ export default function InventoryContent({ logs: initialLogs, inventory: initial
                                     </div>
                                     <input
                                         type="number"
+                                        step="any"
                                         value={adjustmentAmount}
                                         onChange={(e) => setAdjustmentAmount(Number(e.target.value))}
                                         placeholder="+ / -"

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { useCartStore } from "@/lib/cartStore";
+import { cartQuantityBounds, useCartStore } from "@/lib/cartStore";
 import type { Product, ZutayaPackage } from "@/types";
 
 // Minimal Product factory — only the fields the cart math reads.
@@ -73,6 +73,200 @@ describe("standalone item pricing", () => {
   });
 });
 
+describe("weight-priced items (decimal quantities)", () => {
+  it("adds a chosen kg amount and prices it per kg", () => {
+    // ₦4,000/kg × 2.5kg = ₦10,000
+    useCartStore
+      .getState()
+      .addItem(
+        product({ price: 4_000, stock: 50, priceUnit: "per_kg" }),
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        2.5,
+      );
+    const items = useCartStore.getState().items;
+    expect(items[0].quantity).toBe(2.5);
+    expect(useCartStore.getState().subtotal()).toBe(10_000);
+  });
+
+  it("accumulates decimal weights on repeat adds", () => {
+    const p = product({ price: 4_000, stock: 50, priceUnit: "per_kg" });
+    useCartStore.getState().addItem(p, undefined, undefined, undefined, undefined, 1.5);
+    useCartStore.getState().addItem(p, undefined, undefined, undefined, undefined, 2);
+    expect(useCartStore.getState().items[0].quantity).toBe(3.5);
+    expect(useCartStore.getState().subtotal()).toBe(14_000);
+  });
+
+  it("refuses to add more weight than is in stock", () => {
+    useCartStore
+      .getState()
+      .addItem(
+        product({ price: 4_000, stock: 2, priceUnit: "per_kg" }),
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        2.5,
+      );
+    expect(useCartStore.getState().items).toHaveLength(0);
+  });
+});
+
+describe("cartQuantityBounds", () => {
+  it("uses 0.5 kg steps and the product's min for weight items", () => {
+    const b = cartQuantityBounds({
+      product: product({ priceUnit: "per_kg", minWeightKg: 2, stock: 30 }),
+      variant: undefined,
+    });
+    expect(b).toMatchObject({ isWeight: true, step: 0.5, min: 2, max: 30, unit: "kg" });
+  });
+
+  it("caps the weight max at 50 kg even with more stock", () => {
+    const b = cartQuantityBounds({
+      product: product({ priceUnit: "per_kg", stock: 200 }),
+      variant: undefined,
+    });
+    expect(b.max).toBe(50);
+    expect(b.min).toBe(1); // falls back to global min when product min unset
+  });
+
+  it("uses whole steps and no unit for non-weight items", () => {
+    const b = cartQuantityBounds({ product: product({ stock: 8 }), variant: undefined });
+    expect(b).toMatchObject({ isWeight: false, step: 1, min: 1, max: 8, unit: "" });
+  });
+
+  it("treats a per_kg product with a chosen variant as discrete units", () => {
+    const b = cartQuantityBounds({
+      product: product({ priceUnit: "per_kg", stock: 10 }),
+      variant: { name: "500g pack", stock: 8 },
+    });
+    expect(b).toMatchObject({ isWeight: false, step: 1, unit: "", max: 8 });
+  });
+});
+
+describe("totalWeightKg", () => {
+  it("sums only weight (per_kg, no-variant, non-package) lines", () => {
+    const s = useCartStore.getState();
+    s.addItem(
+      product({ id: "a", priceUnit: "per_kg", price: 4_000, stock: 50 }),
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      2.5,
+    );
+    s.addItem(
+      product({ id: "b", price: 1_000, stock: 5 }),
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      3,
+    ); // unit item
+    s.addItem(
+      product({ id: "c", priceUnit: "per_kg", price: 4_000, stock: 20 }),
+      { name: "500g", stock: 10 },
+      undefined,
+      undefined,
+      undefined,
+      2,
+    ); // variant
+    expect(useCartStore.getState().totalWeightKg()).toBe(2.5);
+  });
+
+  it("is zero with no weight items", () => {
+    useCartStore.getState().addItem(product({ price: 1_000, stock: 5 }));
+    expect(useCartStore.getState().totalWeightKg()).toBe(0);
+  });
+});
+
+describe("totalItems (cart badge count)", () => {
+  it("counts a weight line as 1 item, not its kg", () => {
+    useCartStore
+      .getState()
+      .addItem(product({ priceUnit: "per_kg", price: 4_000, stock: 50 }), undefined, undefined, undefined, undefined, 2.5);
+    expect(useCartStore.getState().totalItems()).toBe(1);
+  });
+
+  it("counts unit lines by their quantity", () => {
+    const p = product({ price: 1_000, stock: 5 });
+    useCartStore.getState().addItem(p);
+    useCartStore.getState().addItem(p); // qty 2
+    expect(useCartStore.getState().totalItems()).toBe(2);
+  });
+
+  it("counts a package group by its box count, once", () => {
+    useCartStore.getState().addPackageToCart(pkg(), 2); // 3 content lines, 2 boxes
+    expect(useCartStore.getState().totalItems()).toBe(2);
+  });
+
+  it("mixes weight + unit + package correctly", () => {
+    const s = useCartStore.getState();
+    s.addItem(product({ id: "w", priceUnit: "per_kg", price: 4_000, stock: 50 }), undefined, undefined, undefined, undefined, 3.5); // 1
+    s.addItem(product({ id: "u", price: 1_000, stock: 9 }), undefined, undefined, undefined, undefined, 3); // 3
+    s.addPackageToCart(pkg({ id: "x" }), 1); // 1
+    expect(useCartStore.getState().totalItems()).toBe(5);
+  });
+});
+
+describe("adjustItemQuantity (kg-aware stepper)", () => {
+  function addKg(over: Partial<Product>, qty: number) {
+    useCartStore
+      .getState()
+      .addItem(
+        product({ priceUnit: "per_kg", price: 4_000, stock: 50, ...over }),
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        qty,
+      );
+  }
+
+  it("steps a weight item up by 0.5 kg", () => {
+    addKg({}, 1);
+    useCartStore.getState().adjustItemQuantity("p1", undefined, 1);
+    expect(useCartStore.getState().items[0].quantity).toBe(1.5);
+  });
+
+  it("removes the line when stepping below the minimum", () => {
+    addKg({}, 1); // min is 1 kg
+    useCartStore.getState().adjustItemQuantity("p1", undefined, -1);
+    expect(useCartStore.getState().items).toHaveLength(0);
+  });
+
+  it("respects a product's own minWeightKg", () => {
+    addKg({ minWeightKg: 2 }, 2);
+    useCartStore.getState().adjustItemQuantity("p1", undefined, -1); // 1.5 < 2 → removed
+    expect(useCartStore.getState().items).toHaveLength(0);
+  });
+
+  it("caps at available stock", () => {
+    addKg({ stock: 2 }, 2);
+    useCartStore.getState().adjustItemQuantity("p1", undefined, 1);
+    expect(useCartStore.getState().items[0].quantity).toBe(2);
+  });
+
+  it("caps at the 50 kg max even with more stock", () => {
+    addKg({ stock: 100 }, 49.5);
+    useCartStore.getState().adjustItemQuantity("p1", undefined, 1);
+    useCartStore.getState().adjustItemQuantity("p1", undefined, 1);
+    expect(useCartStore.getState().items[0].quantity).toBe(50);
+  });
+
+  it("steps whole units and removes a unit item at 1", () => {
+    useCartStore
+      .getState()
+      .addItem(product({ price: 1_000, stock: 5 }), undefined, undefined, undefined, undefined, 2);
+    useCartStore.getState().adjustItemQuantity("p1", undefined, -1);
+    expect(useCartStore.getState().items[0].quantity).toBe(1);
+    useCartStore.getState().adjustItemQuantity("p1", undefined, -1);
+    expect(useCartStore.getState().items).toHaveLength(0);
+  });
+});
+
 describe("package flat-price math (the core invariant)", () => {
   it("charges the flat package price ONCE, not the sum of its lines", () => {
     useCartStore.getState().addPackageToCart(pkg({ price: 45_000 }), 1);
@@ -117,8 +311,9 @@ describe("removePackage", () => {
   it("removes every line belonging to that package group", () => {
     const s = useCartStore.getState();
     s.addPackageToCart(pkg(), 1);
-    const packageId = useCartStore.getState().items[0].packageId!;
-    useCartStore.getState().removePackage(packageId);
+    const packageId = useCartStore.getState().items[0].packageId;
+    expect(packageId).toBeTruthy();
+    useCartStore.getState().removePackage(packageId as string);
     expect(useCartStore.getState().items).toHaveLength(0);
   });
 
@@ -126,8 +321,9 @@ describe("removePackage", () => {
     const s = useCartStore.getState();
     s.addItem(product({ price: 10_000 }));
     s.addPackageToCart(pkg(), 1);
-    const packageId = useCartStore.getState().items.find((i) => i.packageId)!.packageId!;
-    useCartStore.getState().removePackage(packageId);
+    const packageLine = useCartStore.getState().items.find((i) => i.packageId);
+    expect(packageLine?.packageId).toBeTruthy();
+    useCartStore.getState().removePackage(packageLine?.packageId as string);
     const left = useCartStore.getState().items;
     expect(left).toHaveLength(1);
     expect(left[0].packageId).toBeUndefined();

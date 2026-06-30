@@ -27,7 +27,13 @@ describe.skipIf(!hasTestDb)("create_order_atomic (real RPC, real Postgres)", () 
   it("deducts variant stock on a successful order", async () => {
     const productId = await seedProductWithVariant({ variantName: "1kg", stock: 10 });
     const res = await createOrderAtomic("ZY-20260629-0001", [
-      { product_id: productId, product_name: "Goat", quantity: 3, variant_name: "1kg", inventory_item_id: null },
+      {
+        product_id: productId,
+        product_name: "Goat",
+        quantity: 3,
+        variant_name: "1kg",
+        inventory_item_id: null,
+      },
     ]);
     expect(res.ok).toBe(true);
     expect(await getProductVariantStock(productId, "1kg")).toBe(7);
@@ -37,19 +43,41 @@ describe.skipIf(!hasTestDb)("create_order_atomic (real RPC, real Postgres)", () 
   it("deducts inventory-item stock when there is no variant", async () => {
     const { productId, inventoryId } = await seedProductWithInventory({ stock: 8 });
     await createOrderAtomic("ZY-20260629-0002", [
-      { product_id: productId, product_name: "Beef", quantity: 5, variant_name: null, inventory_item_id: inventoryId },
+      {
+        product_id: productId,
+        product_name: "Beef",
+        quantity: 5,
+        variant_name: null,
+        inventory_item_id: inventoryId,
+      },
     ]);
     expect(await getInventoryStock(inventoryId)).toBe(3);
   });
 
   it("rolls the WHOLE order back if any line is short (no partial deduction, no orphan order)", async () => {
     const okProduct = await seedProductWithVariant({ name: "Goat", variantName: "1kg", stock: 10 });
-    const shortProduct = await seedProductWithVariant({ name: "Shaki", variantName: "pack", stock: 1 });
+    const shortProduct = await seedProductWithVariant({
+      name: "Shaki",
+      variantName: "pack",
+      stock: 1,
+    });
 
     await expect(
       createOrderAtomic("ZY-20260629-0003", [
-        { product_id: okProduct, product_name: "Goat", quantity: 2, variant_name: "1kg", inventory_item_id: null },
-        { product_id: shortProduct, product_name: "Shaki", quantity: 5, variant_name: "pack", inventory_item_id: null },
+        {
+          product_id: okProduct,
+          product_name: "Goat",
+          quantity: 2,
+          variant_name: "1kg",
+          inventory_item_id: null,
+        },
+        {
+          product_id: shortProduct,
+          product_name: "Shaki",
+          quantity: 5,
+          variant_name: "pack",
+          inventory_item_id: null,
+        },
       ]),
     ).rejects.toThrow(/Insufficient stock/i);
 
@@ -65,7 +93,13 @@ describe.skipIf(!hasTestDb)("create_order_atomic (real RPC, real Postgres)", () 
 
     const attempts = Array.from({ length: 10 }, (_, i) =>
       createOrderAtomic(`ZY-20260629-1${String(i).padStart(3, "0")}`, [
-        { product_id: productId, product_name: "Goat", quantity: 1, variant_name: "1kg", inventory_item_id: null },
+        {
+          product_id: productId,
+          product_name: "Goat",
+          quantity: 1,
+          variant_name: "1kg",
+          inventory_item_id: null,
+        },
       ])
         .then(() => "ok" as const)
         .catch(() => "fail" as const),
@@ -88,7 +122,13 @@ describe.skipIf(!hasTestDb)("create_order_atomic (real RPC, real Postgres)", () 
     const { productId, inventoryId } = await seedProductWithInventory({ stock: 5 });
     const attempts = Array.from({ length: 12 }, (_, i) =>
       createOrderAtomic(`ZY-20260629-2${String(i).padStart(3, "0")}`, [
-        { product_id: productId, product_name: "Beef", quantity: 1, variant_name: null, inventory_item_id: inventoryId },
+        {
+          product_id: productId,
+          product_name: "Beef",
+          quantity: 1,
+          variant_name: null,
+          inventory_item_id: inventoryId,
+        },
       ])
         .then(() => "ok" as const)
         .catch(() => "fail" as const),

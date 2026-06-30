@@ -150,7 +150,8 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
 
         setLoading(true);
         try {
-            const stockToSave = variantStockTotal !== null ? variantStockTotal : parseInt(form.stock);
+            // parseFloat (not parseInt) so weight-based stock keeps its decimals (e.g. 50.5 kg).
+            const stockToSave = variantStockTotal !== null ? variantStockTotal : (parseFloat(form.stock) || 0);
 
         if (initialData) {
                 // Edit (Standard Update)
@@ -286,7 +287,7 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                         )}
 
                         <InputField
-                            label={`Selling Price (₦) ${mode === "existing" ? "(Managed in Inventory)" : ""}`}
+                            label={`Selling Price (₦${form.priceUnit === "per_kg" ? " / kg" : form.priceUnit === "per_pack" ? " / pack" : form.priceUnit === "per_piece" ? " / piece" : ""}) ${mode === "existing" ? "(Managed in Inventory)" : ""}`}
                             name="price"
                             type="number"
                             value={form.price}
@@ -300,6 +301,7 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                             label={`Stock Quantity${mode === "existing" ? " (Managed in Inventory)" : variantStockTotal !== null ? " (Sum of variants)" : ""}`}
                             name="stock"
                             type="number"
+                            step="any"
                             value={variantStockTotal !== null ? variantStockTotal.toString() : form.stock}
                             onChange={handleChange}
                             required
@@ -361,7 +363,7 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                     </div>
                     {form.priceUnit === "per_kg" && (
                         <div className="mt-4">
-                            <InputField label="Min Weight (kg)" name="minWeightKg" type="number" value={form.minWeightKg} onChange={handleChange} />
+                            <InputField label="Min Weight (kg)" name="minWeightKg" type="number" step="0.5" value={form.minWeightKg} onChange={handleChange} />
                         </div>
                     )}
 
@@ -480,10 +482,11 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                                 <label className="text-xs text-warm-cream/60">Stock</label>
                                 <input
                                     type="number"
+                                    step="0.5"
                                     value={variant.stock || 0}
                                     onChange={(e) => {
                                         const newVariants = [...variants];
-                                        newVariants[idx].stock = parseInt(e.target.value) || 0;
+                                        newVariants[idx].stock = parseFloat(e.target.value) || 0;
                                         setVariants(newVariants);
                                     }}
                                     className="w-full border border-warm-cream/20 rounded-md px-2 py-1 text-sm"
@@ -575,18 +578,19 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
     );
 }
 
-function InputField({ label, name, type = "text", value, onChange, required, readOnly, className }: {
+function InputField({ label, name, type = "text", value, onChange, required, readOnly, className, step }: {
     label: string; name: string; type?: string; value: string;
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     required?: boolean;
     readOnly?: boolean;
     className?: string;
+    step?: string;
 }) {
     return (
         <div>
             <label htmlFor={name} className="block text-xs text-warm-cream/60 mb-1">{label}</label>
             <input
-                id={name} name={name} type={type} value={value} onChange={onChange} required={required} readOnly={readOnly}
+                id={name} name={name} type={type} value={value} onChange={onChange} required={required} readOnly={readOnly} step={step}
                 className={`w-full border border-warm-cream/20 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/30 ${className || ""}`}
             />
         </div>

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { formatCurrency } from "@/lib/formatCurrency";
 import type { Product } from "@/types";
-import { useCartStore } from "@/lib/cartStore";
+import { useCartStore, cartQuantityBounds } from "@/lib/cartStore";
 import { LOW_STOCK_THRESHOLD } from "@/lib/constants";
 import { ShoppingBag, Heart, Eye } from "lucide-react";
 import { StorageBadge } from "@/components/ui/StorageBadge";
@@ -25,7 +25,14 @@ export default function ProductCard({ product }: ProductCardProps) {
     const handleQuickAdd = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        addItem(product);
+        // Add the line's natural minimum (1kg for weight, 1 for units) and only
+        // confirm if it actually went in — never a false "added" toast.
+        const { min, max } = cartQuantityBounds({ product, variant: undefined });
+        if (max < min) {
+            toast.error(`${product.name} is unavailable right now`);
+            return;
+        }
+        addItem(product, undefined, undefined, undefined, undefined, min);
         setJustAdded(true);
         toast.success(`${product.name} added to cart`, {
             description: formatCurrency(product.price),

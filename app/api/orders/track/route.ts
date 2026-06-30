@@ -33,6 +33,7 @@ export async function POST(request: Request) {
                     name: item.product.name,
                     price: item.product.price,
                     images: item.product.images,
+                    priceUnit: item.product.priceUnit, // needed to show "kg" on the receipt
                 },
                 variant: item.variant
                     ? { name: item.variant.name, price: item.variant.price }
