@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getOrders } from "@/lib/queries";
 import { formatCurrency } from "@/lib/formatCurrency";
+import { formatLineQuantity } from "@/lib/quantity";
 import { SITE_NAME } from "@/lib/constants";
 import Image from "next/image";
 
@@ -62,7 +63,7 @@ export default async function PrintOrderPage({ params }: { params: Promise<{ id:
                 <tbody className="divide-y divide-black/10">
                     {order.items.map((item) => (
                         <tr key={`${item.product.id}-${item.variant?.name ?? ""}`}>
-                            <td className="py-4 text-warm-cream align-top">{item.quantity}</td>
+                            <td className="py-4 text-warm-cream align-top">{formatLineQuantity(item)}</td>
                             <td className="py-4 text-warm-cream align-top">
                                 <p className="font-medium">{item.product.name}</p>
                                 {item.variant && (

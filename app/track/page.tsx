@@ -8,13 +8,14 @@ import Footer from "@/components/modules/Footer";
 import OrderTimeline from "@/components/modules/OrderTimeline";
 import Button from "@/components/ui/Button";
 import { Search, ArrowLeft, Package, MapPin, CreditCard, ShoppingBag, ArrowRight } from "lucide-react";
+import { formatLineQuantity, isWeightLine } from "@/lib/quantity";
 
 interface TrackedOrder {
     id: string;
     customerName: string;
     email: string;
     items: {
-        product: { id: string; name: string; price: number; images: string[] };
+        product: { id: string; name: string; price: number; images: string[]; priceUnit?: string };
         variant?: { name: string; price?: number };
         quantity: number;
     }[];
@@ -296,7 +297,7 @@ function TrackContent() {
                                                             </p>
                                                         )}
                                                         <p className="text-[11px] text-warm-cream/35 mt-0.5">
-                                                            Qty: {item.quantity}
+                                                            {isWeightLine(item) ? formatLineQuantity(item) : `Qty: ${item.quantity}`}
                                                         </p>
                                                     </div>
 
