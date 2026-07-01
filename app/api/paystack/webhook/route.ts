@@ -284,7 +284,8 @@ async function handleDispute(event: PaystackEvent, isCreate: boolean): Promise<v
 
     if (isCreate && disputeRow) {
         const amountKobo = disputeRow.amount_kobo ?? 0;
-        sendDisputeAlertEmail({
+        // Await — un-awaited sends are killed when the serverless function returns.
+        await sendDisputeAlertEmail({
             reference,
             orderId: payment?.order_id ?? null,
             customerEmail: payment?.customer_email ?? d.customer?.email ?? "unknown",

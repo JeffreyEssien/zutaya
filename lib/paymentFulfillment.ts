@@ -39,7 +39,11 @@ export async function runPostPaidFulfillment(
         try {
             const order = await getOrderById(payment.order_id);
             if (order) {
-                sendOrderEmails(order).catch((err) =>
+                // MUST await — on Vercel serverless the function is frozen once the
+                // route returns, killing any un-awaited send before the SMTP handshake
+                // completes (no email + nothing in the Sent folder). The .catch keeps
+                // a send failure from breaking fulfillment (order is already confirmed).
+                await sendOrderEmails(order).catch((err) =>
                     console.error("Receipt email failed:", err),
                 );
             }
