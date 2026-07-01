@@ -21,9 +21,9 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ message: "You're already subscribed!", alreadyExists: true });
         }
 
-        // Send welcome email (non-blocking)
+        // Await — un-awaited sends are killed when the serverless function returns.
         if (subscriber) {
-            sendNewsletterWelcomeEmail(subscriber.email, subscriber.firstName, subscriber.token).catch(console.error);
+            await sendNewsletterWelcomeEmail(subscriber.email, subscriber.firstName, subscriber.token).catch(console.error);
         }
 
         return NextResponse.json({ message: "Successfully subscribed!", subscriber });

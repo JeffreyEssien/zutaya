@@ -45,8 +45,9 @@ export async function POST(request: Request) {
             }
         }
 
-        // Send emails (non-blocking — don't fail the order if email fails)
-        sendOrderEmails(order).catch((err) =>
+        // Await the send — on Vercel serverless an un-awaited send is killed when the
+        // function returns (no email sent). .catch keeps a failure from failing the order.
+        await sendOrderEmails(order).catch((err) =>
             console.error("Email send failed:", err)
         );
 
