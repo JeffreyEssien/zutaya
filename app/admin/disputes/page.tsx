@@ -84,8 +84,8 @@ export default function AdminDisputesPage() {
                 </div>
 
                 {/* Filters */}
-                <div className="bg-white/[0.03] border border-warm-cream/10 rounded-2xl p-4 mb-6 flex flex-wrap gap-3">
-                    <div className="flex items-center gap-2 bg-[#1e1e1e] border border-warm-cream/10 rounded-xl px-3 flex-1 min-w-[200px]">
+                <div className="bg-raised border border-warm-cream/10 rounded-2xl p-4 mb-6 flex flex-wrap gap-3">
+                    <div className="flex items-center gap-2 bg-base border border-warm-cream/10 rounded-xl px-3 flex-1 min-w-[200px]">
                         <Filter size={14} className="text-warm-cream/30" />
                         <select
                             value={statusFilter}
@@ -96,7 +96,7 @@ export default function AdminDisputesPage() {
                             className="bg-transparent py-2.5 text-sm text-warm-cream focus:outline-none cursor-pointer w-full"
                         >
                             {STATUS_OPTIONS.map((s) => (
-                                <option key={s} value={s} className="bg-[#1e1e1e] text-warm-cream">
+                                <option key={s} value={s} className="bg-base text-warm-cream">
                                     {s === "all" ? "All statuses" : s.replace(/_/g, " ")}
                                 </option>
                             ))}
@@ -112,7 +112,7 @@ export default function AdminDisputesPage() {
                 </div>
 
                 {/* Disputes table */}
-                <div className="bg-white/[0.03] border border-warm-cream/10 rounded-2xl overflow-hidden">
+                <div className="bg-raised border border-warm-cream/10 rounded-2xl overflow-hidden">
                     {loading && disputes.length === 0 ? (
                         <div className="p-12 text-center text-warm-cream/40 text-sm">Loading…</div>
                     ) : disputes.length === 0 ? (
@@ -125,7 +125,7 @@ export default function AdminDisputesPage() {
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm">
                                 <thead>
-                                    <tr className="border-b border-warm-cream/10 bg-white/[0.02]">
+                                    <tr className="border-b border-warm-cream/10 bg-raised">
                                         <Th>Status</Th>
                                         <Th>Reference</Th>
                                         <Th>Category</Th>
@@ -139,7 +139,7 @@ export default function AdminDisputesPage() {
                                     {disputes.map((d) => {
                                         const isUrgent = isDeadlineUrgent(d.due_at);
                                         return (
-                                            <tr key={d.id} className={`border-b border-warm-cream/5 transition-colors ${isUrgent ? "bg-red-500/[0.04] hover:bg-red-500/[0.07]" : "hover:bg-white/[0.02]"}`}>
+                                            <tr key={d.id} className={`border-b border-warm-cream/5 transition-colors ${isUrgent ? "bg-red-500/[0.04] hover:bg-red-500/[0.07]" : "hover:bg-raised"}`}>
                                                 <td className="px-4 py-3"><DisputeBadge status={d.status} resolution={d.resolution} /></td>
                                                 <td className="px-4 py-3">
                                                     <Link href={`/admin/payments/${encodeURIComponent(d.reference)}`} className="font-mono text-[12px] text-warm-cream hover:text-brand-green">

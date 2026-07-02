@@ -85,14 +85,14 @@ export default function ProductImageGallery({ images, name }: ProductImageGaller
                         <button
                             type="button"
                             onClick={(e) => { e.stopPropagation(); prev(); }}
-                            className="absolute left-3 top-1/2 -translate-y-1/2 bg-[#222]/90 backdrop-blur-sm p-2.5 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-[#222] hover:scale-105 cursor-pointer shadow-md"
+                            className="absolute left-3 top-1/2 -translate-y-1/2 bg-surface/90 backdrop-blur-sm p-2.5 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-surface hover:scale-105 cursor-pointer shadow-md"
                         >
                             <ChevronLeft size={16} className="text-warm-cream" />
                         </button>
                         <button
                             type="button"
                             onClick={(e) => { e.stopPropagation(); next(); }}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 bg-[#222]/90 backdrop-blur-sm p-2.5 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-[#222] hover:scale-105 cursor-pointer shadow-md"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 bg-surface/90 backdrop-blur-sm p-2.5 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-surface hover:scale-105 cursor-pointer shadow-md"
                         >
                             <ChevronRight size={16} className="text-warm-cream" />
                         </button>
@@ -108,8 +108,8 @@ export default function ProductImageGallery({ images, name }: ProductImageGaller
                                 type="button"
                                 onClick={(e) => { e.stopPropagation(); goTo(i); }}
                                 className={`rounded-full transition-all duration-300 cursor-pointer ${i === activeIndex
-                                        ? "w-6 h-1.5 bg-[#222] shadow-sm"
-                                        : "w-1.5 h-1.5 bg-[#222]/50 hover:bg-[#222]/70"
+                                        ? "w-6 h-1.5 bg-surface shadow-sm"
+                                        : "w-1.5 h-1.5 bg-surface/50 hover:bg-surface/70"
                                     }`}
                             />
                         ))}
@@ -151,7 +151,7 @@ export default function ProductImageGallery({ images, name }: ProductImageGaller
                         <button
                             type="button"
                             onClick={() => setZoomed(false)}
-                            className="absolute top-4 right-4 p-3 rounded-full bg-[#222]/10 hover:bg-[#222]/20 transition-colors cursor-pointer z-10"
+                            className="absolute top-4 right-4 p-3 rounded-full bg-surface/10 hover:bg-surface/20 transition-colors cursor-pointer z-10"
                         >
                             <X size={20} className="text-white" />
                         </button>
@@ -177,14 +177,14 @@ export default function ProductImageGallery({ images, name }: ProductImageGaller
                                 <button
                                     type="button"
                                     onClick={(e) => { e.stopPropagation(); prev(); }}
-                                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-[#222]/10 backdrop-blur-sm p-3 rounded-full hover:bg-[#222]/25 transition-colors cursor-pointer"
+                                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-surface/10 backdrop-blur-sm p-3 rounded-full hover:bg-surface/25 transition-colors cursor-pointer"
                                 >
                                     <ChevronLeft size={22} className="text-white" />
                                 </button>
                                 <button
                                     type="button"
                                     onClick={(e) => { e.stopPropagation(); next(); }}
-                                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-[#222]/10 backdrop-blur-sm p-3 rounded-full hover:bg-[#222]/25 transition-colors cursor-pointer"
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-surface/10 backdrop-blur-sm p-3 rounded-full hover:bg-surface/25 transition-colors cursor-pointer"
                                 >
                                     <ChevronRight size={22} className="text-white" />
                                 </button>
@@ -200,8 +200,8 @@ export default function ProductImageGallery({ images, name }: ProductImageGaller
                                         type="button"
                                         onClick={(e) => { e.stopPropagation(); goTo(i); }}
                                         className={`rounded-full transition-all duration-300 cursor-pointer ${i === activeIndex
-                                                ? "w-6 h-1.5 bg-[#222]"
-                                                : "w-1.5 h-1.5 bg-[#222]/40 hover:bg-[#222]/60"
+                                                ? "w-6 h-1.5 bg-surface"
+                                                : "w-1.5 h-1.5 bg-surface/40 hover:bg-surface/60"
                                             }`}
                                     />
                                 ))}

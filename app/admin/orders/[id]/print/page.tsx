@@ -13,7 +13,7 @@ export default async function PrintOrderPage({ params }: { params: Promise<{ id:
     if (!order) notFound();
 
     return (
-        <div className="max-w-3xl mx-auto p-8 bg-white/[0.04] print:p-0">
+        <div className="max-w-3xl mx-auto p-8 bg-raised print:p-0">
             {/* Header */}
             <div className="flex justify-between items-start border-b border-black/10 pb-8 mb-8">
                 <div>

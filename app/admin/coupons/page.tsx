@@ -29,7 +29,7 @@ export default async function AdminCouponsPage() {
 
             <CouponFormWrapper />
 
-            <div className="bg-white/[0.04] rounded-lg border border-warm-cream/20 overflow-hidden">
+            <div className="bg-raised rounded-lg border border-warm-cream/20 overflow-hidden">
                 <CouponList initialCoupons={coupons} />
             </div>
         </div>

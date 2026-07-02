@@ -439,7 +439,7 @@ export default function CheckoutForm({
                                 placeholder="Any special preparation instructions? e.g. 'Debone the chicken', 'Cut into thin strips', 'Season with suya spice'..."
                                 rows={3}
                                 maxLength={500}
-                                className="w-full border border-warm-cream/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green/40 transition-all bg-[#222] placeholder:text-warm-cream/25 resize-none"
+                                className="w-full border border-warm-cream/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green/40 transition-all bg-surface placeholder:text-warm-cream/25 resize-none"
                             />
                             <div className="flex items-center justify-between mt-1.5 px-1">
                                 <div className="flex items-center gap-1.5 text-warm-cream/30">
@@ -521,7 +521,13 @@ export default function CheckoutForm({
                     </div>
                 )}
 
-                <Button type="submit" size="lg" className="w-full" loading={loading} disabled={overWeightCap}>
+                <Button
+                    type="submit"
+                    size="lg"
+                    className="w-full bg-brand-red text-white hover:bg-brand-red/90 shadow-md hover:shadow-lg hover:shadow-brand-red/25"
+                    loading={loading}
+                    disabled={overWeightCap}
+                >
                     <span className="flex items-center justify-center gap-2">
                         <CreditCard size={16} />
                         Pay ₦{(baseTotal + processingFee).toLocaleString()} Securely
@@ -558,7 +564,7 @@ function FloatingField({ label, name, type = "text", value, error, onChange }: {
                 value={value}
                 onChange={onChange}
                 placeholder=" "
-                className={`peer w-full border rounded-xl px-4 pt-5 pb-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green/40 transition-all bg-[#222] ${error ? "border-red-300 focus:ring-red-200 focus:border-red-400" : "border-warm-cream/10"}`}
+                className={`peer w-full border rounded-xl px-4 pt-5 pb-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green/40 transition-all bg-surface ${error ? "border-red-300 focus:ring-red-200 focus:border-red-400" : "border-warm-cream/10"}`}
             />
             <label
                 htmlFor={name}
@@ -586,7 +592,7 @@ function SelectField({ icon, value, placeholder, error, children, onChange }: {
                 <select
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
-                    className={`w-full border rounded-xl pl-10 pr-10 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green/40 transition-all bg-[#222] appearance-none cursor-pointer ${error ? "border-red-300" : "border-warm-cream/10"} ${!value ? "text-warm-cream/40" : "text-warm-cream"}`}
+                    className={`w-full border rounded-xl pl-10 pr-10 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green/40 transition-all bg-surface appearance-none cursor-pointer ${error ? "border-red-300" : "border-warm-cream/10"} ${!value ? "text-warm-cream/40" : "text-warm-cream"}`}
                 >
                     <option value="">{placeholder}</option>
                     {children}

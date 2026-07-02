@@ -4,7 +4,10 @@
   --color-brand-red: #B5332E;
   --color-brand-green: #355E3B;
   --color-brand-black: #1A1A1A;
-  --color-warm-cream: #FDF6EC;
+  /* warm-cream is the app's primary FG/overlay token — remapped to a theme var
+     so all `text-warm-cream` / `bg-warm-cream/x` / `border-warm-cream/x` usages
+     flip automatically between dark (cream) and light (near-black) mode. */
+  --color-warm-cream: var(--fg);
   --color-warm-tan: #C8955A;
   --color-deep-espresso: #2C1A0E;
   --color-muted-brown: #7A5C3A;
@@ -12,12 +15,18 @@
   --color-chilled-blue: #D0E8FF;
   --color-frozen-ice: #E8F4FD;
 
+  /* Semantic surface tokens (theme-responsive; see :root below) */
+  --color-base: var(--base);       /* page background */
+  --color-surface: var(--surface); /* cards / panels */
+  --color-raised: var(--raised);   /* elevated overlay */
+  --color-line: var(--line);       /* borders */
+
   /* Legacy aliases used by existing components */
   --color-brand-lilac: #C8955A;
   --color-brand-purple: #B5332E;
   --color-brand-dark: #1A1A1A;
-  --color-brand-white: #FDF6EC;
-  --color-brand-cream: #FDF6EC;
+  --color-brand-white: var(--fg);
+  --color-brand-cream: var(--fg);
 
   --font-serif: var(--font-playfair), "Georgia", serif;
   --font-sans: var(--font-inter), "Helvetica Neue", sans-serif;
@@ -34,6 +43,47 @@
   --animate-countUp: countUp 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   --animate-drawLine: drawLine 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   --animate-popIn: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* ══ Theme tokens ══
+   Dark is the default. Light applies automatically when the visitor's OS is set
+   to light (prefers-color-scheme). `[data-theme="dark"]` re-pins the dark values
+   for subtrees that must stay dark regardless of OS (e.g. the admin panel). */
+:root {
+  color-scheme: dark;
+  --fg: #FDF6EC;                       /* primary text / overlay */
+  --base: #1A1A1A;                     /* page background */
+  --surface: #222222;                  /* cards / panels */
+  --raised: rgba(255, 255, 255, 0.04); /* elevated overlay */
+  --line: rgba(253, 246, 236, 0.12);   /* borders */
+  --glass: rgba(26, 26, 26, 0.65);     /* frosted card bg */
+  --glass-border: rgba(255, 255, 255, 0.08);
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color-scheme: light;
+    --fg: #241C15;
+    --base: #FAF6EF;
+    --surface: #FFFFFF;
+    --raised: rgba(26, 17, 8, 0.035);
+    --line: rgba(26, 17, 8, 0.12);
+    --glass: rgba(255, 255, 255, 0.72);
+    --glass-border: rgba(26, 17, 8, 0.08);
+  }
+}
+
+/* Force dark (used by the admin panel + intentionally-dark sections like the
+   hero and footer) regardless of OS preference. */
+[data-theme="dark"] {
+  color-scheme: dark;
+  --fg: #FDF6EC;
+  --base: #1A1A1A;
+  --surface: #222222;
+  --raised: rgba(255, 255, 255, 0.04);
+  --line: rgba(253, 246, 236, 0.12);
+  --glass: rgba(26, 26, 26, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.08);
 }
 
 /* ── Smooth scroll ── */
@@ -245,7 +295,7 @@ html {
 /* ── Base ── */
 @layer base {
   body {
-    background-color: var(--color-brand-black);
+    background-color: var(--color-base);
     color: var(--color-warm-cream);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -275,10 +325,10 @@ html {
 
   /* Glass card */
   .glass-card {
-    background: rgba(26, 26, 26, 0.65);
+    background: var(--glass);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--glass-border);
     border-radius: 1.5rem;
     box-shadow:
       0 8px 32px rgba(0, 0, 0, 0.2),
@@ -288,9 +338,7 @@ html {
 
   /* Glass panel (header, drawers) */
   .glass-panel {
-    background: linear-gradient(135deg,
-        rgba(26, 26, 26, 0.92),
-        rgba(26, 26, 26, 0.78));
+    background: var(--glass);
     backdrop-filter: blur(24px) saturate(1.8);
     -webkit-backdrop-filter: blur(24px) saturate(1.8);
     border-bottom: 1px solid rgba(53, 94, 59, 0.15);

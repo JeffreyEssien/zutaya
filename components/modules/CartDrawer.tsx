@@ -32,7 +32,7 @@ export default function CartDrawer() {
                         animate={{ x: 0 }}
                         exit={{ x: "100%" }}
                         transition={{ type: "spring", damping: 28, stiffness: 280 }}
-                        className="fixed inset-y-0 right-0 z-[60] w-full max-w-md bg-[#222] shadow-2xl flex flex-col"
+                        className="fixed inset-y-0 right-0 z-[60] w-full max-w-md bg-surface shadow-2xl flex flex-col"
                     >
                         {/* Header */}
                         <div className="flex items-center justify-between px-6 py-5 border-b border-warm-cream/10">
@@ -216,7 +216,7 @@ function CartItemRow({ item, compact }: { item: CartItem; compact?: boolean }) {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, x: 60, height: 0 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className={`flex gap-3 ${compact ? "p-1.5" : "p-3 rounded-xl bg-[#222] border border-warm-cream/8 shadow-sm hover:shadow-md transition-shadow"}`}
+            className={`flex gap-3 ${compact ? "p-1.5" : "p-3 rounded-xl bg-surface border border-warm-cream/8 shadow-sm hover:shadow-md transition-shadow"}`}
         >
             <div className={`relative rounded-lg overflow-hidden bg-warm-cream/5 shrink-0 ${compact ? "h-14 w-11" : "h-20 w-16"}`}>
                 <SafeImage src={item.variant?.image || item.product.images?.[0]} alt={item.product.name} fill className="object-cover" sizes="64px" />

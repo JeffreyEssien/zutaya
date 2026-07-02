@@ -59,7 +59,7 @@ export default function Footer({ customTexts }: { customTexts?: Record<string, s
     ].filter(s => s.url);
 
     return (
-        <footer className="relative bg-brand-black overflow-hidden pt-24 md:pt-32 pb-8 border-t border-warm-cream/5">
+        <footer data-theme="dark" className="relative bg-brand-black overflow-hidden pt-24 md:pt-32 pb-8 border-t border-warm-cream/5">
             {/* Ambient Background Glows */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[1px] bg-gradient-to-r from-transparent via-brand-green/20 to-transparent" />
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-32 bg-gradient-to-b from-brand-green/[0.02] to-transparent pointer-events-none blur-3xl rounded-full" />

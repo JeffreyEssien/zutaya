@@ -10,7 +10,7 @@ interface RecentOrdersTableProps {
 
 export default function RecentOrdersTable({ orders }: RecentOrdersTableProps) {
     return (
-        <div className="bg-white/[0.04] rounded-lg shadow-sm border border-warm-cream/20 overflow-hidden">
+        <div className="bg-raised rounded-lg shadow-sm border border-warm-cream/20 overflow-hidden">
             <div className="px-6 py-4 border-b border-warm-cream/20 flex justify-between items-center bg-warm-cream/5">
                 <h3 className="font-serif text-lg text-warm-cream">Recent Orders</h3>
                 <Link href="/admin/orders" className="text-sm text-brand-green hover:underline">

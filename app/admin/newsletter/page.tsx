@@ -200,7 +200,7 @@ export default function AdminNewsletterPage() {
                         onClick={() => setTab(t)}
                         className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
                             tab === t
-                                ? "bg-white/[0.04] text-brand-black shadow-sm"
+                                ? "bg-raised text-brand-black shadow-sm"
                                 : "text-warm-cream/40 hover:text-brand-black"
                         }`}
                     >
@@ -213,7 +213,7 @@ export default function AdminNewsletterPage() {
             {tab === "campaigns" && (
                 <div className="space-y-4">
                     {campaigns.length === 0 ? (
-                        <div className="bg-white/[0.04] rounded-xl border border-warm-tan/20 p-12 text-center">
+                        <div className="bg-raised rounded-xl border border-warm-tan/20 p-12 text-center">
                             <Mail size={40} className="mx-auto text-warm-cream/40/30 mb-3" />
                             <p className="text-warm-cream/40 mb-4">No campaigns yet. Create your first one!</p>
                             <button
@@ -227,7 +227,7 @@ export default function AdminNewsletterPage() {
                         campaigns.map((c) => (
                             <div
                                 key={c.id}
-                                className="bg-white/[0.04] rounded-xl border border-warm-tan/20 p-5 hover:shadow-sm transition-shadow"
+                                className="bg-raised rounded-xl border border-warm-tan/20 p-5 hover:shadow-sm transition-shadow"
                             >
                                 <div className="flex items-start justify-between gap-4">
                                     <div className="flex-1 min-w-0">
@@ -335,11 +335,11 @@ export default function AdminNewsletterPage() {
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder="Search by email or name..."
-                            className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-warm-tan/20 text-sm focus:outline-none focus:border-brand-red/40 bg-[#1e1e1e]"
+                            className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-warm-tan/20 text-sm focus:outline-none focus:border-brand-red/40 bg-base"
                         />
                     </div>
 
-                    <div className="bg-white/[0.04] rounded-xl border border-warm-tan/20 overflow-hidden">
+                    <div className="bg-raised rounded-xl border border-warm-tan/20 overflow-hidden">
                         <table className="w-full text-sm">
                             <thead className="bg-warm-cream/50">
                                 <tr>
@@ -406,7 +406,7 @@ export default function AdminNewsletterPage() {
             {/* ── Campaign Editor Modal ── */}
             {showEditor && (
                 <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-                    <div className="bg-white/[0.04] rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <div className="bg-raised rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                         {/* Editor Header */}
                         <div className="flex items-center justify-between px-6 py-4 border-b border-warm-tan/10">
                             <h2 className="text-lg font-bold text-brand-black">
@@ -507,7 +507,7 @@ function StatCard({
     bg: string;
 }) {
     return (
-        <div className="bg-white/[0.04] rounded-xl border border-warm-tan/20 p-4">
+        <div className="bg-raised rounded-xl border border-warm-tan/20 p-4">
             <div className="flex items-center justify-between mb-3">
                 <span className={`p-2 rounded-lg ${bg} ${color}`}>{icon}</span>
             </div>

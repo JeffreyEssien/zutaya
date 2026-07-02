@@ -61,7 +61,7 @@ export default function AdminCategoriesPage() {
                 <h1 className="font-serif text-2xl text-warm-cream mb-8">
                     {editingCategory ? "Edit Category" : "Add New Category"}
                 </h1>
-                <div className="bg-white/[0.04] p-6 rounded-lg shadow-sm border border-warm-cream/20">
+                <div className="bg-raised p-6 rounded-lg shadow-sm border border-warm-cream/20">
                     <CategoryForm
                         initialData={editingCategory}
                         onSuccess={handleFormSuccess}
@@ -89,7 +89,7 @@ export default function AdminCategoriesPage() {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                     {categories.map((cat) => (
-                        <div key={cat.id} className="bg-white/[0.04] rounded-lg shadow-sm border border-warm-cream/20 overflow-hidden group">
+                        <div key={cat.id} className="bg-raised rounded-lg shadow-sm border border-warm-cream/20 overflow-hidden group">
                             <div className="relative h-48 bg-neutral-100">
                                 {cat.image ? (
                                     <Image

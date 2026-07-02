@@ -31,7 +31,7 @@ export default function BookingsAdmin({ initial }: { initial: ServiceBooking[] }
                 })}
             </div>
 
-            <div className="bg-white/[0.04] rounded-xl border border-warm-cream/15 overflow-hidden">
+            <div className="bg-raised rounded-xl border border-warm-cream/15 overflow-hidden">
                 {filtered.length === 0 ? (
                     <p className="p-6 text-center text-warm-cream/40 text-sm">No bookings.</p>
                 ) : (

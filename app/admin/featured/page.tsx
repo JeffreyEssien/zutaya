@@ -273,7 +273,7 @@ export default function FeaturedPage() {
             </div>
 
             {/* Hero Mode Toggle */}
-            <div className={`rounded-2xl border-2 p-5 shadow-sm transition-all ${heroDisplay.useFeaturedSlides ? "bg-brand-green/[0.08] border-brand-green/30" : "bg-white/[0.04] border-warm-cream/15"}`}>
+            <div className={`rounded-2xl border-2 p-5 shadow-sm transition-all ${heroDisplay.useFeaturedSlides ? "bg-brand-green/[0.08] border-brand-green/30" : "bg-raised border-warm-cream/15"}`}>
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className={`p-2 rounded-lg transition-colors ${heroDisplay.useFeaturedSlides ? "bg-brand-green/20" : "bg-amber-500/10"}`}>
@@ -326,7 +326,7 @@ export default function FeaturedPage() {
                     { label: "Active", value: activeSlides.length, icon: Eye, color: "text-emerald-600 bg-emerald-50" },
                     { label: "Inactive", value: slides.length - activeSlides.length, icon: EyeOff, color: "text-warm-cream/40 bg-warm-cream/[0.03]" },
                 ].map((stat) => (
-                    <div key={stat.label} className="bg-white/[0.04] rounded-xl border border-warm-cream/10 p-4 flex items-center gap-3">
+                    <div key={stat.label} className="bg-raised rounded-xl border border-warm-cream/10 p-4 flex items-center gap-3">
                         <div className={`w-10 h-10 rounded-lg ${stat.color} flex items-center justify-center`}>
                             <stat.icon size={18} />
                         </div>
@@ -392,7 +392,7 @@ export default function FeaturedPage() {
 
             {/* Slide List */}
             {slides.length === 0 ? (
-                <div className="bg-white/[0.04] rounded-2xl border-2 border-dashed border-warm-cream/20 p-16 text-center">
+                <div className="bg-raised rounded-2xl border-2 border-dashed border-warm-cream/20 p-16 text-center">
                     <Sparkles size={40} className="mx-auto text-warm-cream/10 mb-4" />
                     <h3 className="text-lg font-serif text-warm-cream/50 mb-2">No featured slides yet</h3>
                     <p className="text-sm text-warm-cream/30 max-w-md mx-auto">
@@ -416,7 +416,7 @@ export default function FeaturedPage() {
                                 onDragOver={(e) => handleDragOver(e, idx)}
                                 onDrop={() => handleDrop(idx)}
                                 onDragEnd={() => { setDragIdx(null); setDragOverIdx(null); }}
-                                className={`bg-white/[0.04] rounded-xl border transition-all ${
+                                className={`bg-raised rounded-xl border transition-all ${
                                     dragOverIdx === idx
                                         ? "border-brand-green/40 shadow-lg shadow-brand-green/10"
                                         : slide.isActive

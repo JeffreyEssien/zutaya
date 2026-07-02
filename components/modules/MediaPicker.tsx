@@ -150,7 +150,7 @@ export default function MediaPicker({
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative bg-white/[0.04] rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden">
+      <div className="relative bg-raised rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-brand-dark/8">
           <h2 className="font-serif text-lg text-warm-cream">{title}</h2>

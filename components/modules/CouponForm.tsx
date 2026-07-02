@@ -64,7 +64,7 @@ export default function CouponForm({ onSuccess }: { onSuccess: () => void }) {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 bg-white/[0.04] p-4 rounded-lg border border-warm-cream/20">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 bg-raised p-4 rounded-lg border border-warm-cream/20">
             <div className="flex gap-4 items-end">
                 <div>
                     <label className="block text-xs text-warm-cream/60 mb-1">Coupon Code</label>

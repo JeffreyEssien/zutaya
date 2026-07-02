@@ -61,7 +61,7 @@ function LoginForm() {
                     <p className="text-warm-cream/40 text-xs mt-1 uppercase tracking-widest">Admin Portal</p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="bg-white/[0.04] rounded-2xl shadow-xl shadow-brand-dark/5 border border-warm-cream/10 p-7 space-y-5">
+                <form onSubmit={handleSubmit} className="bg-raised rounded-2xl shadow-xl shadow-brand-dark/5 border border-warm-cream/10 p-7 space-y-5">
                     {/* Email */}
                     <div>
                         <label htmlFor="email" className="block text-[10px] text-warm-cream/40 mb-1.5 uppercase tracking-wider font-medium">
@@ -75,7 +75,7 @@ function LoginForm() {
                                 value={email}
                                 onChange={(e) => { setEmail(e.target.value); setError(""); }}
                                 placeholder="admin@zutayang.com"
-                                className="w-full border border-warm-cream/20 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green/40 transition-all bg-[#1e1e1e]"
+                                className="w-full border border-warm-cream/20 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green/40 transition-all bg-base"
                                 autoFocus
                                 autoComplete="email"
                             />
@@ -95,7 +95,7 @@ function LoginForm() {
                                 value={password}
                                 onChange={(e) => { setPassword(e.target.value); setError(""); }}
                                 placeholder="Enter your password"
-                                className="w-full border border-warm-cream/20 rounded-xl pl-10 pr-11 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green/40 transition-all bg-[#1e1e1e]"
+                                className="w-full border border-warm-cream/20 rounded-xl pl-10 pr-11 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green/40 transition-all bg-base"
                                 autoComplete="current-password"
                             />
                             <button

@@ -82,7 +82,7 @@ export default function PackagesClient({ packages, customTexts }: Props) {
                                     onClick={() => openPackage(pkg)}
                                     disabled={soldOut}
                                     aria-disabled={soldOut}
-                                    className={`group text-left rounded-2xl overflow-hidden bg-[#222] border border-warm-cream/10 transition-colors flex flex-col scroll-mt-24 ${soldOut ? "opacity-60 cursor-not-allowed" : "hover:border-brand-green/40"}`}
+                                    className={`group text-left rounded-2xl overflow-hidden bg-surface border border-warm-cream/10 transition-colors flex flex-col scroll-mt-24 ${soldOut ? "opacity-60 cursor-not-allowed" : "hover:border-brand-green/40"}`}
                                 >
                                     <div className="relative aspect-[4/3] bg-warm-cream/5">
                                         {pkg.imageUrl ? (
@@ -145,7 +145,7 @@ export default function PackagesClient({ packages, customTexts }: Props) {
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.96, y: 20 }}
                             transition={{ type: "spring", damping: 26, stiffness: 300 }}
-                            className="fixed inset-x-4 top-1/2 -translate-y-1/2 sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 sm:w-full sm:max-w-lg z-[75] bg-[#1d1d1d] rounded-2xl border border-warm-cream/15 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+                            className="fixed inset-x-4 top-1/2 -translate-y-1/2 sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 sm:w-full sm:max-w-lg z-[75] bg-base rounded-2xl border border-warm-cream/15 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
                         >
                             <div className="relative aspect-[16/9] bg-warm-cream/5 shrink-0">
                                 {active.imageUrl ? (

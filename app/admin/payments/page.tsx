@@ -124,7 +124,7 @@ export default function AdminPaymentsPage() {
                 )}
 
                 {/* ── Filters ── */}
-                <div className="bg-white/[0.03] border border-warm-cream/10 rounded-2xl p-4 mb-6">
+                <div className="bg-raised border border-warm-cream/10 rounded-2xl p-4 mb-6">
                     <div className="flex flex-col md:flex-row gap-3">
                         <div className="relative flex-1">
                             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-warm-cream/30" />
@@ -136,10 +136,10 @@ export default function AdminPaymentsPage() {
                                     setSearch(e.target.value);
                                     setOffset(0);
                                 }}
-                                className="w-full bg-[#1e1e1e] border border-warm-cream/10 rounded-xl pl-9 pr-3 py-2.5 text-sm text-warm-cream placeholder:text-warm-cream/30 focus:outline-none focus:border-brand-green/40"
+                                className="w-full bg-base border border-warm-cream/10 rounded-xl pl-9 pr-3 py-2.5 text-sm text-warm-cream placeholder:text-warm-cream/30 focus:outline-none focus:border-brand-green/40"
                             />
                         </div>
-                        <div className="flex items-center gap-2 bg-[#1e1e1e] border border-warm-cream/10 rounded-xl px-3">
+                        <div className="flex items-center gap-2 bg-base border border-warm-cream/10 rounded-xl px-3">
                             <Filter size={14} className="text-warm-cream/30" />
                             <select
                                 value={statusFilter}
@@ -150,7 +150,7 @@ export default function AdminPaymentsPage() {
                                 className="bg-transparent py-2.5 text-sm text-warm-cream focus:outline-none cursor-pointer pr-2"
                             >
                                 {STATUS_OPTIONS.map((s) => (
-                                    <option key={s} value={s} className="bg-[#1e1e1e]">
+                                    <option key={s} value={s} className="bg-base">
                                         {s === "all" ? "All statuses" : s.replace(/_/g, " ")}
                                     </option>
                                 ))}
@@ -167,7 +167,7 @@ export default function AdminPaymentsPage() {
                 </div>
 
                 {/* ── Payments table ── */}
-                <div className="bg-white/[0.03] border border-warm-cream/10 rounded-2xl overflow-hidden">
+                <div className="bg-raised border border-warm-cream/10 rounded-2xl overflow-hidden">
                     {loading && payments.length === 0 ? (
                         <div className="p-12 text-center text-warm-cream/40 text-sm">Loading…</div>
                     ) : payments.length === 0 ? (
@@ -179,7 +179,7 @@ export default function AdminPaymentsPage() {
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm">
                                 <thead>
-                                    <tr className="border-b border-warm-cream/10 bg-white/[0.02]">
+                                    <tr className="border-b border-warm-cream/10 bg-raised">
                                         <Th>Reference</Th>
                                         <Th>Customer</Th>
                                         <Th>Status</Th>
@@ -195,7 +195,7 @@ export default function AdminPaymentsPage() {
                                         const netKobo = (p.total_charged_kobo ?? 0) - (p.paystack_fees_kobo ?? 0) - (p.refunded_amount_kobo ?? 0);
                                         const when = p.paid_at || p.failed_at || p.created_at;
                                         return (
-                                            <tr key={p.id} className="border-b border-warm-cream/5 hover:bg-white/[0.02] transition-colors">
+                                            <tr key={p.id} className="border-b border-warm-cream/5 hover:bg-raised transition-colors">
                                                 <td className="px-4 py-3">
                                                     <Link
                                                         href={`/admin/payments/${encodeURIComponent(p.reference)}`}
@@ -275,7 +275,7 @@ function KPI({
     icon: React.ReactNode; label: string; value: string; sub: string; warn?: boolean;
 }) {
     return (
-        <div className={`bg-white/[0.03] border ${warn ? "border-amber-500/20" : "border-warm-cream/10"} rounded-2xl p-4`}>
+        <div className={`bg-raised border ${warn ? "border-amber-500/20" : "border-warm-cream/10"} rounded-2xl p-4`}>
             <div className="flex items-center gap-2 mb-2">
                 {icon}
                 <span className="text-[10px] uppercase tracking-wider text-warm-cream/45 font-semibold">{label}</span>

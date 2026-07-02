@@ -111,6 +111,7 @@ export default function Hero({ customTexts, settings, heroMedia = [], featuredSl
   return (
     <section
       ref={sectionRef}
+      data-theme="dark"
       className="relative min-h-dvh overflow-hidden bg-brand-black"
     >
       <div

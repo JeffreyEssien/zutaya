@@ -55,10 +55,10 @@ export default function ProductCard({ product }: ProductCardProps) {
 
     return (
         <>
-            <div className="group relative rounded-2xl bg-[#1e1e1e] border border-warm-cream/[0.06] hover:border-brand-green/20 transition-all duration-500 hover:shadow-[0_8px_40px_rgba(53,94,59,0.12)] overflow-hidden">
+            <div className="group relative rounded-2xl bg-base border border-warm-cream/[0.06] hover:border-brand-green/20 transition-all duration-500 hover:shadow-[0_8px_40px_rgba(53,94,59,0.12)] overflow-hidden">
                 <Link href={`/product/${product.slug}`} className="block">
                     {/* Image */}
-                    <div className="relative aspect-[3/4] overflow-hidden bg-[#2a2a2a]">
+                    <div className="relative aspect-[3/4] overflow-hidden bg-surface">
                         {product.images?.[0] ? (
                             <SafeImage
                                 src={product.images[0]}

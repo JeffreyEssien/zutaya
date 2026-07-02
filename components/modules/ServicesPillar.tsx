@@ -30,7 +30,7 @@ export default function ServicesPillar({ eventsEnabled = true, headline = "Two w
                         const Icon = c.icon;
                         return (
                             <Link key={c.key} href={c.href}>
-                                <motion.div whileHover={{ y: -6 }} className="group h-full bg-white/[0.03] rounded-2xl border border-warm-cream/8 hover:border-brand-green/40 p-7 transition-all">
+                                <motion.div whileHover={{ y: -6 }} className="group h-full bg-raised rounded-2xl border border-warm-cream/8 hover:border-brand-green/40 p-7 transition-all">
                                     <div className="w-12 h-12 rounded-xl bg-brand-green/15 text-brand-green flex items-center justify-center mb-4 group-hover:bg-brand-green group-hover:text-white transition-colors">
                                         <Icon size={22} />
                                     </div>

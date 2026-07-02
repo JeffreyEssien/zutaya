@@ -173,15 +173,15 @@ export default function AdminCreateOrder({ onClose, onSuccess }: AdminCreateOrde
     }
 
     const inputClass =
-        "w-full px-3 py-2.5 border border-warm-cream/20 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green/30 bg-white/[0.04] transition-all";
+        "w-full px-3 py-2.5 border border-warm-cream/20 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green/30 bg-raised transition-all";
     const labelClass = "block text-xs font-medium text-warm-cream/60 mb-1.5";
-    const sectionClass = "bg-white/[0.04] rounded-xl border border-warm-cream/10 p-5";
+    const sectionClass = "bg-raised rounded-xl border border-warm-cream/10 p-5";
 
     return (
         <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/30 backdrop-blur-sm p-4 sm:p-8">
             <div className="bg-[#111] rounded-2xl shadow-2xl w-full max-w-3xl my-4 border border-warm-cream/10 overflow-hidden">
                 {/* Header */}
-                <div className="sticky top-0 z-10 bg-white/[0.04] border-b border-warm-cream/10 px-6 py-4 flex items-center justify-between">
+                <div className="sticky top-0 z-10 bg-raised border-b border-warm-cream/10 px-6 py-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-brand-green/10 rounded-lg">
                             <ShoppingBag size={18} className="text-brand-green" />

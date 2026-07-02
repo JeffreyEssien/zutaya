@@ -17,7 +17,7 @@ export default function Receipt() {
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="max-w-2xl mx-auto bg-[#222] border border-warm-cream/15 rounded-2xl overflow-hidden shadow-lg print:border-none print:shadow-none"
+            className="max-w-2xl mx-auto bg-surface border border-warm-cream/15 rounded-2xl overflow-hidden shadow-lg print:border-none print:shadow-none"
         >
             <ReceiptHeader orderId={id} date={createdAt} />
             <div className="px-8 py-7 space-y-7">
@@ -72,7 +72,7 @@ function ReceiptHeader({ orderId, date }: { orderId: string; date: string }) {
                     <p className="text-white/40 text-xs mt-1.5 uppercase tracking-wider">Order Receipt</p>
                 </div>
                 <div className="text-right">
-                    <p className="font-mono text-sm bg-[#222]/10 px-3 py-1 rounded-full inline-block">{orderId}</p>
+                    <p className="font-mono text-sm bg-surface/10 px-3 py-1 rounded-full inline-block">{orderId}</p>
                     <p className="text-white/40 text-xs mt-2">
                         {new Date(date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
                     </p>

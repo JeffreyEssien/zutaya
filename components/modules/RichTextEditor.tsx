@@ -32,7 +32,7 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
     if (!editor) return null;
 
     return (
-        <div className="border border-warm-cream/30 rounded-sm overflow-hidden bg-white/[0.04] focus-within:border-brand-green focus-within:ring-1 focus-within:ring-brand-green transition-all">
+        <div className="border border-warm-cream/30 rounded-sm overflow-hidden bg-raised focus-within:border-brand-green focus-within:ring-1 focus-within:ring-brand-green transition-all">
             <div className="flex flex-wrap items-center gap-1 border-b border-warm-cream/10 bg-[#111] p-2">
                 <ToolbarButton
                     onClick={() => editor.chain().focus().toggleBold().run()}

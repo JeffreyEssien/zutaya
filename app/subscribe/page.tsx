@@ -248,7 +248,7 @@ export default function SubscribePage() {
                 <div className="absolute top-0 right-0 w-96 h-96 bg-brand-red/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3" />
                 <div className="absolute bottom-0 left-0 w-64 h-64 bg-warm-cream/5 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/4" />
                 <div className="max-w-5xl mx-auto px-4 py-16 md:py-20 text-center relative z-10">
-                    <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/[0.06] backdrop-blur-sm rounded-full text-xs text-warm-cream/70 uppercase tracking-widest mb-6 border border-white/10">
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-raised backdrop-blur-sm rounded-full text-xs text-warm-cream/70 uppercase tracking-widest mb-6 border border-white/10">
                         <RefreshCw size={12} />
                         Subscribe & Save
                     </div>
@@ -262,7 +262,7 @@ export default function SubscribePage() {
             </div>
 
             {/* Progress Steps */}
-            <div className="bg-[#1a1a1a] border-b border-warm-cream/[0.06] sticky top-0 z-30">
+            <div className="bg-base border-b border-warm-cream/[0.06] sticky top-0 z-30">
                 <div className="max-w-5xl mx-auto px-4 py-4">
                     <div className="flex items-center justify-center gap-2 md:gap-4">
                         {[
@@ -336,7 +336,7 @@ export default function SubscribePage() {
                                                     className={`relative p-4 rounded-xl border-2 text-left transition-all ${
                                                         form.frequency === opt.value
                                                             ? "border-brand-green bg-brand-green/5"
-                                                            : "border-warm-cream/[0.08] hover:border-warm-cream/15 bg-[#1e1e1e]"
+                                                            : "border-warm-cream/[0.08] hover:border-warm-cream/15 bg-base"
                                                     }`}
                                                 >
                                                     {opt.savings && (
@@ -358,7 +358,7 @@ export default function SubscribePage() {
                                             value={searchQuery}
                                             onChange={(e) => setSearchQuery(e.target.value)}
                                             placeholder="Search products..."
-                                            className="w-full bg-[#1e1e1e] border border-warm-cream/[0.08] rounded-xl px-4 py-3 text-sm text-warm-cream placeholder:text-warm-cream/25 focus:outline-none focus:border-brand-green/30 focus:ring-2 focus:ring-brand-green/10 pl-10"
+                                            className="w-full bg-base border border-warm-cream/[0.08] rounded-xl px-4 py-3 text-sm text-warm-cream placeholder:text-warm-cream/25 focus:outline-none focus:border-brand-green/30 focus:ring-2 focus:ring-brand-green/10 pl-10"
                                         />
                                         <Package size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-warm-cream/40/40" />
                                     </div>
@@ -376,7 +376,7 @@ export default function SubscribePage() {
                                                     className={`group relative text-left p-4 rounded-xl border-2 transition-all duration-300 ${
                                                         isSelected
                                                             ? "border-brand-green bg-brand-green/5 cursor-default"
-                                                            : "border-transparent bg-[#1e1e1e] hover:border-brand-green/20 hover:shadow-[0_4px_20px_rgba(53,94,59,0.08)]"
+                                                            : "border-transparent bg-base hover:border-brand-green/20 hover:shadow-[0_4px_20px_rgba(53,94,59,0.08)]"
                                                     }`}
                                                 >
                                                     {isSelected && (
@@ -451,7 +451,7 @@ export default function SubscribePage() {
                                                     onChange={(e) => setForm((p) => ({ ...p, customerName: e.target.value }))}
                                                     required
                                                     placeholder="e.g. Amara Obi"
-                                                    className="w-full bg-[#1e1e1e] border border-warm-cream/[0.08] rounded-xl px-4 py-3 text-sm text-warm-cream placeholder:text-warm-cream/25 focus:outline-none focus:border-brand-green/30 focus:ring-2 focus:ring-brand-green/10"
+                                                    className="w-full bg-base border border-warm-cream/[0.08] rounded-xl px-4 py-3 text-sm text-warm-cream placeholder:text-warm-cream/25 focus:outline-none focus:border-brand-green/30 focus:ring-2 focus:ring-brand-green/10"
                                                 />
                                             </div>
                                             <div>
@@ -464,7 +464,7 @@ export default function SubscribePage() {
                                                     onChange={(e) => setForm((p) => ({ ...p, customerEmail: e.target.value }))}
                                                     required
                                                     placeholder="amara@email.com"
-                                                    className="w-full bg-[#1e1e1e] border border-warm-cream/[0.08] rounded-xl px-4 py-3 text-sm text-warm-cream placeholder:text-warm-cream/25 focus:outline-none focus:border-brand-green/30 focus:ring-2 focus:ring-brand-green/10"
+                                                    className="w-full bg-base border border-warm-cream/[0.08] rounded-xl px-4 py-3 text-sm text-warm-cream placeholder:text-warm-cream/25 focus:outline-none focus:border-brand-green/30 focus:ring-2 focus:ring-brand-green/10"
                                                 />
                                             </div>
                                         </div>
@@ -477,7 +477,7 @@ export default function SubscribePage() {
                                                 value={form.phone}
                                                 onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
                                                 placeholder="+234 xxx xxxx xxx"
-                                                className="w-full bg-[#1e1e1e] border border-warm-cream/[0.08] rounded-xl px-4 py-3 text-sm text-warm-cream placeholder:text-warm-cream/25 focus:outline-none focus:border-brand-green/30 focus:ring-2 focus:ring-brand-green/10"
+                                                className="w-full bg-base border border-warm-cream/[0.08] rounded-xl px-4 py-3 text-sm text-warm-cream placeholder:text-warm-cream/25 focus:outline-none focus:border-brand-green/30 focus:ring-2 focus:ring-brand-green/10"
                                             />
                                         </div>
                                     </div>
@@ -526,7 +526,7 @@ export default function SubscribePage() {
                                                 onChange={(e) => setForm((p) => ({ ...p, address: e.target.value }))}
                                                 required
                                                 placeholder="e.g. 12 Ozumba Mbadiwe Ave"
-                                                className="w-full bg-[#1e1e1e] border border-warm-cream/[0.08] rounded-xl px-4 py-3 text-sm text-warm-cream placeholder:text-warm-cream/25 focus:outline-none focus:border-brand-green/30 focus:ring-2 focus:ring-brand-green/10"
+                                                className="w-full bg-base border border-warm-cream/[0.08] rounded-xl px-4 py-3 text-sm text-warm-cream placeholder:text-warm-cream/25 focus:outline-none focus:border-brand-green/30 focus:ring-2 focus:ring-brand-green/10"
                                             />
                                         </div>
                                         <div className="grid grid-cols-2 gap-4">
@@ -540,7 +540,7 @@ export default function SubscribePage() {
                                                     onChange={(e) => setForm((p) => ({ ...p, city: e.target.value }))}
                                                     required
                                                     placeholder="Lagos"
-                                                    className="w-full bg-[#1e1e1e] border border-warm-cream/[0.08] rounded-xl px-4 py-3 text-sm text-warm-cream placeholder:text-warm-cream/25 focus:outline-none focus:border-brand-green/30 focus:ring-2 focus:ring-brand-green/10"
+                                                    className="w-full bg-base border border-warm-cream/[0.08] rounded-xl px-4 py-3 text-sm text-warm-cream placeholder:text-warm-cream/25 focus:outline-none focus:border-brand-green/30 focus:ring-2 focus:ring-brand-green/10"
                                                 />
                                             </div>
                                             <div>
@@ -553,7 +553,7 @@ export default function SubscribePage() {
                                                     onChange={(e) => setForm((p) => ({ ...p, state: e.target.value }))}
                                                     required
                                                     placeholder="Lagos"
-                                                    className="w-full bg-[#1e1e1e] border border-warm-cream/[0.08] rounded-xl px-4 py-3 text-sm text-warm-cream placeholder:text-warm-cream/25 focus:outline-none focus:border-brand-green/30 focus:ring-2 focus:ring-brand-green/10"
+                                                    className="w-full bg-base border border-warm-cream/[0.08] rounded-xl px-4 py-3 text-sm text-warm-cream placeholder:text-warm-cream/25 focus:outline-none focus:border-brand-green/30 focus:ring-2 focus:ring-brand-green/10"
                                                 />
                                             </div>
                                         </div>

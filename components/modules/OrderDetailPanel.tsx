@@ -351,7 +351,7 @@ export default function OrderDetailPanel({ order, onClose, onUpdate }: OrderDeta
             {/* Panel */}
             <div className="fixed inset-0 z-50 overflow-y-auto xl:relative xl:inset-auto xl:z-auto">
                 <div className="min-h-full flex items-end xl:items-start xl:min-h-0">
-                    <div className="w-full bg-white/[0.04] rounded-t-2xl xl:rounded-t-none xl:rounded-xl border border-warm-cream/15 xl:sticky xl:top-24 animate-slideUp xl:animate-none shadow-2xl xl:shadow-md xl:max-h-[calc(100vh-7rem)] xl:overflow-y-auto">
+                    <div className="w-full bg-raised rounded-t-2xl xl:rounded-t-none xl:rounded-xl border border-warm-cream/15 xl:sticky xl:top-24 animate-slideUp xl:animate-none shadow-2xl xl:shadow-md xl:max-h-[calc(100vh-7rem)] xl:overflow-y-auto">
 
                         {/* ═══ Header ═══ */}
                         <div className="bg-gradient-to-r from-brand-dark to-brand-green px-5 sm:px-6 py-4">
@@ -680,7 +680,7 @@ export default function OrderDetailPanel({ order, onClose, onUpdate }: OrderDeta
                                 ) : (
                                     <div className="space-y-2">
                                         {payments.map((p) => (
-                                            <div key={p.id} className="rounded-lg border border-warm-cream/10 bg-white/[0.02] px-3 py-2 text-[11px]">
+                                            <div key={p.id} className="rounded-lg border border-warm-cream/10 bg-raised px-3 py-2 text-[11px]">
                                                 <div className="flex items-center justify-between gap-2">
                                                     <span className="font-mono text-warm-cream/70 truncate">{p.reference}</span>
                                                     <div className="flex items-center gap-1.5 shrink-0">
@@ -778,7 +778,7 @@ export default function OrderDetailPanel({ order, onClose, onUpdate }: OrderDeta
                             {/* ═══ Internal Notes ═══ */}
                             <Card icon={<StickyNote size={14} />} title="Internal Notes">
                                 <textarea
-                                    className="w-full text-sm p-3 border border-warm-cream/15 rounded-lg bg-[#111]/80 focus:bg-white/[0.04] focus:outline-none focus:border-brand-green focus:ring-1 focus:ring-brand-green/30 transition-all resize-none"
+                                    className="w-full text-sm p-3 border border-warm-cream/15 rounded-lg bg-[#111]/80 focus:bg-raised focus:outline-none focus:border-brand-green focus:ring-1 focus:ring-brand-green/30 transition-all resize-none"
                                     rows={3}
                                     placeholder="Add private notes about this order..."
                                     value={notes}
