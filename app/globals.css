@@ -4,10 +4,11 @@
   --color-brand-red: #B5332E;
   --color-brand-green: #355E3B;
   --color-brand-black: #1A1A1A;
-  /* warm-cream is the app's primary FG/overlay token — remapped to a theme var
-     so all `text-warm-cream` / `bg-warm-cream/x` / `border-warm-cream/x` usages
-     flip automatically between dark (cream) and light (near-black) mode. */
-  --color-warm-cream: var(--fg);
+  /* warm-cream is the app's primary FG/overlay token. Dark default here; the
+     light value + [data-theme="dark"] scope overrides live below. NOTE: these are
+     concrete values (NOT var(--fg)) so a data-theme subtree can override them —
+     an indirection like `var(--fg)` computes once at :root and can't be re-scoped. */
+  --color-warm-cream: #FDF6EC;
   --color-warm-tan: #C8955A;
   --color-deep-espresso: #2C1A0E;
   --color-muted-brown: #7A5C3A;
@@ -15,18 +16,18 @@
   --color-chilled-blue: #D0E8FF;
   --color-frozen-ice: #E8F4FD;
 
-  /* Semantic surface tokens (theme-responsive; see :root below) */
-  --color-base: var(--base);       /* page background */
-  --color-surface: var(--surface); /* cards / panels */
-  --color-raised: var(--raised);   /* elevated overlay */
-  --color-line: var(--line);       /* borders */
+  /* Semantic surface tokens (dark defaults; light/scoped values below) */
+  --color-base: #1A1A1A;                  /* page background */
+  --color-surface: #222222;               /* cards / panels */
+  --color-raised: rgba(255, 255, 255, 0.04); /* elevated overlay */
+  --color-line: rgba(253, 246, 236, 0.12);   /* borders */
 
   /* Legacy aliases used by existing components */
   --color-brand-lilac: #C8955A;
   --color-brand-purple: #B5332E;
   --color-brand-dark: #1A1A1A;
-  --color-brand-white: var(--fg);
-  --color-brand-cream: var(--fg);
+  --color-brand-white: #FDF6EC;
+  --color-brand-cream: #FDF6EC;
 
   --font-serif: var(--font-playfair), "Georgia", serif;
   --font-sans: var(--font-inter), "Helvetica Neue", sans-serif;
@@ -46,16 +47,13 @@
 }
 
 /* ══ Theme tokens ══
-   Dark is the default. Light applies automatically when the visitor's OS is set
-   to light (prefers-color-scheme). `[data-theme="dark"]` re-pins the dark values
-   for subtrees that must stay dark regardless of OS (e.g. the admin panel). */
+   Dark is the default (set in @theme above). Light applies automatically when the
+   visitor's OS is set to light. `[data-theme="dark"]` re-pins the dark values for
+   subtrees that must stay dark regardless of OS (admin panel, colored banners).
+   We override the concrete --color-* tokens directly (not an --fg indirection) so
+   the data-theme scope actually takes effect. */
 :root {
   color-scheme: dark;
-  --fg: #FDF6EC;                       /* primary text / overlay */
-  --base: #1A1A1A;                     /* page background */
-  --surface: #222222;                  /* cards / panels */
-  --raised: rgba(255, 255, 255, 0.04); /* elevated overlay */
-  --line: rgba(253, 246, 236, 0.12);   /* borders */
   --glass: rgba(26, 26, 26, 0.65);     /* frosted card bg */
   --glass-border: rgba(255, 255, 255, 0.08);
 }
@@ -63,25 +61,28 @@
 @media (prefers-color-scheme: light) {
   :root {
     color-scheme: light;
-    --fg: #241C15;
-    --base: #FAF6EF;
-    --surface: #FFFFFF;
-    --raised: rgba(26, 17, 8, 0.035);
-    --line: rgba(26, 17, 8, 0.12);
+    --color-warm-cream: #241C15;
+    --color-brand-white: #241C15;
+    --color-brand-cream: #241C15;
+    --color-base: #FAF6EF;
+    --color-surface: #FFFFFF;
+    --color-raised: rgba(26, 17, 8, 0.035);
+    --color-line: rgba(26, 17, 8, 0.12);
     --glass: rgba(255, 255, 255, 0.72);
     --glass-border: rgba(26, 17, 8, 0.08);
   }
 }
 
-/* Force dark (used by the admin panel + intentionally-dark sections like the
-   hero and footer) regardless of OS preference. */
+/* Force dark for opted-out subtrees (admin panel, colored accent banners). */
 [data-theme="dark"] {
   color-scheme: dark;
-  --fg: #FDF6EC;
-  --base: #1A1A1A;
-  --surface: #222222;
-  --raised: rgba(255, 255, 255, 0.04);
-  --line: rgba(253, 246, 236, 0.12);
+  --color-warm-cream: #FDF6EC;
+  --color-brand-white: #FDF6EC;
+  --color-brand-cream: #FDF6EC;
+  --color-base: #1A1A1A;
+  --color-surface: #222222;
+  --color-raised: rgba(255, 255, 255, 0.04);
+  --color-line: rgba(253, 246, 236, 0.12);
   --glass: rgba(26, 26, 26, 0.65);
   --glass-border: rgba(255, 255, 255, 0.08);
 }
