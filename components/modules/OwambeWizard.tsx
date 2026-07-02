@@ -135,7 +135,7 @@ export default function OwambeWizard({ occasions, animals, tiers, tagline }: Pro
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.25 }}
-                    className="bg-white/[0.04] rounded-2xl border border-warm-cream/10 p-6 md:p-8 min-h-[300px]"
+                    className="bg-raised rounded-2xl border border-warm-cream/10 p-6 md:p-8 min-h-[300px]"
                 >
                     {step === 0 && (
                         <div>

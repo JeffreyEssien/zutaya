@@ -27,7 +27,7 @@ export default function SalesChart({ orders }: SalesChartProps) {
     const maxTotal = Math.max(...data.map((d) => d.total), 100); // Prevent div by zero, min scale 100
 
     return (
-        <div className="bg-white/[0.04] rounded-lg shadow-sm border border-warm-cream/20 p-6">
+        <div className="bg-raised rounded-lg shadow-sm border border-warm-cream/20 p-6">
             <h3 className="font-serif text-lg text-warm-cream mb-6">Sales (Last 7 Days)</h3>
             <div className="h-48 flex items-end justify-between gap-2">
                 {data.map((day) => {

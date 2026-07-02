@@ -301,7 +301,7 @@ export default function AuditLogView({ initialLogs }: { initialLogs: AuditLog[] 
             </div>
 
             {/* Filters */}
-            <div className="bg-white/[0.04] rounded-2xl border border-brand-dark/[0.06] p-4 space-y-3">
+            <div className="bg-raised rounded-2xl border border-brand-dark/[0.06] p-4 space-y-3">
                 <div className="flex flex-col sm:flex-row gap-3">
                     <div className="relative flex-1">
                         <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-warm-cream/25" />
@@ -388,7 +388,7 @@ export default function AuditLogView({ initialLogs }: { initialLogs: AuditLog[] 
 
             {/* Timeline */}
             {filtered.length === 0 ? (
-                <div className="bg-white/[0.04] rounded-2xl border border-brand-dark/[0.06] p-20 text-center">
+                <div className="bg-raised rounded-2xl border border-brand-dark/[0.06] p-20 text-center">
                     <div className="w-16 h-16 bg-brand-dark/5 rounded-2xl flex items-center justify-center mx-auto mb-4">
                         <Shield size={28} className="text-warm-cream/15" />
                     </div>
@@ -430,7 +430,7 @@ export default function AuditLogView({ initialLogs }: { initialLogs: AuditLog[] 
 
                     {/* Pagination */}
                     {totalPages > 1 && (
-                        <div className="flex items-center justify-between bg-white/[0.04] rounded-2xl border border-brand-dark/[0.06] px-5 py-3">
+                        <div className="flex items-center justify-between bg-raised rounded-2xl border border-brand-dark/[0.06] px-5 py-3">
                             <span className="text-xs text-warm-cream/40">
                                 Page {page} of {totalPages} ({filtered.length} entries)
                             </span>
@@ -488,7 +488,7 @@ function StatCard({ icon: Icon, label, value, color, bg }: {
     bg: string;
 }) {
     return (
-        <div className="bg-white/[0.04] rounded-2xl border border-brand-dark/[0.06] p-4 hover:shadow-md hover:shadow-brand-dark/[0.03] transition-shadow">
+        <div className="bg-raised rounded-2xl border border-brand-dark/[0.06] p-4 hover:shadow-md hover:shadow-brand-dark/[0.03] transition-shadow">
             <div className="flex items-center gap-3">
                 <div className={`w-9 h-9 ${bg} rounded-xl flex items-center justify-center shrink-0`}>
                     <Icon size={16} className={color} />
@@ -519,7 +519,7 @@ function LogEntry({ log, expanded, onToggle }: { log: AuditLog; expanded: boolea
 
             <div
                 onClick={onToggle}
-                className={`bg-white/[0.04] rounded-xl border transition-all cursor-pointer group ${
+                className={`bg-raised rounded-xl border transition-all cursor-pointer group ${
                     expanded
                         ? "border-brand-dark/15 shadow-md shadow-brand-dark/[0.04]"
                         : "border-brand-dark/[0.06] hover:border-brand-dark/10 hover:shadow-sm hover:shadow-brand-dark/[0.02]"

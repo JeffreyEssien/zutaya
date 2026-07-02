@@ -137,7 +137,7 @@ export default function DeliveryManagement({ initialZones }: Props) {
                             key={t.key}
                             onClick={() => setTab(t.key)}
                             className={`flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-medium transition-all ${tab === t.key
-                                ? "bg-white/[0.04] shadow-sm text-brand-green"
+                                ? "bg-raised shadow-sm text-brand-green"
                                 : "text-warm-cream/50 hover:text-brand-green"
                                 }`}
                         >
@@ -152,7 +152,7 @@ export default function DeliveryManagement({ initialZones }: Props) {
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                         placeholder="Search zones or locations..."
-                        className="w-full pl-9 pr-4 py-2.5 border border-warm-cream/20 rounded-lg text-sm focus:outline-none focus:border-brand-green/40 bg-[#1e1e1e]"
+                        className="w-full pl-9 pr-4 py-2.5 border border-warm-cream/20 rounded-lg text-sm focus:outline-none focus:border-brand-green/40 bg-base"
                     />
                     {search && (
                         <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-warm-cream/25 hover:text-warm-cream/50">
@@ -181,7 +181,7 @@ export default function DeliveryManagement({ initialZones }: Props) {
                         const feeDisplay = zone.base_fee ? formatCurrency(zone.base_fee) : "—";
 
                         return (
-                            <div key={zone.id} className={`bg-white/[0.04] rounded-xl border overflow-hidden transition-all shadow-sm ${zone.is_active ? "border-warm-cream/15" : "border-red-200/50 opacity-60"}`}>
+                            <div key={zone.id} className={`bg-raised rounded-xl border overflow-hidden transition-all shadow-sm ${zone.is_active ? "border-warm-cream/15" : "border-red-200/50 opacity-60"}`}>
                                 {/* Zone Header */}
                                 <div className="flex items-center gap-3 p-4 cursor-pointer hover:bg-warm-cream/[0.03] transition-colors" onClick={() => toggle(zone.id)}>
                                     <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-brand-green/8 text-brand-green">
@@ -355,7 +355,7 @@ export default function DeliveryManagement({ initialZones }: Props) {
                                                     {/* Mobile Cards */}
                                                     <div className="md:hidden space-y-2">
                                                         {zone.locations.map(loc => (
-                                                            <div key={loc.id} className={`p-3 rounded-lg border border-warm-cream/10 bg-white/[0.04] ${!loc.is_active ? "opacity-35" : ""}`}>
+                                                            <div key={loc.id} className={`p-3 rounded-lg border border-warm-cream/10 bg-raised ${!loc.is_active ? "opacity-35" : ""}`}>
                                                                 {editingLoc === loc.id ? (
                                                                     <EditLocMobile
                                                                         loc={loc}
@@ -491,7 +491,7 @@ function DiscountsPanel({ zones, onUpdate }: {
         <div className="space-y-6">
             {/* Active Discounts */}
             {zonesWithDiscounts.length > 0 && (
-                <div className="bg-white/[0.04] rounded-xl border border-warm-cream/15 overflow-hidden shadow-sm">
+                <div className="bg-raised rounded-xl border border-warm-cream/15 overflow-hidden shadow-sm">
                     <div className="px-4 py-3 bg-emerald-50/50 border-b border-emerald-100/50">
                         <h3 className="text-sm font-semibold text-emerald-800 flex items-center gap-2"><Tag size={14} /> Active Delivery Discounts</h3>
                     </div>
@@ -521,7 +521,7 @@ function DiscountsPanel({ zones, onUpdate }: {
             )}
 
             {/* Apply New Discount */}
-            <div className="bg-white/[0.04] rounded-xl border border-warm-cream/15 overflow-hidden shadow-sm">
+            <div className="bg-raised rounded-xl border border-warm-cream/15 overflow-hidden shadow-sm">
                 <div className="px-4 py-3 border-b border-warm-cream/10">
                     <h3 className="text-sm font-semibold text-warm-cream flex items-center gap-2"><Percent size={14} className="text-brand-green" /> Apply Discount to Zone</h3>
                     <p className="text-[11px] text-warm-cream/35 mt-0.5">Customers will see the discount at checkout with the original price crossed out.</p>
@@ -674,17 +674,17 @@ function EditLocRow({ loc, isLagos, allowsHub, zoneFee, onSave, onCancel }: {
             <div className="flex items-end gap-2 flex-wrap">
                 <div className="flex-1 min-w-[140px]">
                     <label className="block text-[9px] text-warm-cream/30 mb-0.5 uppercase tracking-wider">Name</label>
-                    <input value={name} onChange={e => setName(e.target.value)} className="w-full px-2.5 py-1.5 border border-warm-cream/25 rounded-lg text-sm focus:outline-none focus:border-brand-green bg-[#1e1e1e]" />
+                    <input value={name} onChange={e => setName(e.target.value)} className="w-full px-2.5 py-1.5 border border-warm-cream/25 rounded-lg text-sm focus:outline-none focus:border-brand-green bg-base" />
                 </div>
                 {allowsHub && !isLagos && (
                     <div className="w-28">
                         <label className="block text-[9px] text-warm-cream/30 mb-0.5 uppercase tracking-wider">Hub (₦)</label>
-                        <input type="number" value={hubFee} onChange={e => setHubFee(e.target.value)} className="w-full px-2.5 py-1.5 border border-warm-cream/25 rounded-lg text-sm focus:outline-none focus:border-brand-green bg-[#1e1e1e]" />
+                        <input type="number" value={hubFee} onChange={e => setHubFee(e.target.value)} className="w-full px-2.5 py-1.5 border border-warm-cream/25 rounded-lg text-sm focus:outline-none focus:border-brand-green bg-base" />
                     </div>
                 )}
                 <div className="w-28">
                     <label className="block text-[9px] text-warm-cream/30 mb-0.5 uppercase tracking-wider">{isLagos ? "Fee (₦)" : "Door (₦)"}</label>
-                    <input type="number" value={doorFee} onChange={e => setDoorFee(e.target.value)} placeholder={isLagos ? "zone fee" : ""} className="w-full px-2.5 py-1.5 border border-warm-cream/25 rounded-lg text-sm focus:outline-none focus:border-brand-green bg-[#1e1e1e]" />
+                    <input type="number" value={doorFee} onChange={e => setDoorFee(e.target.value)} placeholder={isLagos ? "zone fee" : ""} className="w-full px-2.5 py-1.5 border border-warm-cream/25 rounded-lg text-sm focus:outline-none focus:border-brand-green bg-base" />
                 </div>
                 <Button size="sm" onClick={save} loading={saving}><Save size={12} /></Button>
                 <Button size="sm" variant="ghost" onClick={onCancel}><X size={12} /></Button>
@@ -866,7 +866,7 @@ function BulkAddLocations({ zoneId, onDone, onCancel }: {
                     value={defaultFee}
                     onChange={e => setDefaultFee(e.target.value)}
                     placeholder="Blank = inherit the zone fee"
-                    className="w-full px-3 py-2 border border-warm-cream/20 rounded-lg text-sm focus:outline-none focus:border-brand-green bg-[#1e1e1e]"
+                    className="w-full px-3 py-2 border border-warm-cream/20 rounded-lg text-sm focus:outline-none focus:border-brand-green bg-base"
                 />
             </div>
             <div className="flex justify-end gap-2">
@@ -917,7 +917,7 @@ function CreateZoneModal({ defaultType, onCreated, onClose }: {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={onClose}>
-            <div className="bg-white/[0.04] rounded-xl shadow-2xl w-full max-w-lg p-6 overflow-y-auto max-h-[90vh]" onClick={e => e.stopPropagation()}>
+            <div className="bg-raised rounded-xl shadow-2xl w-full max-w-lg p-6 overflow-y-auto max-h-[90vh]" onClick={e => e.stopPropagation()}>
                 <div className="flex items-center justify-between mb-5">
                     <h2 className="text-xl font-serif text-warm-cream">Create Delivery Zone</h2>
                     <button onClick={onClose} className="text-warm-cream/25 hover:text-warm-cream/50 p-1"><X size={18} /></button>
@@ -954,7 +954,7 @@ function InputField({ label, required, type = "text", value, onChange, placehold
                 value={value}
                 onChange={e => onChange(e.target.value)}
                 placeholder={placeholder}
-                className="w-full px-3 py-2 border border-warm-cream/20 rounded-lg text-sm focus:outline-none focus:border-brand-green transition-colors bg-[#1e1e1e]"
+                className="w-full px-3 py-2 border border-warm-cream/20 rounded-lg text-sm focus:outline-none focus:border-brand-green transition-colors bg-base"
             />
         </div>
     );

@@ -81,7 +81,7 @@ export default function AdminProductsContent({ products }: AdminProductsContentP
 
             {/* Desktop table */}
             <div className="hidden md:block">
-                <div className="bg-white/[0.04] rounded-lg border border-warm-cream/20 overflow-hidden">
+                <div className="bg-raised rounded-lg border border-warm-cream/20 overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                             <thead>
@@ -145,7 +145,7 @@ export default function AdminProductsContent({ products }: AdminProductsContentP
                     <div
                         key={p.id}
                         className={cn(
-                            "bg-white/[0.04] rounded-lg border p-4",
+                            "bg-raised rounded-lg border p-4",
                             p.stock <= LOW_STOCK_THRESHOLD ? "border-red-500/20 bg-red-500/10/30" : "border-warm-cream/20",
                         )}
                     >

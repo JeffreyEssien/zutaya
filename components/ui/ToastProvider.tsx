@@ -10,7 +10,7 @@ export default function ToastProvider() {
             toastOptions={{
                 duration: 3000,
                 classNames: {
-                    toast: "bg-[#222] border border-warm-cream/15 shadow-xl rounded-xl text-warm-cream font-sans",
+                    toast: "bg-surface border border-warm-cream/15 shadow-xl rounded-xl text-warm-cream font-sans",
                     title: "text-sm font-semibold",
                     description: "text-xs text-warm-cream/50",
                     actionButton: "bg-brand-green text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-brand-dark transition-colors",

@@ -34,7 +34,7 @@ export default async function BookingTrackerPage({ params }: { params: Promise<{
                 </div>
 
                 {/* Timeline */}
-                <div className="bg-white/[0.04] rounded-2xl border border-warm-cream/10 p-6 mb-6">
+                <div className="bg-raised rounded-2xl border border-warm-cream/10 p-6 mb-6">
                     <div className="space-y-3">
                         {STAGES.map((s, i) => {
                             const done = i < stageIdx;
@@ -52,7 +52,7 @@ export default async function BookingTrackerPage({ params }: { params: Promise<{
                 </div>
 
                 {/* Details */}
-                <div className="bg-white/[0.04] rounded-2xl border border-warm-cream/10 p-6 space-y-3 text-sm">
+                <div className="bg-raised rounded-2xl border border-warm-cream/10 p-6 space-y-3 text-sm">
                     <Row label="Occasion" value={booking.occasionLabel || "—"} />
                     <Row label="Guests" value={`${booking.headcount}`} />
                     <Row label="Service tier" value={booking.serviceTierLabel || "—"} />

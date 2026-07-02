@@ -155,13 +155,13 @@ export default function InventoryContent({ logs: initialLogs, inventory: initial
                     <div className="flex gap-2 bg-warm-cream/10 p-1 rounded-md">
                         <button
                             onClick={() => setTab("stock")}
-                            className={`px-4 py-1.5 rounded-sm text-sm font-medium transition-colors ${tab === "stock" ? "bg-white/[0.04] shadow-sm text-brand-green" : "text-warm-cream/60 hover:text-brand-green"}`}
+                            className={`px-4 py-1.5 rounded-sm text-sm font-medium transition-colors ${tab === "stock" ? "bg-raised shadow-sm text-brand-green" : "text-warm-cream/60 hover:text-brand-green"}`}
                         >
                             Stock & Pricing
                         </button>
                         <button
                             onClick={() => setTab("history")}
-                            className={`px-4 py-1.5 rounded-sm text-sm font-medium transition-colors ${tab === "history" ? "bg-white/[0.04] shadow-sm text-brand-green" : "text-warm-cream/60 hover:text-brand-green"}`}
+                            className={`px-4 py-1.5 rounded-sm text-sm font-medium transition-colors ${tab === "history" ? "bg-raised shadow-sm text-brand-green" : "text-warm-cream/60 hover:text-brand-green"}`}
                         >
                             History Log
                         </button>
@@ -172,7 +172,7 @@ export default function InventoryContent({ logs: initialLogs, inventory: initial
             {/* Create Modal */}
             {isCreating && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                    <div className="bg-white/[0.04] rounded-lg shadow-xl w-full max-w-2xl p-6 overflow-y-auto max-h-[90vh]">
+                    <div className="bg-raised rounded-lg shadow-xl w-full max-w-2xl p-6 overflow-y-auto max-h-[90vh]">
                         <h2 className="text-xl font-serif text-warm-cream mb-4">Add New Inventory Item</h2>
                         <form onSubmit={handleCreate} className="space-y-4">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -223,7 +223,7 @@ export default function InventoryContent({ logs: initialLogs, inventory: initial
             />
 
             {tab === "stock" && (
-                <div className="bg-white/[0.04] rounded-lg shadow overflow-hidden border border-warm-cream/20">
+                <div className="bg-raised rounded-lg shadow overflow-hidden border border-warm-cream/20">
                     <div className="hidden md:block overflow-x-auto whitespace-nowrap">
                         <table className="w-full text-left text-sm">
                             <thead className="bg-brand-creme text-warm-cream">
@@ -339,7 +339,7 @@ export default function InventoryContent({ logs: initialLogs, inventory: initial
 
             {/* Reuse History Log Table from before (omitted for brevity, assume strictly kept or copied) */}
             {tab === "history" && (
-                <div className="bg-white/[0.04] rounded-lg shadow overflow-hidden border border-warm-cream/20">
+                <div className="bg-raised rounded-lg shadow overflow-hidden border border-warm-cream/20">
                     <div className="hidden md:block overflow-x-auto whitespace-nowrap">
                         <table className="w-full text-left text-sm">
                             <thead className="bg-brand-creme text-warm-cream">
@@ -400,7 +400,7 @@ export default function InventoryContent({ logs: initialLogs, inventory: initial
             {/* Enhanced Adjustment Modal */}
             {isAdjusting && selectedItem && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                    <div className="bg-white/[0.04] rounded-lg shadow-xl w-full max-w-md p-6">
+                    <div className="bg-raised rounded-lg shadow-xl w-full max-w-md p-6">
                         <h2 className="text-xl font-serif text-warm-cream mb-4">Manage: {selectedItem.name}</h2>
                         <form onSubmit={handleUpdate} className="space-y-4">
 

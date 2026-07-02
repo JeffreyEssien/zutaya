@@ -40,7 +40,7 @@ export default function ServicesConfig(p: Props) {
 
     return (
         <div className="space-y-6">
-            <section className="bg-white/[0.04] rounded-xl border border-warm-cream/15 p-5 space-y-3">
+            <section className="bg-raised rounded-xl border border-warm-cream/15 p-5 space-y-3">
                 <h2 className="font-serif text-lg text-warm-cream">Delivery cutoff</h2>
                 <p className="text-xs text-warm-cream/50">Orders placed after this hour are scheduled for the next day's delivery.</p>
                 <div className="grid sm:grid-cols-2 gap-3">
@@ -55,7 +55,7 @@ export default function ServicesConfig(p: Props) {
                 </div>
             </section>
 
-            <section className="bg-white/[0.04] rounded-xl border border-warm-cream/15 p-5 space-y-3">
+            <section className="bg-raised rounded-xl border border-warm-cream/15 p-5 space-y-3">
                 <h2 className="font-serif text-lg text-warm-cream">Service toggles</h2>
                 <label className="flex items-center gap-2 text-sm text-warm-cream/80">
                     <input type="checkbox" checked={events} onChange={(e) => setEvents(e.target.checked)} /> Outdoor Butchery enabled
@@ -66,7 +66,7 @@ export default function ServicesConfig(p: Props) {
                 </div>
             </section>
 
-            <section className="bg-white/[0.04] rounded-xl border border-warm-cream/15 p-5">
+            <section className="bg-raised rounded-xl border border-warm-cream/15 p-5">
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="font-serif text-lg text-warm-cream">Butcher profiles</h2>
                     <button onClick={addProfile} className="flex items-center gap-1.5 text-xs text-brand-green cursor-pointer"><Plus size={14} /> Add</button>

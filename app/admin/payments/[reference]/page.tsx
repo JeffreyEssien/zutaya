@@ -81,10 +81,10 @@ export default function PaymentDetailPage() {
     }, [fetchData]);
 
     if (loading) {
-        return <div className="min-h-screen bg-brand-black flex items-center justify-center text-warm-cream/45 text-sm">Loading payment…</div>;
+        return <div className="min-h-screen bg-base flex items-center justify-center text-warm-cream/45 text-sm">Loading payment…</div>;
     }
     if (!data) {
-        return <div className="min-h-screen bg-brand-black flex items-center justify-center text-warm-cream/45 text-sm">Payment not found.</div>;
+        return <div className="min-h-screen bg-base flex items-center justify-center text-warm-cream/45 text-sm">Payment not found.</div>;
     }
 
     const { payment, events, order, subscription, customer, otherPayments } = data;
@@ -154,7 +154,7 @@ export default function PaymentDetailPage() {
     };
 
     return (
-        <main className="min-h-screen bg-brand-black text-warm-cream p-6 md:p-10">
+        <main className="min-h-screen bg-base text-warm-cream p-6 md:p-10">
             <div className="max-w-6xl mx-auto">
                 {/* ── Top bar ── */}
                 <Link href="/admin/payments" className="inline-flex items-center gap-1.5 text-xs text-warm-cream/45 hover:text-brand-green mb-6">
@@ -162,7 +162,7 @@ export default function PaymentDetailPage() {
                 </Link>
 
                 {/* ── Hero header ── */}
-                <div className="bg-gradient-to-br from-[#1e1e1e] to-[#181818] border border-warm-cream/10 rounded-2xl p-6 mb-6">
+                <div className="bg-gradient-to-br from-base to-base border border-warm-cream/10 rounded-2xl p-6 mb-6">
                     <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-2">
@@ -183,7 +183,7 @@ export default function PaymentDetailPage() {
                                     </span>
                                 )}
                                 {payment.channel && (
-                                    <span className="text-[11px] text-warm-cream/55 px-2 py-0.5 bg-white/[0.05] rounded-full">
+                                    <span className="text-[11px] text-warm-cream/55 px-2 py-0.5 bg-raised rounded-full">
                                         {payment.channel.replace(/_/g, " ")}
                                     </span>
                                 )}
@@ -412,7 +412,7 @@ export default function PaymentDetailPage() {
                                 <div className="space-y-1.5 max-h-64 overflow-y-auto">
                                     {otherPayments.map((p) => (
                                         <Link key={p.id} href={`/admin/payments/${encodeURIComponent(p.reference)}`}
-                                            className="flex items-center justify-between gap-2 px-2 py-1.5 rounded-md hover:bg-white/[0.03] text-[11px]">
+                                            className="flex items-center justify-between gap-2 px-2 py-1.5 rounded-md hover:bg-raised text-[11px]">
                                             <div className="min-w-0 flex-1">
                                                 <p className="font-mono text-warm-cream/70 truncate">{p.reference}</p>
                                                 <p className="text-warm-cream/40">{new Date(p.created_at).toLocaleDateString()}</p>
@@ -447,7 +447,7 @@ function getEventDotColor(type: string): string {
 
 function Card({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) {
     return (
-        <div className="bg-white/[0.03] border border-warm-cream/10 rounded-2xl p-5">
+        <div className="bg-raised border border-warm-cream/10 rounded-2xl p-5">
             <div className="flex items-center gap-1.5 mb-4">
                 <span className="text-brand-green/60">{icon}</span>
                 <h3 className="text-[11px] font-semibold text-warm-cream/45 uppercase tracking-wider">{title}</h3>

@@ -87,7 +87,7 @@ export default function CouponList({ initialCoupons }: { initialCoupons: Coupon[
             {/* Mobile Cards */}
             <div className="md:hidden flex flex-col gap-3">
                 {initialCoupons.map((c) => (
-                    <div key={c.id} className="bg-white/[0.04] rounded-xl border border-warm-cream/20 p-4 shadow-sm flex flex-col gap-3">
+                    <div key={c.id} className="bg-raised rounded-xl border border-warm-cream/20 p-4 shadow-sm flex flex-col gap-3">
                         <div className="flex justify-between items-center pb-3 border-b border-warm-cream/10">
                             <span className="font-mono font-medium text-warm-cream text-lg px-2 py-1 bg-warm-cream/10 rounded-md border border-warm-cream/20">
                                 {c.code}

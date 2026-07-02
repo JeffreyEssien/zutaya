@@ -51,7 +51,7 @@ export default function ProcessingAdmin({ initialMarinades, initialOptions }: Pr
     return (
         <div className="grid lg:grid-cols-2 gap-6">
             {/* Processing Options */}
-            <section className="bg-white/[0.04] rounded-xl border border-warm-cream/15 p-5">
+            <section className="bg-raised rounded-xl border border-warm-cream/15 p-5">
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="font-serif text-lg text-warm-cream">Processing Options</h2>
                     <button onClick={() => setOptions((s) => [...s, blankOption()])} className="flex items-center gap-1.5 text-xs text-brand-green hover:text-brand-green/80 cursor-pointer">
@@ -85,7 +85,7 @@ export default function ProcessingAdmin({ initialMarinades, initialOptions }: Pr
             </section>
 
             {/* Marinades */}
-            <section className="bg-white/[0.04] rounded-xl border border-warm-cream/15 p-5">
+            <section className="bg-raised rounded-xl border border-warm-cream/15 p-5">
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="font-serif text-lg text-warm-cream">Marinades</h2>
                     <button onClick={() => setMarinades((s) => [...s, blankMarinade()])} className="flex items-center gap-1.5 text-xs text-brand-green hover:text-brand-green/80 cursor-pointer">

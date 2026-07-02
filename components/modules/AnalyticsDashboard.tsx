@@ -92,7 +92,7 @@ export default function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
                         )}
                     </div>
                 </div>
-                <div className="flex flex-wrap gap-1 bg-white/[0.04] backdrop-blur-sm p-1 rounded-xl border border-warm-cream/[0.08] shadow-sm max-w-full">
+                <div className="flex flex-wrap gap-1 bg-raised backdrop-blur-sm p-1 rounded-xl border border-warm-cream/[0.08] shadow-sm max-w-full">
                     {tabs.map(tab => (
                         <button
                             key={tab.id}
@@ -105,7 +105,7 @@ export default function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
                             {activeTab === tab.id && (
                                 <motion.div
                                     layoutId="activeTab"
-                                    className="absolute inset-0 bg-white/[0.08] rounded-lg shadow-md border border-warm-cream/10"
+                                    className="absolute inset-0 bg-raised rounded-lg shadow-md border border-warm-cream/10"
                                     transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
                                 />
                             )}
@@ -259,7 +259,7 @@ function SalesView({ data }: { data: AnalyticsData }) {
                             </thead>
                             <tbody className="divide-y divide-warm-cream/[0.06]">
                                 {data.products.topSelling.map((p, i) => (
-                                    <tr key={p.id} className="hover:bg-white/[0.03] transition-colors">
+                                    <tr key={p.id} className="hover:bg-raised transition-colors">
                                         <td className="py-3 font-medium text-warm-cream flex items-center gap-2">
                                             <span className="text-xs text-brand-green/60 font-mono w-5">#{i + 1}</span>
                                             {p.name}
@@ -274,7 +274,7 @@ function SalesView({ data }: { data: AnalyticsData }) {
                     {/* Mobile Cards */}
                     <div className="md:hidden flex flex-col gap-3">
                         {data.products.topSelling.map((p, i) => (
-                            <div key={p.id} className="bg-white/[0.04] rounded-lg border border-warm-cream/[0.08] p-3 shadow-sm flex flex-col gap-2">
+                            <div key={p.id} className="bg-raised rounded-lg border border-warm-cream/[0.08] p-3 shadow-sm flex flex-col gap-2">
                                 <div className="flex items-center gap-2 border-b border-warm-cream/10 pb-2">
                                     <span className="text-xs font-mono font-bold text-brand-green bg-warm-cream/10 px-2 py-0.5 rounded-full">#{i + 1}</span>
                                     <span className="font-medium text-warm-cream">{p.name}</span>
@@ -459,7 +459,7 @@ function MeatDeliveryView({ data }: { data: AnalyticsData }) {
                             </thead>
                             <tbody className="divide-y divide-warm-cream/[0.06]">
                                 {m.deliveryZoneBreakdown.map((z, i) => (
-                                    <tr key={i} className="hover:bg-white/[0.03] transition-colors">
+                                    <tr key={i} className="hover:bg-raised transition-colors">
                                         <td className="py-3 font-medium text-warm-cream flex items-center gap-2">
                                             <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: ZONE_COLORS[i % ZONE_COLORS.length] }} />
                                             {z.zone}
@@ -623,7 +623,7 @@ function MarketingView({ data }: { data: AnalyticsData }) {
                         </thead>
                         <tbody className="divide-y divide-warm-cream/[0.06]">
                             {data.marketing.topCoupons.map(c => (
-                                <tr key={c.code} className="hover:bg-white/[0.03] transition-colors">
+                                <tr key={c.code} className="hover:bg-raised transition-colors">
                                     <td className="py-3 font-mono font-medium text-brand-green">{c.code}</td>
                                     <td className="py-3 text-right">{c.count}</td>
                                 </tr>
@@ -637,7 +637,7 @@ function MarketingView({ data }: { data: AnalyticsData }) {
                 {/* Mobile Cards */}
                 <div className="md:hidden flex flex-col gap-3">
                     {data.marketing.topCoupons.map(c => (
-                        <div key={c.code} className="bg-white/[0.04] flex justify-between items-center rounded-lg border border-warm-cream/20 p-4 shadow-sm">
+                        <div key={c.code} className="bg-raised flex justify-between items-center rounded-lg border border-warm-cream/20 p-4 shadow-sm">
                             <span className="font-mono font-bold text-brand-green">{c.code}</span>
                             <div className="flex flex-col text-right">
                                 <span className="text-[10px] uppercase text-warm-cream/40">Uses</span>
@@ -662,7 +662,7 @@ function MarketingView({ data }: { data: AnalyticsData }) {
                 {data.basket.length > 0 ? (
                     <ul className="space-y-2">
                         {data.basket.map((b, i) => (
-                            <li key={i} className="flex items-center justify-between gap-3 bg-white/[0.03] border border-warm-cream/[0.06] rounded-lg px-4 py-3">
+                            <li key={i} className="flex items-center justify-between gap-3 bg-raised border border-warm-cream/[0.06] rounded-lg px-4 py-3">
                                 <span className="text-sm text-warm-cream min-w-0">{b.pair}</span>
                                 <div className="flex items-center gap-5 shrink-0 text-right">
                                     <div>
@@ -891,7 +891,7 @@ function VelocityCard({ label, value }: { label: string; value: number }) {
 
 function MiniGlassKPI({ label, value, alert = false }: { label: string; value: string; alert?: boolean }) {
     return (
-        <div className={`p-4 rounded-xl border text-center transition-colors ${alert ? "border-red-500/20 bg-red-500/5" : "border-warm-cream/[0.08] bg-white/[0.03]"}`}>
+        <div className={`p-4 rounded-xl border text-center transition-colors ${alert ? "border-red-500/20 bg-red-500/5" : "border-warm-cream/[0.08] bg-raised"}`}>
             <p className="text-xs text-warm-cream/50 uppercase tracking-wider">{label}</p>
             <p className={`text-lg font-bold font-serif mt-1 ${alert ? "text-red-600" : "text-warm-cream"}`}>{value}</p>
         </div>

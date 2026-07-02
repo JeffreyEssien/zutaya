@@ -22,7 +22,7 @@ export default function ServicesDashboardCards({ pendingBookings, upcomingBookin
             </div>
 
             {recentBookings.length > 0 && (
-                <div className="bg-white/[0.04] rounded-xl border border-warm-cream/15 overflow-hidden">
+                <div className="bg-raised rounded-xl border border-warm-cream/15 overflow-hidden">
                     <div className="flex items-center justify-between p-4 border-b border-warm-cream/8">
                         <h3 className="text-sm font-semibold text-warm-cream">Recent bookings</h3>
                         <Link href="/admin/bookings" className="text-xs text-brand-green hover:underline flex items-center gap-1">View all <ArrowRight size={12} /></Link>
@@ -46,7 +46,7 @@ export default function ServicesDashboardCards({ pendingBookings, upcomingBookin
 
 function Card({ href, icon: Icon, label, value, hint }: { href: string; icon: React.ElementType; label: string; value: string; hint: string }) {
     return (
-        <Link href={href} className="block bg-white/[0.04] rounded-xl border border-warm-cream/15 p-4 hover:border-brand-green/40 transition-colors">
+        <Link href={href} className="block bg-raised rounded-xl border border-warm-cream/15 p-4 hover:border-brand-green/40 transition-colors">
             <div className="flex items-center justify-between mb-2">
                 <span className="text-[10px] uppercase tracking-wider text-warm-cream/40">{label}</span>
                 <Icon size={14} className="text-brand-green/70" />

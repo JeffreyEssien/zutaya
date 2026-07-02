@@ -247,7 +247,7 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                 </div>
             )}
 
-            <form onSubmit={handleSubmit} className="bg-white/[0.04] rounded-lg border border-warm-cream/20 p-6 mb-8 space-y-6 animate-slideUp">
+            <form onSubmit={handleSubmit} className="bg-raised rounded-lg border border-warm-cream/20 p-6 mb-8 space-y-6 animate-slideUp">
                 <h2 className="font-serif text-lg text-warm-cream mb-4">{initialData ? "Edit Product" : (mode === "new" ? "Create New Item & Product" : "Publish Inventory Item")}</h2>
 
                 {mode === "existing" && !initialData && (
@@ -402,7 +402,7 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                             </button>
                         )}
                         {prepOptions.map((opt, idx) => (
-                            <div key={opt.id} className="flex gap-2 items-end bg-white/[0.04] p-3 rounded-md mb-2">
+                            <div key={opt.id} className="flex gap-2 items-end bg-raised p-3 rounded-md mb-2">
                                 <div className="flex-1">
                                     <label className="text-xs text-warm-cream/60">Label</label>
                                     <input

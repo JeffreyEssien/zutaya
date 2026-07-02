@@ -55,10 +55,10 @@ export default function ProductCard({ product }: ProductCardProps) {
 
     return (
         <>
-            <div className="group relative rounded-2xl bg-[#1e1e1e] border border-warm-cream/[0.06] hover:border-brand-green/20 transition-all duration-500 hover:shadow-[0_8px_40px_rgba(53,94,59,0.12)] overflow-hidden">
+            <div className="group relative rounded-2xl bg-base border border-warm-cream/[0.06] hover:border-brand-green/20 transition-all duration-500 hover:shadow-[0_8px_40px_rgba(53,94,59,0.12)] overflow-hidden">
                 <Link href={`/product/${product.slug}`} className="block">
                     {/* Image */}
-                    <div className="relative aspect-[3/4] overflow-hidden bg-[#2a2a2a]">
+                    <div className="relative aspect-[3/4] overflow-hidden bg-surface">
                         {product.images?.[0] ? (
                             <SafeImage
                                 src={product.images[0]}
@@ -111,14 +111,14 @@ export default function ProductCard({ product }: ProductCardProps) {
                             <button
                                 type="button"
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                                className="p-2 rounded-full bg-brand-black/70 backdrop-blur-sm text-warm-cream/40 hover:text-red-400 cursor-pointer shadow-sm hover:shadow-md transition-all"
+                                className="p-2 rounded-full bg-base/70 backdrop-blur-sm text-warm-cream/40 hover:text-red-400 cursor-pointer shadow-sm hover:shadow-md transition-all"
                             >
                                 <Heart size={14} strokeWidth={1.5} />
                             </button>
                             <button
                                 type="button"
                                 onClick={handleQuickView}
-                                className="p-2 rounded-full bg-brand-black/70 backdrop-blur-sm text-warm-cream/40 hover:text-brand-green cursor-pointer shadow-sm hover:shadow-md transition-all"
+                                className="p-2 rounded-full bg-base/70 backdrop-blur-sm text-warm-cream/40 hover:text-brand-green cursor-pointer shadow-sm hover:shadow-md transition-all"
                             >
                                 <Eye size={14} strokeWidth={1.5} />
                             </button>
@@ -129,7 +129,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                             type="button"
                             onClick={handleQuickAdd}
                             disabled={isSoldOut}
-                            className="hidden sm:flex absolute bottom-3 left-3 right-3 items-center justify-center gap-2 bg-brand-black/90 backdrop-blur-md text-warm-cream text-xs font-semibold tracking-wide py-3 rounded-full opacity-0 translate-y-3 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer shadow-lg hover:bg-brand-black active:scale-[0.97]"
+                            className="hidden sm:flex absolute bottom-3 left-3 right-3 items-center justify-center gap-2 bg-base/90 backdrop-blur-md text-warm-cream text-xs font-semibold tracking-wide py-3 rounded-full opacity-0 translate-y-3 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer shadow-lg hover:bg-base active:scale-[0.97]"
                         >
                             {isSoldOut ? (
                                 "Sold Out"

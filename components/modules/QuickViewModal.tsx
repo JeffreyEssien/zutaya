@@ -66,13 +66,13 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
                         exit={{ scale: 0.95, opacity: 0, y: 20 }}
                         transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                         onClick={(e) => e.stopPropagation()}
-                        className="relative bg-[#222] rounded-2xl shadow-2xl max-w-3xl w-full max-h-[85vh] overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-0"
+                        className="relative bg-surface rounded-2xl shadow-2xl max-w-3xl w-full max-h-[85vh] overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-0"
                     >
                         {/* Close */}
                         <button
                             type="button"
                             onClick={onClose}
-                            className="absolute top-3 right-3 z-10 p-2 bg-[#222]/90 backdrop-blur-sm rounded-full hover:bg-[#222] shadow-md transition-all cursor-pointer"
+                            className="absolute top-3 right-3 z-10 p-2 bg-surface/90 backdrop-blur-sm rounded-full hover:bg-surface shadow-md transition-all cursor-pointer"
                         >
                             <X size={16} className="text-warm-cream/60" />
                         </button>
@@ -92,14 +92,14 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
                                     <button
                                         type="button"
                                         onClick={() => setImageIndex((i) => (i - 1 + product.images.length) % product.images.length)}
-                                        className="absolute left-2 top-1/2 -translate-y-1/2 p-2 bg-[#222]/80 rounded-full hover:bg-[#222] shadow transition-all cursor-pointer"
+                                        className="absolute left-2 top-1/2 -translate-y-1/2 p-2 bg-surface/80 rounded-full hover:bg-surface shadow transition-all cursor-pointer"
                                     >
                                         <ChevronLeft size={14} />
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => setImageIndex((i) => (i + 1) % product.images.length)}
-                                        className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-[#222]/80 rounded-full hover:bg-[#222] shadow transition-all cursor-pointer"
+                                        className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-surface/80 rounded-full hover:bg-surface shadow transition-all cursor-pointer"
                                     >
                                         <ChevronRight size={14} />
                                     </button>
@@ -115,8 +115,8 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
                                             type="button"
                                             onClick={() => setImageIndex(i)}
                                             className={`rounded-full transition-all cursor-pointer ${i === imageIndex
-                                                    ? "w-5 h-1.5 bg-[#222] shadow"
-                                                    : "w-1.5 h-1.5 bg-[#222]/50"
+                                                    ? "w-5 h-1.5 bg-surface shadow"
+                                                    : "w-1.5 h-1.5 bg-surface/50"
                                                 }`}
                                         />
                                     ))}

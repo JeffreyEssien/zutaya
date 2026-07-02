@@ -191,7 +191,7 @@ function OrderCard({ order, onStatusChange, onSelect, isSelected }: {
     return (
         <div
             onClick={() => onSelect(order)}
-            className={`bg-white/[0.04] rounded-lg border p-4 cursor-pointer transition-colors ${isSelected ? "border-brand-green ring-1 ring-brand-green/20" : "border-warm-cream/20 hover:border-warm-cream/40"}`}
+            className={`bg-raised rounded-lg border p-4 cursor-pointer transition-colors ${isSelected ? "border-brand-green ring-1 ring-brand-green/20" : "border-warm-cream/20 hover:border-warm-cream/40"}`}
         >
             <div className="flex items-start justify-between gap-3 mb-3">
                 <div className="min-w-0">
@@ -210,10 +210,10 @@ function OrderCard({ order, onStatusChange, onSelect, isSelected }: {
                     <select
                         value={order.status}
                         onChange={(e) => onStatusChange(order.id, e.target.value as Order["status"])}
-                        className="text-xs border border-warm-cream/20 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brand-green/30 bg-[#1e1e1e]"
+                        className="text-xs border border-warm-cream/20 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brand-green/30 bg-base"
                     >
                         {getAllowedStatuses(order.status).map((s) => (
-                            <option key={s} value={s} className="bg-[#1e1e1e] text-warm-cream">{prettyStatus(s)}</option>
+                            <option key={s} value={s} className="bg-base text-warm-cream">{prettyStatus(s)}</option>
                         ))}
                     </select>
                 </div>
@@ -228,7 +228,7 @@ function OrderTable({ orders, onStatusChange, onSelect, selectedId }: {
     onSelect: (o: Order) => void; selectedId?: string;
 }) {
     return (
-        <div className="bg-white/[0.04] rounded-lg border border-warm-cream/20 overflow-hidden">
+        <div className="bg-raised rounded-lg border border-warm-cream/20 overflow-hidden">
             <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                     <thead>
@@ -264,10 +264,10 @@ function OrderTable({ orders, onStatusChange, onSelect, selectedId }: {
                                     <select
                                         value={o.status}
                                         onChange={(e) => onStatusChange(o.id, e.target.value as Order["status"])}
-                                        className="text-xs border border-warm-cream/20 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brand-green/30 bg-[#1e1e1e] text-warm-cream cursor-pointer"
+                                        className="text-xs border border-warm-cream/20 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brand-green/30 bg-base text-warm-cream cursor-pointer"
                                     >
                                         {getAllowedStatuses(o.status).map((s) => (
-                                            <option key={s} value={s} className="bg-[#1e1e1e] text-warm-cream">{prettyStatus(s)}</option>
+                                            <option key={s} value={s} className="bg-base text-warm-cream">{prettyStatus(s)}</option>
                                         ))}
                                     </select>
                                 </td>

@@ -124,7 +124,7 @@ export default function CronDashboard({ initialLogs }: { initialLogs: CronLog[] 
                     const isRunning = running === job.key;
 
                     return (
-                        <div key={job.key} className="bg-white/[0.04] rounded-xl border border-warm-cream/15 p-5 shadow-sm space-y-4">
+                        <div key={job.key} className="bg-raised rounded-xl border border-warm-cream/15 p-5 shadow-sm space-y-4">
                             <div className="flex items-start gap-3">
                                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${job.bg}`}>
                                     <Icon size={18} className={job.color} />
@@ -177,14 +177,14 @@ export default function CronDashboard({ initialLogs }: { initialLogs: CronLog[] 
             <div>
                 <h2 className="font-serif text-lg text-warm-cream mb-3">Execution History</h2>
                 {logs.length === 0 ? (
-                    <div className="bg-white/[0.04] rounded-xl border border-warm-cream/15 p-12 text-center">
+                    <div className="bg-raised rounded-xl border border-warm-cream/15 p-12 text-center">
                         <Clock size={32} className="mx-auto mb-3 text-warm-cream/15" />
                         <p className="text-warm-cream/40 text-sm">No cron jobs have run yet. They'll execute on schedule or you can trigger them manually.</p>
                     </div>
                 ) : (
                     <>
                         {/* Desktop */}
-                        <div className="hidden md:block bg-white/[0.04] rounded-xl border border-warm-cream/15 overflow-hidden">
+                        <div className="hidden md:block bg-raised rounded-xl border border-warm-cream/15 overflow-hidden">
                             <table className="w-full text-sm">
                                 <thead>
                                     <tr className="border-b border-warm-cream/10 bg-warm-cream/[0.03]">
@@ -222,7 +222,7 @@ export default function CronDashboard({ initialLogs }: { initialLogs: CronLog[] 
                                 const job = JOB_CONFIG.find((j) => j.key === log.job_name);
                                 const StatusIcon = cfg.icon;
                                 return (
-                                    <div key={log.id} className="bg-white/[0.04] rounded-lg border border-warm-cream/15 p-4 space-y-2">
+                                    <div key={log.id} className="bg-raised rounded-lg border border-warm-cream/15 p-4 space-y-2">
                                         <div className="flex items-center justify-between">
                                             <span className="font-medium text-sm text-warm-cream">{job?.label || log.job_name}</span>
                                             <Badge variant={cfg.variant}>{log.status}</Badge>
@@ -245,7 +245,7 @@ export default function CronDashboard({ initialLogs }: { initialLogs: CronLog[] 
 
 function StatCard({ label, value, accent }: { label: string; value: number; accent?: string }) {
     return (
-        <div className="bg-white/[0.04] rounded-xl border border-warm-cream/15 p-4 text-center">
+        <div className="bg-raised rounded-xl border border-warm-cream/15 p-4 text-center">
             <p className={`text-2xl font-bold ${accent || "text-warm-cream"}`}>{value}</p>
             <p className="text-[10px] text-warm-cream/40 uppercase tracking-wider mt-1">{label}</p>
         </div>

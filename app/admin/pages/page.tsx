@@ -14,7 +14,7 @@ export default async function PagesPage() {
                 </Link>
             </div>
 
-            <div className="bg-white/[0.04] rounded-lg shadow overflow-hidden border border-warm-cream/20">
+            <div className="bg-raised rounded-lg shadow overflow-hidden border border-warm-cream/20">
                 <table className="w-full text-left text-sm">
                     <thead className="bg-brand-creme text-warm-cream">
                         <tr>

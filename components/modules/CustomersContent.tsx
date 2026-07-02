@@ -74,7 +74,7 @@ export default function CustomersContent({ customers }: CustomersContentProps) {
                     <p className="text-warm-cream/60">Manage your customer base and view insights</p>
                 </div>
                 <div className="flex gap-3">
-                    <button className="flex items-center gap-2 px-4 py-2 bg-white/[0.04] border border-warm-cream/30 rounded-lg text-warm-cream hover:bg-brand-creme/50 transition-colors">
+                    <button className="flex items-center gap-2 px-4 py-2 bg-raised border border-warm-cream/30 rounded-lg text-warm-cream hover:bg-brand-creme/50 transition-colors">
                         <ExternalLink size={16} />
                         <span>Export CSV</span>
                     </button>
@@ -259,7 +259,7 @@ export default function CustomersContent({ customers }: CustomersContentProps) {
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0 }}
-                                    className="bg-white/[0.04] rounded-xl border border-warm-cream/20 p-4 shadow-sm"
+                                    className="bg-raised rounded-xl border border-warm-cream/20 p-4 shadow-sm"
                                 >
                                     <div className="flex items-center justify-between border-b border-warm-cream/10 pb-3 mb-3">
                                         <div className="flex items-center gap-3">
@@ -314,10 +314,10 @@ export default function CustomersContent({ customers }: CustomersContentProps) {
                                                 </p>
                                             </div>
                                             <div className="flex items-center gap-1 shrink-0">
-                                                <button className="p-1.5 hover:bg-white/[0.04] rounded-md text-warm-cream/60 hover:text-brand-green transition-colors border border-transparent hover:border-warm-cream/20 shadow-sm" title="Email Customer">
+                                                <button className="p-1.5 hover:bg-raised rounded-md text-warm-cream/60 hover:text-brand-green transition-colors border border-transparent hover:border-warm-cream/20 shadow-sm" title="Email Customer">
                                                     <Mail size={14} />
                                                 </button>
-                                                <button className="p-1.5 hover:bg-white/[0.04] rounded-md text-warm-cream/60 hover:text-brand-green transition-colors border border-transparent hover:border-warm-cream/20 shadow-sm" title="View Details">
+                                                <button className="p-1.5 hover:bg-raised rounded-md text-warm-cream/60 hover:text-brand-green transition-colors border border-transparent hover:border-warm-cream/20 shadow-sm" title="View Details">
                                                     <MoreVertical size={14} />
                                                 </button>
                                             </div>

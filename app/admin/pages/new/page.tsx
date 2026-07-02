@@ -91,7 +91,7 @@ export default function NewPage() {
 
             <div>
                 <label className="block text-sm font-medium text-warm-cream/60 mb-1">Content</label>
-                <div className="bg-white/[0.04] rounded-md">
+                <div className="bg-raised rounded-md">
                     <div className="border-b border-warm-cream/10 p-2 flex gap-2">
                         <button
                             onClick={() => editor?.chain().focus().toggleBold().run()}
@@ -131,7 +131,7 @@ export default function NewPage() {
             <div className="flex justify-end gap-4">
                 <button
                     onClick={() => router.back()}
-                    className="px-4 py-2 border border-warm-cream/15 rounded-md text-warm-cream/60 hover:bg-warm-cream/[0.03] bg-[#1e1e1e]"
+                    className="px-4 py-2 border border-warm-cream/15 rounded-md text-warm-cream/60 hover:bg-warm-cream/[0.03] bg-base"
                 >
                     Cancel
                 </button>

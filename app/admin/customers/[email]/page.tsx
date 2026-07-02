@@ -46,7 +46,7 @@ export default async function CustomerTimelinePage({ params }: { params: Promise
                 <Stat label="Lifetime spend" value={formatCurrency(totalSpent)} />
             </div>
 
-            <section className="bg-white/[0.04] rounded-xl border border-warm-cream/15 p-5">
+            <section className="bg-raised rounded-xl border border-warm-cream/15 p-5">
                 <h2 className="font-serif text-lg text-warm-cream mb-4">Timeline</h2>
                 {events.length === 0 ? (
                     <p className="text-warm-cream/40 text-sm">No activity yet.</p>
@@ -74,7 +74,7 @@ export default async function CustomerTimelinePage({ params }: { params: Promise
 
 function Stat({ label, value }: { label: string; value: string }) {
     return (
-        <div className="bg-white/[0.04] rounded-xl border border-warm-cream/15 p-4">
+        <div className="bg-raised rounded-xl border border-warm-cream/15 p-4">
             <p className="text-[11px] uppercase tracking-wider text-warm-cream/40">{label}</p>
             <p className="font-serif text-2xl text-warm-cream mt-1">{value}</p>
         </div>

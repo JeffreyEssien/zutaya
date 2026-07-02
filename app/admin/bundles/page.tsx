@@ -197,7 +197,7 @@ export default function AdminPackagesPage() {
             </div>
 
             {showForm && (
-                <form onSubmit={handleSubmit} className="bg-white/[0.04] rounded-xl p-6 shadow-sm border border-warm-tan/20 mb-8 space-y-5">
+                <form onSubmit={handleSubmit} className="bg-raised rounded-xl p-6 shadow-sm border border-warm-tan/20 mb-8 space-y-5">
                     <h2 className="font-semibold text-brand-black text-lg">{editing ? "Edit Package" : "New Package"}</h2>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -258,7 +258,7 @@ export default function AdminPackagesPage() {
                                 const product = products.find((p) => p.id === line.productId);
                                 const variants = product?.variants || [];
                                 return (
-                                    <div key={idx} className="flex flex-wrap items-center gap-2 bg-white/[0.03] rounded-lg p-2 border border-warm-tan/15">
+                                    <div key={idx} className="flex flex-wrap items-center gap-2 bg-raised rounded-lg p-2 border border-warm-tan/15">
                                         <GripVertical size={14} className="text-warm-cream/20 shrink-0" />
                                         {/* Product */}
                                         <select value={line.productId || ""} onChange={(e) => onPickProduct(idx, e.target.value)} className="bg-black/40 text-warm-cream placeholder:text-warm-cream/30 border border-warm-tan/30 rounded-lg px-2 py-1.5 text-sm min-w-[160px] flex-1">
@@ -305,7 +305,7 @@ export default function AdminPackagesPage() {
             {/* List */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {packages.map((pkg) => (
-                    <div key={pkg.id} className="bg-white/[0.04] rounded-xl border border-warm-tan/20 overflow-hidden flex">
+                    <div key={pkg.id} className="bg-raised rounded-xl border border-warm-tan/20 overflow-hidden flex">
                         <div className="relative w-28 shrink-0 bg-warm-cream/5">
                             {pkg.imageUrl ? (
                                 <SafeImage src={pkg.imageUrl} alt={pkg.name} fill className="object-cover" sizes="112px" />

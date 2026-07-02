@@ -280,7 +280,7 @@ export default function GalleryPage() {
       </div>
 
       {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-white/[0.04] rounded-xl border border-warm-cream/8 p-3">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-raised rounded-xl border border-warm-cream/8 p-3">
         {/* Search */}
         <div className="relative flex-1 w-full">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-warm-cream/30" />
@@ -314,13 +314,13 @@ export default function GalleryPage() {
         <div className="flex items-center gap-0.5 bg-brand-dark/5 rounded-lg p-0.5">
           <button
             onClick={() => setView("grid")}
-            className={`p-1.5 rounded-md cursor-pointer transition-colors ${view === "grid" ? "bg-white/[0.04] shadow-sm text-warm-cream" : "text-warm-cream/40"}`}
+            className={`p-1.5 rounded-md cursor-pointer transition-colors ${view === "grid" ? "bg-raised shadow-sm text-warm-cream" : "text-warm-cream/40"}`}
           >
             <Grid3X3 size={14} />
           </button>
           <button
             onClick={() => setView("list")}
-            className={`p-1.5 rounded-md cursor-pointer transition-colors ${view === "list" ? "bg-white/[0.04] shadow-sm text-warm-cream" : "text-warm-cream/40"}`}
+            className={`p-1.5 rounded-md cursor-pointer transition-colors ${view === "list" ? "bg-raised shadow-sm text-warm-cream" : "text-warm-cream/40"}`}
           >
             <List size={14} />
           </button>
@@ -329,7 +329,7 @@ export default function GalleryPage() {
 
       {/* Upload progress */}
       {uploading && (
-        <div className="bg-white/[0.04] rounded-xl border border-warm-cream/8 p-4">
+        <div className="bg-raised rounded-xl border border-warm-cream/8 p-4">
           <div className="flex items-center gap-3 mb-2">
             <Loader2 size={16} className="animate-spin text-brand-red" />
             <span className="text-sm text-warm-cream/70">Uploading... {uploadProgress}%</span>
@@ -381,7 +381,7 @@ export default function GalleryPage() {
           {filtered.map((item) => (
             <div
               key={item.id}
-              className={`group relative bg-white/[0.04] rounded-xl border overflow-hidden transition-all cursor-pointer hover:shadow-md ${
+              className={`group relative bg-raised rounded-xl border overflow-hidden transition-all cursor-pointer hover:shadow-md ${
                 selected.has(item.id) ? "border-brand-red ring-2 ring-brand-red/20" : "border-warm-cream/8"
               }`}
               onClick={() => toggleSelect(item.id)}
@@ -415,21 +415,21 @@ export default function GalleryPage() {
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
                   <button
                     onClick={(e) => startRename(item, e)}
-                    className="p-2 bg-white/[0.04] rounded-full shadow-lg hover:scale-110 transition-transform cursor-pointer"
+                    className="p-2 bg-raised rounded-full shadow-lg hover:scale-110 transition-transform cursor-pointer"
                     title="Rename"
                   >
                     <Pencil size={14} />
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); handleCopy(item.url, item.id); }}
-                    className="p-2 bg-white/[0.04] rounded-full shadow-lg hover:scale-110 transition-transform cursor-pointer"
+                    className="p-2 bg-raised rounded-full shadow-lg hover:scale-110 transition-transform cursor-pointer"
                     title="Copy URL"
                   >
                     {copiedId === item.id ? <Check size={14} className="text-green-600" /> : <Copy size={14} />}
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); handleDelete([item.id]); }}
-                    className="p-2 bg-white/[0.04] rounded-full shadow-lg hover:scale-110 transition-transform cursor-pointer"
+                    className="p-2 bg-raised rounded-full shadow-lg hover:scale-110 transition-transform cursor-pointer"
                     title="Delete"
                   >
                     <Trash2 size={14} className="text-red-500" />
@@ -491,7 +491,7 @@ export default function GalleryPage() {
       {/* List View */}
       {!loading && filtered.length > 0 && view === "list" && (
         <div
-          className="bg-white/[0.04] rounded-xl border border-warm-cream/8 divide-y divide-warm-cream/5"
+          className="bg-raised rounded-xl border border-warm-cream/8 divide-y divide-warm-cream/5"
           onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
           onDragLeave={() => setDragOver(false)}
           onDrop={handleDrop}

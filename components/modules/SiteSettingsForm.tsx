@@ -316,7 +316,7 @@ export default function SiteSettingsForm() {
                                                 className="relative w-20 h-20 rounded-lg overflow-hidden border border-warm-cream/10 group"
                                             >
                                                 {item.type === "video" ? (
-                                                    <div className="w-full h-full flex items-center justify-center bg-[#1e1e1e]">
+                                                    <div className="w-full h-full flex items-center justify-center bg-base">
                                                         <Film size={18} className="text-white/40" />
                                                     </div>
                                                 ) : (
@@ -587,7 +587,7 @@ export default function SiteSettingsForm() {
             `}</style>
 
             {/* Fixed save bar — positioned within main content area */}
-            <div className="fixed bottom-0 right-0 left-0 lg:left-60 z-40 px-4 sm:px-6 lg:px-10 py-3.5 bg-gradient-to-r from-[#161616] via-[#1a1a1a] to-[#161616] border-t border-warm-cream/10 shadow-[0_-4px_20px_rgba(0,0,0,0.4)] flex items-center justify-between">
+            <div className="fixed bottom-0 right-0 left-0 lg:left-60 z-40 px-4 sm:px-6 lg:px-10 py-3.5 bg-gradient-to-r from-base via-base to-base border-t border-warm-cream/10 shadow-[0_-4px_20px_rgba(0,0,0,0.4)] flex items-center justify-between">
                 <p className="text-xs text-warm-cream/40 hidden sm:flex items-center gap-1.5">
                     <span className="inline-block w-1.5 h-1.5 rounded-full bg-brand-green/50" />
                     Changes are saved across all tabs at once
@@ -609,7 +609,7 @@ function Card({ title, description, icon: Icon, children }: {
     title: string; description?: string; icon?: React.ElementType; children: React.ReactNode;
 }) {
     return (
-        <div className="bg-white/[0.04] rounded-xl border border-warm-cream/10 shadow-sm overflow-hidden">
+        <div className="bg-raised rounded-xl border border-warm-cream/10 shadow-sm overflow-hidden">
             <div className="px-5 py-4 border-b border-warm-cream/8 bg-[#111]/50">
                 <div className="flex items-center gap-2">
                     {Icon && <Icon size={16} className="text-brand-green" />}
@@ -671,7 +671,7 @@ function SocialField({ label, icon: Icon, name, value, onChange, placeholder }: 
                 <Icon size={12} className="text-warm-cream/35" />
                 {label}
             </label>
-            <input type="url" name={name} value={value} onChange={onChange} className="w-full border border-warm-cream/15 rounded-[0.625rem] px-3 py-2 text-sm bg-[#1e1e1e] text-warm-cream focus:outline-none focus:ring-2 focus:ring-brand-green/10 focus:border-brand-green/40 focus:bg-[#252525] transition-all placeholder:text-warm-cream/30" placeholder={placeholder} />
+            <input type="url" name={name} value={value} onChange={onChange} className="w-full border border-warm-cream/15 rounded-[0.625rem] px-3 py-2 text-sm bg-base text-warm-cream focus:outline-none focus:ring-2 focus:ring-brand-green/10 focus:border-brand-green/40 focus:bg-surface transition-all placeholder:text-warm-cream/30" placeholder={placeholder} />
         </div>
     );
 }

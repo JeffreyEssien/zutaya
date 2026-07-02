@@ -207,7 +207,7 @@ export default function NotificationBell() {
                     {/* Panel */}
                     <div
                         ref={panelRef}
-                        className="absolute top-2 right-2 sm:top-4 sm:right-4 w-[calc(100vw-16px)] sm:w-[400px] max-h-[80vh] bg-white/[0.04] rounded-2xl shadow-2xl border border-warm-cream/15 overflow-hidden flex flex-col"
+                        className="absolute top-2 right-2 sm:top-4 sm:right-4 w-[calc(100vw-16px)] sm:w-[400px] max-h-[80vh] bg-raised rounded-2xl shadow-2xl border border-warm-cream/15 overflow-hidden flex flex-col"
                     >
                         {/* Header */}
                         <div className="px-5 py-4 border-b border-warm-cream/10 flex items-center justify-between bg-warm-cream/[0.02] shrink-0">

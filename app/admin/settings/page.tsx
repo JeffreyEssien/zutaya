@@ -8,7 +8,7 @@ export default function AdminSettingsPage() {
                 <p className="text-warm-cream/60 text-sm">Manage global site configuration.</p>
             </div>
 
-            <div className="bg-white/[0.04] rounded-lg border border-warm-cream/20 p-6">
+            <div className="bg-raised rounded-lg border border-warm-cream/20 p-6">
                 <SiteSettingsForm />
             </div>
         </div>

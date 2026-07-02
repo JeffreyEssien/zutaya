@@ -50,7 +50,7 @@ export default function AdminSubscriptionsPage() {
         <div className="p-6 max-w-5xl mx-auto">
             <h1 className="text-2xl font-bold text-warm-cream mb-6">Subscriptions</h1>
 
-            <div className="bg-white/[0.04] rounded-xl shadow-sm border border-warm-cream/20 overflow-hidden">
+            <div className="bg-raised rounded-xl shadow-sm border border-warm-cream/20 overflow-hidden">
                 <table className="w-full text-sm">
                     <thead className="bg-warm-cream text-warm-cream/40">
                         <tr>

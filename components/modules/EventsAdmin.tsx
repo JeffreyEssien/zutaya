@@ -115,7 +115,7 @@ export default function EventsAdmin({ initialOccasions, initialAnimals, initialT
 
 function Section({ title, onAdd, children }: { title: string; onAdd: () => void; children: React.ReactNode }) {
     return (
-        <section className="bg-white/[0.04] rounded-xl border border-warm-cream/15 p-5">
+        <section className="bg-raised rounded-xl border border-warm-cream/15 p-5">
             <div className="flex items-center justify-between mb-4">
                 <h2 className="font-serif text-lg text-warm-cream">{title}</h2>
                 <button onClick={onAdd} className="flex items-center gap-1.5 text-xs text-brand-green hover:text-brand-green/80 cursor-pointer"><Plus size={14} /> Add</button>

@@ -177,7 +177,7 @@ export default function Header() {
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                         placeholder="Search products..."
-                                        className="w-36 sm:w-48 border border-warm-cream/20 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green/40 text-warm-cream placeholder:text-warm-cream/40 bg-brand-black/80 backdrop-blur-sm transition-all"
+                                        className="w-36 sm:w-48 border border-warm-cream/20 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green/40 text-warm-cream placeholder:text-warm-cream/40 bg-base/80 backdrop-blur-sm transition-all"
                                         onBlur={() => { if (!searchQuery) setSearchOpen(false); }}
                                     />
                                     <button
@@ -197,7 +197,7 @@ export default function Header() {
                                                 animate={{ opacity: 1, y: 0 }}
                                                 exit={{ opacity: 0, y: -8 }}
                                                 transition={{ duration: 0.2 }}
-                                                className="absolute top-full right-0 mt-2 w-72 sm:w-80 bg-brand-black rounded-2xl shadow-2xl border border-warm-cream/10 overflow-hidden z-50"
+                                                className="absolute top-full right-0 mt-2 w-72 sm:w-80 bg-base rounded-2xl shadow-2xl border border-warm-cream/10 overflow-hidden z-50"
                                             >
                                                 {searchLoading ? (
                                                     <div className="p-4 space-y-3">
@@ -331,7 +331,7 @@ export default function Header() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
                             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                            className="fixed top-0 left-0 right-0 z-[46] bg-brand-black pt-24 pb-8 px-8 md:hidden shadow-2xl border-b border-warm-cream/10"
+                            className="fixed top-0 left-0 right-0 z-[46] bg-base pt-24 pb-8 px-8 md:hidden shadow-2xl border-b border-warm-cream/10"
                         >
                             <nav>
                                 <ul className="space-y-1">

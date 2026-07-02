@@ -150,7 +150,7 @@ export default function ShopContent({ products, categories }: ShopContentProps) 
                                         animate={{ opacity: 1, y: 0, scale: 1 }}
                                         exit={{ opacity: 0, y: -8, scale: 0.95 }}
                                         transition={{ duration: 0.2 }}
-                                        className="absolute right-0 top-full mt-2 bg-brand-black rounded-xl shadow-xl border border-warm-cream/10 py-2 z-40 min-w-[180px]"
+                                        className="absolute right-0 top-full mt-2 bg-base rounded-xl shadow-xl border border-warm-cream/10 py-2 z-40 min-w-[180px]"
                                     >
                                         {SORT_OPTIONS.map((opt) => (
                                             <button
@@ -244,7 +244,7 @@ export default function ShopContent({ products, categories }: ShopContentProps) 
                                 animate={{ x: 0 }}
                                 exit={{ x: "-100%" }}
                                 transition={{ type: "spring", damping: 30, stiffness: 300 }}
-                                className="fixed inset-y-0 left-0 z-[70] w-full max-w-xs bg-brand-black shadow-2xl lg:hidden flex flex-col"
+                                className="fixed inset-y-0 left-0 z-[70] w-full max-w-xs bg-base shadow-2xl lg:hidden flex flex-col"
                             >
                                 <div className="flex justify-between items-center px-6 py-5 border-b border-warm-cream/15">
                                     <h2 className="font-serif text-lg text-warm-cream">Filters</h2>
