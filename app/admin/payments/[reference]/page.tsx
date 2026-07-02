@@ -81,10 +81,10 @@ export default function PaymentDetailPage() {
     }, [fetchData]);
 
     if (loading) {
-        return <div className="min-h-screen bg-brand-black flex items-center justify-center text-warm-cream/45 text-sm">Loading payment…</div>;
+        return <div className="min-h-screen bg-base flex items-center justify-center text-warm-cream/45 text-sm">Loading payment…</div>;
     }
     if (!data) {
-        return <div className="min-h-screen bg-brand-black flex items-center justify-center text-warm-cream/45 text-sm">Payment not found.</div>;
+        return <div className="min-h-screen bg-base flex items-center justify-center text-warm-cream/45 text-sm">Payment not found.</div>;
     }
 
     const { payment, events, order, subscription, customer, otherPayments } = data;
@@ -154,7 +154,7 @@ export default function PaymentDetailPage() {
     };
 
     return (
-        <main className="min-h-screen bg-brand-black text-warm-cream p-6 md:p-10">
+        <main className="min-h-screen bg-base text-warm-cream p-6 md:p-10">
             <div className="max-w-6xl mx-auto">
                 {/* ── Top bar ── */}
                 <Link href="/admin/payments" className="inline-flex items-center gap-1.5 text-xs text-warm-cream/45 hover:text-brand-green mb-6">
@@ -162,7 +162,7 @@ export default function PaymentDetailPage() {
                 </Link>
 
                 {/* ── Hero header ── */}
-                <div className="bg-gradient-to-br from-[#1e1e1e] to-[#181818] border border-warm-cream/10 rounded-2xl p-6 mb-6">
+                <div className="bg-gradient-to-br from-base to-base border border-warm-cream/10 rounded-2xl p-6 mb-6">
                     <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-2">

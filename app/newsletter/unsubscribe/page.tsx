@@ -10,8 +10,8 @@ function UnsubscribeContent() {
     const success = params.get("success") === "true";
 
     return (
-        <div className="min-h-screen bg-brand-black flex items-center justify-center px-4">
-            <div className="bg-gradient-to-br from-[#1e1e1e] to-[#252525] rounded-2xl p-10 shadow-2xl max-w-md w-full text-center border border-warm-cream/[0.06]">
+        <div className="min-h-screen bg-base flex items-center justify-center px-4">
+            <div className="bg-gradient-to-br from-base to-surface rounded-2xl p-10 shadow-2xl max-w-md w-full text-center border border-warm-cream/[0.06]">
                 <div
                     className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 ${
                         success ? "bg-brand-green/10 border border-brand-green/20" : "bg-red-500/10 border border-red-500/20"
@@ -59,7 +59,7 @@ export default function UnsubscribePage() {
     return (
         <Suspense
             fallback={
-                <div className="min-h-screen bg-brand-black flex items-center justify-center">
+                <div className="min-h-screen bg-base flex items-center justify-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-red" />
                 </div>
             }

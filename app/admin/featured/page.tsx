@@ -349,7 +349,7 @@ export default function FeaturedPage() {
                 </button>
 
                 {addMenuOpen && (
-                    <div className="absolute top-full left-0 mt-2 w-72 bg-deep-espresso rounded-xl shadow-2xl border border-warm-cream/15 overflow-hidden z-30">
+                    <div className="absolute top-full left-0 mt-2 w-72 bg-base rounded-xl shadow-2xl border border-warm-cream/15 overflow-hidden z-30">
                         <button
                             onClick={() => { setProductSearchOpen(true); setAddMenuOpen(false); }}
                             className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-brand-green/5 transition-colors cursor-pointer text-left"
@@ -437,7 +437,7 @@ export default function FeaturedPage() {
                                     <div className="w-12 h-12 rounded-lg overflow-hidden bg-brand-dark/5 flex-shrink-0">
                                         {imageUrl ? (
                                             slide.mediaType === "video" ? (
-                                                <div className="w-full h-full flex items-center justify-center bg-deep-espresso/90">
+                                                <div className="w-full h-full flex items-center justify-center bg-base/90">
                                                     <Film size={16} className="text-white/50" />
                                                 </div>
                                             ) : (
@@ -660,7 +660,7 @@ export default function FeaturedPage() {
             {/* Product Search Modal */}
             {productSearchOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-                    <div className="bg-deep-espresso rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] overflow-hidden flex flex-col border border-warm-cream/15">
+                    <div className="bg-base rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] overflow-hidden flex flex-col border border-warm-cream/15">
                         <div className="px-5 py-4 border-b border-warm-cream/10 flex items-center justify-between">
                             <h3 className="text-sm font-semibold text-warm-cream">Select Product</h3>
                             <button onClick={() => { setProductSearchOpen(false); setProductSearch(""); }} className="p-1 hover:bg-warm-cream/10 rounded-lg cursor-pointer">

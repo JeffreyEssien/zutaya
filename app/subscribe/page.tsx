@@ -176,8 +176,8 @@ export default function SubscribePage() {
 
     if (success) {
         return (
-            <div className="min-h-screen bg-brand-black flex items-center justify-center px-4">
-                <div className="relative bg-gradient-to-br from-[#1e1e1e] to-[#252525] rounded-2xl p-10 shadow-2xl max-w-lg w-full text-center border border-warm-cream/[0.06] animate-scaleIn overflow-hidden">
+            <div className="min-h-screen bg-base flex items-center justify-center px-4">
+                <div className="relative bg-gradient-to-br from-base to-surface rounded-2xl p-10 shadow-2xl max-w-lg w-full text-center border border-warm-cream/[0.06] animate-scaleIn overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-t from-brand-green/5 via-transparent to-transparent" />
                     {/* Success animation */}
                     <div className="relative w-24 h-24 mx-auto mb-6">
@@ -230,7 +230,7 @@ export default function SubscribePage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-brand-black flex items-center justify-center">
+            <div className="min-h-screen bg-base flex items-center justify-center">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-brand-red mx-auto mb-4" />
                     <p className="text-warm-cream/40 text-sm">Loading products...</p>
@@ -240,7 +240,7 @@ export default function SubscribePage() {
     }
 
     return (
-        <div className="min-h-screen bg-brand-black">
+        <div className="min-h-screen bg-base">
             <Script src="https://js.paystack.co/v2/inline.js" strategy="afterInteractive" />
             {/* Hero Header */}
             <div className="relative overflow-hidden bg-gradient-to-br from-brand-green via-brand-green/90 to-brand-black text-warm-cream">
@@ -385,7 +385,7 @@ export default function SubscribePage() {
                                                         </div>
                                                     )}
                                                     {product.images?.[0] && (
-                                                        <div className="w-full aspect-square rounded-lg bg-brand-black mb-3 overflow-hidden">
+                                                        <div className="w-full aspect-square rounded-lg bg-base mb-3 overflow-hidden">
                                                             <img
                                                                 src={product.images[0]}
                                                                 alt={product.name}
@@ -439,7 +439,7 @@ export default function SubscribePage() {
                                         </p>
                                     </div>
 
-                                    <div className="bg-gradient-to-br from-[#1e1e1e] to-[#252525] rounded-xl p-6 border border-warm-cream/[0.06] space-y-5">
+                                    <div className="bg-gradient-to-br from-base to-surface rounded-xl p-6 border border-warm-cream/[0.06] space-y-5">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
                                                 <label className="block text-xs font-semibold text-warm-cream/40 uppercase tracking-wider mb-2">
@@ -515,7 +515,7 @@ export default function SubscribePage() {
                                         </p>
                                     </div>
 
-                                    <div className="bg-gradient-to-br from-[#1e1e1e] to-[#252525] rounded-xl p-6 border border-warm-cream/[0.06] space-y-5">
+                                    <div className="bg-gradient-to-br from-base to-surface rounded-xl p-6 border border-warm-cream/[0.06] space-y-5">
                                         <div>
                                             <label className="block text-xs font-semibold text-warm-cream/40 uppercase tracking-wider mb-2">
                                                 Street Address *
@@ -560,7 +560,7 @@ export default function SubscribePage() {
                                     </div>
 
                                     {/* Payment — Paystack only */}
-                                    <div className="bg-gradient-to-br from-[#1e1e1e] to-[#252525] rounded-xl p-6 border border-brand-green/20">
+                                    <div className="bg-gradient-to-br from-base to-surface rounded-xl p-6 border border-brand-green/20">
                                         <label className="block text-xs font-semibold text-warm-cream/40 uppercase tracking-wider mb-3">
                                             Payment
                                         </label>
@@ -611,7 +611,7 @@ export default function SubscribePage() {
                                     {/* Summary Cards */}
                                     <div className="space-y-4">
                                         {/* Customer Info */}
-                                        <div className="bg-gradient-to-br from-[#1e1e1e] to-[#252525] rounded-xl p-5 border border-warm-cream/[0.06]">
+                                        <div className="bg-gradient-to-br from-base to-surface rounded-xl p-5 border border-warm-cream/[0.06]">
                                             <div className="flex items-center justify-between mb-3">
                                                 <h3 className="text-xs font-semibold text-warm-cream/40 uppercase tracking-wider">
                                                     Contact Info
@@ -630,7 +630,7 @@ export default function SubscribePage() {
                                         </div>
 
                                         {/* Delivery */}
-                                        <div className="bg-gradient-to-br from-[#1e1e1e] to-[#252525] rounded-xl p-5 border border-warm-cream/[0.06]">
+                                        <div className="bg-gradient-to-br from-base to-surface rounded-xl p-5 border border-warm-cream/[0.06]">
                                             <div className="flex items-center justify-between mb-3">
                                                 <h3 className="text-xs font-semibold text-warm-cream/40 uppercase tracking-wider">
                                                     Delivery
@@ -660,7 +660,7 @@ export default function SubscribePage() {
                                         </div>
 
                                         {/* Products */}
-                                        <div className="bg-gradient-to-br from-[#1e1e1e] to-[#252525] rounded-xl p-5 border border-warm-cream/[0.06]">
+                                        <div className="bg-gradient-to-br from-base to-surface rounded-xl p-5 border border-warm-cream/[0.06]">
                                             <div className="flex items-center justify-between mb-3">
                                                 <h3 className="text-xs font-semibold text-warm-cream/40 uppercase tracking-wider">
                                                     Products ({items.length})
@@ -723,7 +723,7 @@ export default function SubscribePage() {
 
                         {/* Right Column — Live Order Summary */}
                         <div className="lg:col-span-1">
-                            <div className="bg-gradient-to-b from-[#1e1e1e] to-[#222] rounded-2xl p-6 border border-warm-cream/[0.06] shadow-xl shadow-black/20 sticky top-20">
+                            <div className="bg-gradient-to-b from-base to-surface rounded-2xl p-6 border border-warm-cream/[0.06] shadow-xl shadow-black/20 sticky top-20">
                                 <h3 className="text-xs font-semibold text-warm-cream/40 uppercase tracking-wider mb-4">
                                     Your Recurring Box
                                 </h3>
@@ -740,7 +740,7 @@ export default function SubscribePage() {
                                         {items.map((item) => (
                                             <div key={item.productId} className="flex items-center gap-3 group">
                                                 {item.image && (
-                                                    <div className="w-10 h-10 rounded-lg overflow-hidden bg-brand-black shrink-0">
+                                                    <div className="w-10 h-10 rounded-lg overflow-hidden bg-base shrink-0">
                                                         <img
                                                             src={item.image}
                                                             alt={item.productName}
@@ -760,7 +760,7 @@ export default function SubscribePage() {
                                                     <button
                                                         type="button"
                                                         onClick={() => updateItemQuantity(item.productId, item.quantity - 1)}
-                                                        className="w-6 h-6 rounded-md bg-brand-black text-warm-cream flex items-center justify-center hover:bg-warm-tan/20 transition-colors"
+                                                        className="w-6 h-6 rounded-md bg-base text-warm-cream flex items-center justify-center hover:bg-warm-tan/20 transition-colors"
                                                     >
                                                         <Minus size={12} />
                                                     </button>
@@ -768,7 +768,7 @@ export default function SubscribePage() {
                                                     <button
                                                         type="button"
                                                         onClick={() => updateItemQuantity(item.productId, item.quantity + 1)}
-                                                        className="w-6 h-6 rounded-md bg-brand-black text-warm-cream flex items-center justify-center hover:bg-warm-tan/20 transition-colors"
+                                                        className="w-6 h-6 rounded-md bg-base text-warm-cream flex items-center justify-center hover:bg-warm-tan/20 transition-colors"
                                                     >
                                                         <Plus size={12} />
                                                     </button>

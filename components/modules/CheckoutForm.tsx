@@ -615,7 +615,7 @@ function DeliveryResultCard({ icon, title, fee, originalFee, discount, children 
     children: React.ReactNode;
 }) {
     return (
-        <div className="rounded-xl bg-gradient-to-br from-[#1e1e1e] to-[#252525] border border-warm-cream/10 p-5 space-y-4 shadow-sm">
+        <div className="rounded-xl bg-gradient-to-br from-base to-surface border border-warm-cream/10 p-5 space-y-4 shadow-sm">
             <div className="flex items-center justify-between flex-wrap gap-2">
                 <div className="flex items-center gap-2 text-warm-cream/70">
                     <span className="text-brand-green">{icon}</span>

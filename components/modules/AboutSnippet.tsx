@@ -88,7 +88,7 @@ export default function AboutSnippet({ customTexts }: { customTexts?: Record<str
     return (
         <section id="about" ref={sectionRef} className="relative overflow-hidden">
             {/* ── Story Section ── */}
-            <div className="py-24 md:py-32 px-6 bg-brand-black relative">
+            <div className="py-24 md:py-32 px-6 bg-base relative">
                 <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-green/20 to-transparent" />
 
                 <div className="max-w-6xl mx-auto">
@@ -185,7 +185,7 @@ export default function AboutSnippet({ customTexts }: { customTexts?: Record<str
             </div>
 
             {/* ── Features Strip ── */}
-            <div className="bg-brand-black py-20 md:py-24 px-6 border-t border-warm-cream/5">
+            <div className="bg-base py-20 md:py-24 px-6 border-t border-warm-cream/5">
                 <div className="max-w-6xl mx-auto">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -220,7 +220,7 @@ export default function AboutSnippet({ customTexts }: { customTexts?: Record<str
             </div>
 
             {/* ── Contact / CTA Strip ── */}
-            <div className="bg-brand-black py-16 md:py-20 px-6 border-t border-warm-cream/5">
+            <div className="bg-base py-16 md:py-20 px-6 border-t border-warm-cream/5">
                 <div className="max-w-6xl mx-auto">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {/* Contact info */}

@@ -84,7 +84,7 @@ export default function AdminPaymentsPage() {
     const hasPrev = offset > 0;
 
     return (
-        <main className="min-h-screen bg-brand-black text-warm-cream p-6 md:p-10">
+        <main className="min-h-screen bg-base text-warm-cream p-6 md:p-10">
             <div className="max-w-7xl mx-auto">
                 <div className="mb-8">
                     <h1 className="font-serif text-3xl md:text-4xl text-warm-cream mb-1">Payments</h1>

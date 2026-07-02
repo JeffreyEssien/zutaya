@@ -111,8 +111,7 @@ export default function Hero({ customTexts, settings, heroMedia = [], featuredSl
   return (
     <section
       ref={sectionRef}
-      data-theme="dark"
-      className="relative min-h-dvh overflow-hidden bg-brand-black"
+      className="relative min-h-dvh overflow-hidden bg-base"
     >
       <div
         className="absolute inset-0 opacity-[0.02] pointer-events-none"
@@ -395,7 +394,7 @@ export default function Hero({ customTexts, settings, heroMedia = [], featuredSl
             <div className="hidden lg:block absolute bottom-8 left-8 w-20 h-20 border-l-2 border-b-2 border-white/10 rounded-bl-xl z-10" />
             <div className="hidden lg:block absolute top-8 right-8 w-20 h-20 border-r-2 border-t-2 border-white/10 rounded-tr-xl z-10" />
 
-            <div className="hidden lg:flex absolute bottom-8 right-8 items-center gap-2 bg-deep-espresso/60 backdrop-blur-md rounded-full px-4 py-2 border border-white/10 z-10">
+            <div className="hidden lg:flex absolute bottom-8 right-8 items-center gap-2 bg-base/60 backdrop-blur-md rounded-full px-4 py-2 border border-white/10 z-10">
               <span className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse" />
               <span className="text-[10px] uppercase tracking-[0.25em] text-white/70 font-medium">
                 Lagos, Nigeria

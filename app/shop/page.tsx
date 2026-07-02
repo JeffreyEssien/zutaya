@@ -35,7 +35,7 @@ export default async function ShopPage() {
     return (
         <SettingsProvider settings={settings}>
             <Header />
-            <main className="min-h-screen bg-brand-black">
+            <main className="min-h-screen bg-base">
                 {/* Shop hero */}
                 <div className="relative overflow-hidden bg-gradient-to-br from-brand-green via-brand-green/90 to-brand-black text-warm-cream">
                     <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgba(253,246,236,0.5) 0.5px, transparent 0)", backgroundSize: "24px 24px" }} />

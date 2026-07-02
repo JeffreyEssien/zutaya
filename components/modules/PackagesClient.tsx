@@ -38,7 +38,7 @@ export default function PackagesClient({ packages, customTexts }: Props) {
     };
 
     return (
-        <div className="min-h-screen bg-brand-dark">
+        <div className="min-h-screen bg-base">
             {/* Hero */}
             <div className="relative overflow-hidden border-b border-warm-cream/10">
                 <div className="absolute inset-0 bg-gradient-to-br from-brand-green/10 via-transparent to-brand-red/5" />

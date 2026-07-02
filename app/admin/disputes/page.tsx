@@ -59,7 +59,7 @@ export default function AdminDisputesPage() {
     const openCount = disputes.filter((d) => d.status !== "resolved" && d.status !== "declined").length;
 
     return (
-        <main className="min-h-screen bg-brand-black text-warm-cream p-6 md:p-10">
+        <main className="min-h-screen bg-base text-warm-cream p-6 md:p-10">
             <div className="max-w-6xl mx-auto">
                 <div className="flex items-start justify-between mb-8 gap-4 flex-wrap">
                     <div>

@@ -208,7 +208,7 @@ function TotalsSection({ subtotal, shipping, total, discountTotal, couponCode, d
 
 function ReceiptFooter() {
     return (
-        <div className="bg-brand-black/[0.04] px-8 py-5 text-center border-t border-warm-cream/10">
+        <div className="bg-base/[0.04] px-8 py-5 text-center border-t border-warm-cream/10">
             <p className="text-xs text-warm-cream/35">
                 A confirmation email has been sent to your inbox. Thank you for shopping with {SITE_NAME}.
             </p>

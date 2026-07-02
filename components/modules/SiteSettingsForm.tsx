@@ -587,7 +587,7 @@ export default function SiteSettingsForm() {
             `}</style>
 
             {/* Fixed save bar — positioned within main content area */}
-            <div className="fixed bottom-0 right-0 left-0 lg:left-60 z-40 px-4 sm:px-6 lg:px-10 py-3.5 bg-gradient-to-r from-[#161616] via-[#1a1a1a] to-[#161616] border-t border-warm-cream/10 shadow-[0_-4px_20px_rgba(0,0,0,0.4)] flex items-center justify-between">
+            <div className="fixed bottom-0 right-0 left-0 lg:left-60 z-40 px-4 sm:px-6 lg:px-10 py-3.5 bg-gradient-to-r from-base via-base to-base border-t border-warm-cream/10 shadow-[0_-4px_20px_rgba(0,0,0,0.4)] flex items-center justify-between">
                 <p className="text-xs text-warm-cream/40 hidden sm:flex items-center gap-1.5">
                     <span className="inline-block w-1.5 h-1.5 rounded-full bg-brand-green/50" />
                     Changes are saved across all tabs at once

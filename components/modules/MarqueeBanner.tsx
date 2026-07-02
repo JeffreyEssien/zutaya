@@ -6,7 +6,7 @@ interface MarqueeBannerProps {
 }
 
 export default function MarqueeBanner({ text = "FRESH MEAT", variant = "green" }: MarqueeBannerProps) {
-    const bg = variant === "red" ? "bg-brand-red" : variant === "green" ? "bg-brand-green" : "bg-deep-espresso";
+    const bg = variant === "red" ? "bg-brand-red" : variant === "green" ? "bg-brand-green" : "bg-base";
     const textColor = "text-warm-cream";
 
     return (
