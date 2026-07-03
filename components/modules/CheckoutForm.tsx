@@ -530,7 +530,7 @@ export default function CheckoutForm({
                 >
                     <span className="flex items-center justify-center gap-2">
                         <CreditCard size={16} />
-                        Pay ₦{(baseTotal + processingFee).toLocaleString()} Securely
+                        Click Here to Pay ₦{(baseTotal + processingFee).toLocaleString()}
                     </span>
                 </Button>
             </form>

@@ -58,7 +58,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             <div className="group relative rounded-2xl bg-base border border-warm-cream/[0.06] hover:border-brand-green/20 transition-all duration-500 hover:shadow-[0_8px_40px_rgba(53,94,59,0.12)] overflow-hidden">
                 <Link href={`/product/${product.slug}`} className="block">
                     {/* Image */}
-                    <div className="relative aspect-[3/4] overflow-hidden bg-surface">
+                    <div className="relative aspect-square overflow-hidden bg-surface">
                         {product.images?.[0] ? (
                             <SafeImage
                                 src={product.images[0]}
@@ -149,8 +149,8 @@ export default function ProductCard({ product }: ProductCardProps) {
 
                     {/* Info */}
                     <div className="p-4 pt-3 space-y-1.5">
-                        <div className="flex items-center gap-2">
-                            <p className="text-[10px] text-warm-cream/35 uppercase tracking-[0.15em] font-medium">
+                        <div className="flex items-center justify-between gap-2">
+                            <p className="min-w-0 truncate text-[10px] text-warm-cream/35 uppercase tracking-[0.15em] font-medium">
                                 {product.category}
                             </p>
                             {product.storageType && <StorageBadge type={product.storageType} />}

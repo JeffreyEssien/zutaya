@@ -48,13 +48,17 @@ export default async function ShopPage() {
                             <span className="text-warm-cream/70">Shop</span>
                         </div>
                         <h1 className="font-serif text-4xl md:text-5xl font-bold tracking-tight">{getText(ct, "shop.heading")}</h1>
-                        <p className="text-warm-cream/50 mt-3 text-sm md:text-base max-w-lg">{getText(ct, "shop.desc")}</p>
+                        <p className="text-warm-cream/75 mt-3 text-sm md:text-base max-w-lg">{getText(ct, "shop.desc")}</p>
                     </div>
                 </div>
 
-                <div className="max-w-7xl mx-auto px-6 pt-8 pb-16">
-                    {/* SEO intro — keyword context for the product listing */}
-                    <p className="text-warm-cream/45 text-sm leading-relaxed max-w-3xl mb-8">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-16">
+                    <Suspense>
+                        <ShopContent products={products} categories={categories} />
+                    </Suspense>
+
+                    {/* SEO intro — keyword context for the product listing (below the fold so the page leads with product) */}
+                    <p className="text-warm-cream/40 text-sm leading-relaxed max-w-3xl mt-16 pt-10 border-t border-warm-cream/10">
                         Order premium meat online in Lagos and get it delivered to your door the same day.
                         ZúTa Ya stocks fresh, chilled and frozen cuts — beef, chicken, goat, turkey, offal and
                         assorted meat like shaki, ponmo and cow leg — all cold-chain packed and hygienically
@@ -62,9 +66,6 @@ export default async function ShopPage() {
                         owambe, shop well-trimmed cuts at honest prices, with same-day delivery across Yaba,
                         Igbobi, Lekki, Victoria Island and mainland Lagos.
                     </p>
-                    <Suspense>
-                        <ShopContent products={products} categories={categories} />
-                    </Suspense>
                 </div>
             </main>
             <Footer />
