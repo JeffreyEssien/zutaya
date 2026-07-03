@@ -316,7 +316,7 @@ export default function ShopContent({ products, categories }: ShopContentProps) 
                                 transition={{ duration: 0.3 }}
                                 className={
                                     layout === "grid"
-                                        ? "grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
+                                        ? "grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5"
                                         : "space-y-4"
                                 }
                             >
