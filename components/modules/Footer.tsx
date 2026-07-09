@@ -204,11 +204,15 @@ export default function Footer({ customTexts }: { customTexts?: Record<string, s
                         <span className="hidden md:inline">ALL RIGHTS RESERVED.</span>
                     </p>
                     <div className="flex gap-8 text-[10px] text-warm-cream/40 tracking-[0.2em] font-light uppercase order-1 md:order-2">
-                        {["Privacy Policy", "Terms of Service"].map((item) => (
-                            <span key={item} className="hover:text-brand-green transition-colors cursor-pointer relative overflow-hidden inline-flex group">
-                                <span className="inline-block transition-transform duration-[400ms] group-hover:-translate-y-full">{item}</span>
-                                <span className="absolute top-0 left-0 inline-block translate-y-full transition-transform duration-[400ms] group-hover:translate-y-0 text-brand-green">{item}</span>
-                            </span>
+                        {[
+                            { label: "Return Policy", href: "/return-policy" },
+                            { label: "Privacy Policy", href: "/privacy-policy" },
+                            { label: "Terms of Service", href: "/terms-of-service" },
+                        ].map((item) => (
+                            <Link key={item.href} href={item.href} className="hover:text-brand-green transition-colors cursor-pointer relative overflow-hidden inline-flex group">
+                                <span className="inline-block transition-transform duration-[400ms] group-hover:-translate-y-full">{item.label}</span>
+                                <span className="absolute top-0 left-0 inline-block translate-y-full transition-transform duration-[400ms] group-hover:translate-y-0 text-brand-green">{item.label}</span>
+                            </Link>
                         ))}
                     </div>
                 </div>

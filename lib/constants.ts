@@ -21,6 +21,16 @@ export const BUSINESS_PHONE = "07042038491";
 export const BUSINESS_HOURS = "8am – 6pm, Monday – Saturday";
 export const INSTAGRAM_HANDLE = "@zuutaya";
 
+// Physical business address (used for local SEO / structured data + footer).
+export const BUSINESS_ADDRESS = {
+    street: "68 Community Road, Akoka",
+    locality: "Yaba",
+    region: "Lagos",
+    country: "NG",
+    /** One-line human-readable form. */
+    full: "68 Community Road, Akoka, Yaba, Lagos",
+} as const;
+
 export const NAV_LINKS = [
     { label: "Home", href: "/" },
     { label: "Shop", href: "/shop" },

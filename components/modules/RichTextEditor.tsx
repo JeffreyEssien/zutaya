@@ -54,6 +54,12 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
                     title="Heading 2"
                 />
                 <ToolbarButton
+                    onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+                    isActive={editor.isActive("heading", { level: 3 })}
+                    label="H3"
+                    title="Heading 3"
+                />
+                <ToolbarButton
                     onClick={() => editor.chain().focus().toggleBulletList().run()}
                     isActive={editor.isActive("bulletList")}
                     label="• List"
@@ -64,6 +70,33 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
                     isActive={editor.isActive("orderedList")}
                     label="1. List"
                     title="Ordered List"
+                />
+                <div className="w-px h-4 bg-warm-cream/20 mx-1" />
+                <ToolbarButton
+                    onClick={() => {
+                        const prev = editor.getAttributes("link").href as string | undefined;
+                        const url = window.prompt("Link URL (leave blank to remove)", prev ?? "");
+                        if (url === null) return; // cancelled
+                        if (url === "") {
+                            editor.chain().focus().extendMarkRange("link").unsetLink().run();
+                            return;
+                        }
+                        editor
+                            .chain()
+                            .focus()
+                            .extendMarkRange("link")
+                            .setLink({ href: url })
+                            .run();
+                    }}
+                    isActive={editor.isActive("link")}
+                    label="Link"
+                    title="Add / edit link"
+                />
+                <ToolbarButton
+                    onClick={() => editor.chain().focus().unsetLink().run()}
+                    isActive={false}
+                    label="Unlink"
+                    title="Remove link"
                 />
             </div>
             <EditorContent editor={editor} />

@@ -1,40 +1,20 @@
 "use client";
 
-import { useEditor, EditorContent } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
-import LinkExtension from "@tiptap/extension-link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { getPageById, updatePage } from "@/lib/queries";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Page } from "@/types";
-
-import { use } from "react";
+import RichTextEditor from "@/components/modules/RichTextEditor";
 
 export default function EditPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const router = useRouter();
     const [title, setTitle] = useState("");
     const [slug, setSlug] = useState("");
+    const [content, setContent] = useState("");
     const [isPublished, setIsPublished] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
-
-    const editor = useEditor({
-        extensions: [
-            StarterKit,
-            LinkExtension.configure({
-                openOnClick: false,
-            }),
-        ],
-        content: "", // Initial load handled in useEffect
-        immediatelyRender: false,
-        editorProps: {
-            attributes: {
-                class: "prose prose-sm sm:prose lg:prose-lg xl:prose-xl focus:outline-none min-h-[300px] p-4 border rounded-md border-warm-cream/10",
-            },
-        },
-    });
 
     useEffect(() => {
         const loadPage = async () => {
@@ -43,9 +23,7 @@ export default function EditPage({ params }: { params: Promise<{ id: string }> }
                 setTitle(page.title);
                 setSlug(page.slug);
                 setIsPublished(page.isPublished);
-                if (editor) {
-                    editor.commands.setContent(page.content);
-                }
+                setContent(typeof page.content === "string" ? page.content : "");
             } else {
                 toast.error("Page not found");
                 router.push("/admin/pages");
@@ -53,7 +31,7 @@ export default function EditPage({ params }: { params: Promise<{ id: string }> }
             setIsLoading(false);
         };
         loadPage();
-    }, [id, editor, router]);
+    }, [id, router]);
 
     const handleSave = async () => {
         if (!title || !slug) {
@@ -63,12 +41,7 @@ export default function EditPage({ params }: { params: Promise<{ id: string }> }
 
         setIsSaving(true);
         try {
-            await updatePage(id, {
-                title,
-                slug,
-                content: editor?.getHTML(),
-                isPublished,
-            });
+            await updatePage(id, { title, slug, content, isPublished });
             toast.success("Page updated successfully!");
         } catch (error) {
             console.error(error);
@@ -78,7 +51,7 @@ export default function EditPage({ params }: { params: Promise<{ id: string }> }
         }
     };
 
-    if (isLoading) return <div>Loading...</div>;
+    if (isLoading) return <div className="text-warm-cream/60">Loading…</div>;
 
     return (
         <div className="max-w-4xl mx-auto space-y-8 pb-20">
@@ -91,7 +64,7 @@ export default function EditPage({ params }: { params: Promise<{ id: string }> }
                         type="text"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
-                        className="w-full border border-warm-cream/15 rounded-md p-2"
+                        className="w-full border border-warm-cream/15 rounded-md p-2 bg-raised text-warm-cream"
                     />
                 </div>
                 <div>
@@ -100,36 +73,14 @@ export default function EditPage({ params }: { params: Promise<{ id: string }> }
                         type="text"
                         value={slug}
                         onChange={(e) => setSlug(e.target.value)}
-                        className="w-full border border-warm-cream/15 rounded-md p-2"
+                        className="w-full border border-warm-cream/15 rounded-md p-2 bg-raised text-warm-cream"
                     />
                 </div>
             </div>
 
             <div>
                 <label className="block text-sm font-medium text-warm-cream/60 mb-1">Content</label>
-                <div className="bg-raised rounded-md">
-                    <div className="border-b border-warm-cream/10 p-2 flex gap-2">
-                        <button
-                            onClick={() => editor?.chain().focus().toggleBold().run()}
-                            className={`px-2 py-1 rounded ${editor?.isActive('bold') ? 'bg-gray-200' : ''}`}
-                        >
-                            Bold
-                        </button>
-                        <button
-                            onClick={() => editor?.chain().focus().toggleItalic().run()}
-                            className={`px-2 py-1 rounded ${editor?.isActive('italic') ? 'bg-gray-200' : ''}`}
-                        >
-                            Italic
-                        </button>
-                        <button
-                            onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
-                            className={`px-2 py-1 rounded ${editor?.isActive('heading', { level: 2 }) ? 'bg-gray-200' : ''}`}
-                        >
-                            H2
-                        </button>
-                    </div>
-                    <EditorContent editor={editor} />
-                </div>
+                <RichTextEditor value={content} onChange={setContent} />
             </div>
 
             <div className="flex items-center gap-4">
@@ -146,17 +97,19 @@ export default function EditPage({ params }: { params: Promise<{ id: string }> }
 
             <div className="flex justify-end gap-4">
                 <button
+                    type="button"
                     onClick={() => router.back()}
                     className="px-4 py-2 border border-warm-cream/15 rounded-md text-warm-cream/60 hover:bg-warm-cream/[0.03] bg-base"
                 >
                     Cancel
                 </button>
                 <button
+                    type="button"
                     onClick={handleSave}
                     disabled={isSaving}
                     className="px-6 py-2 bg-brand-dark text-white rounded-md hover:bg-gray-800 disabled:opacity-50"
                 >
-                    {isSaving ? "Saving..." : "Save Changes"}
+                    {isSaving ? "Saving…" : "Save Changes"}
                 </button>
             </div>
         </div>

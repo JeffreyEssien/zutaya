@@ -10,13 +10,13 @@ import {
 describe("lookupLagosZone", () => {
   it("resolves a known area to its zone and fee", () => {
     const zone = lookupLagosZone("Lekki Phase 1");
-    expect(zone?.key).toBe("island_core");
-    expect(zone?.fee).toBe(3500);
+    expect(zone?.key).toBe("lagos_island");
+    expect(zone?.fee).toBe(5000);
   });
 
   it("is case-insensitive", () => {
-    expect(lookupLagosZone("lekki phase 1")?.key).toBe("island_core");
-    expect(lookupLagosZone("IKEJA")?.key).toBe("mainland_core");
+    expect(lookupLagosZone("lekki phase 1")?.key).toBe("lagos_island");
+    expect(lookupLagosZone("IKEJA")?.key).toBe("lagos_mainland");
   });
 
   it("returns null for an area in no zone", () => {
@@ -31,9 +31,9 @@ describe("fuzzyMatchLagosArea", () => {
   });
 
   it("prefers an exact match and echoes the canonical area name", () => {
-    const m = fuzzyMatchLagosArea("ikoyi");
-    expect(m?.area).toBe("Ikoyi");
-    expect(m?.zone.key).toBe("island_core");
+    const m = fuzzyMatchLagosArea("eti-osa");
+    expect(m?.area).toBe("Eti-Osa");
+    expect(m?.zone.key).toBe("lagos_island");
   });
 
   it("falls back to a starts-with match before a contains match", () => {
