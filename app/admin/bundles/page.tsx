@@ -184,7 +184,7 @@ export default function AdminPackagesPage() {
         <div className="p-6 max-w-5xl mx-auto">
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-2xl font-bold text-brand-black flex items-center gap-2">
+                    <h1 className="text-2xl font-bold text-warm-cream flex items-center gap-2">
                         <Package size={22} className="text-brand-green" /> Zútaya Packages
                     </h1>
                     <p className="text-sm text-warm-cream/40 mt-1">Curated meat boxes sold at a flat price. Buying one deducts stock from each linked product.</p>
@@ -198,7 +198,7 @@ export default function AdminPackagesPage() {
 
             {showForm && (
                 <form onSubmit={handleSubmit} className="bg-raised rounded-xl p-6 shadow-sm border border-warm-tan/20 mb-8 space-y-5">
-                    <h2 className="font-semibold text-brand-black text-lg">{editing ? "Edit Package" : "New Package"}</h2>
+                    <h2 className="font-semibold text-warm-cream text-lg">{editing ? "Edit Package" : "New Package"}</h2>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
@@ -316,7 +316,7 @@ export default function AdminPackagesPage() {
                         <div className="flex-1 p-3 min-w-0">
                             <div className="flex items-start justify-between gap-2">
                                 <div className="min-w-0">
-                                    <p className="font-semibold text-brand-black truncate">{pkg.name}</p>
+                                    <p className="font-semibold text-warm-cream truncate">{pkg.name}</p>
                                     <p className="text-brand-red font-bold text-sm">{formatCurrency(pkg.price)}</p>
                                 </div>
                                 <button onClick={() => toggleActive(pkg)} className={`px-2 py-0.5 rounded text-[10px] font-semibold shrink-0 ${pkg.isActive ? "bg-brand-green/10 text-brand-green" : "bg-warm-cream/10 text-warm-cream/40"}`}>

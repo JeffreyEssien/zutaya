@@ -139,7 +139,7 @@ export default function AdminNewsletterPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
                 <div>
-                    <h1 className="text-2xl font-bold text-brand-black">Newsletter</h1>
+                    <h1 className="text-2xl font-bold text-warm-cream">Newsletter</h1>
                     <p className="text-sm text-warm-cream/40 mt-1">Manage subscribers and email campaigns</p>
                 </div>
                 <div className="flex items-center gap-3">
@@ -200,8 +200,8 @@ export default function AdminNewsletterPage() {
                         onClick={() => setTab(t)}
                         className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
                             tab === t
-                                ? "bg-raised text-brand-black shadow-sm"
-                                : "text-warm-cream/40 hover:text-brand-black"
+                                ? "bg-raised text-warm-cream shadow-sm"
+                                : "text-warm-cream/40 hover:text-warm-cream"
                         }`}
                     >
                         {t === "campaigns" ? "Campaigns" : `Subscribers (${activeSubscribers.length})`}
@@ -232,7 +232,7 @@ export default function AdminNewsletterPage() {
                                 <div className="flex items-start justify-between gap-4">
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-3 mb-2">
-                                            <h3 className="font-semibold text-brand-black truncate">
+                                            <h3 className="font-semibold text-warm-cream truncate">
                                                 {c.subject}
                                             </h3>
                                             <span
@@ -310,7 +310,7 @@ export default function AdminNewsletterPage() {
                                 {previewCampaign?.id === c.id && (
                                     <div className="mt-4 pt-4 border-t border-warm-tan/10">
                                         <div
-                                            className="prose prose-sm max-w-none text-brand-black/80"
+                                            className="prose prose-sm max-w-none bg-white text-brand-black rounded-lg p-4"
                                             dangerouslySetInnerHTML={{ __html: c.content }}
                                         />
                                     </div>
@@ -354,7 +354,7 @@ export default function AdminNewsletterPage() {
                             <tbody>
                                 {filteredSubscribers.map((sub) => (
                                     <tr key={sub.id} className="border-t border-warm-tan/10 hover:bg-warm-cream/30 transition-colors">
-                                        <td className="px-4 py-3 text-brand-black font-medium">{sub.email}</td>
+                                        <td className="px-4 py-3 text-warm-cream font-medium">{sub.email}</td>
                                         <td className="px-4 py-3 text-warm-cream/40 hidden sm:table-cell">{sub.firstName || "—"}</td>
                                         <td className="px-4 py-3 hidden md:table-cell">
                                             <span className="px-2 py-0.5 rounded text-xs bg-warm-cream text-warm-cream/40">
@@ -409,7 +409,7 @@ export default function AdminNewsletterPage() {
                     <div className="bg-raised rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                         {/* Editor Header */}
                         <div className="flex items-center justify-between px-6 py-4 border-b border-warm-tan/10">
-                            <h2 className="text-lg font-bold text-brand-black">
+                            <h2 className="text-lg font-bold text-warm-cream">
                                 {editingCampaign ? "Edit Campaign" : "New Campaign"}
                             </h2>
                             <button
@@ -423,7 +423,7 @@ export default function AdminNewsletterPage() {
                         {/* Editor Body */}
                         <div className="p-6 space-y-5">
                             <div>
-                                <label className="block text-sm font-medium text-brand-black mb-1.5">
+                                <label className="block text-sm font-medium text-warm-cream mb-1.5">
                                     Subject Line
                                 </label>
                                 <input
@@ -436,7 +436,7 @@ export default function AdminNewsletterPage() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-brand-black mb-1.5">
+                                <label className="block text-sm font-medium text-warm-cream mb-1.5">
                                     Content (HTML supported)
                                 </label>
                                 <textarea
@@ -454,12 +454,12 @@ export default function AdminNewsletterPage() {
                             {/* Preview */}
                             {content && (
                                 <div>
-                                    <label className="block text-sm font-medium text-brand-black mb-1.5">
+                                    <label className="block text-sm font-medium text-warm-cream mb-1.5">
                                         Preview
                                     </label>
-                                    <div className="border border-warm-tan/20 rounded-lg p-4 bg-warm-cream/30">
+                                    <div className="border border-warm-tan/20 rounded-lg p-4 bg-white">
                                         <div
-                                            className="prose prose-sm max-w-none text-brand-black/80"
+                                            className="prose prose-sm max-w-none text-brand-black"
                                             dangerouslySetInnerHTML={{ __html: content }}
                                         />
                                     </div>
@@ -511,7 +511,7 @@ function StatCard({
             <div className="flex items-center justify-between mb-3">
                 <span className={`p-2 rounded-lg ${bg} ${color}`}>{icon}</span>
             </div>
-            <p className="text-2xl font-bold text-brand-black">{value.toLocaleString()}</p>
+            <p className="text-2xl font-bold text-warm-cream">{value.toLocaleString()}</p>
             <p className="text-xs text-warm-cream/40 mt-0.5">{label}</p>
         </div>
     );
