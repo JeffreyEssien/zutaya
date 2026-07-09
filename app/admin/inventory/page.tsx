@@ -1,13 +1,15 @@
-import { getInventoryItems, getInventoryLogs } from "@/lib/queries";
+import { getInventoryItems, getInventoryLogs, getOrders, getProducts } from "@/lib/queries";
 import InventoryContent from "@/components/modules/InventoryContent";
 
 export const dynamic = "force-dynamic";
 
 export default async function InventoryPage() {
-    const [inventory, logs] = await Promise.all([
+    const [inventory, logs, products, orders] = await Promise.all([
         getInventoryItems(),
-        getInventoryLogs()
+        getInventoryLogs(),
+        getProducts().catch(() => []),
+        getOrders().catch(() => [])
     ]);
 
-    return <InventoryContent inventory={inventory} logs={logs} />;
+    return <InventoryContent inventory={inventory} logs={logs} products={products} orders={orders} />;
 }

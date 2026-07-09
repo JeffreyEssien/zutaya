@@ -5,11 +5,7 @@
 
 // ─── Lagos Zone Types ────────────────────────────────────────────
 
-export type LagosZone =
-    | "island_core"
-    | "island_extension"
-    | "mainland_core"
-    | "mainland_extension";
+export type LagosZone = "lagos_mainland" | "lagos_island";
 
 export interface LagosZoneInfo {
     key: LagosZone;
@@ -20,48 +16,30 @@ export interface LagosZoneInfo {
 
 // ─── Lagos Zones ─────────────────────────────────────────────────
 
+// NOTE: This is a client-side FALLBACK used only when the DB fetch
+// (/api/admin/delivery) fails. The DB is the source of truth and carries
+// per-area doorstep_fee overrides (see migration 031_reset_delivery_locations.sql
+// + areaFees in fetchDeliveryPricingFromDB). The `fee` here is a single
+// zone-level default (matches each zone's base_fee); per-area fees only
+// apply on the DB path.
 export const LAGOS_ZONES: LagosZoneInfo[] = [
     {
-        key: "island_core",
-        label: "Island Core",
-        fee: 3500,
-        areas: [
-            "Ikate", "Lekki Phase 1", "Chevron", "Osapa London", "Ikoyi",
-            "Victoria Island (VI)", "Oniru", "Banana Island", "Salem",
-            "Jakande", "Agungi", "Ajah", "Ikota",
-        ],
-    },
-    {
-        key: "island_extension",
-        label: "Island Extension",
+        key: "lagos_mainland",
+        label: "Lagos Mainland",
         fee: 5000,
         areas: [
-            "Sangotedo", "Awoyaya", "Marina", "CMS", "Apapa", "Ijora",
-            "Mile 2", "Festac", "Satellite Town", "Trade Fair",
-            "LASU (Ojo)", "Iyana Iba",
+            "Lagos Mainland", "Surulere", "Shomolu", "Ilupeju", "Anthony",
+            "Kosofe", "Mushin", "Ikeja", "Apapa", "Amuwo-Odofin", "Ojo",
+            "Oshodi-Isolo", "Agege", "Ajeromi-Ifelodun", "Alimosho",
+            "Ifako-Ijaye", "Ikorodu", "Badagry",
         ],
     },
     {
-        key: "mainland_core",
-        label: "Mainland Core",
+        key: "lagos_island",
+        label: "Lagos Island",
         fee: 5000,
         areas: [
-            "Surulere", "Ojuelegba", "Mushin", "Isolo", "Oshodi",
-            "Anthony", "Maryland", "Palmgrove", "Shomolu", "Bariga",
-            "Gbagada", "Oworoshoki", "Yaba", "Ebute Metta", "Oyingbo",
-            "Fadeyi", "Jibowu", "Ikeja", "Ogba", "Ojota", "Ketu",
-            "Ogudu", "Magodo", "Iju Ishaga", "LUTH (Idi-Araba)",
-        ],
-    },
-    {
-        key: "mainland_extension",
-        label: "Mainland Extension",
-        fee: 6000,
-        areas: [
-            "Ikorodu", "Ikotun", "Egbeda", "Ipaja", "Iyana Ipaja",
-            "Ayobo", "Command", "Abule Egba", "Agege", "Dopemu", "Fagba",
-            "Isheri Olowora", "Akute", "Berger", "Lambe Alagbado",
-            "Ishashi", "Igando", "Ejigbo", "Ago Palace",
+            "Lagos Island", "Eti-Osa", "Lekki Phase 1", "Ibeju-Lekki", "Epe",
         ],
     },
 ];

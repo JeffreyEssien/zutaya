@@ -1,24 +1,102 @@
 "use client";
 
-import { useState } from "react";
-import type { InventoryLog, InventoryItem } from "@/types";
+import { useState, useRef, useEffect } from "react";
+import type { InventoryLog, InventoryItem, Product, Order } from "@/types";
 import { formatCurrency } from "@/lib/formatCurrency";
 import Button from "@/components/ui/Button";
 import { toast } from "sonner";
 import { updateInventoryItem, logInventoryChange, createInventoryItem } from "@/lib/queries";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { downloadCsv, dateStamp } from "@/lib/csv";
+import {
+    buildSnapshot,
+    buildSalesMovement,
+    buildBumpaUpload,
+    buildFullReport,
+    sectionToCsv,
+    type ExportFormat,
+} from "@/lib/inventoryExport";
 
 interface InventoryContentProps {
     logs: InventoryLog[];
     inventory: InventoryItem[];
+    products?: Product[];
+    orders?: Order[];
 }
 
-export default function InventoryContent({ logs: initialLogs, inventory: initialInventory }: InventoryContentProps) {
+export default function InventoryContent({
+    logs: initialLogs,
+    inventory: initialInventory,
+    products = [],
+    orders = [],
+}: InventoryContentProps) {
     const router = useRouter();
     const [inventoryItems, setInventoryItems] = useState(initialInventory);
     const [search, setSearch] = useState("");
     const [tab, setTab] = useState<"stock" | "history">("stock");
+    const [exportOpen, setExportOpen] = useState(false);
+    const exportRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (!exportOpen) return;
+        const onClick = (e: MouseEvent) => {
+            if (exportRef.current && !exportRef.current.contains(e.target as Node)) setExportOpen(false);
+        };
+        document.addEventListener("mousedown", onClick);
+        return () => document.removeEventListener("mousedown", onClick);
+    }, [exportOpen]);
+
+    const handleExport = (format: ExportFormat) => {
+        try {
+            let csv: string;
+            if (format === "snapshot") {
+                csv = sectionToCsv(buildSnapshot(inventoryItems, products));
+            } else if (format === "sales") {
+                csv = sectionToCsv(buildSalesMovement(products, orders, initialLogs, inventoryItems));
+            } else if (format === "bumpa") {
+                csv = sectionToCsv(buildBumpaUpload(products, inventoryItems));
+            } else {
+                csv = buildFullReport(inventoryItems, products, orders, initialLogs);
+            }
+            downloadCsv(`zutaya-inventory-${format}-${dateStamp()}.csv`, csv);
+            toast.success("Export ready — check your downloads");
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to build export");
+        }
+        setExportOpen(false);
+    };
+
+    const [catalogueBusy, setCatalogueBusy] = useState(false);
+    const handleCatalogue = async (kind: "pdf" | "png") => {
+        setExportOpen(false);
+        if (catalogueBusy) return;
+        setCatalogueBusy(true);
+        try {
+            const { buildCatalogue, catalogueItemCount } = await import("@/lib/catalogue");
+            const sections = buildCatalogue(products);
+            if (catalogueItemCount(sections) === 0) {
+                toast.error("No in-stock products to put in the catalogue");
+                return;
+            }
+            const { generateCataloguePdf, generateCataloguePngs } = await import(
+                "@/lib/catalogueExport"
+            );
+            if (kind === "pdf") {
+                await generateCataloguePdf(sections);
+                toast.success("Catalogue PDF ready — check your downloads");
+            } else {
+                const n = await generateCataloguePngs(sections);
+                toast.success(`${n} catalogue image${n === 1 ? "" : "s"} downloaded`);
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to generate catalogue");
+        } finally {
+            setCatalogueBusy(false);
+        }
+    };
 
     // Adjustment State
     const [isAdjusting, setIsAdjusting] = useState(false);
@@ -149,6 +227,68 @@ export default function InventoryContent({ logs: initialLogs, inventory: initial
                 </div>
 
                 <div className="flex gap-2 items-center">
+                    <div className="relative" ref={exportRef}>
+                        <Button onClick={() => setExportOpen(o => !o)} variant="ghost" className="mr-2">
+                            Export ▾
+                        </Button>
+                        {exportOpen && (
+                            <div className="absolute right-2 top-full mt-1 z-50 w-72 bg-surface border border-warm-cream/20 rounded-lg shadow-2xl ring-1 ring-black/40 overflow-hidden">
+                                <button
+                                    type="button"
+                                    onClick={() => handleExport("snapshot")}
+                                    className="w-full text-left px-4 py-3 hover:bg-warm-cream/10 transition-colors border-b border-warm-cream/10"
+                                >
+                                    <div className="text-sm font-medium text-warm-cream">Inventory Snapshot</div>
+                                    <div className="text-xs text-warm-cream/50">Current holdings, all fields, by category</div>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => handleExport("sales")}
+                                    className="w-full text-left px-4 py-3 hover:bg-warm-cream/10 transition-colors border-b border-warm-cream/10"
+                                >
+                                    <div className="text-sm font-medium text-warm-cream">Sales &amp; Movement</div>
+                                    <div className="text-xs text-warm-cream/50">Stock history + revenue/profit per product</div>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => handleExport("bumpa")}
+                                    className="w-full text-left px-4 py-3 hover:bg-warm-cream/10 transition-colors border-b border-warm-cream/10"
+                                >
+                                    <div className="text-sm font-medium text-warm-cream">Bumpa Product Upload</div>
+                                    <div className="text-xs text-warm-cream/50">Product Title, price, stock — ready to import</div>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => handleExport("full")}
+                                    className="w-full text-left px-4 py-3 hover:bg-warm-cream/10 transition-colors border-b border-warm-cream/10"
+                                >
+                                    <div className="text-sm font-medium text-warm-cream">Full Detailed Report</div>
+                                    <div className="text-xs text-warm-cream/50">Summary + snapshot + sales + raw log</div>
+                                </button>
+                                <div className="px-4 py-2 bg-warm-cream/[0.03] text-[10px] font-semibold uppercase tracking-[0.2em] text-warm-cream/40">
+                                    Branded Catalogue
+                                </div>
+                                <button
+                                    type="button"
+                                    disabled={catalogueBusy}
+                                    onClick={() => handleCatalogue("pdf")}
+                                    className="w-full text-left px-4 py-3 hover:bg-warm-cream/10 transition-colors border-b border-warm-cream/10 disabled:opacity-50"
+                                >
+                                    <div className="text-sm font-medium text-warm-cream">Catalogue — PDF</div>
+                                    <div className="text-xs text-warm-cream/50">Printable price list, brand-styled, by category</div>
+                                </button>
+                                <button
+                                    type="button"
+                                    disabled={catalogueBusy}
+                                    onClick={() => handleCatalogue("png")}
+                                    className="w-full text-left px-4 py-3 hover:bg-warm-cream/10 transition-colors disabled:opacity-50"
+                                >
+                                    <div className="text-sm font-medium text-warm-cream">Catalogue — Images (PNG)</div>
+                                    <div className="text-xs text-warm-cream/50">One shareable image per category</div>
+                                </button>
+                            </div>
+                        )}
+                    </div>
                     <Button onClick={() => setIsCreating(true)} variant="primary" className="mr-2">
                         + Add Item
                     </Button>

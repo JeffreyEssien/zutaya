@@ -3,6 +3,7 @@ import {
   SITE_EMAIL,
   WHATSAPP_NUMBER,
   BUSINESS_HOURS,
+  BUSINESS_ADDRESS,
   INSTAGRAM_HANDLE,
 } from "@/lib/constants";
 import type { Product, ZutayaPackage } from "@/types";
@@ -97,7 +98,8 @@ export function websiteSchema() {
 
 /**
  * LocalBusiness schema — the Lagos map-pack signal.
- * TODO: add a real streetAddress + geo (lat/lng) for full local rich results.
+ * TODO: add geo (lat/lng) for full local rich results; Google will otherwise
+ * geocode the postal address below.
  */
 export function localBusinessSchema() {
   return {
@@ -112,10 +114,10 @@ export function localBusinessSchema() {
     priceRange: "₦₦",
     address: {
       "@type": "PostalAddress",
-      // TODO: streetAddress: "<your shop street address>",
-      addressLocality: "Lagos",
-      addressRegion: "Lagos",
-      addressCountry: "NG",
+      streetAddress: BUSINESS_ADDRESS.street,
+      addressLocality: BUSINESS_ADDRESS.locality,
+      addressRegion: BUSINESS_ADDRESS.region,
+      addressCountry: BUSINESS_ADDRESS.country,
     },
     areaServed: ["Lagos", "Yaba", "Igbobi", "Lekki", "Victoria Island", "Lagos Mainland"].map(
       (name) => ({ "@type": "City", name }),
