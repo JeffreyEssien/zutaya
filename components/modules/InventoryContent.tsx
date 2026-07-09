@@ -266,13 +266,13 @@ export default function InventoryContent({
                     </div>
                 </div>
 
-                <div className="flex gap-2 items-center">
+                <div className="flex flex-wrap gap-2 items-center w-full md:w-auto">
                     <div className="relative" ref={exportRef}>
-                        <Button onClick={() => setExportOpen(o => !o)} variant="ghost" className="mr-2">
+                        <Button onClick={() => setExportOpen(o => !o)} variant="ghost">
                             Export ▾
                         </Button>
                         {exportOpen && (
-                            <div className="absolute right-2 top-full mt-1 z-50 w-72 max-h-[75vh] overflow-y-auto bg-surface border border-warm-cream/20 rounded-lg shadow-2xl ring-1 ring-black/40">
+                            <div className="absolute left-0 sm:left-auto sm:right-0 top-full mt-1 z-50 w-72 max-w-[calc(100vw-2rem)] max-h-[75vh] overflow-y-auto bg-surface border border-warm-cream/20 rounded-lg shadow-2xl ring-1 ring-black/40">
                                 <button
                                     type="button"
                                     onClick={() => handleExport("snapshot")}
@@ -324,7 +324,7 @@ export default function InventoryContent({
                                     className="w-full text-left px-4 py-3 hover:bg-warm-cream/10 transition-colors border-b border-warm-cream/10 disabled:opacity-50"
                                 >
                                     <div className="text-sm font-medium text-warm-cream">Price List — Images</div>
-                                    <div className="text-xs text-warm-cream/50">One shareable image per category (≤10 items)</div>
+                                    <div className="text-xs text-warm-cream/50">Portrait slides for status / stories</div>
                                 </button>
                                 <div className="px-4 py-2 bg-warm-cream/[0.03] text-[10px] font-semibold uppercase tracking-[0.2em] text-warm-cream/40">
                                     Photo Catalogue — with product images
@@ -369,7 +369,7 @@ export default function InventoryContent({
                             </div>
                         )}
                     </div>
-                    <Button onClick={() => setIsCreating(true)} variant="primary" className="mr-2">
+                    <Button onClick={() => setIsCreating(true)} variant="primary">
                         + Add Item
                     </Button>
                     <div className="flex gap-2 bg-warm-cream/10 p-1 rounded-md">
