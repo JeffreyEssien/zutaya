@@ -5,35 +5,37 @@
 //
 // Two variants:
 //   • "list"   — a branded text price list (name → price), fast + reliable.
-//   • "photos" — a product-photo card grid, for Instagram carousels / flyers.
-// Each variant exports as PDF (print) or PNG images (one per category, split
-// at 10 items). Design follows flyer/carousel conventions: one consistent
-// template, a masthead cover band, generous margins, a 2-col card grid, and a
-// graceful placeholder when a photo is missing or can't be loaded cross-origin.
+//   • "photos" — a product-photo card grid, for social carousels / flyers.
+// Each variant exports as PDF (print) or PNG slides (9:16 portrait, one per
+// category). The photo carousel uses an editorial template — a red cover title
+// card, then category slides with a centred grid of up to 6 cards (2×3) whose
+// typography scales with the card width — plus a graceful placeholder when a
+// photo is missing or can't be loaded cross-origin.
 // ═══════════════════════════════════════════════════════════════════
 
-import { BUSINESS_PHONE, CONTACT_EMAIL, SITE_DESCRIPTION, SITE_NAME } from "@/lib/constants";
+import { BUSINESS_PHONE, SITE_NAME } from "@/lib/constants";
 import { dateStamp } from "@/lib/csv";
 import {
     CATALOGUE_BRAND as C,
-    catalogueItemCount,
     type CatalogueImagePage,
     type CatalogueSection,
-    chunkSectionsForImages,
 } from "@/lib/catalogue";
 
 export type CatalogueVariant = "list" | "photos";
 
 const BRAND_LABEL = SITE_NAME.toUpperCase();
-const CONTACT_LINE = `${CONTACT_EMAIL}   ·   ${BUSINESS_PHONE}   ·   Lagos`;
+/** Brand slogan (from the logo) — sits under the wordmark. */
+const TAGLINE = "We run errands for your convenience";
+/** Public web address — featured on every slide/footer. */
+const SITE_WEB = "www.zutayang.com";
+const CONTACT_LINE = `${SITE_WEB}   ·   ${BUSINESS_PHONE}   ·   Lagos`;
 const SUBTITLE = "PRODUCT CATALOGUE · PRICE LIST";
 const SANS = "system-ui, -apple-system, 'Segoe UI', Arial, sans-serif";
 const SERIF = "Georgia, 'Times New Roman', serif";
-const MAX_PER_IMAGE = 10; // price-list images
-const PHOTO_W = 1920; // 16:9 landscape slide
-const PHOTO_H = 1080; // 1920×1080
-const PHOTO_COLS = 4; // single row of large cards across the wide frame
-const PHOTO_PER_SLIDE = 4;
+const PHOTO_W = 1080; // 9:16 portrait slide (full phone screen)
+const PHOTO_H = 1920; // 1080×1920
+const PHOTO_COLS = 2; // 2 cards per row suits the narrower portrait frame
+const PHOTO_PER_SLIDE = 6; // 3 rows × 2 — fits more per slide while staying large
 
 function prettyDate(): string {
     return new Date().toLocaleDateString("en-NG", { day: "numeric", month: "long", year: "numeric" });
@@ -296,9 +298,10 @@ function drawPriceRight(
 const W = 1080;
 const SCALE = 2;
 const PAD = 56;
-const HEADER_H = 156;
-const CAT_H = 72;
-const FOOTER_H = 92;
+const HEADER_H = 140; // brand wordmark zone
+const CAT_H = 110; // category title zone
+const FOOTER_H = 104;
+const INK = "44,26,14"; // espresso, for translucent ink fills
 
 function newCanvas(
     width: number,
@@ -335,50 +338,71 @@ function roundRectTop(
     ctx.closePath();
 }
 
-/** Masthead (red) + category band (green). Returns the y where body content starts. */
+/**
+ * Editorial masthead: a small letter-spaced wordmark, then the category as a
+ * large centred serif with a short brand-red accent rule beneath it. No heavy
+ * colour blocks — the warm page shows through so it reads as designed, not
+ * generated. Returns the y where body content starts.
+ */
 function drawHead(ctx: CanvasRenderingContext2D, page: CatalogueImagePage, width: number = W): number {
-    // Masthead
-    ctx.fillStyle = C.red;
-    ctx.fillRect(0, 0, width, HEADER_H);
-    ctx.fillStyle = C.cream;
-    ctx.textAlign = "left";
+    const cx = width / 2;
+    ctx.textAlign = "center";
     ctx.textBaseline = "alphabetic";
-    ctx.font = `bold 56px ${SERIF}`;
-    ctx.fillText(BRAND_LABEL, PAD, 86);
-    ctx.font = `600 20px ${SANS}`;
-    ctx.fillText(spaced(SUBTITLE), PAD, 122);
-    ctx.textAlign = "right";
-    ctx.font = `20px ${SANS}`;
-    ctx.fillText(prettyDate(), width - PAD, 86);
 
-    // Category band
-    const catY = HEADER_H;
-    ctx.fillStyle = C.green;
-    ctx.fillRect(0, catY, width, CAT_H);
-    const baseline = catY + CAT_H / 2 + 11;
-    ctx.fillStyle = C.cream;
+    // Brand wordmark + slogan
+    ctx.fillStyle = C.red;
+    ctx.font = `600 24px ${SANS}`;
+    ctx.fillText(spaced(BRAND_LABEL), cx, 58);
+    ctx.fillStyle = `rgba(${INK},0.55)`;
+    ctx.font = `italic 19px ${SERIF}`;
+    ctx.fillText(TAGLINE, cx, 92);
+
+    // Category title
+    const baseline = HEADER_H + 58;
+    ctx.fillStyle = C.espresso;
+    ctx.font = `bold 46px ${SERIF}`;
+    ctx.fillText(truncateToWidth(ctx, page.category, width - PAD * 2), cx, baseline);
+
+    // Short accent rule
+    ctx.strokeStyle = C.red;
+    ctx.lineWidth = 3;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(cx - 44, baseline + 22);
+    ctx.lineTo(cx + 44, baseline + 22);
+    ctx.stroke();
+    ctx.lineCap = "butt";
+
+    if (page.totalParts > 1) {
+        ctx.fillStyle = `rgba(${INK},0.5)`;
+        ctx.font = `500 16px ${SANS}`;
+        ctx.fillText(`${page.part} / ${page.totalParts}`, cx, baseline + 48);
+    }
+
     ctx.textAlign = "left";
-    ctx.font = `bold 34px ${SERIF}`;
-    const title =
-        page.totalParts > 1 ? `${page.category}  (${page.part}/${page.totalParts})` : page.category;
-    ctx.fillText(title, PAD, baseline);
-    ctx.textAlign = "right";
-    ctx.font = `20px ${SANS}`;
-    ctx.fillText(`${page.items.length} item${page.items.length === 1 ? "" : "s"}`, width - PAD, baseline);
-
-    return catY + CAT_H;
+    return HEADER_H + CAT_H;
 }
 
 function drawFooter(ctx: CanvasRenderingContext2D, height: number, width: number = W): void {
     const y = height - FOOTER_H;
-    ctx.fillStyle = C.green;
-    ctx.fillRect(0, y, width, FOOTER_H);
-    ctx.fillStyle = C.cream;
+    const cx = width / 2;
+    // Hairline rule instead of a heavy colour bar.
+    ctx.strokeStyle = `rgba(${INK},0.12)`;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(PAD, y + 8);
+    ctx.lineTo(width - PAD, y + 8);
+    ctx.stroke();
+
     ctx.textAlign = "center";
-    ctx.font = `bold 22px ${SANS}`;
-    ctx.fillText("Order now · Same-day delivery across Lagos", width / 2, y + 38);
-    ctx.font = `18px ${SANS}`;
-    ctx.fillText(CONTACT_LINE, width / 2, y + 68);
+    ctx.textBaseline = "alphabetic";
+    ctx.fillStyle = C.red;
+    ctx.font = `600 27px ${SANS}`;
+    ctx.fillText(SITE_WEB, cx, y + 54);
+    ctx.fillStyle = `rgba(${INK},0.6)`;
+    ctx.font = `500 18px ${SANS}`;
+    ctx.fillText("Order online · Same-day delivery across Lagos", cx, y + 84);
+    ctx.textAlign = "left";
 }
 
 function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
@@ -387,41 +411,76 @@ function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
     });
 }
 
-// ─── PNG: list variant ───────────────────────────────────────────
+// ─── PNG: list variant (portrait price sheet, 1080×1920) ─────────
 
-const LIST_ROW_H = 64;
+const LIST_ROW_H = 88;
+const LIST_MAX_ROWS = 14; // rows per portrait slide
 
 function renderListImage(page: CatalogueImagePage): Promise<Blob> {
-    const bodyTop = HEADER_H + CAT_H + 10;
-    const height = bodyTop + page.items.length * LIST_ROW_H + 22 + FOOTER_H;
-    const { canvas, ctx } = newCanvas(W, height);
-    drawHead(ctx, page);
+    const { canvas, ctx } = newCanvas(PHOTO_W, PHOTO_H, C.cream);
+    const bodyTop = drawHead(ctx, page, PHOTO_W) + 24;
+    const bodyBottom = PHOTO_H - FOOTER_H;
 
-    const priceStyle: PriceStyle = { size: 30, color: C.red, unitColor: C.red };
+    // Vertically centre the rows so a short list doesn't float at the top.
+    const blockH = page.items.length * LIST_ROW_H;
+    const top = bodyTop + Math.max(0, (bodyBottom - bodyTop - blockH) / 2);
+
+    const left = PAD;
+    const right = PHOTO_W - PAD;
+    const priceStyle: PriceStyle = { size: 36, color: C.red, unitColor: "rgba(181,51,46,0.6)" };
+    ctx.textBaseline = "alphabetic";
+
     page.items.forEach((item, idx) => {
-        const y = bodyTop + idx * LIST_ROW_H;
+        const y = top + idx * LIST_ROW_H;
         if (idx % 2 === 1) {
             ctx.fillStyle = C.creamAlt;
-            ctx.fillRect(PAD - 16, y, W - (PAD - 16) * 2, LIST_ROW_H);
+            roundRect(ctx, left - 16, y + 6, right - left + 32, LIST_ROW_H - 12, 14);
+            ctx.fill();
         }
-        const midY = y + LIST_ROW_H / 2 + 10;
+        const midY = y + LIST_ROW_H / 2 + 13;
+        // Reserve the price's actual width, then fit the name into the gap.
+        const priceW = priceWidth(ctx, item.priceLabel, priceStyle);
         ctx.fillStyle = C.espresso;
         ctx.textAlign = "left";
-        ctx.font = `30px ${SANS}`;
-        ctx.fillText(truncateToWidth(ctx, item.name, W - PAD * 2 - 280), PAD, midY);
-        drawPriceRight(ctx, W - PAD, midY, item.priceLabel, priceStyle);
+        ctx.font = `500 36px ${SANS}`;
+        ctx.fillText(truncateToWidth(ctx, item.name, right - left - priceW - 40), left, midY);
+        drawPriceRight(ctx, right, midY, item.priceLabel, priceStyle);
     });
 
-    drawFooter(ctx, height);
+    drawFooter(ctx, PHOTO_H, PHOTO_W);
     return canvasToBlob(canvas);
 }
 
-// ─── PNG: photo-card carousel (16:9 / 1920×1080) ─────────────────
+// ─── PNG: photo-card carousel (9:16 portrait / 1080×1920) ────────
 
 const CARD_GAP = 26;
-const CARD_BODY_H = 128;
 const CARD_RADIUS = 22;
 const CARD_PAGE_BG = "#F2E8D8"; // deeper parchment so white cards pop
+
+/**
+ * Card typography + spacing scale with the card width, so a denser 2-row grid
+ * stays as polished as a single big row. `bodyH` is the fixed text-zone height
+ * below the photo (top pad + two name lines + price + bottom pad); the photo
+ * takes whatever height remains.
+ */
+function cardMetrics(w: number): {
+    nameSize: number;
+    nameLH: number;
+    priceSize: number;
+    padX: number;
+    padY: number;
+    nameGap: number;
+    bodyH: number;
+} {
+    const nameSize = Math.max(19, Math.round(w * 0.061));
+    const nameLH = Math.round(nameSize * 1.16);
+    const priceSize = Math.max(22, Math.round(w * 0.077));
+    const padX = Math.max(16, Math.round(w * 0.055));
+    const padY = Math.max(12, Math.round(w * 0.038));
+    const nameGap = Math.round(padY * 0.6);
+    const bodyH = padY + nameLH * 2 + nameGap + priceSize + padY;
+    return { nameSize, nameLH, priceSize, padX, padY, nameGap, bodyH };
+}
 
 /** One card. */
 function drawPhotoCard(
@@ -454,27 +513,30 @@ function drawPhotoCard(
     if (img) drawImageCover(ctx, img, x, y, w, photoH, CARD_RADIUS, true);
     else drawPlaceholder(ctx, item.name, x, y, w, photoH, CARD_RADIUS, true);
 
-    // Name (≤2 lines under the photo)
-    const bx = x + 26;
+    // Name + price scale with the card width.
+    const m = cardMetrics(w);
+    const bx = x + m.padX;
     ctx.fillStyle = C.espresso;
     ctx.textAlign = "left";
-    ctx.font = `600 28px ${SANS}`;
-    const nameLines = wrapLines(ctx, item.name, w - 52, 2);
-    nameLines.forEach((ln, i) => ctx.fillText(ln, bx, y + photoH + 46 + i * 33));
+    ctx.font = `600 ${m.nameSize}px ${SANS}`;
+    const nameLines = wrapLines(ctx, item.name, w - m.padX * 2, 2);
+    const nameBaseline = y + photoH + m.padY + m.nameSize;
+    nameLines.forEach((ln, i) => ctx.fillText(ln, bx, nameBaseline + i * m.nameLH));
 
-    // Divider + price anchored to card bottom
-    const dividerY = y + cardH - 60;
+    // Divider + price anchored to the card bottom
+    const priceBaseline = y + cardH - m.padY;
+    const dividerY = priceBaseline - m.priceSize - m.nameGap;
     ctx.strokeStyle = "rgba(44,26,14,0.08)";
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(bx, dividerY);
-    ctx.lineTo(x + w - 26, dividerY);
+    ctx.lineTo(x + w - m.padX, dividerY);
     ctx.stroke();
-    const priceStyle: PriceStyle = { size: 34, color: C.red, unitColor: "rgba(181,51,46,0.55)" };
-    drawPriceLeft(ctx, bx, y + cardH - 24, item.priceLabel, priceStyle);
+    const priceStyle: PriceStyle = { size: m.priceSize, color: C.red, unitColor: "rgba(181,51,46,0.55)" };
+    drawPriceLeft(ctx, bx, priceBaseline, item.priceLabel, priceStyle);
 }
 
-/** A category slide (16:9): masthead + category bar + single row of large cards + CTA. */
+/** A category slide (9:16 portrait): editorial masthead + a centred grid of cards + footer. */
 function renderPhotoImage(
     page: CatalogueImagePage,
     images: Map<string, HTMLImageElement>,
@@ -488,13 +550,14 @@ function renderPhotoImage(
     const contentW = PHOTO_W - PAD * 2;
     const colW = (contentW - CARD_GAP * (PHOTO_COLS - 1)) / PHOTO_COLS;
 
-    // Fit rows into the body; cap card height so a single row isn't oversized.
+    // Fit rows into the body; cap card height so a sparse slide isn't oversized.
+    const { bodyH } = cardMetrics(colW);
     const avail = bodyBottom - bodyTop - 28;
     const cardH = Math.min(
         Math.floor((avail - (rows - 1) * CARD_GAP) / rows),
-        Math.round(colW * 0.82) + CARD_BODY_H,
+        Math.round(colW * 0.72) + bodyH,
     );
-    const photoH = cardH - CARD_BODY_H;
+    const photoH = cardH - bodyH;
     const gridH = rows * cardH + (rows - 1) * CARD_GAP;
     const gridTop = bodyTop + (bodyBottom - bodyTop - gridH) / 2; // vertically centre
 
@@ -513,60 +576,60 @@ function renderPhotoImage(
     return canvasToBlob(canvas);
 }
 
-/** Slide 1 — the carousel hook / cover (16:9). */
-function renderCoverSlide(sections: CatalogueSection[]): Promise<Blob> {
+/** Slide 1 — the carousel hook / cover (9:16 portrait), deep red with an inset frame. */
+function renderCoverSlide(): Promise<Blob> {
     const { canvas, ctx } = newCanvas(PHOTO_W, PHOTO_H, C.red);
-
-    // Thin brand accents top/bottom (full width)
-    ctx.fillStyle = C.green;
-    ctx.fillRect(0, 0, PHOTO_W, 14);
-    ctx.fillRect(0, PHOTO_H - 14, PHOTO_W, 14);
-
     const cx = PHOTO_W / 2;
-    ctx.textAlign = "center";
 
-    ctx.fillStyle = "rgba(253,246,236,0.85)";
-    ctx.font = `600 30px ${SANS}`;
-    ctx.fillText(spaced("FRESH · CHILLED · FROZEN"), cx, 300);
-
-    ctx.fillStyle = C.cream;
-    ctx.font = `bold 150px ${SERIF}`;
-    ctx.fillText(BRAND_LABEL, cx, 470);
-
-    ctx.font = `400 38px ${SANS}`;
-    ctx.fillText(SITE_DESCRIPTION, cx, 540);
-
-    // Divider rule
-    ctx.strokeStyle = "rgba(253,246,236,0.35)";
+    // Elegant inset hairline frame — reads as a designed title card.
+    ctx.strokeStyle = "rgba(253,246,236,0.32)";
     ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(cx - 150, 610);
-    ctx.lineTo(cx + 150, 610);
+    const m = 44;
+    roundRect(ctx, m, m, PHOTO_W - m * 2, PHOTO_H - m * 2, 12);
     ctx.stroke();
 
+    ctx.textAlign = "center";
+    ctx.textBaseline = "alphabetic";
+
+    // Eyebrow
+    ctx.fillStyle = "rgba(253,246,236,0.82)";
+    ctx.font = `600 26px ${SANS}`;
+    ctx.fillText(spaced("FRESH · CHILLED · FROZEN"), cx, 700);
+
+    // Wordmark
     ctx.fillStyle = C.cream;
-    ctx.font = `bold 64px ${SERIF}`;
-    ctx.fillText("Product Catalogue", cx, 710);
+    ctx.font = `bold 150px ${SERIF}`;
+    ctx.fillText(BRAND_LABEL, cx, 858);
 
-    const productCount = catalogueItemCount(sections);
-    ctx.fillStyle = "rgba(253,246,236,0.85)";
-    ctx.font = `500 32px ${SANS}`;
-    ctx.fillText(
-        `${productCount} products · ${sections.length} categories · ${prettyDate()}`,
-        cx,
-        765,
-    );
+    // Slogan (from the logo)
+    ctx.font = `italic 40px ${SERIF}`;
+    ctx.fillText(TAGLINE, cx, 936);
 
+    // Divider rule
+    ctx.strokeStyle = "rgba(253,246,236,0.4)";
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(cx - 140, 1016);
+    ctx.lineTo(cx + 140, 1016);
+    ctx.stroke();
+    ctx.lineCap = "butt";
+
+    // Sub-title + prompt
     ctx.fillStyle = C.cream;
-    ctx.font = `600 32px ${SANS}`;
-    ctx.fillText("Swipe to browse  →", cx, 855);
+    ctx.font = `italic 46px ${SERIF}`;
+    ctx.fillText("Product Catalogue", cx, 1120);
+    ctx.fillStyle = "rgba(253,246,236,0.78)";
+    ctx.font = `500 27px ${SANS}`;
+    ctx.fillText("Swipe to browse the range  →", cx, 1196);
 
-    // Contact
-    ctx.fillStyle = "rgba(253,246,236,0.85)";
-    ctx.font = `27px ${SANS}`;
-    ctx.fillText(CONTACT_LINE, cx, PHOTO_H - 95);
-    ctx.font = `23px ${SANS}`;
-    ctx.fillText("Same-day delivery across Lagos", cx, PHOTO_H - 58);
+    // Website URL — featured near the base.
+    ctx.fillStyle = C.cream;
+    ctx.font = `600 38px ${SANS}`;
+    ctx.fillText(SITE_WEB, cx, PHOTO_H - 148);
+    ctx.fillStyle = "rgba(253,246,236,0.78)";
+    ctx.font = `400 25px ${SANS}`;
+    ctx.fillText("Same-day delivery across Lagos", cx, PHOTO_H - 106);
 
     return canvasToBlob(canvas);
 }
@@ -582,7 +645,7 @@ export async function generateCataloguePngs(
         const pages = chunkSectionsBalanced(sections, PHOTO_PER_SLIDE);
         const stamp = dateStamp();
         // Cover slide first (the carousel hook), then category slides.
-        const cover = await renderCoverSlide(sections);
+        const cover = await renderCoverSlide();
         downloadBlob(cover, `${slugify(SITE_NAME)}-catalogue-00-cover-${stamp}.png`);
         for (let i = 0; i < pages.length; i++) {
             await new Promise((r) => setTimeout(r, 220));
@@ -598,7 +661,7 @@ export async function generateCataloguePngs(
         return pages.length + 1;
     }
 
-    const pages = chunkSectionsForImages(sections, MAX_PER_IMAGE);
+    const pages = chunkSectionsBalanced(sections, LIST_MAX_ROWS);
     for (let i = 0; i < pages.length; i++) {
         const page = pages[i];
         const blob = await renderListImage(page);
@@ -678,36 +741,46 @@ async function generateListPdf(sections: CatalogueSection[]): Promise<void> {
     const { default: autoTable } = await import("jspdf-autotable");
     const { doc, margin, bannerH, chrome } = await makePdf();
 
-    let startY = bannerH + 22;
+    // Title block (first page)
     doc.setTextColor(...hexToRgb(C.espresso));
+    doc.setFont("times", "bold");
+    doc.setFontSize(20);
+    doc.text("Product Catalogue", margin, bannerH + 34);
     doc.setFont("helvetica", "italic");
-    doc.setFontSize(9);
-    doc.text("All prices in Naira (₦). Prices are subject to change and availability.", margin, startY);
-    startY += 14;
+    doc.setFontSize(9.5);
+    doc.setTextColor(120, 96, 74);
+    doc.text(
+        "Fresh, chilled & frozen — all prices in Naira (₦). Subject to change and availability.",
+        margin,
+        bannerH + 52,
+    );
+
+    let startY = bannerH + 68;
 
     for (const section of sections) {
         autoTable(doc, {
             startY,
-            margin: { top: bannerH + 16, left: margin, right: margin, bottom: 44 },
+            margin: { top: bannerH + 18, left: margin, right: margin, bottom: 48 },
             head: [[section.category.toUpperCase(), "PRICE"]],
             body: section.items.map((i) => [i.name, i.priceLabel]),
             theme: "striped",
+            styles: { font: "helvetica", lineColor: hexToRgb(C.creamAlt), lineWidth: 0.1 },
             headStyles: {
                 fillColor: hexToRgb(C.green),
                 textColor: hexToRgb(C.cream),
                 fontStyle: "bold",
                 fontSize: 11,
-                cellPadding: { top: 7, bottom: 7, left: 10, right: 10 },
+                cellPadding: { top: 8, bottom: 8, left: 12, right: 12 },
             },
             bodyStyles: {
                 textColor: hexToRgb(C.espresso),
                 fontSize: 11,
-                cellPadding: { top: 6, bottom: 6, left: 10, right: 10 },
+                cellPadding: { top: 7, bottom: 7, left: 12, right: 12 },
             },
             alternateRowStyles: { fillColor: hexToRgb(C.creamAlt) },
             columnStyles: {
                 0: { cellWidth: "auto" },
-                1: { halign: "right", cellWidth: 130, fontStyle: "bold", textColor: hexToRgb(C.red) },
+                1: { halign: "right", cellWidth: 140, fontStyle: "bold", textColor: hexToRgb(C.red) },
             },
             didParseCell: (data) => {
                 if (data.section === "head" && data.column.index === 1) data.cell.styles.halign = "right";
@@ -715,7 +788,7 @@ async function generateListPdf(sections: CatalogueSection[]): Promise<void> {
             didDrawPage: (data) => chrome(data.pageNumber),
         });
         // @ts-expect-error lastAutoTable is attached by the plugin at runtime
-        startY = doc.lastAutoTable.finalY + 22;
+        startY = doc.lastAutoTable.finalY + 20;
     }
 
     doc.save(`${slugify(SITE_NAME)}-catalogue-prices-${dateStamp()}.pdf`);
@@ -726,91 +799,103 @@ async function generatePhotoPdf(sections: CatalogueSection[]): Promise<void> {
     const { doc, pageW, pageH, margin, bannerH, chrome } = await makePdf();
 
     const cols = 2;
-    const gap = 18;
+    const gap = 20;
     const colW = (pageW - margin * 2 - gap * (cols - 1)) / cols;
-    const photoH = colW * 0.72;
-    const bodyH = 44;
+    const photoH = Math.round(colW * 0.7);
+    const bodyH = 50;
     const cardH = photoH + bodyH;
-    const rowGap = 18;
-    const top = bannerH + 34;
-    const bottom = pageH - 44;
+    const rowGap = 20;
+    const headerH = 30;
+    const headerGap = 16;
+    const catGap = 12; // extra breathing room before a new category
+    const top = bannerH + 26;
+    const bottom = pageH - 54; // clears the footer chrome (rule + contact line)
 
-    let first = true;
     let y = top;
     let col = 0;
 
-    const newPage = () => {
-        doc.addPage();
-        y = top;
-        col = 0;
-    };
-
-    for (const section of sections) {
-        // Category header bar (green)
-        if (!first && y + 40 > bottom) newPage();
-        if (col !== 0) {
-            col = 0;
-            y += cardH + rowGap;
-            if (y + cardH > bottom) newPage();
-        }
+    const catHeader = (label: string, continued = false): void => {
         doc.setFillColor(...hexToRgb(C.green));
-        doc.rect(margin, y, pageW - margin * 2, 26, "F");
+        doc.rect(margin, y, pageW - margin * 2, headerH, "F");
         doc.setTextColor(...hexToRgb(C.cream));
         doc.setFont("times", "bold");
         doc.setFontSize(13);
-        doc.text(section.category.toUpperCase(), margin + 8, y + 18);
-        y += 26 + 14;
-        first = false;
+        doc.text(label.toUpperCase(), margin + 12, y + 20);
+        if (continued) {
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(8.5);
+            doc.text("(cont.)", pageW - margin - 10, y + 20, { align: "right" });
+        }
+        y += headerH + headerGap;
+    };
+
+    const drawCard = (item: CatalogueSection["items"][number], x: number): void => {
+        // Card outline
+        doc.setDrawColor(...hexToRgb(C.creamAlt));
+        doc.setLineWidth(0.75);
+        doc.rect(x, y, colW, cardH, "S");
+
+        // Photo area (contain-fit on a tinted box; jsPDF can't source-crop)
+        doc.setFillColor(...hexToRgb(C.creamAlt));
+        doc.rect(x, y, colW, photoH, "F");
+        const img = item.image ? images.get(item.image) : undefined;
+        const jpeg = img ? imgToJpeg(img) : null;
+        if (jpeg) {
+            const fit = Math.min(colW / jpeg.w, photoH / jpeg.h);
+            const dw = jpeg.w * fit;
+            const dh = jpeg.h * fit;
+            doc.addImage(jpeg.data, "JPEG", x + (colW - dw) / 2, y + (photoH - dh) / 2, dw, dh);
+        } else {
+            doc.setTextColor(...hexToRgb(C.green));
+            doc.setFont("times", "bold");
+            doc.setFontSize(30);
+            doc.text((item.name.trim()[0] || "•").toUpperCase(), x + colW / 2, y + photoH / 2 + 10, {
+                align: "center",
+            });
+        }
+        doc.setDrawColor(...hexToRgb(C.creamAlt));
+        doc.line(x, y + photoH, x + colW, y + photoH);
+
+        // Name (≤2 lines) + price, kept inside the card body
+        doc.setTextColor(...hexToRgb(C.espresso));
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(9.5);
+        const nameLines = (doc.splitTextToSize(item.name, colW - 16) as string[]).slice(0, 2);
+        nameLines.forEach((ln, i) => doc.text(ln, x + 8, y + photoH + 15 + i * 12));
+        doc.setTextColor(...hexToRgb(C.red));
+        doc.setFontSize(10.5);
+        doc.text(item.priceLabel, x + 8, y + cardH - 9);
+    };
+
+    sections.forEach((section, sIdx) => {
+        if (col !== 0) {
+            col = 0;
+            y += cardH + rowGap;
+        }
+        if (sIdx > 0) y += catGap;
+        // Keep the header with at least its first row of cards.
+        if (y + headerH + headerGap + cardH > bottom) {
+            doc.addPage();
+            y = top;
+            col = 0;
+        }
+        catHeader(section.category);
 
         for (const item of section.items) {
-            if (y + cardH > bottom) {
-                newPage();
+            if (col === 0 && y + cardH > bottom) {
+                doc.addPage();
+                y = top;
+                col = 0;
+                catHeader(section.category, true); // repeat header on continuation
             }
-            const x = margin + col * (colW + gap);
-
-            // Card border
-            doc.setDrawColor(...hexToRgb(C.creamAlt));
-            doc.setFillColor(255, 255, 255);
-            doc.roundedRect(x, y, colW, cardH, 6, 6, "FD");
-
-            const img = item.image ? images.get(item.image) : undefined;
-            const jpeg = img ? imgToJpeg(img) : null;
-            if (jpeg) {
-                // jsPDF can't source-crop, so contain-fit the photo on a tinted box.
-                doc.setFillColor(...hexToRgb(C.creamAlt));
-                doc.rect(x, y, colW, photoH, "F");
-                const fit = Math.min(colW / jpeg.w, photoH / jpeg.h);
-                const dw = jpeg.w * fit;
-                const dh = jpeg.h * fit;
-                doc.addImage(jpeg.data, "JPEG", x + (colW - dw) / 2, y + (photoH - dh) / 2, dw, dh);
-            } else {
-                doc.setFillColor(...hexToRgb(C.creamAlt));
-                doc.rect(x, y, colW, photoH, "F");
-                doc.setTextColor(53, 94, 59);
-                doc.setFont("times", "bold");
-                doc.setFontSize(28);
-                doc.text((item.name.trim()[0] || "•").toUpperCase(), x + colW / 2, y + photoH / 2 + 8, {
-                    align: "center",
-                });
-            }
-
-            // Name + price
-            doc.setTextColor(...hexToRgb(C.espresso));
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(9.5);
-            const name = doc.splitTextToSize(item.name, colW - 16)[0];
-            doc.text(name, x + 8, y + photoH + 17);
-            doc.setTextColor(...hexToRgb(C.red));
-            doc.setFontSize(10.5);
-            doc.text(item.priceLabel, x + 8, y + photoH + 34);
-
+            drawCard(item, margin + col * (colW + gap));
             col += 1;
             if (col >= cols) {
                 col = 0;
                 y += cardH + rowGap;
             }
         }
-    }
+    });
 
     const total = doc.getNumberOfPages();
     for (let p = 1; p <= total; p++) {

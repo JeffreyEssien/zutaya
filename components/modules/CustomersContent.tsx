@@ -120,7 +120,7 @@ export default function CustomersContent({ customers }: CustomersContentProps) {
                             placeholder="Search by name or email..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 bg-white/50 border border-warm-cream/20 rounded-lg focus:outline-none focus:border-brand-green/50 focus:ring-1 focus:ring-brand-green/50 transition-all"
+                            className="w-full pl-10 pr-4 py-2 bg-warm-cream/5 border border-warm-cream/20 rounded-lg focus:outline-none focus:border-brand-green/50 focus:ring-1 focus:ring-brand-green/50 transition-all"
                         />
                     </div>
                     <div className="flex gap-3">

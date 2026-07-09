@@ -87,6 +87,28 @@
   --glass-border: rgba(255, 255, 255, 0.08);
 }
 
+/* ── Admin form-control contrast ──
+   The admin shell is force-dark. Text inputs / textareas / selects that don't
+   set an explicit text colour otherwise fall back to `inherit`, which is
+   fragile (and invisible on any light-tinted field). Pin readable cream text
+   and a legible placeholder for every control inside the admin. Kept in
+   @layer base so an explicit `text-*` utility on a field still wins. */
+@layer base {
+  .admin-shell input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+  .admin-shell textarea,
+  .admin-shell select {
+    color: var(--color-warm-cream);
+  }
+  .admin-shell input::placeholder,
+  .admin-shell textarea::placeholder {
+    color: color-mix(in oklab, var(--color-warm-cream) 45%, transparent);
+    opacity: 1;
+  }
+  .admin-shell select option {
+    color: #1a1a1a;
+  }
+}
+
 /* ── Smooth scroll ── */
 html {
   scroll-behavior: smooth;
