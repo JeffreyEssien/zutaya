@@ -23,6 +23,8 @@ export interface CatalogueEntry {
     price: number;
     /** e.g. "₦11,000 / kg" */
     priceLabel: string;
+    /** First product image URL, when available (for the photo catalogue). */
+    image?: string;
 }
 
 export interface CatalogueSection {
@@ -100,6 +102,7 @@ export function buildCatalogue(products: Product[]): CatalogueSection[] {
             name: p.name,
             price: p.price,
             priceLabel: formatCataloguePrice(p.price, p.priceUnit),
+            image: Array.isArray(p.images) ? p.images.find((u) => !!u) : undefined,
         };
         const list = byCategory.get(category);
         if (list) list.push(entry);
@@ -126,7 +129,7 @@ export function catalogueItemCount(sections: CatalogueSection[]): number {
  */
 export function chunkSectionsForImages(
     sections: CatalogueSection[],
-    maxItemsPerImage = 16,
+    maxItemsPerImage = 10,
 ): CatalogueImagePage[] {
     const max = Math.max(1, Math.floor(maxItemsPerImage));
     const pages: CatalogueImagePage[] = [];

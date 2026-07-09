@@ -69,32 +69,72 @@ export default function InventoryContent({
     };
 
     const [catalogueBusy, setCatalogueBusy] = useState(false);
-    const handleCatalogue = async (kind: "pdf" | "png") => {
+    const handleCatalogue = async (variant: "list" | "photos", format: "pdf" | "png") => {
         setExportOpen(false);
         if (catalogueBusy) return;
         setCatalogueBusy(true);
+        const note =
+            variant === "photos"
+                ? toast.loading("Building photo catalogue — loading product images…")
+                : null;
         try {
             const { buildCatalogue, catalogueItemCount } = await import("@/lib/catalogue");
             const sections = buildCatalogue(products);
             if (catalogueItemCount(sections) === 0) {
-                toast.error("No in-stock products to put in the catalogue");
+                toast.error("No in-stock products to put in the catalogue", { id: note ?? undefined });
                 return;
             }
             const { generateCataloguePdf, generateCataloguePngs } = await import(
                 "@/lib/catalogueExport"
             );
-            if (kind === "pdf") {
-                await generateCataloguePdf(sections);
-                toast.success("Catalogue PDF ready — check your downloads");
+            if (format === "pdf") {
+                await generateCataloguePdf(sections, variant);
+                toast.success("Catalogue PDF ready — check your downloads", { id: note ?? undefined });
             } else {
-                const n = await generateCataloguePngs(sections);
-                toast.success(`${n} catalogue image${n === 1 ? "" : "s"} downloaded`);
+                const n = await generateCataloguePngs(sections, variant);
+                toast.success(`${n} catalogue image${n === 1 ? "" : "s"} downloaded`, {
+                    id: note ?? undefined,
+                });
             }
         } catch (err) {
             console.error(err);
-            toast.error("Failed to generate catalogue");
+            toast.error("Failed to generate catalogue", { id: note ?? undefined });
         } finally {
             setCatalogueBusy(false);
+        }
+    };
+
+    const handleGoogleFeed = async () => {
+        setExportOpen(false);
+        try {
+            const { buildGoogleFeedItems, feedToXml } = await import("@/lib/googleFeed");
+            const { downloadText, dateStamp: stamp } = await import("@/lib/csv");
+            const items = buildGoogleFeedItems(products);
+            if (items.length === 0) {
+                toast.error("No products to include in the feed");
+                return;
+            }
+            const xml = feedToXml(items, {
+                title: "Zúta Ya",
+                link: typeof window !== "undefined" ? window.location.origin : "",
+                description: "Zúta Ya product feed",
+            });
+            downloadText(`zutaya-google-merchant-${stamp()}.xml`, xml, "application/xml;charset=utf-8");
+            toast.success("Google Merchant feed downloaded");
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to build Google feed");
+        }
+    };
+
+    const copyFeedUrl = async () => {
+        setExportOpen(false);
+        const url = `${window.location.origin}/feed/google-merchant.xml`;
+        try {
+            await navigator.clipboard.writeText(url);
+            toast.success("Live feed URL copied — paste into Merchant Center");
+        } catch {
+            toast.message(url);
         }
     };
 
@@ -232,7 +272,7 @@ export default function InventoryContent({
                             Export ▾
                         </Button>
                         {exportOpen && (
-                            <div className="absolute right-2 top-full mt-1 z-50 w-72 bg-surface border border-warm-cream/20 rounded-lg shadow-2xl ring-1 ring-black/40 overflow-hidden">
+                            <div className="absolute right-2 top-full mt-1 z-50 w-72 max-h-[75vh] overflow-y-auto bg-surface border border-warm-cream/20 rounded-lg shadow-2xl ring-1 ring-black/40">
                                 <button
                                     type="button"
                                     onClick={() => handleExport("snapshot")}
@@ -266,25 +306,65 @@ export default function InventoryContent({
                                     <div className="text-xs text-warm-cream/50">Summary + snapshot + sales + raw log</div>
                                 </button>
                                 <div className="px-4 py-2 bg-warm-cream/[0.03] text-[10px] font-semibold uppercase tracking-[0.2em] text-warm-cream/40">
-                                    Branded Catalogue
+                                    Price List — text only
                                 </div>
                                 <button
                                     type="button"
                                     disabled={catalogueBusy}
-                                    onClick={() => handleCatalogue("pdf")}
+                                    onClick={() => handleCatalogue("list", "pdf")}
                                     className="w-full text-left px-4 py-3 hover:bg-warm-cream/10 transition-colors border-b border-warm-cream/10 disabled:opacity-50"
                                 >
-                                    <div className="text-sm font-medium text-warm-cream">Catalogue — PDF</div>
-                                    <div className="text-xs text-warm-cream/50">Printable price list, brand-styled, by category</div>
+                                    <div className="text-sm font-medium text-warm-cream">Price List — PDF</div>
+                                    <div className="text-xs text-warm-cream/50">Printable, brand-styled, by category</div>
                                 </button>
                                 <button
                                     type="button"
                                     disabled={catalogueBusy}
-                                    onClick={() => handleCatalogue("png")}
-                                    className="w-full text-left px-4 py-3 hover:bg-warm-cream/10 transition-colors disabled:opacity-50"
+                                    onClick={() => handleCatalogue("list", "png")}
+                                    className="w-full text-left px-4 py-3 hover:bg-warm-cream/10 transition-colors border-b border-warm-cream/10 disabled:opacity-50"
                                 >
-                                    <div className="text-sm font-medium text-warm-cream">Catalogue — Images (PNG)</div>
-                                    <div className="text-xs text-warm-cream/50">One shareable image per category</div>
+                                    <div className="text-sm font-medium text-warm-cream">Price List — Images</div>
+                                    <div className="text-xs text-warm-cream/50">One shareable image per category (≤10 items)</div>
+                                </button>
+                                <div className="px-4 py-2 bg-warm-cream/[0.03] text-[10px] font-semibold uppercase tracking-[0.2em] text-warm-cream/40">
+                                    Photo Catalogue — with product images
+                                </div>
+                                <button
+                                    type="button"
+                                    disabled={catalogueBusy}
+                                    onClick={() => handleCatalogue("photos", "png")}
+                                    className="w-full text-left px-4 py-3 hover:bg-warm-cream/10 transition-colors border-b border-warm-cream/10 disabled:opacity-50"
+                                >
+                                    <div className="text-sm font-medium text-warm-cream">Photo Catalogue — Images</div>
+                                    <div className="text-xs text-warm-cream/50">Product-photo cards for IG posts / carousels</div>
+                                </button>
+                                <button
+                                    type="button"
+                                    disabled={catalogueBusy}
+                                    onClick={() => handleCatalogue("photos", "pdf")}
+                                    className="w-full text-left px-4 py-3 hover:bg-warm-cream/10 transition-colors border-b border-warm-cream/10 disabled:opacity-50"
+                                >
+                                    <div className="text-sm font-medium text-warm-cream">Photo Catalogue — PDF</div>
+                                    <div className="text-xs text-warm-cream/50">Photo grid flyer, printable</div>
+                                </button>
+                                <div className="px-4 py-2 bg-warm-cream/[0.03] text-[10px] font-semibold uppercase tracking-[0.2em] text-warm-cream/40">
+                                    Google Shopping
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={copyFeedUrl}
+                                    className="w-full text-left px-4 py-3 hover:bg-warm-cream/10 transition-colors border-b border-warm-cream/10"
+                                >
+                                    <div className="text-sm font-medium text-warm-cream">Copy live feed URL</div>
+                                    <div className="text-xs text-warm-cream/50">Auto-updates · paste into Merchant Center fetch</div>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handleGoogleFeed}
+                                    className="w-full text-left px-4 py-3 hover:bg-warm-cream/10 transition-colors"
+                                >
+                                    <div className="text-sm font-medium text-warm-cream">Google Merchant Feed (XML)</div>
+                                    <div className="text-xs text-warm-cream/50">One-off download of the current feed</div>
                                 </button>
                             </div>
                         )}

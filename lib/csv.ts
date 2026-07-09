@@ -33,8 +33,13 @@ export function withBom(csv: string): string {
 
 /** Trigger a client-side download of a CSV string. No-op outside the browser. */
 export function downloadCsv(filename: string, csv: string): void {
+    downloadText(filename, withBom(csv), "text/csv;charset=utf-8");
+}
+
+/** Trigger a browser download of arbitrary text with a given MIME type. */
+export function downloadText(filename: string, text: string, mime = "text/plain;charset=utf-8"): void {
     if (typeof window === "undefined") return;
-    const blob = new Blob([withBom(csv)], { type: "text/csv;charset=utf-8" });
+    const blob = new Blob([text], { type: mime });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;

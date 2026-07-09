@@ -97,7 +97,7 @@ function Badge({ status }: { status: string }) {
         shipped: "bg-blue-100 text-blue-800",
         delivered: "bg-green-100 text-green-800",
     };
-    const style = colors[status as keyof typeof colors] || "bg-warm-cream/5 text-gray-800";
+    const style = colors[status as keyof typeof colors] || "bg-warm-cream/10 text-warm-cream/80";
     return (
         <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium capitalize ${style}`}>
             {status}
