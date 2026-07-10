@@ -163,32 +163,76 @@ function plainText(html: string | undefined | null): string {
     return (html || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
 }
 
+// Bumpa's product import schema — exact column order + spelling from Bumpa's own
+// template (public/custom_import_template.csv). Rows are grouped by "Handle": a
+// "Simple" parent row per product, followed by one "variant" row per variant.
+const BUMPA_HEADERS = [
+    "Handle", "Product Type", "Product Title", "Description (Long)",
+    "Description (Short - max 300 characters)", "Cost price", "Selling Price",
+    "Stock Qty", "Weight (kg)", "Collections", "SKU", "Barcode", "Featured Brand",
+    "Option1 Type", "Option1 Value", "Option2 Type", "Option2 Value",
+    "Option3 Type", "Option3 Value", "Main Image", "Additional Images",
+];
+
+/** Turn a category slug ("goat-meat") into a display collection ("Goat Meat"). */
+function titleFromSlug(slug: string | undefined | null): string {
+    return (slug || "")
+        .split(/[-_]/)
+        .filter(Boolean)
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(" ");
+}
+
+/** Slug fragment for deriving per-variant SKUs (e.g. "1kg" → "1KG"). */
+function skuFragment(name: string): string {
+    return name.replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-+|-+$/g, "").toUpperCase();
+}
+
 /**
- * Bumpa bulk product upload — one row per product, mapped to Bumpa's product
- * fields (Product Title / Price / Cost Price / Stock Quantity / Product Collection).
- * Enriched with inventory_items (cost/SKU/live stock) by name where matched.
+ * Bumpa bulk product upload — matches Bumpa's import template
+ * (public/custom_import_template.csv) column-for-column so the file imports
+ * without errors. Each product is a "Simple" parent row (grouped by Handle =
+ * slug); variants follow as "variant" rows carrying their own price/stock/SKU
+ * and Option1 = the variant name. Enriched with inventory_items (cost/SKU/live
+ * stock) by name where matched.
  */
 export function buildBumpaUpload(products: Product[], inventory: InventoryItem[]): ExportSection {
-    const headers = [
-        "Product Title", "Description", "Price", "Cost Price", "Discount Price",
-        "Stock Quantity", "Product Collection", "SKU", "Image URL",
-    ];
     const idx = indexInventory(inventory);
-    const rows: CsvCell[][] = products.map(p => {
+    const rows: CsvCell[][] = [];
+
+    for (const p of products) {
         const inv = idx.match(p);
-        return [
-            p.name,
-            plainText(p.description),
-            round2(inv ? inv.sellingPrice : p.price),
-            inv ? round2(inv.costPrice) : "",
-            "",
-            inv ? inv.stock : p.stock,
-            p.category || "",
-            inv?.sku ?? "",
-            p.images?.[0] ?? "",
-        ];
-    });
-    return { headers, rows };
+        const handle = p.slug || p.name;
+        const sku = inv?.sku ?? "";
+        const cost: CsvCell = inv ? round2(inv.costPrice) : "";
+        const sellingBase = round2(inv ? inv.sellingPrice : p.price);
+        const stockBase = inv ? inv.stock : p.stock;
+        const weight: CsvCell = p.minWeightKg ?? "";
+        const collection = titleFromSlug(p.category);
+        const mainImage = p.images?.[0] ?? "";
+        const additional = p.images && p.images.length > 1 ? p.images.slice(1).join(", ") : "";
+        const variants = Array.isArray(p.variants) ? p.variants : [];
+
+        // Parent "Simple" row — holds the product's title, description, brand,
+        // collections and base price/stock (kept even when variants exist).
+        rows.push([
+            handle, "Simple", p.name, p.description || "", plainText(p.description).slice(0, 300),
+            cost, sellingBase, stockBase, weight, collection, sku, "", p.brand || "",
+            "", "", "", "", "", "", mainImage, additional,
+        ]);
+
+        // Variant rows — Option1 carries the variant name; own price/stock/SKU/image.
+        for (const v of variants) {
+            rows.push([
+                handle, "variant", "", "", "",
+                cost, round2(v.price ?? sellingBase), v.stock ?? 0, "", "",
+                sku ? `${sku}-${skuFragment(v.name)}` : "", "", "",
+                "Variant", v.name, "", "", "", "", v.image || "", "",
+            ]);
+        }
+    }
+
+    return { headers: BUMPA_HEADERS, rows };
 }
 
 /** Raw movement log — every inventory_logs row, newest first (input order preserved). */
