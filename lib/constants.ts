@@ -57,7 +57,6 @@ export const ADMIN_NAV_GROUPS = [
             { label: "Orders", href: "/admin/orders", icon: "clipboard" },
             { label: "Payments", href: "/admin/payments", icon: "creditcard" },
             { label: "Disputes", href: "/admin/disputes", icon: "alerttriangle" },
-            { label: "Bumpa Orders", href: "/admin/bumpa", icon: "refresh" },
             { label: "Expenses", href: "/admin/expenses", icon: "creditcard" },
             { label: "Customers", href: "/admin/customers", icon: "users" },
         ],
