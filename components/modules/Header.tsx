@@ -13,6 +13,7 @@ import { useSettings } from "@/lib/SettingsProvider";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, X, ShoppingBag, Menu } from "lucide-react";
 import ScrollProgress from "@/components/ui/ScrollProgress";
+import CountdownBanner from "@/components/modules/CountdownBanner";
 import { formatCurrency } from "@/lib/formatCurrency";
 
 export default function Header() {
@@ -113,6 +114,16 @@ export default function Header() {
                 >
                     {settings.announcementBarText}
                 </div>
+            )}
+            {/* Flash-sale countdown (auto-hides when expired) */}
+            {settings?.flashSaleEnabled && settings.flashSaleEndsAt && (
+                <CountdownBanner
+                    title={settings.flashSaleTitle}
+                    subtitle={settings.flashSaleSubtitle}
+                    endsAt={settings.flashSaleEndsAt}
+                    link={settings.flashSaleLink}
+                    bgColor={settings.flashSaleBgColor}
+                />
             )}
             <ScrollProgress />
             <header

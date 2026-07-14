@@ -208,6 +208,13 @@ export interface SiteSettings {
     announcementBarEnabled?: boolean;
     announcementBarText?: string;
     announcementBarColor?: string;
+    // Flash-sale countdown banner
+    flashSaleEnabled?: boolean;
+    flashSaleTitle?: string;
+    flashSaleSubtitle?: string;
+    flashSaleEndsAt?: string; // ISO datetime
+    flashSaleLink?: string;
+    flashSaleBgColor?: string;
     // Social links
     socialInstagram?: string;
     socialTwitter?: string;
@@ -491,3 +498,32 @@ export interface CartItemProcessing {
     notes?: string;
 }
 
+
+export interface ProductReview {
+    id: string;
+    productId: string;
+    authorName: string;
+    email?: string;
+    rating: number; // 1–5
+    title?: string;
+    body?: string;
+    status: "pending" | "approved" | "rejected";
+    verifiedPurchase: boolean;
+    createdAt: string;
+}
+
+export interface ReviewSummary {
+    count: number;
+    average: number; // 1 decimal
+    distribution: Record<number, number>; // rating(1-5) -> count
+}
+
+export interface Expense {
+    id: string;
+    category: string;
+    description?: string;
+    amount: number; // Naira
+    incurredOn: string; // YYYY-MM-DD
+    note?: string;
+    createdAt: string;
+}

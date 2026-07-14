@@ -21,6 +21,14 @@ import Image from "next/image";
 
 type TabId = "general" | "storefront" | "business" | "checkout" | "texts";
 
+// ISO datetime → "YYYY-MM-DDTHH:mm" in the admin's local time (for datetime-local inputs).
+function toLocalInput(iso?: string): string {
+    if (!iso) return "";
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return "";
+    return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+}
+
 const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
     { id: "general", label: "General", icon: Globe },
     { id: "storefront", label: "Storefront", icon: ImageIcon },
@@ -373,6 +381,45 @@ export default function SiteSettingsForm() {
                                 <div className="flex items-center gap-3">
                                     <input type="color" name="announcementBarColor" value={settings.announcementBarColor || "#B665D2"} onChange={handleChange} className="h-9 w-12 rounded-lg border border-warm-cream/20 cursor-pointer p-0.5" />
                                     <input type="text" name="announcementBarColor" value={settings.announcementBarColor || "#B665D2"} onChange={handleChange} className="settings-input flex-1 font-mono text-xs" placeholder="#B665D2" />
+                                </div>
+                            </Field>
+                        </Card>
+
+                        <Card title="Flash Sale Countdown" description="Live countdown banner shown site-wide; auto-hides when it ends" icon={Zap}>
+                            <div className="flex items-center gap-3">
+                                <input
+                                    type="checkbox"
+                                    name="flashSaleEnabled"
+                                    checked={settings.flashSaleEnabled || false}
+                                    onChange={handleChange}
+                                    className="h-4 w-4 rounded border-warm-cream/30 text-brand-green focus:ring-brand-green/30"
+                                    id="flashsale-toggle"
+                                />
+                                <label htmlFor="flashsale-toggle" className="text-sm text-warm-cream/70 cursor-pointer">
+                                    Show flash-sale countdown
+                                </label>
+                            </div>
+                            <Field label="Title">
+                                <input type="text" name="flashSaleTitle" value={settings.flashSaleTitle || ""} onChange={handleChange} className="settings-input" placeholder="Weekend Flash Sale" />
+                            </Field>
+                            <Field label="Subtitle">
+                                <input type="text" name="flashSaleSubtitle" value={settings.flashSaleSubtitle || ""} onChange={handleChange} className="settings-input" placeholder="Up to 20% off select cuts" />
+                            </Field>
+                            <Field label="Ends At">
+                                <input
+                                    type="datetime-local"
+                                    value={toLocalInput(settings.flashSaleEndsAt)}
+                                    onChange={(e) => setSettings((prev) => ({ ...prev, flashSaleEndsAt: e.target.value ? new Date(e.target.value).toISOString() : "" }))}
+                                    className="settings-input"
+                                />
+                            </Field>
+                            <Field label="Link (optional)">
+                                <input type="text" name="flashSaleLink" value={settings.flashSaleLink || ""} onChange={handleChange} className="settings-input" placeholder="/shop" />
+                            </Field>
+                            <Field label="Background Color">
+                                <div className="flex items-center gap-3">
+                                    <input type="color" name="flashSaleBgColor" value={settings.flashSaleBgColor || "#C0392B"} onChange={handleChange} className="h-9 w-12 rounded-lg border border-warm-cream/20 cursor-pointer p-0.5" />
+                                    <input type="text" name="flashSaleBgColor" value={settings.flashSaleBgColor || "#C0392B"} onChange={handleChange} className="settings-input flex-1 font-mono text-xs" placeholder="#C0392B" />
                                 </div>
                             </Field>
                         </Card>

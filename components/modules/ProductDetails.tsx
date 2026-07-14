@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import type { Product, PrepOption, Marinade, ProcessingOption, CartItemProcessing, CompletionMode } from "@/types";
+import type { Product, PrepOption, Marinade, ProcessingOption, CartItemProcessing, CompletionMode, ReviewSummary } from "@/types";
+import { StarRating } from "@/components/ui/StarRating";
 import { formatCurrency } from "@/lib/formatCurrency";
 import { useCartStore, cartQuantityBounds } from "@/lib/cartStore";
 import Button from "@/components/ui/Button";
@@ -22,9 +23,10 @@ interface ProductDetailsProps {
     eventsEnabled?: boolean;
     mode?: CompletionMode;
     onModeChange?: (m: CompletionMode) => void;
+    reviewSummary?: ReviewSummary;
 }
 
-export default function ProductDetails({ product, marinades = [], processingOptions = [], eventsEnabled = true, mode, onModeChange }: ProductDetailsProps) {
+export default function ProductDetails({ product, marinades = [], processingOptions = [], eventsEnabled = true, mode, onModeChange, reviewSummary }: ProductDetailsProps) {
     const { addItem, open } = useCartStore();
     const [selectedVariant, setSelectedVariant] = useState<Product["variants"][0] | undefined>(
         product.variants && product.variants.length > 0 ? product.variants[0] : undefined
@@ -37,6 +39,35 @@ export default function ProductDetails({ product, marinades = [], processingOpti
     const setCompletionMode = onModeChange ?? setInternalMode;
     const [processing, setProcessing] = useState<CartItemProcessing>({});
     const [processingFee, setProcessingFee] = useState(0);
+
+    // Back-in-stock subscribe (shown when the item is sold out)
+    const [notifyEmail, setNotifyEmail] = useState("");
+    const [notifyStatus, setNotifyStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
+    const [notifyMsg, setNotifyMsg] = useState("");
+
+    const handleNotify = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (notifyStatus === "loading") return;
+        setNotifyStatus("loading");
+        try {
+            const res = await fetch("/api/stock-notify", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    productId: product.id,
+                    email: notifyEmail,
+                    variant: selectedVariant?.name,
+                }),
+            });
+            const data = await res.json();
+            if (!res.ok || !data.success) throw new Error(data.error || "Failed");
+            setNotifyStatus("done");
+            setNotifyMsg(data.alreadySubscribed ? "You're already on the list — we'll email you." : "Done! We'll email you the moment it's back.");
+        } catch (err: any) {
+            setNotifyStatus("error");
+            setNotifyMsg(err?.message === "Invalid email address" ? "Please enter a valid email." : "Something went wrong. Try again.");
+        }
+    };
 
     const currentPrice = selectedVariant?.price || product.price;
     const currentStock = selectedVariant?.stock !== undefined ? selectedVariant.stock : product.stock;
@@ -108,7 +139,17 @@ export default function ProductDetails({ product, marinades = [], processingOpti
                 <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl text-warm-cream leading-tight">{product.name}</h1>
                 {product.storageType && <StorageBadge type={product.storageType} />}
             </div>
-            <p className="text-sm text-warm-cream/35 mb-5">by {product.brand}</p>
+            <p className="text-sm text-warm-cream/35 mb-2">by {product.brand}</p>
+
+            {/* Rating summary — links to the reviews section */}
+            {reviewSummary && reviewSummary.count > 0 && (
+                <a href="#reviews" className="inline-flex items-center gap-2 mb-5 group">
+                    <StarRating value={reviewSummary.average} size={15} />
+                    <span className="text-xs text-warm-cream/50 group-hover:text-warm-cream/80 transition-colors">
+                        {reviewSummary.average.toFixed(1)} · {reviewSummary.count} review{reviewSummary.count > 1 ? "s" : ""}
+                    </span>
+                </a>
+            )}
 
             {/* Price */}
             <div className="flex items-baseline gap-3 mb-6">
@@ -322,6 +363,42 @@ export default function ProductDetails({ product, marinades = [], processingOpti
                         )}
                     </span>
                 </Button>
+            )}
+
+            {/* Back-in-stock notify — shown when sold out */}
+            {!canOrder && completionMode !== "event" && (
+                <div className="mt-4 rounded-2xl border border-warm-cream/10 bg-raised p-4">
+                    {notifyStatus === "done" ? (
+                        <p className="flex items-center gap-2 text-sm text-brand-green">
+                            <Check size={16} /> {notifyMsg}
+                        </p>
+                    ) : (
+                        <>
+                            <p className="text-sm font-semibold text-warm-cream mb-1">Notify me when it's back</p>
+                            <p className="text-xs text-warm-cream/60 mb-3">
+                                Sold out{selectedVariant?.name ? ` (${selectedVariant.name})` : ""}? Drop your email and we'll alert you the moment it's restocked.
+                            </p>
+                            <form onSubmit={handleNotify} className="flex flex-col sm:flex-row gap-2">
+                                <input
+                                    type="email"
+                                    required
+                                    value={notifyEmail}
+                                    onChange={(e) => { setNotifyEmail(e.target.value); if (notifyStatus === "error") setNotifyStatus("idle"); }}
+                                    placeholder="you@email.com"
+                                    className="flex-1 rounded-full bg-base border border-warm-cream/15 px-4 py-2.5 text-sm text-warm-cream placeholder:text-warm-cream/40 focus:outline-none focus:border-brand-red/50"
+                                />
+                                <button
+                                    type="submit"
+                                    disabled={notifyStatus === "loading"}
+                                    className="rounded-full bg-brand-red px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-red/90 transition-colors disabled:opacity-60"
+                                >
+                                    {notifyStatus === "loading" ? "Adding…" : "Notify me"}
+                                </button>
+                            </form>
+                            {notifyStatus === "error" && <p className="mt-2 text-xs text-red-400">{notifyMsg}</p>}
+                        </>
+                    )}
+                </div>
             )}
 
             {/* Ask About This on WhatsApp */}

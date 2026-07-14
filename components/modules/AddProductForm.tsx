@@ -172,6 +172,12 @@ export default function AddProductForm({ initialData }: { initialData?: Product 
                     imageEvent: form.imageEvent || undefined,
                 });
                 logAction("update", "product", initialData.id, `Updated product: ${form.title}`);
+                // Fire back-in-stock alerts if this edit restocked the product.
+                fetch("/api/admin/stock-notify/restock", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ productId: initialData.id }),
+                }).catch(() => {});
                 await revalidateShop();
                 toast.success("Product updated!");
             } else {

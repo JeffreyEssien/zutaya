@@ -4,16 +4,17 @@ import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ProductImageGallery from "@/components/modules/ProductImageGallery";
 import ProductDetails from "@/components/modules/ProductDetails";
-import type { Product, Marinade, ProcessingOption, CompletionMode } from "@/types";
+import type { Product, Marinade, ProcessingOption, CompletionMode, ReviewSummary } from "@/types";
 
 interface Props {
     product: Product;
     marinades: Marinade[];
     processingOptions: ProcessingOption[];
     eventsEnabled: boolean;
+    reviewSummary?: ReviewSummary;
 }
 
-export default function ProductPageShell({ product, marinades, processingOptions, eventsEnabled }: Props) {
+export default function ProductPageShell({ product, marinades, processingOptions, eventsEnabled, reviewSummary }: Props) {
     const [mode, setMode] = useState<CompletionMode>("cook_myself");
 
     const images = useMemo(() => {
@@ -55,6 +56,7 @@ export default function ProductPageShell({ product, marinades, processingOptions
                 eventsEnabled={eventsEnabled}
                 mode={mode}
                 onModeChange={setMode}
+                reviewSummary={reviewSummary}
             />
         </div>
     );

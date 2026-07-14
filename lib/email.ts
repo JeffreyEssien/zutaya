@@ -1413,3 +1413,69 @@ export async function sendLowStockAlertEmail(
     console.error("❌ Low stock alert email failed:", error);
   }
 }
+
+// ── Back-in-Stock Notification ──
+export async function sendBackInStockEmail(
+  to: string,
+  product: { name: string; slug: string; image?: string | null; priceLabel?: string },
+  variantName?: string | null
+): Promise<void> {
+  if (!process.env.SMTP_PASSWORD || !to) return;
+
+  const title = variantName ? `${product.name} — ${variantName}` : product.name;
+  const productUrl = `${SITE_URL}/product/${product.slug}`;
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f8f7fa;">
+  <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+
+    <div style="background:#1A1A1A;border-bottom:4px solid #1E8449; border-radius: 16px 16px 0 0; padding: 32px; text-align: center;">
+      <h1 style="color: white; font-size: 28px; letter-spacing: 4px; margin: 0 0 4px 0;">${SITE_NAME}</h1>
+      <p style="font-family:Arial,sans-serif;font-size:12px;color:#C8955A;margin-top:4px;">Back In Stock</p>
+    </div>
+
+    <div style="background: white; padding: 32px; border-left: 1px solid #f3f0f7; border-right: 1px solid #f3f0f7;">
+      <div style="text-align: center; margin-bottom: 24px;">
+        <div style="display: inline-block; width: 64px; height: 64px; line-height: 64px; font-size: 32px; background: #d5f5e3; border-radius: 50%; text-align: center;">✅</div>
+      </div>
+
+      <h2 style="font-size: 22px; color: #1a1a2e; text-align: center; margin: 0 0 12px 0;">It's Back!</h2>
+      <p style="font-size: 15px; color: #666; margin: 0 0 20px 0; line-height: 1.6; text-align: center;">
+        Good news — <strong style="color:#1a1a2e;">${title}</strong> is back in stock. It sells fast, so grab yours before it's gone again.
+      </p>
+
+      ${product.image ? `<div style="text-align:center;margin-bottom:20px;"><img src="${product.image}" alt="${title}" style="max-width:280px;width:100%;border-radius:12px;" /></div>` : ""}
+
+      ${product.priceLabel ? `<p style="font-size:18px;font-weight:700;color:#1E8449;text-align:center;margin:0 0 20px 0;">${product.priceLabel}</p>` : ""}
+
+      <div style="text-align: center;">
+        <a href="${productUrl}" style="display: inline-block; background: #C0392B; color: white; text-decoration: none; font-size: 15px; font-weight: 600; padding: 14px 36px; border-radius: 25px;">🛒 Order Now</a>
+      </div>
+    </div>
+
+    <div style="background: #f8f7fa; border-radius: 0 0 16px 16px; padding: 24px; text-align: center; border: 1px solid #f3f0f7; border-top: none;">
+      <p style="font-size: 12px; color: #999; margin: 0 0 4px 0;">You asked to be notified when this item returned.</p>
+      <p style="font-size: 12px; color: #ccc; margin: 0;">The ${SITE_NAME} Team</p>
+    </div>
+
+  </div>
+</body>
+</html>`;
+
+  try {
+    await transporter.sendMail({
+      from: `"${SITE_NAME}" <${process.env.SMTP_EMAIL || SITE_EMAIL}>`,
+      to,
+      subject: `✅ Back in stock: ${title} | ${SITE_NAME}`,
+      html,
+    });
+  } catch (error) {
+    console.error("❌ Back-in-stock email failed:", error);
+  }
+}

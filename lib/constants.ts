@@ -57,6 +57,8 @@ export const ADMIN_NAV_GROUPS = [
             { label: "Orders", href: "/admin/orders", icon: "clipboard" },
             { label: "Payments", href: "/admin/payments", icon: "creditcard" },
             { label: "Disputes", href: "/admin/disputes", icon: "alerttriangle" },
+            { label: "Bumpa Orders", href: "/admin/bumpa", icon: "refresh" },
+            { label: "Expenses", href: "/admin/expenses", icon: "creditcard" },
             { label: "Customers", href: "/admin/customers", icon: "users" },
         ],
     },
@@ -67,6 +69,7 @@ export const ADMIN_NAV_GROUPS = [
             { label: "Categories", href: "/admin/categories", icon: "tag" },
             { label: "Inventory", href: "/admin/inventory", icon: "box" },
             { label: "Packages", href: "/admin/bundles", icon: "gift" },
+            { label: "Reviews", href: "/admin/reviews", icon: "star" },
         ],
     },
     {
@@ -107,6 +110,20 @@ export const ADMIN_NAV_GROUPS = [
 
 // Flat list of every admin link — kept for backward-compatibility.
 export const ADMIN_NAV_LINKS = ADMIN_NAV_GROUPS.flatMap((g) => [...g.links]);
+
+// Bookkeeping expense categories (shared by the expenses form + server module).
+export const EXPENSE_CATEGORIES = [
+    "Inventory / Stock Purchase",
+    "Logistics & Delivery",
+    "Packaging",
+    "Salaries & Wages",
+    "Rent",
+    "Utilities",
+    "Marketing & Ads",
+    "Equipment",
+    "Transaction Fees",
+    "Other",
+] as const;
 
 export const WHATSAPP_NUMBER = "2347042038491";
 

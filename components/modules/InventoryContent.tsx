@@ -18,11 +18,18 @@ import {
     type ExportFormat,
 } from "@/lib/inventoryExport";
 
+interface RestockDemand {
+    productId: string;
+    productName: string;
+    count: number;
+}
+
 interface InventoryContentProps {
     logs: InventoryLog[];
     inventory: InventoryItem[];
     products?: Product[];
     orders?: Order[];
+    restockDemand?: RestockDemand[];
 }
 
 export default function InventoryContent({
@@ -30,6 +37,7 @@ export default function InventoryContent({
     inventory: initialInventory,
     products = [],
     orders = [],
+    restockDemand = [],
 }: InventoryContentProps) {
     const router = useRouter();
     const [inventoryItems, setInventoryItems] = useState(initialInventory);
@@ -92,9 +100,12 @@ export default function InventoryContent({
                 toast.success("Catalogue PDF ready — check your downloads", { id: note ?? undefined });
             } else {
                 const n = await generateCataloguePngs(sections, variant);
-                toast.success(`${n} catalogue image${n === 1 ? "" : "s"} downloaded`, {
-                    id: note ?? undefined,
-                });
+                toast.success(
+                    n === 1
+                        ? "Catalogue image downloaded"
+                        : `${n} catalogue images downloaded as a .zip`,
+                    { id: note ?? undefined },
+                );
             }
         } catch (err) {
             console.error(err);
@@ -189,6 +200,13 @@ export default function InventoryContent({
                 sellingPrice: Number(sellingPrice)
             });
 
+            // Fire back-in-stock alerts if this adjustment restocked a linked product.
+            fetch("/api/admin/stock-notify/restock", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ inventoryItemId: selectedItem.id }),
+            }).catch(() => {});
+
             toast.success("Inventory updated", { id: toastId });
             setIsAdjusting(false);
             router.refresh();
@@ -251,6 +269,22 @@ export default function InventoryContent({
 
     return (
         <div className="space-y-6">
+            {restockDemand.length > 0 && (
+                <div className="rounded-xl border border-brand-red/30 bg-brand-red/5 p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                        <span className="text-sm font-semibold text-warm-cream">🔔 Restock demand</span>
+                        <span className="text-xs text-warm-cream/50">customers waiting to be notified when these are back</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        {restockDemand.map((d) => (
+                            <span key={d.productId} className="inline-flex items-center gap-1.5 rounded-full bg-base border border-warm-cream/10 px-3 py-1 text-xs text-warm-cream">
+                                {d.productName}
+                                <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-brand-red text-white text-[10px] font-bold">{d.count}</span>
+                            </span>
+                        ))}
+                    </div>
+                </div>
+            )}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
                 <div>
                     <h1 className="text-3xl font-serif text-warm-cream">Inventory Management</h1>

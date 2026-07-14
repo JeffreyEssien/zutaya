@@ -716,6 +716,13 @@ async function _getSiteSettings(): Promise<SiteSettings | null> {
         announcementBarEnabled: data.announcement_bar_enabled,
         announcementBarText: data.announcement_bar_text,
         announcementBarColor: data.announcement_bar_color,
+        // Flash-sale countdown
+        flashSaleEnabled: data.flash_sale_enabled,
+        flashSaleTitle: data.flash_sale_title,
+        flashSaleSubtitle: data.flash_sale_subtitle,
+        flashSaleEndsAt: data.flash_sale_ends_at,
+        flashSaleLink: data.flash_sale_link,
+        flashSaleBgColor: data.flash_sale_bg_color,
         // Social links
         socialInstagram: data.social_instagram,
         socialTwitter: data.social_twitter,
@@ -779,6 +786,13 @@ export async function updateSiteSettings(settings: Partial<SiteSettings>): Promi
     if (settings.announcementBarEnabled !== undefined) dbSettings.announcement_bar_enabled = settings.announcementBarEnabled;
     if (settings.announcementBarText !== undefined) dbSettings.announcement_bar_text = settings.announcementBarText;
     if (settings.announcementBarColor !== undefined) dbSettings.announcement_bar_color = settings.announcementBarColor;
+    // Flash-sale countdown
+    if (settings.flashSaleEnabled !== undefined) dbSettings.flash_sale_enabled = settings.flashSaleEnabled;
+    if (settings.flashSaleTitle !== undefined) dbSettings.flash_sale_title = settings.flashSaleTitle;
+    if (settings.flashSaleSubtitle !== undefined) dbSettings.flash_sale_subtitle = settings.flashSaleSubtitle;
+    if (settings.flashSaleEndsAt !== undefined) dbSettings.flash_sale_ends_at = settings.flashSaleEndsAt || null;
+    if (settings.flashSaleLink !== undefined) dbSettings.flash_sale_link = settings.flashSaleLink;
+    if (settings.flashSaleBgColor !== undefined) dbSettings.flash_sale_bg_color = settings.flashSaleBgColor;
     // Social links
     if (settings.socialInstagram !== undefined) dbSettings.social_instagram = settings.socialInstagram;
     if (settings.socialTwitter !== undefined) dbSettings.social_twitter = settings.socialTwitter;

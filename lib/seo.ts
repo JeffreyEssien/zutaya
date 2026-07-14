@@ -128,11 +128,12 @@ export function localBusinessSchema() {
   };
 }
 
-/** Product + Offer schema — unlocks price/availability rich snippets. */
-export function productSchema(product: Product) {
+/** Product + Offer schema — unlocks price/availability rich snippets.
+ * Pass `rating` (from approved reviews only) to emit aggregateRating stars. */
+export function productSchema(product: Product, rating?: { average: number; count: number }) {
   const url = absoluteUrl(`/product/${product.slug}`);
   const images = (product.images || []).filter(Boolean);
-  return {
+  const schema: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
@@ -155,6 +156,17 @@ export function productSchema(product: Product) {
       seller: { "@type": "Organization", name: SITE_NAME },
     },
   };
+  // Only emit aggregateRating with real, approved reviews (faking = Google penalty).
+  if (rating && rating.count > 0) {
+    schema.aggregateRating = {
+      "@type": "AggregateRating",
+      ratingValue: rating.average,
+      reviewCount: rating.count,
+      bestRating: 5,
+      worstRating: 1,
+    };
+  }
+  return schema;
 }
 
 /** Transactional meta description for a Zútaya Package (curated box). */
